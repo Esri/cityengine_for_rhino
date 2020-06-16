@@ -11,20 +11,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\codec\encoder\RhinoEncoder.cpp" />
     <ClCompile Include="cmdRhinoPRT.cpp" />
+    <ClCompile Include="RhinoCallbacks.cpp" />
     <ClCompile Include="RhinoPRTApp.cpp" />
     <ClCompile Include="RhinoPRTPlugIn.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="wrap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\codec\encoder\IRhinoCallbacks.h" />
+    <ClInclude Include="..\codec\encoder\RhinoEncoder.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RhinoCallbacks.h" />
     <ClInclude Include="RhinoPRTApp.h" />
     <ClInclude Include="RhinoPRTPlugIn.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="wrap.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\RhinoPRT.rc2" />
