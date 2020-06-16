@@ -43,14 +43,13 @@ RHINO_PLUG_IN_ICON_RESOURCE_ID(IDI_ICON);
 // must be present or your plug-in will not load.
 //
 // When completed, delete the following #error directive.
-#error Developer declarations block is incomplete!
-RHINO_PLUG_IN_DEVELOPER_ORGANIZATION(L"My Company Name");
-RHINO_PLUG_IN_DEVELOPER_ADDRESS(L"123 Developer Street\r\nCity State 12345-6789");
-RHINO_PLUG_IN_DEVELOPER_COUNTRY(L"My Country");
+RHINO_PLUG_IN_DEVELOPER_ORGANIZATION(L"Esri");
+RHINO_PLUG_IN_DEVELOPER_ADDRESS(L"Förrlibuckstrasse 110\r\n 8005 Zürich");
+RHINO_PLUG_IN_DEVELOPER_COUNTRY(L"Switzerland");
 RHINO_PLUG_IN_DEVELOPER_PHONE(L"123.456.7890");
 RHINO_PLUG_IN_DEVELOPER_FAX(L"123.456.7891");
-RHINO_PLUG_IN_DEVELOPER_EMAIL(L"support@mycompany.com");
-RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"http://www.mycompany.com");
+RHINO_PLUG_IN_DEVELOPER_EMAIL(L"laiulfi@esri.com");
+RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"http://www.esri.com");
 RHINO_PLUG_IN_UPDATE_URL(L"http://www.mycompany.com/support");
 
 // The one and only CRhinoPRTPlugIn object
