@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "prt/API.h"
+
 // CRhinoPRTPlugIn
 // See RhinoPRTPlugIn.cpp for the implementation of this class
 //
@@ -59,6 +61,9 @@ private:
   ON_wString m_plugin_version;
 
   // TODO: Add additional class information here
+
+  prt::ConsoleLogHandler* logHandler;
+  const prt::Object* prt_handle;
 };
 
 // Return a reference to the one and only CRhinoPRTPlugIn object
