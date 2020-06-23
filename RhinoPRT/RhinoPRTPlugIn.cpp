@@ -113,6 +113,19 @@ GUID CRhinoPRTPlugIn::PlugInID() const
 	return ON_UuidFromString(RhinoPlugInId());
 }
 
+void CRhinoPRTPlugIn::initializePRT() {
+	if (!prtCtx)
+		prtCtx.reset(new PRTContext(prt::LOG_DEBUG));
+}
+
+bool CRhinoPRTPlugIn::isPRTInitialized() {
+	return (bool)prtCtx;
+}
+
+void CRhinoPRTPlugIn::shutdownPRT() {
+	prtCtx.reset();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Additional overrides
 
@@ -133,12 +146,7 @@ BOOL CRhinoPRTPlugIn::OnLoadPlugIn()
 	//    CPlugIn::OnLoadPlugIn() from your derived class.
 
 	// TODO: Add plug-in initialization code here.
-	this->logHandler = prt::ConsoleLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT);
-	prt::addLogHandler(this->logHandler);
-
-	//const wchar_t* prt_path = L"C:\\Users\\lor11212\\Documents\\Rhino\\rhino-plugin-prototype\\esri_sdk\\lib";
-	const wchar_t* prt_path = L".\\esri_sdk\\lib";
-	this->prt_handle = prt::init(&prt_path, 1, prt::LOG_INFO);
+	initializePRT();
 
 	return TRUE;
 }
@@ -153,7 +161,6 @@ void CRhinoPRTPlugIn::OnUnloadPlugIn()
 	//    or tools here.
 
 	// TODO: Add plug-in cleanup code here.
-	this->prt_handle->destroy();
-	prt::removeLogHandler(this->logHandler);
-	this->logHandler->destroy();
+	shutdownPRT();
+	
 }

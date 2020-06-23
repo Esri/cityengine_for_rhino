@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\client">
+      <UniqueIdentifier>{e9be2c36-1357-490f-9931-187144cb29a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RhinoPRTApp.cpp">
@@ -33,7 +36,10 @@
     <ClCompile Include="wrap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\codec\encoder\RhinoEncoder.cpp">
+    <ClCompile Include="CCommandExtrudeShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -54,16 +60,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RhinoCallbacks.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\client</Filter>
     </ClInclude>
     <ClInclude Include="wrap.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\client</Filter>
     </ClInclude>
-    <ClInclude Include="..\codec\encoder\IRhinoCallbacks.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\codec\encoder\RhinoEncoder.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files\client</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

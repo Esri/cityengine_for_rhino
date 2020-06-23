@@ -4,6 +4,7 @@
 #pragma once
 
 #include "prt/API.h"
+#include "wrap.h"
 
 // CRhinoPRTPlugIn
 // See RhinoPRTPlugIn.cpp for the implementation of this class
@@ -57,13 +58,17 @@ public:
   // or tools here.  
   void OnUnloadPlugIn() override;
 
+  bool isPRTInitialized();
+
 private:
   ON_wString m_plugin_version;
 
   // TODO: Add additional class information here
 
-  prt::ConsoleLogHandler* logHandler;
-  const prt::Object* prt_handle;
+  std::unique_ptr<PRTContext> prtCtx;
+
+  void initializePRT();
+  void shutdownPRT();
 };
 
 // Return a reference to the one and only CRhinoPRTPlugIn object
