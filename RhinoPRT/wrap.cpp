@@ -15,8 +15,9 @@ InitialShape::InitialShape(const std::vector<double> &vertices): mVertices(verti
 	mIndices.resize(vertices.size() / 3);
 	std::iota(std::begin(mIndices), std::end(mIndices), 0);
 
+	mIndices[1] = 2;
 	mIndices[2] = 3;
-	mIndices[3] = 2;
+	mIndices[3] = 1;
 
 	mFaceCounts.resize(1, (uint32_t)mIndices.size());
 }
@@ -137,10 +138,10 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(std::vector<pcu::Shape
 				return {};
 			}
 
-			/*for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
+			for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
 				new_geometry.emplace_back(idx, roc->getVertices(idx), roc->getIndices(idx), roc->getFaces(idx),
 					roc->getReport(idx));
-			}*/
+			}
 		}
 		else {
 			//TODO

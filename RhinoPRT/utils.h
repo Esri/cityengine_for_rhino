@@ -17,8 +17,8 @@ namespace pcu {
 		int seed;
 		float height;
 
-		ShapeAttributes(const std::wstring rulef = L"bin/extrusion_rule.cgb", const std::wstring startRl = L"Default$Footprint",
-			const std::wstring shapeN = L"myShape", int sd = 555, float hgt = 10.0f) :
+		ShapeAttributes(const std::wstring rulef = L"bin/rule.cgb", const std::wstring startRl = L"Default$Lot",
+			const std::wstring shapeN = L"Lot", int sd = 555, float hgt = 10.0f) :
 			ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(sd), height(hgt) { }
 	};
 

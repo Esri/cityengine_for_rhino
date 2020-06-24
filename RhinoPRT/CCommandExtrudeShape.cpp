@@ -9,6 +9,50 @@
 
 #pragma region ExtrudeShape command
 
+ON_Mesh getMeshFromGenModel(GeneratedModel& model) {
+	auto faces = model.getFaces();
+	auto vertices = model.getVertices();
+	auto indices = model.getIndices();
+
+	size_t nbVertices = vertices.size() / 3;
+
+	ON_Mesh mesh(faces.size(), nbVertices, false, false);
+
+	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
+		mesh.SetVertex(v_id, ON_3dPoint(vertices[v_id * 3], vertices[v_id * 3 + 1], vertices[v_id * 3 + 2]));
+	}
+
+	int faceid(0);
+	int currindex(0);
+	for (int face : faces) {
+		if (face == 3) {
+			mesh.SetTriangle(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2]);
+			currindex += face;
+		}
+		else if (face == 4) {
+			mesh.SetQuad(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2], indices[currindex + 3]);
+			currindex += face;
+		} else {
+			//ignore face because it is invalid
+			currindex += face;
+		}
+		faceid++;
+	}
+
+	FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_2.txt", L"w");
+	if (fp) {
+		ON_TextLog log(fp);
+		if (!mesh.IsValid(&log))
+			mesh.Dump(log);
+		ON::CloseFile(fp);
+	}
+
+	mesh.ComputeVertexNormals();
+	mesh.Compact();
+
+	return mesh;
+}
+
 class CCommandExtrudeShape : public CRhinoCommand
 {
 public:
@@ -70,7 +114,25 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 	// PRT Generation
 	auto generated_models = model_generator.generateModel(shapeAttrs, rpk, encoder, encoder_options);
 	
+	// Create Rhino object with given geometry
+	for (auto& model : generated_models) {
+		ON_Mesh mesh = getMeshFromGenModel(model);
 
+		/*if (mesh.IsValid()) {
+			if (!mesh.HasVertexNormals())
+				mesh.ComputeVertexNormals();
+			
+			mesh.Compact();
+
+			context.m_doc.AddMeshObject(mesh);
+			context.m_doc.Redraw();
+		}*/
+
+		auto meshOBject = context.m_doc.AddMeshObject(mesh);
+	}
+
+	context.m_doc.Redraw();
+	
 	return CRhinoCommand::success;
 }
 

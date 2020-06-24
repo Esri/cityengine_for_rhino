@@ -141,9 +141,9 @@ private:
 	std::vector<pcu::AttributeMapPtr> mEncodersOptionsPtr;
 	
 	std::wstring mRuleFile = L"bin/rule.cgb";
-	std::wstring mStartRule = L"default$init";
+	std::wstring mStartRule = L"default$Lot";
 	int32_t mSeed = 0;
-	std::wstring mShapeName = L"InitialShape";
+	std::wstring mShapeName = L"Lot";
 
 	bool mValid = true;
 

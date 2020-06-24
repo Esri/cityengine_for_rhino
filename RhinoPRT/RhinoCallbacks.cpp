@@ -9,7 +9,7 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 {
 	Model& currentModel = mModels[initialShapeIndex];
 
-	/*
+	
 	if (vertexCoords != nullptr)
 		currentModel.mVertices.insert(currentModel.mVertices.end(), vertexCoords, vertexCoords + vextexCoordsCount);
 
@@ -18,7 +18,7 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 
 	if (faceCounts != nullptr)
 		currentModel.mFaces.insert(currentModel.mFaces.end(), faceCounts, faceCounts + faceCountsCount);
-	*/
+	
 
 	//TODO: Convert the prt geometry into Rhino geometry.
 }

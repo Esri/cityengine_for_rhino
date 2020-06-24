@@ -5,6 +5,7 @@
 #include "IRhinoCallbacks.h"
 
 #include <vector>
+#include <map>
 #include <iostream>
 
 class RhinoCallbacks : public IRhinoCallbacks {
@@ -14,6 +15,7 @@ private:
 		std::vector<double> mVertices;
 		std::vector<uint32_t> mIndices;
 		std::vector<uint32_t> mFaces;
+		std::map<std::string, std::string> mReport;
 	};
 
 	std::vector<Model> mModels;
@@ -55,6 +57,13 @@ public:
 			throw std::out_of_range("initial shape index is out of range.");
 
 		return mModels[initialShapeIdx].mFaces;
+	}
+
+	const std::map<std::string, std::string>& getReport(const size_t initialShapeIdx) const {
+		if (initialShapeIdx >= mModels.size())
+			throw std::out_of_range("initial shape index is out of range.");
+
+		return mModels[initialShapeIdx].mReport;
 	}
 
 	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) {

@@ -12,6 +12,9 @@
 #include "prtx/ShapeIterator.h"
 #include "prtx/prtx.h"
 
+#include <iostream>
+#include <fstream>
+
 namespace {
 
 	const wchar_t* EO_BASE_NAME = L"baseName";
@@ -60,6 +63,14 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 				mEncodePreparator->add(context.getCache(), shape, is->getAttributeMap());
 			}
 		}
+		catch (std::exception& e) {
+			std::ofstream outfile;
+			outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
+			outfile << e.what() << std::endl;
+			outfile.close();
+			
+			mEncodePreparator->add(context.getCache(), *is, initialShapeIndex);
+		}
 		catch (...) {
 			mEncodePreparator->add(context.getCache(), *is, initialShapeIndex);
 		}
@@ -67,6 +78,35 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 		std::vector<prtx::EncodePreparator::FinalizedInstance> finalizedInstances;
 		mEncodePreparator->fetchFinalizedInstances(finalizedInstances, ENC_PREP_FLAGS);
 		uint32_t vertexIndexBase = 0;
+
+		std::vector<double> vertexCoords;
+		std::vector<uint32_t> faceIndices;
+		std::vector<uint32_t> faceCounts;
+
+		for (const auto& instance : finalizedInstances) {
+			const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
+
+			vertexCoords.clear();
+			faceIndices.clear();
+			faceCounts.clear();
+
+			for (const auto& mesh : meshes) {
+				const prtx::DoubleVector& verts = mesh->getVertexCoords();
+				vertexCoords.insert(vertexCoords.end(), verts.begin(), verts.end());
+
+				for (uint32_t fi = 0; fi < mesh->getFaceCount(); ++fi) {
+					const uint32_t* vtxIdx = mesh->getFaceVertexIndices(fi);
+					const uint32_t vtxCnt = mesh->getFaceVertexCount(fi);
+					faceCounts.push_back(vtxCnt);
+					for (uint32_t vi = 0; vi < vtxCnt; vi++)
+						faceIndices.push_back(vtxIdx[vi] + vertexIndexBase);
+				}
+				vertexIndexBase += (uint32_t)verts.size() / 3;
+			}
+
+			cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
+				faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size());
+		}
 	}
 }
 
