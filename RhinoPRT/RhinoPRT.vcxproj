@@ -13,6 +13,8 @@
   <ItemGroup>
     <ClCompile Include="CCommandExtrudeShape.cpp" />
     <ClCompile Include="cmdRhinoPRT.cpp" />
+    <ClCompile Include="PRTPropertyPanel.cpp" />
+    <ClCompile Include="PRTPropertyWindow.cpp" />
     <ClCompile Include="RhinoCallbacks.cpp" />
     <ClCompile Include="RhinoPRTApp.cpp" />
     <ClCompile Include="RhinoPRTPlugIn.cpp" />
@@ -24,8 +26,11 @@
     <ClCompile Include="wrap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="PRTPropertyPanel.h" />
+    <ClInclude Include="PRTPropertyWindow.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RhinoCallbacks.h" />
+    <ClInclude Include="RhinoPRTAPI.h" />
     <ClInclude Include="RhinoPRTApp.h" />
     <ClInclude Include="RhinoPRTPlugIn.h" />
     <ClInclude Include="stdafx.h" />

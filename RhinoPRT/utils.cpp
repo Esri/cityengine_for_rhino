@@ -8,7 +8,78 @@
 #	include <dlfcn.h>
 #endif
 
+#include <cwchar>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <sys/stat.h>
+
 namespace pcu {
+
+	// location of RhinoPRT shared library
+	std::wstring getDllLocation() {
+#ifdef _WIN32
+		char dllPath[_MAX_PATH];
+		char drive[8];
+		char dir[_MAX_PATH];
+		HMODULE hModule = 0;
+
+		GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+						  (LPCWSTR)getDllLocation, &hModule);
+		const DWORD res = ::GetModuleFileNameA(hModule, dllPath, _MAX_PATH);
+		if (res == 0) {
+			// TODO DWORD e = ::GetLastError();
+			throw std::runtime_error("failed to get plugin location");
+		}
+
+		_splitpath_s(dllPath, drive, 8, dir, _MAX_PATH, 0, 0, 0, 0);
+		std::wstring rootPath = pcu::toUTF16FromOSNarrow(drive);
+		rootPath.append(pcu::toUTF16FromOSNarrow(dir));
+#else
+		Dl_info dl_info;
+		dladdr((const void*)getPluginRoot, &dl_info);
+		const std::string tmp(dl_info.dli_fname);
+		std::wstring rootPath = pcu::toUTF16FromOSNarrow(tmp.substr(0, tmp.find_last_of(pcu::getDirSeparator<char>())));
+#endif
+
+		// ensure path separator at end
+		if (*rootPath.rbegin() != pcu::getDirSeparator<wchar_t>())
+			rootPath.append(1, pcu::getDirSeparator<wchar_t>());
+
+		return rootPath;
+	}
+
+	template <>
+	char getDirSeparator() {
+#ifdef _WIN32
+		static const char SEPARATOR = '\\';
+#else
+		static const char SEPARATOR = '/';
+#endif
+		return SEPARATOR;
+	}
+
+	template <>
+	wchar_t getDirSeparator() {
+#ifdef _WIN32
+		static const wchar_t SEPARATOR = L'\\';
+#else
+		static const wchar_t SEPARATOR = L'/';
+#endif
+		return SEPARATOR;
+	}
+
+	template <>
+	std::string getDirSeparator() {
+		return std::string(1, getDirSeparator<char>());
+	}
+
+	template <>
+	std::wstring getDirSeparator() {
+		return std::wstring(1, getDirSeparator<wchar_t>());
+	}
+
+	
 
 #ifdef _WIN32
 	const std::string FILE_SCHEMA = "file:/";

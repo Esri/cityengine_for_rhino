@@ -39,6 +39,7 @@ ON_Mesh getMeshFromGenModel(GeneratedModel& model) {
 		faceid++;
 	}
 
+	// Printing an error log if the created mesh is invalid
 	FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_2.txt", L"w");
 	if (fp) {
 		ON_TextLog log(fp);
@@ -76,6 +77,57 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 	// Add a square, expose the extrusion height. Give the shape and rule, give everything to ptr.
 	// The callback should be able to get the answer back, then convert the created face into rhino geometry using a decoder,
 	// and finally display it in Rhino.
+
+	// Select starting shape
+	bool bAttribute = true;
+
+	CRhinoGetObject go;
+	go.SetCommandPrompt(L"Select starting shape");
+	go.AddCommandOptionToggle(
+		RHCMDOPTNAME(L"Location"),
+		RHCMDOPTVALUE(L"Object"),
+		RHCMDOPTVALUE(L"Attribute"),
+		bAttribute,
+		&bAttribute
+	);
+
+	// Get selected object
+	for (;;) {
+		CRhinoGet::result res = go.GetObjects(1, 1);
+		if (res == CRhinoGet::option)
+			continue;
+		if (res != CRhinoGet::object)
+			return cancel;
+		break;
+	}
+
+	const CRhinoObjRef& ref = go.Object(0);
+	const CRhinoObject* obj = ref.Object();
+	if (!obj)
+		return failure;
+
+	ON_wString key = L"rpk_path";
+	ON_wString text = L"path_to_rpk";
+
+	// Attach rpk path user string
+	if (bAttribute) {
+		// to object attributes
+		CRhinoObjectAttributes attribs = obj->Attributes();
+		attribs.SetUserString(key, text);
+		
+		context.m_doc.ModifyObjectAttributes(ref, attribs);
+	}
+	else {
+		// to object geometry
+		CRhinoObject* dupe = obj->DuplicateRhinoObject();
+		if (dupe) {
+			ON_Geometry* geom = const_cast<ON_Geometry*>(dupe->Geometry());
+			if (geom) {
+				geom->SetUserString(key, text);
+				context.m_doc.ReplaceObject(ref, dupe);
+			}
+		}
+	}
 
 	const ON_Plane plane;
 	const ON_PlaneSurface psurf(plane);

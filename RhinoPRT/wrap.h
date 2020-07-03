@@ -20,9 +20,9 @@
 struct PRTContext {
 	PRTContext(prt::LogLevel minimalLogLevel) {
 		mLogHandler = prt::ConsoleLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT);
-		auto fileLogHandler = prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT, L"C:/Windows/Temp/rhino_log.txt");
+		mFileLogHandler = prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT, L"C:/Windows/Temp/rhino_log.txt");
 		prt::addLogHandler(mLogHandler);
-		prt::addLogHandler(fileLogHandler);
+		prt::addLogHandler(mFileLogHandler);
 
 		const wchar_t* prt_path[2] = { L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/esri_sdk/lib", L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/x64/Release/codecs_rhino.dll" };
 		mPRTHandle = prt::init(prt_path, 2, minimalLogLevel);
@@ -32,8 +32,10 @@ struct PRTContext {
 		// shutdown PRT
 		mPRTHandle->destroy();
 
+		prt::removeLogHandler(mFileLogHandler);
 		prt::removeLogHandler(mLogHandler);
 		mLogHandler->destroy();
+		mFileLogHandler->destroy();
 	}
 
 	explicit operator bool() const {
@@ -41,6 +43,7 @@ struct PRTContext {
 	}
 	
 	prt::ConsoleLogHandler* mLogHandler;
+	prt::FileLogHandler* mFileLogHandler;
 	const prt::Object* mPRTHandle;
 };
 

@@ -10,6 +10,16 @@
 #include <string>
 
 namespace pcu {
+
+	std::wstring getDllLocation();
+
+	template <typename C>
+	C getDirSeparator();
+	template <>
+	char getDirSeparator();
+	template <>
+	wchar_t getDirSeparator();
+
 	struct ShapeAttributes {
 		std::wstring ruleFile;
 		std::wstring startRule;

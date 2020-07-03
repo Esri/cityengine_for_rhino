@@ -6,15 +6,17 @@
 #include <iostream>
 
 /**
- * commonly used constants
+ * commonly used constant
  */
 const std::wstring ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
 
 InitialShape::InitialShape() {}
+
 InitialShape::InitialShape(const std::vector<double> &vertices): mVertices(vertices) {
 	mIndices.resize(vertices.size() / 3);
 	std::iota(std::begin(mIndices), std::end(mIndices), 0);
 
+	// It is specific to the plane surface quad.
 	mIndices[1] = 2;
 	mIndices[2] = 3;
 	mIndices[3] = 1;

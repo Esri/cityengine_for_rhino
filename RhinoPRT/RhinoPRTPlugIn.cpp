@@ -1,10 +1,12 @@
 ﻿// RhinoPRTPlugIn.cpp : defines the initialization routines for the plug-in.
 //
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "rhinoSdkPlugInDeclare.h"
 #include "RhinoPRTPlugIn.h"
 #include "Resource.h"
+
+#include "PRTPropertyPanel.h"
 
 // The plug-in object must be constructed before any plug-in classes derived
 // from CRhinoCommand. The #pragma init_seg(lib) ensures that this happens.
@@ -124,6 +126,15 @@ bool CRhinoPRTPlugIn::isPRTInitialized() {
 
 void CRhinoPRTPlugIn::shutdownPRT() {
 	prtCtx.reset();
+}
+
+void CRhinoPRTPlugIn::AddPagesToObjectPropertiesDialog(CRhinoPropertiesPanelPageCollection & collection)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	PRTPropertyPanel* newPanel = new PRTPropertyPanel();
+
+	//auto testPanel = new CSampleObjectPropertiesPageDialog();
+	collection.Add(newPanel);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -42,6 +42,12 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PRTPropertyPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PRTPropertyWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RhinoPRTApp.h">
@@ -67,6 +73,15 @@
     </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>Header Files\client</Filter>
+    </ClInclude>
+    <ClInclude Include="PRTPropertyPanel.h">
+      <Filter>Header Files\client</Filter>
+    </ClInclude>
+    <ClInclude Include="PRTPropertyWindow.h">
+      <Filter>Header Files\client</Filter>
+    </ClInclude>
+    <ClInclude Include="RhinoPRTAPI.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

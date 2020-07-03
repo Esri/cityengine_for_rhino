@@ -69,6 +69,8 @@ private:
 
   void initializePRT();
   void shutdownPRT();
+
+  void AddPagesToObjectPropertiesDialog(CRhinoPropertiesPanelPageCollection& collection) override;
 };
 
 // Return a reference to the one and only CRhinoPRTPlugIn object
