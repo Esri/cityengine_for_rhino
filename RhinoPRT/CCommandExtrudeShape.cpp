@@ -4,7 +4,6 @@
 // BEGIN ExtrudeShape command
 //
 #include "stdafx.h"
-
 #include "RhinoPRTPlugIn.h"
 
 #pragma region ExtrudeShape command
@@ -57,7 +56,7 @@ ON_Mesh getMeshFromGenModel(GeneratedModel& model) {
 class CCommandExtrudeShape : public CRhinoCommand
 {
 public:
-	CCommandExtrudeShape() = default;
+	CCommandExtrudeShape() : CRhinoCommand(false, false, &RhinoPRTPlugIn(), false) {};
 	UUID CommandUUID() override
 	{
 		// {B960EDCA-8D50-4293-8CD6-FE5F8843C975}
@@ -74,7 +73,7 @@ static class CCommandExtrudeShape theExtrudeShapeCommand;
 
 CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContext& context)
 {
-	// Add a square, expose the extrusion height. Give the shape and rule, give everything to ptr.
+	// Add a square, expose the extrusion height. Give the shape and rule, give everything to PRT.
 	// The callback should be able to get the answer back, then convert the created face into rhino geometry using a decoder,
 	// and finally display it in Rhino.
 
@@ -106,29 +105,6 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 	if (!obj)
 		return failure;
 
-	ON_wString key = L"rpk_path";
-	ON_wString text = L"path_to_rpk";
-
-	// Attach rpk path user string
-	if (bAttribute) {
-		// to object attributes
-		CRhinoObjectAttributes attribs = obj->Attributes();
-		attribs.SetUserString(key, text);
-		
-		context.m_doc.ModifyObjectAttributes(ref, attribs);
-	}
-	else {
-		// to object geometry
-		CRhinoObject* dupe = obj->DuplicateRhinoObject();
-		if (dupe) {
-			ON_Geometry* geom = const_cast<ON_Geometry*>(dupe->Geometry());
-			if (geom) {
-				geom->SetUserString(key, text);
-				context.m_doc.ReplaceObject(ref, dupe);
-			}
-		}
-	}
-
 	const ON_Plane plane;
 	const ON_PlaneSurface psurf(plane);
 
@@ -153,19 +129,18 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 		shapes.push_back(InitialShape(vertices));
 	}
 
-	ModelGenerator model_generator(shapes);
 
 	// Model generation argument setup
-	const std::string rpk = "C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/extrusion_rule.rpk";
-	const pcu::ShapeAttributes shapeAttr;
-	std::vector<pcu::ShapeAttributes> shapeAttrs;
-	shapeAttrs.push_back(shapeAttr);
-	const std::wstring encoder = L"com.esri.rhinoprt.RhinoEncoder";
-	const pcu::EncoderOptions encoder_options;
+
+	// TODO: the rpk must be entered by the user.
+	const std::wstring rpk = L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/extrusion_rule.rpk";
+	SetPackage(rpk.c_str());
+
+	RhinoPRT::myPRTAPI->AddInitialShape(shapes);
 
 	// PRT Generation
-	auto generated_models = model_generator.generateModel(shapeAttrs, rpk, encoder, encoder_options);
-	
+	auto generated_models = RhinoPRT::myPRTAPI->GenerateGeometry();
+
 	// Create Rhino object with given geometry
 	for (auto& model : generated_models) {
 		ON_Mesh mesh = getMeshFromGenModel(model);

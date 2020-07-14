@@ -4,11 +4,13 @@
 
 #include "RhinoCallbacks.h"
 #include "utils.h"
+#include "RuleAttributes.h"
 
 #include "prt/prt.h"
 #include "prt/API.h"
 #include "prt/LogLevel.h"
 #include "prt/ContentType.h"
+#include "prt/RuleFileInfo.h"
 
 #include <map>
 #include <vector>
@@ -17,34 +19,20 @@
 /**
 * Helper struct to manage PRT lifetime
 */
-struct PRTContext {
-	PRTContext(prt::LogLevel minimalLogLevel) {
-		mLogHandler = prt::ConsoleLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT);
-		mFileLogHandler = prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT, L"C:/Windows/Temp/rhino_log.txt");
-		prt::addLogHandler(mLogHandler);
-		prt::addLogHandler(mFileLogHandler);
+struct PRTContext final {
+	static PRTContext& get();
 
-		const wchar_t* prt_path[2] = { L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/esri_sdk/lib", L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/x64/Release/codecs_rhino.dll" };
-		mPRTHandle = prt::init(prt_path, 2, minimalLogLevel);
+	explicit PRTContext(prt::LogLevel minimalLogLevel = prt::LogLevel::LOG_DEBUG);
+
+	~PRTContext();
+
+	bool isAlive() const {
+		return static_cast<bool>(mPRTHandle);
 	}
 
-	~PRTContext() {
-		// shutdown PRT
-		mPRTHandle->destroy();
-
-		prt::removeLogHandler(mFileLogHandler);
-		prt::removeLogHandler(mLogHandler);
-		mLogHandler->destroy();
-		mFileLogHandler->destroy();
-	}
-
-	explicit operator bool() const {
-		return (bool)mPRTHandle;
-	}
-	
 	prt::ConsoleLogHandler* mLogHandler;
 	prt::FileLogHandler* mFileLogHandler;
-	const prt::Object* mPRTHandle;
+	pcu::ObjectPtr mPRTHandle;
 };
 
 /**
@@ -54,6 +42,7 @@ class InitialShape {
 public:
 	InitialShape();
 	InitialShape(const std::vector<double> &vertices);
+	InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount);
 	~InitialShape() {}
 
 	const double* getVertices() const {
@@ -82,7 +71,7 @@ public:
 
 protected:
 
-	const std::vector<double> mVertices;
+	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaceCounts;
 };
@@ -123,26 +112,34 @@ private:
 
 
 /**
-* Entry point of the PRT. Gets an initial shape and rpk package, gives them to the PRT and gets the results.
+* Entry point of the PRT. Is given an initial shape and rpk package, gives them to the PRT and gets the results.
 */
 class ModelGenerator {
 public:
-	ModelGenerator(const std::vector<InitialShape>& initial_geom);
+	ModelGenerator();
 	~ModelGenerator() {}
 
-	std::vector<GeneratedModel> generateModel(std::vector<pcu::ShapeAttributes>& shapeAttributes,
-												const std::string& rulePackagePath,
-												const std::wstring& geometryEncoderName,
-												const pcu::EncoderOptions& geometryEncoderOptions);
-private:
-	pcu::ResolveMapPtr mResolveMap;
-	pcu::CachePtr mCache;
+	std::vector<GeneratedModel> generateModel(const std::vector<InitialShape>& initial_geom,
+											  std::vector<pcu::ShapeAttributes>& shapeAttributes,
+											  const std::string& rulePackagePath,
+											  const std::wstring& geometryEncoderName,
+											  const pcu::EncoderOptions& geometryEncoderOptions, 
+											  pcu::AttributeMapBuilderPtr& aBuilder);
 
+	bool initResolveMap();
+	RuleAttributes updateRuleFiles(const std::string rulePkg);
+
+private:
+	pcu::CachePtr mCache;
+	pcu::RuleFileInfoPtr mRuleFileInfo;
+	pcu::ResolveMapPtr mResolveMap;
 	pcu::AttributeMapBuilderPtr mEncoderBuilder;
 	std::vector<pcu::InitialShapeBuilderPtr> mInitialShapesBuilders;
 	std::vector<std::wstring> mEncodersNames;
 	std::vector<pcu::AttributeMapPtr> mEncodersOptionsPtr;
+	RuleAttributes mRuleAttributes;
 	
+	std::string mRulePkg = "";
 	std::wstring mRuleFile = L"bin/rule.cgb";
 	std::wstring mStartRule = L"default$Lot";
 	int32_t mSeed = 0;
@@ -150,7 +147,8 @@ private:
 
 	bool mValid = true;
 
-	void setAndCreateInitialShape(const std::vector<pcu::ShapeAttributes>& shapesAttr,
+	void setAndCreateInitialShape(pcu::AttributeMapBuilderPtr& aBuilder,
+		const std::vector<pcu::ShapeAttributes>& shapesAttr,
 		std::vector<const prt::InitialShape*>& initShapes,
 		std::vector<pcu::InitialShapePtr>& initShapesPtrs,
 		std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
@@ -160,6 +158,7 @@ private:
 	void getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,
 		std::vector<const prt::AttributeMap*>& allEncOpt);
 
-	void extractMainShapeAttributes(const pcu::ShapeAttributes& shapeAttr, std::wstring& ruleFile, std::wstring& startRule,
-		int32_t& seed, std::wstring& shapeName, pcu::AttributeMapPtr& convertShapeAttr);
+	void extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr, 
+		std::wstring& ruleFile, std::wstring& startRule, int32_t& seed, std::wstring& shapeName, 
+		pcu::AttributeMapPtr& convertShapeAttr);
 };

@@ -27,9 +27,6 @@
     <ClCompile Include="RhinoPRTPlugIn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cmdRhinoPRT.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RhinoCallbacks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,10 +39,7 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PRTPropertyPanel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PRTPropertyWindow.cpp">
+    <ClCompile Include="RuleAttributes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,13 +68,13 @@
     <ClInclude Include="utils.h">
       <Filter>Header Files\client</Filter>
     </ClInclude>
-    <ClInclude Include="PRTPropertyPanel.h">
-      <Filter>Header Files\client</Filter>
+    <ClInclude Include="Logger.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PRTPropertyWindow.h">
-      <Filter>Header Files\client</Filter>
+    <ClInclude Include="RhinoPRT.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RhinoPRTAPI.h">
+    <ClInclude Include="RuleAttributes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

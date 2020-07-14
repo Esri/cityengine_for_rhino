@@ -6,8 +6,6 @@
 #include "RhinoPRTPlugIn.h"
 #include "Resource.h"
 
-#include "PRTPropertyPanel.h"
-
 // The plug-in object must be constructed before any plug-in classes derived
 // from CRhinoCommand. The #pragma init_seg(lib) ensures that this happens.
 #pragma warning(push)
@@ -115,28 +113,6 @@ GUID CRhinoPRTPlugIn::PlugInID() const
 	return ON_UuidFromString(RhinoPlugInId());
 }
 
-void CRhinoPRTPlugIn::initializePRT() {
-	if (!prtCtx)
-		prtCtx.reset(new PRTContext(prt::LOG_DEBUG));
-}
-
-bool CRhinoPRTPlugIn::isPRTInitialized() {
-	return (bool)prtCtx;
-}
-
-void CRhinoPRTPlugIn::shutdownPRT() {
-	prtCtx.reset();
-}
-
-void CRhinoPRTPlugIn::AddPagesToObjectPropertiesDialog(CRhinoPropertiesPanelPageCollection & collection)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	PRTPropertyPanel* newPanel = new PRTPropertyPanel();
-
-	//auto testPanel = new CSampleObjectPropertiesPageDialog();
-	collection.Add(newPanel);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Additional overrides
 
@@ -157,7 +133,7 @@ BOOL CRhinoPRTPlugIn::OnLoadPlugIn()
 	//    CPlugIn::OnLoadPlugIn() from your derived class.
 
 	// TODO: Add plug-in initialization code here.
-	initializePRT();
+	InitializeRhinoPRT();
 
 	return TRUE;
 }
@@ -172,6 +148,5 @@ void CRhinoPRTPlugIn::OnUnloadPlugIn()
 	//    or tools here.
 
 	// TODO: Add plug-in cleanup code here.
-	shutdownPRT();
-	
+	ShutdownRhinoPRT();
 }

@@ -9,6 +9,8 @@
 #include <memory>
 #include <string>
 
+struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
+
 namespace pcu {
 
 	std::wstring getDllLocation();
@@ -25,11 +27,10 @@ namespace pcu {
 		std::wstring startRule;
 		std::wstring shapeName;
 		int seed;
-		float height;
 
 		ShapeAttributes(const std::wstring rulef = L"bin/rule.cgb", const std::wstring startRl = L"Default$Lot",
-			const std::wstring shapeN = L"Lot", int sd = 555, float hgt = 10.0f) :
-			ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(sd), height(hgt) { }
+			const std::wstring shapeN = L"Lot", int sd = 555) :
+			ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(sd) { }
 	};
 
 	struct EncoderOptions {
@@ -58,6 +59,7 @@ namespace pcu {
 	using FileOutputCallbacksPtr = std::unique_ptr<prt::FileOutputCallbacks, PRTDestroyer>;
 	using ConsoleLogHandlerPtr = std::unique_ptr<prt::ConsoleLogHandler, PRTDestroyer>;
 	using FileLogHandlerPtr = std::unique_ptr<prt::FileLogHandler, PRTDestroyer>;
+	using RuleFileInfoPtr = std::unique_ptr<const prt::RuleFileInfo, PRTDestroyer>;
 	using EncoderInfoPtr = std::unique_ptr<const prt::EncoderInfo, PRTDestroyer>;
 	using DecoderInfoPtr = std::unique_ptr<const prt::DecoderInfo, PRTDestroyer>;
 	using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRTDestroyer>;
@@ -79,4 +81,14 @@ namespace pcu {
 	std::string toUTF8FromOSNarrow(const std::string& osString);
 	std::string percentEncode(const std::string& utf8String);
 	URI toFileURI(const std::string& p);
-}
+
+	std::wstring filename(const std::wstring& path);
+
+	/**
+	 * Resolve map helpers
+	 */
+	constexpr const wchar_t* ANNOT_START_RULE = L"@StartRule";
+	std::wstring getRuleFileEntry(const ResolveMapPtr& resolveMap);
+	std::wstring detectStartRule(const RuleFileInfoPtr& ruleFileInfo);
+
+} // namespace pcu

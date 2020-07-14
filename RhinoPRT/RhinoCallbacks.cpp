@@ -1,7 +1,5 @@
 #include "RhinoCallbacks.h"
 
-#include "stdafx.h"
-
 
 void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * vertexCoords, 
 								 const size_t vextexCoordsCount, const uint32_t * faceIndices,

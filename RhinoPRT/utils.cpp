@@ -10,9 +10,7 @@
 
 #include <cwchar>
 #include <sstream>
-#include <stdexcept>
 #include <string>
-#include <sys/stat.h>
 
 namespace pcu {
 
@@ -88,14 +86,13 @@ namespace pcu {
 #endif
 
 	/**
-	 * Helper function to create a prt::AttributeMap from a ShapeAttributes structure.
+	 * Helper function to add the ShapeAttributes infos to an existing prt::AttributeMap.
 	 */
 	AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld) {
 		bld.setString(L"ruleFile", attrs.ruleFile.c_str());
 		bld.setString(L"startRule", attrs.startRule.c_str());
 		bld.setString(L"shapeName", attrs.shapeName.c_str());
 		bld.setInt(L"seed", attrs.seed);
-		bld.setFloat(L"height", attrs.height);
 
 		return AttributeMapPtr{ bld.createAttributeMap() };
 	}
@@ -132,6 +129,15 @@ namespace pcu {
 		return std::basic_string<outC>{buffer.data()};
 	}
 
+	std::wstring filename(const std::wstring& path) {
+		size_t pos = path.find_last_of(L'/');
+		if (pos != std::string::npos) {
+			return path.substr(pos + 1);
+		}
+		else
+			return path;
+	}
+
 	std::string toOSNarrowFromUTF16(const std::wstring& osWString) {
 		return callAPI<wchar_t, char>(prt::StringUtils::toOSNarrowFromUTF16, osWString);
 	}
@@ -158,6 +164,37 @@ namespace pcu {
 		const std::string utf8Path = toUTF8FromOSNarrow(p);
 		const std::string u8PE = percentEncode(utf8Path);
 		return FILE_SCHEMA + u8PE;
+	}
+
+	std::wstring getRuleFileEntry(const ResolveMapPtr& resolveMap) {
+		const std::wstring sCGB(L".cgb");
+
+		size_t nKeys;
+		wchar_t const* const* keys = resolveMap->getKeys(&nKeys);
+		for (size_t k = 0; k < nKeys; ++k) {
+			const std::wstring key(keys[k]);
+			if (std::equal(sCGB.rbegin(), sCGB.rend(), key.rbegin()))
+				return key;
+		}
+
+		return {};
+	}
+
+	std::wstring detectStartRule(const RuleFileInfoPtr& ruleFileInfo) {
+		for (size_t r = 0; r < ruleFileInfo->getNumRules(); r++) {
+			const auto* rule = ruleFileInfo->getRule(r);
+
+			// start rules must not have any parameters
+			if (rule->getNumParameters() > 0)
+				continue;
+
+			for (size_t a = 0; a < rule->getNumAnnotations(); a++) {
+				if (std::wcscmp(rule->getAnnotation(a)->getName(), ANNOT_START_RULE) == 0) {
+					return rule->getName();
+				}
+			}
+		}
+		return {};
 	}
 
 }
