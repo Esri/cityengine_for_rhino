@@ -135,7 +135,6 @@ namespace GrasshopperPRT
                 if (mesh != null)
                 {
                     meshes.Add(mesh);
-                    //PRTWrapper.AddMesh(mesh);
                 }
             }
 
@@ -157,39 +156,44 @@ namespace GrasshopperPRT
         private Mesh convertToMesh(IGH_GeometricGoo shape)
         {
             bool status = true;
-            Mesh mesh;
+            Mesh mesh = null;
 
             // Cast the shape to its actual Rhino.Geometry type.
             IGH_GeometricGoo geoGoo = shape; // copy
-            if (shape is GH_Mesh || shape is Mesh)
+
+            if(geoGoo is GH_Mesh)
             {
-                var geoBase = GH_Convert.ToGeometryBase(geoGoo);
-                mesh = geoBase as Mesh;
+                GH_Mesh m = geoGoo as GH_Mesh;
+                if(!GH_Convert.ToMesh(m, ref mesh, GH_Conversion.Both)) return null;
             }
-            else if (shape is GH_Brep || shape is Brep)
+            else if (geoGoo is GH_Brep)
             {
+                GH_Brep brep = geoGoo as GH_Brep;
                 Brep brepShape = null;
-                status = GH_Convert.ToBrep(geoGoo, ref brepShape, GH_Conversion.Both);
-                if (!status) return null;
+                if(!GH_Convert.ToBrep(brep, ref brepShape, GH_Conversion.Both)) return null;
 
                 mesh = new Mesh();
                 mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.DefaultAnalysisMesh));
+                mesh.Compact();
             }
-            else if (shape is GH_Rectangle)
+            else if (geoGoo is GH_Rectangle)
             {
                 Rectangle3d rect = Rectangle3d.Unset;
-                status = GH_Convert.ToRectangle3d(geoGoo, ref rect, GH_Conversion.Both);
+                status = GH_Convert.ToRectangle3d(geoGoo as GH_Rectangle, ref rect, GH_Conversion.Both);
+
                 if (!status) return null;
 
                 mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline());
             }
-            else if (shape is Surface || shape is GH_Surface)
+            else if (geoGoo is GH_Surface)
             {
                 Surface surf = null;
-                status = GH_Convert.ToSurface(geoGoo, ref surf, GH_Conversion.Both);
-                if (!status) return null;
-
-                mesh = Mesh.CreateFromSurface(surf, MeshingParameters.DefaultAnalysisMesh);
+                if(!GH_Convert.ToSurface(geoGoo as GH_Surface, ref surf, GH_Conversion.Both)) return null;
+                mesh = Mesh.CreateFromSurface(surf, MeshingParameters.QualityRenderMesh);
+            }
+            else if (geoGoo is GH_Box)
+            {
+                if(!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
             }
             else
             {
