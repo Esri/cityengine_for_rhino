@@ -8,50 +8,6 @@
 
 #pragma region ExtrudeShape command
 
-ON_Mesh getMeshFromGenModel(GeneratedModel& model) {
-	auto faces = model.getFaces();
-	auto vertices = model.getVertices();
-	auto indices = model.getIndices();
-
-	size_t nbVertices = vertices.size() / 3;
-
-	ON_Mesh mesh(faces.size(), nbVertices, false, false);
-
-	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
-		mesh.SetVertex(v_id, ON_3dPoint(vertices[v_id * 3], vertices[v_id * 3 + 1], vertices[v_id * 3 + 2]));
-	}
-
-	int faceid(0);
-	int currindex(0);
-	for (int face : faces) {
-		if (face == 3) {
-			mesh.SetTriangle(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2]);
-			currindex += face;
-		}
-		else if (face == 4) {
-			mesh.SetQuad(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2], indices[currindex + 3]);
-			currindex += face;
-		} else {
-			//ignore face because it is invalid
-			currindex += face;
-		}
-		faceid++;
-	}
-
-	// Printing an error log if the created mesh is invalid
-	FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_2.txt", L"w");
-	if (fp) {
-		ON_TextLog log(fp);
-		if (!mesh.IsValid(&log))
-			mesh.Dump(log);
-		ON::CloseFile(fp);
-	}
-
-	mesh.ComputeVertexNormals();
-	mesh.Compact();
-
-	return mesh;
-}
 
 class CCommandExtrudeShape : public CRhinoCommand
 {
@@ -105,11 +61,18 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 	if (!obj)
 		return failure;
 
+	// manually adding a surface for testing/debugging purposes
 	const ON_Plane plane;
 	const ON_PlaneSurface psurf(plane);
 
 	CRhinoSurfaceObject* surf_obj = context.m_doc.AddSurfaceObject(psurf);
 	context.m_doc.Redraw();
+
+	// Model generation argument setup
+
+	// TODO: the rpk must be entered by the user.
+	const std::wstring rpk = L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/extrusion_rule.rpk";
+	SetPackage(rpk.c_str());
 	
 	// Create the mesh and get it
 	int crv_id = surf_obj->CreateMeshes(ON::mesh_type::preview_mesh, ON_MeshParameters::QualityRenderMesh);
@@ -117,43 +80,16 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 	ON_SimpleArray<const ON_Mesh*> mesh_array;
 	int msh_id = surf_obj->GetMeshes(ON::mesh_type::preview_mesh, mesh_array);
 
-	std::vector<InitialShape> shapes;
-	for (int i = 0; i < mesh_array.Count(); ++i) {
-		std::vector<double> vertices;
-		for (int j = 0; j < mesh_array[i]->VertexCount(); ++j) {
-			vertices.push_back(mesh_array[i]->Vertex(j).x);
-			vertices.push_back(mesh_array[i]->Vertex(j).y);
-			vertices.push_back(mesh_array[i]->Vertex(j).z);
-		}
-	
-		shapes.push_back(InitialShape(vertices));
-	}
+	if (mesh_array.Count() == 0) return CRhinoCommand::failure;
 
-
-	// Model generation argument setup
-
-	// TODO: the rpk must be entered by the user.
-	const std::wstring rpk = L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/extrusion_rule.rpk";
-	SetPackage(rpk.c_str());
-
-	RhinoPRT::myPRTAPI->AddInitialShape(shapes);
+	AddMeshTest(&mesh_array);
 
 	// PRT Generation
 	auto generated_models = RhinoPRT::myPRTAPI->GenerateGeometry();
 
 	// Create Rhino object with given geometry
 	for (auto& model : generated_models) {
-		ON_Mesh mesh = getMeshFromGenModel(model);
-
-		/*if (mesh.IsValid()) {
-			if (!mesh.HasVertexNormals())
-				mesh.ComputeVertexNormals();
-			
-			mesh.Compact();
-
-			context.m_doc.AddMeshObject(mesh);
-			context.m_doc.Redraw();
-		}*/
+		ON_Mesh mesh = pcu::getMeshFromGenModel(model);
 
 		auto meshOBject = context.m_doc.AddMeshObject(mesh);
 	}

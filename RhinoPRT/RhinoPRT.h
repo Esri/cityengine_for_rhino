@@ -28,17 +28,7 @@
 
 // Exposed interface
 namespace RhinoPRT {
-	/*
-	struct IRhinoPRTAPI {
-		virtual bool InitializeRhinoPRT() = 0;
-		virtual void ReleaseRhinoPRT() = 0;
-		virtual bool IsPRTInitialized() = 0;
-		virtual void SetRPKPath(const std::wstring &rpk_path) = 0;
-		virtual bool AddInitialShape(double* vertices, int vCount, int* indices, int iCount, int* faceCount, int faceCountCount) = 0;
-		virtual bool GenerateGeometry(double** vertices, int* vCount, int** indices, int* iCount, int** faceCount, int* faceCountCount) = 0;
-		virtual int GetRuleAttributeCount() = 0;
-	};
-	*/
+
 	struct RhinoPRTAPI {
 	public:
 
@@ -56,7 +46,9 @@ namespace RhinoPRT {
 		}
 
 		void SetRPKPath(const std::wstring &rpk_path) {
-			mPackagePath = pcu::toOSNarrowFromUTF16(rpk_path);
+			if (wcscmp(mPackagePath.c_str(), rpk_path.c_str()) == 0) return;
+
+			mPackagePath = rpk_path;
 
 			// initialize the resolve map and rule infos here. Create the vector of rule attributes.
 			if (!mModelGenerator)
@@ -85,21 +77,31 @@ namespace RhinoPRT {
 		}
 
 		void AddInitialShape(std::vector<InitialShape>& shapes) {
+
 			for (auto&shape : shapes) {
 				mShapes.push_back(shape);
 				mAttributes.push_back(pcu::ShapeAttributes());
 			}
 		}
 
+		void ClearInitialShapes() {
+			mShapes.clear();
+			mAttributes.clear();
+		}
+
 		std::vector<GeneratedModel> GenerateGeometry() {
-			return mModelGenerator->generateModel(mShapes, mAttributes, mPackagePath, L"com.esri.rhinoprt.RhinoEncoder", options, mAttrBuilder);
+			return mModelGenerator->generateModel(mShapes, mAttributes, L"com.esri.rhinoprt.RhinoEncoder", options, mAttrBuilder);
 		}
 
 		bool GenerateGeometry(double** vertices, int* vCount, int** indices, int* iCount, int** faceCount, int* faceCountCount) {
 
-			auto generated_models = mModelGenerator->generateModel(mShapes, mAttributes, mPackagePath, L"com.esri.rhinoprt.RhinoEncoder", options, mAttrBuilder);
+			auto generated_models = GenerateGeometry();
 
 			if (generated_models.size() == 0) return false;
+
+			mGeneratedModels.clear();
+			mGeneratedModels.reserve(generated_models.size());
+			mGeneratedModels.insert(mGeneratedModels.begin(), generated_models.begin(), generated_models.end());
 
 			// TODO check if array is big enough to contain all the generated vertices/indices.
 			*vCount = generated_models[0].getVertices().size();
@@ -151,7 +153,7 @@ namespace RhinoPRT {
 	private:
 
 		std::vector<InitialShape> mShapes;
-		std::string mPackagePath;
+		std::wstring mPackagePath;
 		std::vector<pcu::ShapeAttributes> mAttributes;
 
 		RuleAttributes mRuleAttributes;
@@ -160,6 +162,7 @@ namespace RhinoPRT {
 		pcu::EncoderOptions options;
 
 		std::unique_ptr<ModelGenerator> mModelGenerator;
+		std::vector<GeneratedModel> mGeneratedModels;
 	};
 
 	// Global PRT handle
@@ -186,6 +189,22 @@ extern "C" {
 		return RhinoPRT::myPRTAPI->AddInitialShape(vertices, vCount, indices, iCount, faceCount, faceCountCount);
 	}
 
+	inline RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh) {
+		if (pMesh == nullptr) return false;
+		
+		std::vector<InitialShape> initShapes;
+		for (int i = 0; i < pMesh->Count(); ++i) {
+			initShapes.push_back(InitialShape(**pMesh->At(i)));
+		}
+
+		RhinoPRT::myPRTAPI->AddInitialShape(initShapes);
+		return true;
+	}
+
+	inline RHINOPRT_API void ClearInitialShapes() {
+		RhinoPRT::myPRTAPI->ClearInitialShapes();
+	}
+
 	inline RHINOPRT_API bool Generate(double** vertices, int* vCount, int** indices, int* iCount, int** faceCount, int* faceCountCount) {
 		bool status = RhinoPRT::myPRTAPI->GenerateGeometry(vertices, vCount, indices, iCount, faceCount, faceCountCount);
 
@@ -196,6 +215,21 @@ extern "C" {
 		}*/
 
 		return status;
+	}
+
+	inline RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray) {
+		if (pMeshArray == nullptr) return false;
+
+		auto meshes = RhinoPRT::myPRTAPI->GenerateGeometry();
+
+		if (meshes.size() == 0) return false;
+
+		for (const auto& mesh : meshes) {
+			const auto on_mesh = pcu::getMeshFromGenModel(mesh);
+			pMeshArray->Append(new ON_Mesh(on_mesh)); // must be freed my the caller of this function.
+		}
+
+		return true;
 	}
 
 	inline RHINOPRT_API int GetRuleAttributesCount() {

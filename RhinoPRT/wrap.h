@@ -43,6 +43,7 @@ public:
 	InitialShape();
 	InitialShape(const std::vector<double> &vertices);
 	InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount);
+	InitialShape(const ON_Mesh& mesh);
 	~InitialShape() {}
 
 	const double* getVertices() const {
@@ -121,13 +122,12 @@ public:
 
 	std::vector<GeneratedModel> generateModel(const std::vector<InitialShape>& initial_geom,
 											  std::vector<pcu::ShapeAttributes>& shapeAttributes,
-											  const std::string& rulePackagePath,
 											  const std::wstring& geometryEncoderName,
 											  const pcu::EncoderOptions& geometryEncoderOptions, 
 											  pcu::AttributeMapBuilderPtr& aBuilder);
 
 	bool initResolveMap();
-	RuleAttributes updateRuleFiles(const std::string rulePkg);
+	RuleAttributes updateRuleFiles(const std::wstring rulePkg);
 
 private:
 	pcu::CachePtr mCache;
@@ -139,7 +139,7 @@ private:
 	std::vector<pcu::AttributeMapPtr> mEncodersOptionsPtr;
 	RuleAttributes mRuleAttributes;
 	
-	std::string mRulePkg = "";
+	std::wstring mRulePkg = L"";
 	std::wstring mRuleFile = L"bin/rule.cgb";
 	std::wstring mStartRule = L"default$Lot";
 	int32_t mSeed = 0;

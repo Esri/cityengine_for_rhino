@@ -24,7 +24,7 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel) {
 	prt::addLogHandler(mFileLogHandler);
 
 	// TODO: create the list of extension path dynamicaly using getDllLocation
-	const wchar_t* prt_path[2] = { L"C:/Users/lor11212/Documents/Rhino/gh-plugin-prototype/GrasshopperPRT/esri_sdk/lib", L"C:/Users/lor11212/Documents/Rhino/gh-plugin-prototype/GrasshopperPRT/x64/Release/RHINOCODECS.dll" };
+	const wchar_t* prt_path[2] = { L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/esri_sdk/lib", L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/x64/Release/codecs_rhino.dll" };
 	
 	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 	mPRTHandle.reset(prt::init(prt_path, 2, minimalLogLevel, &status));
@@ -80,6 +80,32 @@ InitialShape::InitialShape(const double* vertices, int vCount, const int* indice
 	}
 }
 
+InitialShape::InitialShape(const ON_Mesh& mesh) {
+	mVertices.reserve(mesh.VertexCount()*3);
+	mIndices.reserve(mesh.FaceCount()*4);
+	mFaceCounts.reserve(mesh.FaceCount());
+
+	for (int i = 0; i < mesh.VertexCount(); ++i) {
+		ON_3dPoint vertex = mesh.Vertex(i);
+		mVertices.push_back(vertex.x);
+		mVertices.push_back(vertex.y);
+		mVertices.push_back(vertex.z);
+	}
+
+	for (int i = 0; i < mesh.FaceCount(); ++i) {
+		mIndices.push_back(mesh.m_F.At(i)->vi[0]);
+		mIndices.push_back(mesh.m_F.At(i)->vi[1]);
+		mIndices.push_back(mesh.m_F.At(i)->vi[2]);
+		if (mesh.m_F.At(i)->IsQuad()) {
+			mIndices.push_back(mesh.m_F.At(i)->vi[3]);
+			mFaceCounts.push_back(4);
+		}
+		else {
+			mFaceCounts.push_back(3);
+		}
+	}
+}
+
 GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
 							   const std::vector<uint32_t>& face, const std::map<std::string, std::string>& rep): 
 	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReport(rep) {}
@@ -110,7 +136,7 @@ bool ModelGenerator::initResolveMap() {
 	return false;
 }
 
-RuleAttributes ModelGenerator::updateRuleFiles(const std::string rulePkg) {
+RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring rulePkg) {
 	mRulePkg = rulePkg;
 
 	// Reset the rule infos
@@ -156,7 +182,6 @@ RuleAttributes ModelGenerator::updateRuleFiles(const std::string rulePkg) {
 
 std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
 														  std::vector<pcu::ShapeAttributes>& shapeAttributes,
-														  const std::string& rulePackagePath,
 														  const std::wstring& geometryEncoderName,
 														  const pcu::EncoderOptions& geometryEncoderOptions,
 														  pcu::AttributeMapBuilderPtr& aBuilder) {
@@ -229,11 +254,6 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 
 		if (mEncodersNames[0] == ENCODER_ID_RHINO) {
 			pcu::RhinoCallbacksPtr roc{ std::make_unique<RhinoCallbacks>(mInitialShapesBuilders.size()) };
-
-			// DEBUG
-			auto startRule = initialShapes[0]->getStartRule();
-			auto ruleFile = initialShapes[0]->getRuleFile();
-			auto attrMap = initialShapes[0]->getAttributeMap();
 
 			// GENERATE!
 			const prt::Status genStat =

@@ -2,6 +2,8 @@
 
 #include "RhinoCallbacks.h"
 
+#include "stdafx.h"
+
 #include "prt/API.h"
 #include "prt/FileOutputCallbacks.h"
 #include "prt/LogHandler.h"
@@ -10,6 +12,9 @@
 #include <string>
 
 struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
+
+// forward declaration to break include loop
+class GeneratedModel;
 
 namespace pcu {
 
@@ -69,6 +74,8 @@ namespace pcu {
 	AttributeMapPtr createAttributeMapForEncoder(const EncoderOptions& attrs, prt::AttributeMapBuilder& bld);
 	AttributeMapPtr createValidatedOptions(const std::wstring& encID, const AttributeMapPtr& unvalidatedOptions);
 
+	const ON_Mesh getMeshFromGenModel(const GeneratedModel& model);
+
 
 	/**
 	 * String and URI helpers
@@ -81,6 +88,7 @@ namespace pcu {
 	std::string toUTF8FromOSNarrow(const std::string& osString);
 	std::string percentEncode(const std::string& utf8String);
 	URI toFileURI(const std::string& p);
+	URI toFileURI(const std::wstring& p);
 
 	std::wstring filename(const std::wstring& path);
 

@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include "wrap.h"
+
 #include "prt/StringUtils.h"
 
 #ifdef _WIN32
@@ -117,6 +119,53 @@ namespace pcu {
 		return AttributeMapPtr(validatedOptions);
 	}
 
+	const ON_Mesh getMeshFromGenModel(const GeneratedModel& model) {
+		auto faces = model.getFaces();
+		auto vertices = model.getVertices();
+		auto indices = model.getIndices();
+
+		size_t nbVertices = vertices.size() / 3;
+
+		ON_Mesh mesh(faces.size(), nbVertices, false, false);
+
+		for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
+			mesh.SetVertex(v_id, ON_3dPoint(vertices[v_id * 3], vertices[v_id * 3 + 1], vertices[v_id * 3 + 2]));
+		}
+
+		int faceid(0);
+		int currindex(0);
+		for (int face : faces) {
+			if (face == 3) {
+				mesh.SetTriangle(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2]);
+				currindex += face;
+			}
+			else if (face == 4) {
+				mesh.SetQuad(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2], indices[currindex + 3]);
+				currindex += face;
+			}
+			else {
+				//ignore face because it is invalid
+				currindex += face;
+			}
+			faceid++;
+		}
+
+		// Printing an error log if the created mesh is invalid
+		FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_2.txt", L"w");
+		if (fp) {
+			ON_TextLog log(fp);
+			if (!mesh.IsValid(&log))
+				mesh.Dump(log);
+			ON::CloseFile(fp);
+		}
+
+		mesh.ComputeVertexNormals();
+		mesh.Compact();
+
+		return mesh;
+	}
+	
+
 	template <typename inC, typename outC, typename FUNC>
 	std::basic_string<outC> callAPI(FUNC f, const std::basic_string<inC>& s) {
 		std::vector<outC> buffer(s.size());
@@ -159,11 +208,15 @@ namespace pcu {
 		return callAPI<char, char>(prt::StringUtils::percentEncode, utf8String);
 	}
 
-	URI toFileURI(const std::string & p)
+	URI toFileURI(const std::string& p)
 	{
 		const std::string utf8Path = toUTF8FromOSNarrow(p);
 		const std::string u8PE = percentEncode(utf8Path);
 		return FILE_SCHEMA + u8PE;
+	}
+
+	URI toFileURI(const std::wstring& p) {
+		return toFileURI(toOSNarrowFromUTF16(p));
 	}
 
 	std::wstring getRuleFileEntry(const ResolveMapPtr& resolveMap) {

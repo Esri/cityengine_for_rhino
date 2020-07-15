@@ -4,7 +4,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 
 using Rhino.Runtime.InteropWrappers;
@@ -30,10 +32,16 @@ namespace GrasshopperPRT
         public static extern bool AddShape(double[] vertices, int vCount, int[] indices, int iCount, int[] faceCount, int faceCountCount);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool AddMeshTest([In]IntPtr pMesh);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ClearInitialShapes();
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool Generate(ref IntPtr vertices, ref int vCount, ref IntPtr indices, ref int iCount, ref IntPtr faceCount, ref int faceCountCount);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool FreeArray(IntPtr ptr, int size);
+        public static extern bool GenerateTest([In,Out]IntPtr pMeshArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetRuleAttributesCount();
@@ -52,17 +60,52 @@ namespace GrasshopperPRT
 
             double[] vertices = Array.ConvertAll(initialMesh.Vertices.ToFloatArray(), x => (double)x);
             int[] indices = initialMesh.Faces.ToIntArray(false);
-            int[] faceCount = new int[initialMesh.Faces.Count];
+            int[] faceCount = Array.ConvertAll(initialMesh.Faces.ToArray(), x => x.IsQuad ? 4 : 3);
+            
+            return AddShape(vertices, vertices.Length, indices, indices.Length, faceCount, faceCount.Length);
+        }
 
-            for (int i = 0; i < initialMesh.Faces.Count; ++i)
+        public static bool AddMeshTestWrapper(List<Mesh> meshes)
+        {
+            bool status;
+
+            using (var arr = new SimpleArrayMeshPointer())
             {
-                if (initialMesh.Faces[i].IsTriangle)
-                    faceCount[i] = 3;
-                else if (initialMesh.Faces[i].IsQuad)
-                    faceCount[i] = 4;
+                foreach (var mesh in meshes)
+                {
+                    arr.Add(mesh, true);
+                }
+
+                var ptr_array = arr.ConstPointer();
+                status = AddMeshTest(ptr_array);
             }
 
-            return AddShape(vertices, vertices.Length, indices, indices.Length, faceCount, faceCount.Length);
+            return status;
+        }
+
+        public static GH_Structure<GH_Mesh> GenerateMeshTestWrapper()
+        {
+            Mesh[] meshes = null;
+
+            using(var arr = new SimpleArrayMeshPointer())
+            {
+                var ptr_array = arr.NonConstPointer();
+
+                // Start the geometry generation
+                bool status = GenerateTest(ptr_array);
+                if (!status) return null;
+                meshes = arr.ToNonConstArray();
+            }
+
+            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
+
+            foreach(var mesh in meshes) {
+                GH_Mesh gh_mesh = null;
+                bool status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+                if (status) mesh_struct.Append(gh_mesh);
+            }
+
+            return mesh_struct;
         }
 
         public static Mesh GenerateMesh()
@@ -90,9 +133,6 @@ namespace GrasshopperPRT
             double[] verticesResult = Utils.FromIntPtrToDoubleArray(vBuffer, vCount);
             int[] indicesResult = Utils.FromIntPtrToIntArray(iBuffer, iCount);
             int[] fCountResult = Utils.FromIntPtrToIntArray(fCountBuffer, faceCountCount);
-
-            // Free the memory allocated in the c++ part
-            //FreeArray(vBuffer, vCount);
             
             Mesh mesh = new Mesh();
 
