@@ -69,18 +69,35 @@ namespace RhinoPRT {
 		}
 
 		bool AddInitialShape(double* vertices, int vCount, int* indices, int iCount, int* faceCount, int faceCountCount) {
-			
+
 			mShapes.push_back(InitialShape(vertices, vCount, indices, iCount, faceCount, faceCountCount));
-			mAttributes.push_back(pcu::ShapeAttributes());
+
+			if (mModelGenerator.get()) {
+				// get the shape attributes data from ModelGenerator
+				auto rulef = mModelGenerator->getRuleFile();
+				auto ruleN = mModelGenerator->getStartingRule();
+				auto shapeN = mModelGenerator->getDefaultShapeName();
+				int seed = 555; // TODO: compute seed?
+				mAttributes.push_back(pcu::ShapeAttributes(rulef, ruleN, shapeN, seed));
+			}
+			else {
+				mAttributes.push_back(pcu::ShapeAttributes());
+			}
 			
 			return true;
 		}
 
 		void AddInitialShape(std::vector<InitialShape>& shapes) {
 
+			// get the shape attributes data from ModelGenerator
+			auto rulef = mModelGenerator->getRuleFile();
+			auto ruleN = mModelGenerator->getStartingRule();
+			auto shapeN = mModelGenerator->getDefaultShapeName();
+			int seed = 555;
+
 			for (auto&shape : shapes) {
 				mShapes.push_back(shape);
-				mAttributes.push_back(pcu::ShapeAttributes());
+				mAttributes.push_back(pcu::ShapeAttributes(rulef, ruleN, shapeN, seed));
 			}
 		}
 

@@ -26,7 +26,7 @@ namespace {
 	const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
 		prtx::EncodePreparator::PreparationFlags()
 		.instancing(false)
-		.triangulate(false)
+		.triangulate(true)
 		.mergeVertices(false)
 		.cleanupUVs(false)
 		.cleanupVertexNormals(false)
@@ -72,6 +72,11 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 			mEncodePreparator->add(context.getCache(), *is, initialShapeIndex);
 		}
 		catch (...) {
+			std::ofstream outfile;
+			outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
+			outfile << "Unknown exception while encoding geometry." << std::endl;
+			outfile.close();
+
 			mEncodePreparator->add(context.getCache(), *is, initialShapeIndex);
 		}
 

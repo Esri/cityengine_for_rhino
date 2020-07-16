@@ -130,10 +130,6 @@ namespace GrasshopperPRT
             IntPtr vBuffer = Utils.FromArrayToIntPtr(ref vertices);
             IntPtr iBuffer = Utils.FromArrayToIntPtr(ref indices);
             IntPtr fCountBuffer = Utils.FromArrayToIntPtr(ref faceCount);
-
-            // To test the rhino wrappers
-            //SimpleArrayMeshPointer meshes = new SimpleArrayMeshPointer();
-            //IntPtr ptr_array = meshes.NonConstPointer();
            
             bool status = Generate(ref vBuffer, ref vCount, ref iBuffer, ref iCount, ref fCountBuffer, ref faceCountCount);
             if (!status) return new Mesh();

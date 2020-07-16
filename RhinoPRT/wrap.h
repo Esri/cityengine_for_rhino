@@ -129,6 +129,10 @@ public:
 	bool initResolveMap();
 	RuleAttributes updateRuleFiles(const std::wstring rulePkg);
 
+	inline std::wstring getRuleFile() { return mRuleFile; }
+	inline std::wstring getStartingRule() { return mStartRule; };
+	inline std::wstring getDefaultShapeName() { return mShapeName; };
+
 private:
 	pcu::CachePtr mCache;
 	pcu::RuleFileInfoPtr mRuleFileInfo;

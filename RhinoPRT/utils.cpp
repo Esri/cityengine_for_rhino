@@ -138,16 +138,17 @@ namespace pcu {
 			if (face == 3) {
 				mesh.SetTriangle(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2]);
 				currindex += face;
+				faceid++;
 			}
 			else if (face == 4) {
 				mesh.SetQuad(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2], indices[currindex + 3]);
 				currindex += face;
+				faceid++;
 			}
 			else {
 				//ignore face because it is invalid
 				currindex += face;
 			}
-			faceid++;
 		}
 
 		// Printing an error log if the created mesh is invalid
