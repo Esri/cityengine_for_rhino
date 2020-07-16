@@ -197,6 +197,7 @@ namespace GrasshopperPRT
             }
             else
             {
+
                 return null;
             }
 
@@ -260,7 +261,23 @@ namespace GrasshopperPRT
                         if (!DA.GetData<GH_Number>(attrib.mFullName, ref value)) continue;
                         PRTWrapper.SetRuleAttributeDouble(attrib.mRuleFile, attrib.mFullName, value.Value);
                         break;
-                    default: // We just support floating point number for the prototype
+                    case AnnotationArgumentType.AAT_BOOL:
+                        GH_Boolean boolean = new GH_Boolean();
+                        if (!DA.GetData<GH_Boolean>(attrib.mFullName, ref boolean)) continue;
+                        PRTWrapper.SetRuleAttributeBoolean(attrib.mRuleFile, attrib.mFullName, boolean.Value);
+                        break;
+                    case AnnotationArgumentType.AAT_INT:
+                        GH_Integer integer = null;
+                        if (!DA.GetData<GH_Integer>(attrib.mFullName, ref integer)) continue;
+                        PRTWrapper.SetRuleAttributeInteger(attrib.mRuleFile, attrib.mFullName, integer.Value);
+                        break;
+                    case AnnotationArgumentType.AAT_STR:
+                        GH_String gH_String = null;
+                        if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
+                        PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, gH_String.Value);
+                        break;
+                    default:
+                        // not supporting arrays yet.
                         continue;
                 }
             }

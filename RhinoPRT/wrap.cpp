@@ -114,10 +114,8 @@ GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<
 
 ModelGenerator::ModelGenerator() {
 	
-
 	// Cache initialization
 	mCache = (pcu::CachePtr)prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT);
-
 }
 
 bool ModelGenerator::initResolveMap() {

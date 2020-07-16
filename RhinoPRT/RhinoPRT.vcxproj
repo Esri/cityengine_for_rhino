@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClCompile Include="CCommandExtrudeShape.cpp" />
     <ClCompile Include="RhinoCallbacks.cpp" />
+    <ClCompile Include="RhinoPRT.cpp" />
     <ClCompile Include="RhinoPRTApp.cpp" />
     <ClCompile Include="RhinoPRTPlugIn.cpp" />
     <ClCompile Include="RuleAttributes.cpp" />

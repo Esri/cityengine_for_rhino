@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -51,6 +50,16 @@ namespace GrasshopperPRT
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDouble(string rule, string fullName, double value);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void SetRuleAttributeBoolean(string rule, string fullName, bool value);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void SetRuleAttributeInteger(string rule, string fullName, int value);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void SetRuleAttributeString(string rule, string fullName, string value);
+
 
         public static bool AddMesh(Mesh initialMesh)
         {

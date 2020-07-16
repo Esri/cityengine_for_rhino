@@ -151,7 +151,7 @@ namespace pcu {
 		}
 
 		// Printing an error log if the created mesh is invalid
-		FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_2.txt", L"w");
+		FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_3.txt", L"w");
 		if (fp) {
 			ON_TextLog log(fp);
 			if (!mesh.IsValid(&log))

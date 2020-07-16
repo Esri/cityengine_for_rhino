@@ -131,24 +131,10 @@ namespace RhinoPRT {
 		const RuleAttribute RULE_NOT_FOUND{};
 
 		template<typename T>
-		void fillAttributeFromNode(std::wstring& ruleName, std::wstring& attrFullName, T value) {
+		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value);
 
-			// Find the RuleAttribute object corresponding to the given attribute name.
-			auto reverseLookupAttribute = [this](const std::wstring gh_attrFullName) {
-				auto it = std::find_if(mRuleAttributes.begin(), mRuleAttributes.end(), [&gh_attrFullName](const auto& ra) {return ra.mFullName == gh_attrFullName; });
-				if (it != mRuleAttributes.end()) return *it;
-				return RULE_NOT_FOUND;
-			};
-
-			const RuleAttribute rule = reverseLookupAttribute(attrFullName);
-			assert(!rule.mFullName.empty()); // Check if the rule was found
-
-			// If the attribute is found, register the value in the attribute map builder
-			//TODO: check for difference with default value, only add the attribute if it is the case.
-			if (rule.mType == prt::AAT_FLOAT) {
-				mAttrBuilder->setFloat(rule.mFullName.c_str(), value);
-			}
-		}
+		template<typename T>
+		void setRuleAttributeValue(const RuleAttribute& rule, T value);
 
 	private:
 
@@ -249,11 +235,19 @@ extern "C" {
 	}
 
 	inline RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value) {
-		std::wstring ruleFile(rule);
-		std::wstring attrFullName(fullName);
+		RhinoPRT::myPRTAPI->fillAttributeFromNode<double>(std::wstring(rule), std::wstring(fullName), value);
+	}
 
+	inline RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value) {
+		RhinoPRT::myPRTAPI->fillAttributeFromNode<bool>(std::wstring(rule), std::wstring(fullName), value);
+	}
 
-		RhinoPRT::myPRTAPI->fillAttributeFromNode<double>(ruleFile, attrFullName, value);
+	inline RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value) {
+		RhinoPRT::myPRTAPI->fillAttributeFromNode<int>(std::wstring(rule), std::wstring(fullName), value);
+	}
+
+	inline RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value) {
+		RhinoPRT::myPRTAPI->fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
 	}
 }
 
