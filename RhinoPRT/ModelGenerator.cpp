@@ -1,119 +1,9 @@
-#include "wrap.h"
+#include "ModelGenerator.h"
+
 #include "Logger.h"
 
-#include <memory>
-#include <vector>
-#include <numeric>
-#include <iostream>
-#include <sstream>
-
-/**
- * commonly used constant
- */
-const std::wstring ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
-
-PRTContext& PRTContext::get() {
-	static PRTContext prtCtx;
-	return prtCtx;
-}
-
-PRTContext::PRTContext(prt::LogLevel minimalLogLevel) {
-	mLogHandler = prt::ConsoleLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT);
-	mFileLogHandler = prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT, L"C:/Windows/Temp/rhino_log.txt");
-	prt::addLogHandler(mLogHandler);
-	prt::addLogHandler(mFileLogHandler);
-
-	// TODO: create the list of extension path dynamicaly using getDllLocation
-	const wchar_t* prt_path[2] = { L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/esri_sdk/lib", L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/x64/Release/codecs_rhino.dll" };
-	
-	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-	mPRTHandle.reset(prt::init(prt_path, 2, minimalLogLevel, &status));
-
-	if (!mPRTHandle || status != prt::STATUS_OK) {
-		LOG_ERR << L"Could not initilize PRT";
-		mPRTHandle.reset();
-	}
-}
-
-PRTContext::~PRTContext() {
-	// shutdown PRT
-	mPRTHandle.reset();
-
-	prt::removeLogHandler(mFileLogHandler);
-	prt::removeLogHandler(mLogHandler);
-	mLogHandler->destroy();
-	mLogHandler = nullptr;
-	mFileLogHandler->destroy();
-	mFileLogHandler = nullptr;
-}
-
-
-InitialShape::InitialShape() {}
-
-InitialShape::InitialShape(const std::vector<double> &vertices): mVertices(vertices) {
-	mIndices.resize(vertices.size() / 3);
-	std::iota(std::begin(mIndices), std::end(mIndices), 0);
-
-	// It is specific to the plane surface quad.
-	mIndices[1] = 2;
-	mIndices[2] = 3;
-	mIndices[3] = 1;
-
-	mFaceCounts.resize(1, (uint32_t)mIndices.size());
-}
-
-InitialShape::InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount) {
-	mVertices.reserve(vCount);
-	mIndices.reserve(iCount);
-	mFaceCounts.reserve(faceCountCount);
-
-	for (int i = 0; i < vCount; ++i) {
-		mVertices.push_back(vertices[i]);
-	}
-
-	for (int i = 0; i < iCount; ++i) {
-		mIndices.push_back(indices[i]);
-	}
-
-	for (int i = 0; i < faceCountCount; ++i) {
-		mFaceCounts.push_back(faceCount[i]);
-	}
-}
-
-InitialShape::InitialShape(const ON_Mesh& mesh) {
-	mVertices.reserve(mesh.VertexCount()*3);
-	mIndices.reserve(mesh.FaceCount()*4);
-	mFaceCounts.reserve(mesh.FaceCount());
-
-	for (int i = 0; i < mesh.VertexCount(); ++i) {
-		ON_3dPoint vertex = mesh.Vertex(i);
-		mVertices.push_back(vertex.x);
-		mVertices.push_back(vertex.y);
-		mVertices.push_back(vertex.z);
-	}
-
-	for (int i = 0; i < mesh.FaceCount(); ++i) {
-		mIndices.push_back(mesh.m_F.At(i)->vi[0]);
-		mIndices.push_back(mesh.m_F.At(i)->vi[1]);
-		mIndices.push_back(mesh.m_F.At(i)->vi[2]);
-		if (mesh.m_F.At(i)->IsQuad()) {
-			mIndices.push_back(mesh.m_F.At(i)->vi[3]);
-			mFaceCounts.push_back(4);
-		}
-		else {
-			mFaceCounts.push_back(3);
-		}
-	}
-}
-
-GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-							   const std::vector<uint32_t>& face, const std::map<std::string, std::string>& rep): 
-	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReport(rep) {}
-
-
-
 ModelGenerator::ModelGenerator() {
-	
+
 	// Cache initialization
 	mCache = (pcu::CachePtr)prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT);
 }
@@ -179,10 +69,10 @@ RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring rulePkg) {
 }
 
 std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
-														  std::vector<pcu::ShapeAttributes>& shapeAttributes,
-														  const std::wstring& geometryEncoderName,
-														  const pcu::EncoderOptions& geometryEncoderOptions,
-														  pcu::AttributeMapBuilderPtr& aBuilder) {
+	std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	const std::wstring& geometryEncoderName,
+	const pcu::EncoderOptions& geometryEncoderOptions,
+	pcu::AttributeMapBuilderPtr& aBuilder) {
 	mInitialShapesBuilders.resize(initial_geom.size());
 
 	// Initial shapes initializing
@@ -220,7 +110,7 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 	new_geometry.reserve(mInitialShapesBuilders.size());
 
 	try {
-		
+
 
 		if (!mRulePkg.empty()) {
 			LOG_INF << "using rule package " << mRulePkg << std::endl;
@@ -239,7 +129,7 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 
 		if (!mEncoderBuilder)
 			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());
-		
+
 		if (!geometryEncoderName.empty())
 			initializeEncoderData(geometryEncoderName, geometryEncoderOptions);
 
@@ -286,10 +176,10 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 }
 
 void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderPtr& aBuilder,
-											  const std::vector<pcu::ShapeAttributes>& shapesAttr,
-											  std::vector<const prt::InitialShape*>& initShapes,
-											  std::vector<pcu::InitialShapePtr>& initShapesPtrs,
-											  std::vector<pcu::AttributeMapPtr>& convertedShapeAttr) {
+	const std::vector<pcu::ShapeAttributes>& shapesAttr,
+	std::vector<const prt::InitialShape*>& initShapes,
+	std::vector<pcu::InitialShapePtr>& initShapesPtrs,
+	std::vector<pcu::AttributeMapPtr>& convertedShapeAttr) {
 
 	for (size_t i = 0; i < mInitialShapesBuilders.size(); ++i) {
 		pcu::ShapeAttributes shapeAttr = shapesAttr[0];
@@ -306,7 +196,7 @@ void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderPtr& aBuil
 
 		mInitialShapesBuilders[i]->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(), convertedShapeAttr[i].get(),
 			mResolveMap.get());
-		
+
 		initShapesPtrs[i].reset(mInitialShapesBuilders[i]->createInitialShape());
 		initShapes[i] = initShapesPtrs[i].get();
 	}
@@ -337,7 +227,7 @@ void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allE
 }
 
 void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr, std::wstring & ruleFile, std::wstring & startRule,
-												int32_t & seed, std::wstring & shapeName, pcu::AttributeMapPtr & convertShapeAttr)
+	int32_t & seed, std::wstring & shapeName, pcu::AttributeMapPtr & convertShapeAttr)
 {
 	//convertShapeAttr = pcu::createAttributeMapForShape(shapeAttr, *(pcu::AttributeMapBuilderPtr(prt::AttributeMapBuilder::create())));
 	convertShapeAttr = pcu::createAttributeMapForShape(shapeAttr, *aBuilder.get());

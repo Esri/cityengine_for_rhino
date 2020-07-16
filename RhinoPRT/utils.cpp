@@ -1,6 +1,7 @@
 #include "utils.h"
 
-#include "wrap.h"
+#include "Logger.h"
+#include "PRTUtilityModels.h"
 
 #include "prt/StringUtils.h"
 
@@ -110,7 +111,7 @@ namespace pcu {
 		const EncoderInfoPtr encInfo{ prt::createEncoderInfo(encID.c_str()) };
 
 		if (!encInfo) {
-			std::cout << "Failed to create encoder info: encoder not found for given ID." << std::endl;
+			LOG_ERR << "Failed to create encoder info: encoder not found for given ID." << std::endl;
 			return nullptr;
 		}
 
@@ -148,6 +149,7 @@ namespace pcu {
 			else {
 				//ignore face because it is invalid
 				currindex += face;
+				LOG_WRN << "Ignored face with invalid number of vertices :" << face;
 			}
 		}
 
@@ -156,9 +158,9 @@ namespace pcu {
 		if (fp) {
 			ON_TextLog log(fp);
 			if (!mesh.IsValid(&log))
-				mesh.Dump(log);
-			ON::CloseFile(fp);
+				mesh.Dump(log);	
 		}
+		ON::CloseFile(fp);
 
 		mesh.ComputeVertexNormals();
 		mesh.Compact();

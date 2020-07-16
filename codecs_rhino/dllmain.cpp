@@ -1,11 +1,12 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
-#include "codecs_rhino.h"
 #include "RhinoEncoder.h"
 
 #include "prtx/ExtensionManager.h"
 
 #include <iostream>
+
+#define RHENC_EXPORTS_API __declspec(dllexport)
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

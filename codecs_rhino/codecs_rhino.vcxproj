@@ -239,14 +239,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="codecs_rhino.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IRhinoCallbacks.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RhinoEncoder.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="codecs_rhino.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

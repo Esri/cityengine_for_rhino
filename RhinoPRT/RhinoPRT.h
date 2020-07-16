@@ -1,7 +1,9 @@
 #ifndef RHINOPRT
 #define RHINOPRT
 
-#include "wrap.h"
+#include "PRTContext.h"
+
+#include "ModelGenerator.h"
 
 #include "Logger.h"
 
