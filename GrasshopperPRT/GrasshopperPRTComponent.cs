@@ -141,7 +141,7 @@ namespace GrasshopperPRT
             // No compatible mesh was given
             if (meshes.Count == 0) return;
 
-            PRTWrapper.AddMeshTestWrapper(meshes);
+            if(!PRTWrapper.AddMeshTestWrapper(meshes)) return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
             fillAttributesFromNode(DA);
@@ -197,9 +197,11 @@ namespace GrasshopperPRT
             }
             else
             {
-
                 return null;
             }
+
+            mesh.Vertices.UseDoublePrecisionVertices = true;
+            mesh.Faces.ConvertTrianglesToQuads(Rhino.RhinoMath.ToRadians(2), .875);
 
             return mesh;
         }
