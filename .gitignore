@@ -21,7 +21,7 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
+x64/*
 x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
@@ -351,3 +351,7 @@ MigrationBackup/
 esri_sdk/doc/
 esri_sdk/cmake/
 !esri_sdk/bin/
+
+codecs_rhino/x64/
+RhinoPRT/x64/
+GrasshopperPRT/x64
