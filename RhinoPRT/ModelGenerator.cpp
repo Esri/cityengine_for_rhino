@@ -15,7 +15,8 @@ bool ModelGenerator::initResolveMap() {
 		try {
 			auto converted_str = pcu::toUTF16FromUTF8(rpkURI).c_str();
 			mResolveMap.reset(prt::createResolveMap(converted_str, nullptr, &status));
-			return true;
+
+			return status == prt::STATUS_OK;
 		}
 		catch (std::exception& e) {
 			LOG_ERR << L"CAUGHT EXCEPTION: " << e.what() << std::endl;

@@ -195,6 +195,10 @@ namespace GrasshopperPRT
             {
                 if(!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
             }
+            else if(geoGoo is GH_Plane)
+            {
+                if (!GH_Convert.ToMesh(geoGoo as GH_Plane, ref mesh, GH_Conversion.Both)) return null;
+            }
             else
             {
                 return null;

@@ -2,6 +2,11 @@
 
 #include "Logger.h"
 
+
+std::wstring getNiceName(const std::wstring& attrName) {
+		return pcu::removeImport(pcu::removeStyle(attrName));
+}
+
 RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo& ruleFileInfo) {
 	RuleAttributes ra;
 
@@ -15,8 +20,8 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 
 		RuleAttribute ruleAttr;
 		ruleAttr.mFullName = attr->getName();
-		ruleAttr.mRuleFile = mainCgaRuleName; // Only support 1 cgb file for now
-		ruleAttr.mNickname = attr->getName(); // TODO: implement a function that creates the nickname from the full name
+		ruleAttr.mRuleFile = mainCgaRuleName; // TODO: Only support 1 cgb file for now
+		ruleAttr.mNickname = getNiceName(ruleAttr.mFullName);
 		ruleAttr.mType = attr->getReturnType();
 
 		//TODO: implement prt::Annotation support.

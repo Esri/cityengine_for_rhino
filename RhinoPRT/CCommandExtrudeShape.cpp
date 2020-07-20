@@ -6,6 +6,17 @@
 #include "stdafx.h"
 #include "RhinoPRTPlugIn.h"
 
+bool getRpkPath(std::wstring& rpk) {
+	std::wstring ext = L".rpk";
+	std::wstring filename = L"default";
+	std::wstring default_ext = L"RPK (*.rpk) | *.rpk";
+	CFileDialog fd(true, (LPCWSTR)ext.c_str(), (LPCWSTR)filename.c_str(), OFN_FILEMUSTEXIST, (LPCWSTR)default_ext.c_str());
+	auto result = fd.DoModal();
+	if (!result) return false;
+	rpk.assign(fd.GetPathName());
+	return true;
+}
+
 #pragma region ExtrudeShape command
 
 
@@ -29,59 +40,73 @@ static class CCommandExtrudeShape theExtrudeShapeCommand;
 
 CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContext& context)
 {
-	// Add a square, expose the extrusion height. Give the shape and rule, give everything to PRT.
-	// The callback should be able to get the answer back, then convert the created face into rhino geometry using a decoder,
-	// and finally display it in Rhino.
+	std::wstring rpk;
+	if (!getRpkPath(rpk)) return cancel;
 
-	// Select starting shape
-	bool bAttribute = true;
+	// Select starting shapes
+	ON_SimpleArray<const ON_Mesh*> mesh_array;
 
 	CRhinoGetObject go;
-	go.SetCommandPrompt(L"Select starting shape");
-	go.AddCommandOptionToggle(
-		RHCMDOPTNAME(L"Location"),
-		RHCMDOPTVALUE(L"Object"),
-		RHCMDOPTVALUE(L"Attribute"),
-		bAttribute,
-		&bAttribute
-	);
+	go.SetCommandPrompt(L"Select 1 or more starting shapes");
+	go.SetGeometryFilter(CRhinoGetObject::surface_object | CRhinoGetObject::mesh_object | 
+						 CRhinoGetObject::closed_polysrf | CRhinoGetObject::GEOMETRY_TYPE_FILTER::extrusion_object);
+	// Get selected objects
+	CRhinoGet::result res = go.GetObjects(1, 0);
+	if(res == CRhinoGet::object)
+	{
+		int count = go.ObjectCount();
+		for (int i = 0; i < count; ++i) {
+			ON_Mesh* mesh = nullptr;
 
-	// Get selected object
-	for (;;) {
-		CRhinoGet::result res = go.GetObjects(1, 1);
-		if (res == CRhinoGet::option)
-			continue;
-		if (res != CRhinoGet::object)
-			return cancel;
-		break;
+			const CRhinoObjRef& obj_ref = go.Object(i);
+
+			auto geom_type = obj_ref.GeometryType();
+
+			if (geom_type == CRhinoObject::GEOMETRY_TYPE::surface_object) {
+
+				const ON_Surface* srf = obj_ref.Surface();
+				if (srf) {
+					mesh = new ON_Mesh();
+					srf->CreateMesh(ON_MeshParameters::QualityRenderMesh, mesh);
+				}
+			}
+			else if (geom_type == CRhinoObject::GEOMETRY_TYPE::extrusion_object) {
+				const ON_Extrusion* extr = obj_ref.Extrusion();
+				if (extr) {
+					mesh = extr->CreateMesh(ON_MeshParameters::QualityRenderMesh);
+				}
+			}
+			else if (geom_type == CRhinoObject::GEOMETRY_TYPE::polysrf_object)
+			{
+				 
+				const ON_Brep* brep = obj_ref.Brep();
+				if (brep) {
+					ON_SimpleArray<ON_Mesh*> brep_meshes;
+					int nb_meshes = brep->CreateMesh(ON_MeshParameters::QualityRenderMesh, brep_meshes);
+
+					mesh = new ON_Mesh();
+					for (int i = 0; i < nb_meshes; ++i) {
+						mesh->Append(*brep_meshes[i]);
+					}
+				}
+			}
+			else if(geom_type == CRhinoObject::GEOMETRY_TYPE::mesh_object) {
+				mesh = new ON_Mesh();
+				mesh->Append(*obj_ref.Mesh());
+			}
+			else {
+				LOG_ERR << L"Incompatible initial shape." << std::endl;
+			}
+
+			if (mesh) mesh_array.Append(mesh);
+		}
 	}
+	else return cancel;
 
-	const CRhinoObjRef& ref = go.Object(0);
-	const CRhinoObject* obj = ref.Object();
-	if (!obj)
-		return failure;
-
-	// manually adding a surface for testing/debugging purposes
-	const ON_Plane plane;
-	const ON_PlaneSurface psurf(plane);
-
-	CRhinoSurfaceObject* surf_obj = context.m_doc.AddSurfaceObject(psurf);
-	context.m_doc.Redraw();
+	if (mesh_array.Count() == 0) return failure;
 
 	// Model generation argument setup
-
-	// TODO: the rpk must be entered by the user.
-	const std::wstring rpk = L"C:/Users/lor11212/Documents/Rhino/rhino-plugin-prototype/extrusion_rule.rpk";
 	SetPackage(rpk.c_str());
-	
-	// Create the mesh and get it
-	int crv_id = surf_obj->CreateMeshes(ON::mesh_type::preview_mesh, ON_MeshParameters::QualityRenderMesh);
-
-	ON_SimpleArray<const ON_Mesh*> mesh_array;
-	int msh_id = surf_obj->GetMeshes(ON::mesh_type::preview_mesh, mesh_array);
-
-	if (mesh_array.Count() == 0) return CRhinoCommand::failure;
-
 	AddMeshTest(&mesh_array);
 
 	// PRT Generation

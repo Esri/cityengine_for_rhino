@@ -92,6 +92,13 @@ namespace pcu {
 
 	std::wstring filename(const std::wstring& path);
 
+	constexpr const wchar_t STYLE_DELIMITER = L'$';
+	constexpr const wchar_t IMPORT_DELIMITER = L'.';
+
+	std::wstring removePrefix(const std::wstring& attrName);
+	std::wstring removeImport(const std::wstring& attrName);
+	std::wstring removeStyle(const std::wstring& attrName);
+
 	/**
 	 * Resolve map helpers
 	 */

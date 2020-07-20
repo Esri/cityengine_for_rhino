@@ -6,6 +6,7 @@ struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error
 #include "prt/RuleFileInfo.h"
 
 #include "utils.h"
+#include "Logger.h"
 
 #include <string>
 #include <vector>

@@ -211,8 +211,7 @@ namespace pcu {
 		return callAPI<char, char>(prt::StringUtils::percentEncode, utf8String);
 	}
 
-	URI toFileURI(const std::string& p)
-	{
+	URI toFileURI(const std::string& p) {
 		const std::string utf8Path = toUTF8FromOSNarrow(p);
 		const std::string u8PE = percentEncode(utf8Path);
 		return FILE_SCHEMA + u8PE;
@@ -220,6 +219,23 @@ namespace pcu {
 
 	URI toFileURI(const std::wstring& p) {
 		return toFileURI(toOSNarrowFromUTF16(p));
+	}
+
+	std::wstring removePrefix(const std::wstring& attrName, wchar_t delim) {
+		const auto sepPos = attrName.find(delim);
+
+		if (sepPos == std::wstring::npos) return attrName;
+		if (sepPos == attrName.length() - 1) return {};
+		if (attrName.length() <= 1) return {};
+		return attrName.substr(sepPos + 1);
+	}
+
+	std::wstring removeImport(const std::wstring& attrName) {
+		return removePrefix(attrName, IMPORT_DELIMITER);
+	}
+
+	std::wstring removeStyle(const std::wstring& attrName) {
+		return removePrefix(attrName, STYLE_DELIMITER);
 	}
 
 	std::wstring getRuleFileEntry(const ResolveMapPtr& resolveMap) {
