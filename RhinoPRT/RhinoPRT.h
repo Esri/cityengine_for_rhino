@@ -241,13 +241,14 @@ extern "C" {
 		return RhinoPRT::myPRTAPI->GetRuleAttributeCount();
 	}
 
-	inline RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, prt::AnnotationArgumentType* type) {
+	inline RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type) {
 		RuleAttributes ruleAttributes = RhinoPRT::myPRTAPI->GetRuleAttributes();
 
 		if (attrIdx >= ruleAttributes.size()) return false;
 
 		wcscpy_s(rule, rule_size, ruleAttributes[attrIdx].mRuleFile.c_str());
 		wcscpy_s(name, name_size, ruleAttributes[attrIdx].mFullName.c_str());
+		wcscpy_s(nickname, nickname_size, ruleAttributes[attrIdx].mNickname.c_str());
 		*type = ruleAttributes[attrIdx].mType;
 
 		return true;

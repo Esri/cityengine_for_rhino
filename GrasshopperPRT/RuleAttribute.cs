@@ -11,11 +11,11 @@ namespace GrasshopperPRT
         public string mNickname;
         public AnnotationArgumentType attribType;
 
-        public RuleAttribute(string name = "Default$DefaultName", string ruleFile = "rule", AnnotationArgumentType type = AnnotationArgumentType.AAT_INT)
+        public RuleAttribute(string name = "Default$DefaultName", string nickname = "DefaultName", string ruleFile = "rule", AnnotationArgumentType type = AnnotationArgumentType.AAT_INT)
         {
             this.mRuleFile = ruleFile;
             this.mFullName = name;
-            this.mNickname = name;
+            this.mNickname = nickname;
             this.attribType = type;
         }
     }

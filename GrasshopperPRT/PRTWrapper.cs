@@ -46,7 +46,7 @@ namespace GrasshopperPRT
         public static extern int GetRuleAttributesCount();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetRuleAttribute(int attrIdx, StringBuilder rule, int rule_size, StringBuilder name, int name_size, ref AnnotationArgumentType type);
+        public static extern bool GetRuleAttribute(int attrIdx, StringBuilder rule, int rule_size, StringBuilder name, int name_size, StringBuilder nickname, int nickname_size, ref AnnotationArgumentType type);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDouble(string rule, string fullName, double value);
@@ -183,12 +183,13 @@ namespace GrasshopperPRT
             {
                 StringBuilder ruleBuilder = new StringBuilder(100);
                 StringBuilder nameBuilder = new StringBuilder(100);
+                StringBuilder nicknameBuilder = new StringBuilder(100);
                 AnnotationArgumentType type = AnnotationArgumentType.AAT_INT;
 
-                bool status = GetRuleAttribute(i, ruleBuilder, ruleBuilder.Capacity, nameBuilder, nameBuilder.Capacity, ref type);
+                bool status = GetRuleAttribute(i, ruleBuilder, ruleBuilder.Capacity, nameBuilder, nameBuilder.Capacity, nicknameBuilder, nicknameBuilder.Capacity, ref type);
                 if (!status) return new RuleAttribute[0] {};
 
-                attributes[i] = new RuleAttribute(nameBuilder.ToString(), ruleBuilder.ToString(), type);
+                attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type);
             }
             
             return attributes;
