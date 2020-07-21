@@ -17,7 +17,12 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel) {
 
 	// create the list of extension path dynamicaly using getDllLocation
 	std::wstring dll_location = pcu::getDllLocation();
+	size_t idx = dll_location.find(L"Release_gh");
 
+	if (idx != std::wstring::npos) {
+		dll_location = dll_location.substr(0, idx);
+		dll_location = dll_location.append(L"Release\\");
+	}
 	std::wstring rhino_codecs_dir = dll_location.append(L"codecs_rhino.dll");
 
 	// Get the esri_sdk location
