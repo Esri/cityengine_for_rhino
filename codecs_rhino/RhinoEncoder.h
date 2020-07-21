@@ -1,5 +1,7 @@
 #pragma once
 
+#include "IRhinoCallbacks.h"
+
 #include "prtx/EncodePreparator.h"
 #include "prtx/Encoder.h"
 #include "prtx/EncoderFactory.h"
@@ -35,6 +37,10 @@ public:
 private:
 	prtx::DefaultNamePreparator mNamePreparator;
 	prtx::EncodePreparatorPtr mEncodePreparator;
+
+	void convertGeometry(const prtx::InitialShape& initialShape,
+		const prtx::EncodePreparator::InstanceVector& instances,
+		IRhinoCallbacks* cb);
 };
 
 class RhinoEncoderFactory : public prtx::EncoderFactory, public prtx::Singleton<RhinoEncoderFactory> {

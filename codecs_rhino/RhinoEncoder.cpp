@@ -1,7 +1,5 @@
 #include "RhinoEncoder.h"
 
-#include "IRhinoCallbacks.h"
-
 #include "prtx/EncoderInfoBuilder.h"
 #include "prtx/GenerateContext.h"
 #include "prtx/Exception.h"
@@ -20,7 +18,7 @@ namespace {
 	const wchar_t* EO_BASE_NAME = L"baseName";
 	const wchar_t* EO_ERROR_FALLBACK = L"errorFallback";
 	const std::wstring ENCFILE_EXT = L".txt";
-	const wchar_t* EO_EMIT_REPORT = L"emitReport";
+	const wchar_t* EO_EMIT_REPORTS = L"emitReport";
 	const wchar_t* EO_EMIT_GEOMETRY = L"emitGeometry";
 
 	const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
@@ -45,77 +43,94 @@ void RhinoEncoder::init(prtx::GenerateContext& context) {
 
 void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeIndex) {
 
-	const prtx::InitialShape* is = context.getInitialShape(initialShapeIndex);
+	const prtx::InitialShape& initialShape = *context.getInitialShape(initialShapeIndex);
 
 	auto* cb = dynamic_cast<IRhinoCallbacks*>(getCallbacks());
 	if (cb == nullptr)
 		throw prtx::StatusException(prt::STATUS_ILLEGAL_CALLBACK_OBJECT);
 
-	if (getOptions()->getBool(EO_EMIT_REPORT)) {
-		//ignore for now
+	// Initialization of report accumulator and strategy
+	prtx::ReportsAccumulatorPtr reportsAccumulator{ prtx::SummarizingReportsAccumulator::create() };
+	prtx::ReportingStrategyPtr reportsCollector{ prtx::AllShapesReportingStrategy::create(context, initialShapeIndex, reportsAccumulator) };
+
+	try {
+		prtx::LeafIteratorPtr li = prtx::LeafIterator::create(context, initialShapeIndex);
+
+		for (prtx::ShapePtr shape = li->getNext(); shape.get() != nullptr; shape = li->getNext()) {
+			prtx::ReportsPtr report = reportsCollector->getReports(shape->getID());
+			mEncodePreparator->add(context.getCache(), shape, initialShape.getAttributeMap(), report);
+		}
+	}
+	catch (std::exception& e) {
+		std::ofstream outfile;
+		outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
+		outfile << e.what() << std::endl;
+		outfile.close();
+			
+		mEncodePreparator->add(context.getCache(), initialShape, initialShapeIndex);
+	}
+	catch (...) {
+		std::ofstream outfile;
+		outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
+		outfile << "Unknown exception while encoding geometry." << std::endl;
+		outfile.close();
+
+		mEncodePreparator->add(context.getCache(), initialShape, initialShapeIndex);
 	}
 
-	if (getOptions()->getBool(EO_EMIT_GEOMETRY)) {
-		try {
-			prtx::LeafIteratorPtr li = prtx::LeafIterator::create(context, initialShapeIndex);
+	prtx::EncodePreparator::InstanceVector finalizedInstances;
+	mEncodePreparator->fetchFinalizedInstances(finalizedInstances, ENC_PREP_FLAGS);
+	convertGeometry(initialShape, finalizedInstances, cb);
+}
 
-			for (prtx::ShapePtr shape = li->getNext(); shape.get() != nullptr; shape = li->getNext()) {
-				mEncodePreparator->add(context.getCache(), shape, is->getAttributeMap());
+void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
+								   const prtx::EncodePreparator::InstanceVector& instances,
+								   IRhinoCallbacks* cb) 
+{
+
+	const bool emitGeometry = getOptions()->getBool(EO_EMIT_GEOMETRY);
+	const bool emitReports = getOptions()->getBool(EO_EMIT_REPORTS);
+
+	std::vector<prtx::ReportsPtr> reports;
+	std::vector<uint32_t> shapeIDs;
+
+	uint32_t vertexIndexBase = 0;
+
+	std::vector<double> vertexCoords;
+	std::vector<uint32_t> faceIndices;
+	std::vector<uint32_t> faceCounts;
+
+	for (const auto& instance : instances) {
+		const prtx::ReportsPtr& curr_report = instance.getReports();
+
+		const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
+
+		vertexCoords.clear();
+		faceIndices.clear();
+		faceCounts.clear();
+
+		for (const auto& mesh : meshes) {
+			const prtx::DoubleVector& verts = mesh->getVertexCoords();
+			vertexCoords.insert(vertexCoords.end(), verts.begin(), verts.end());
+
+			for (uint32_t fi = 0; fi < mesh->getFaceCount(); ++fi) {
+				const uint32_t* vtxIdx = mesh->getFaceVertexIndices(fi);
+				const uint32_t vtxCnt = mesh->getFaceVertexCount(fi);
+				faceCounts.push_back(vtxCnt);
+				for (uint32_t vi = 0; vi < vtxCnt; vi++)
+					faceIndices.push_back(vtxIdx[vi] + vertexIndexBase);
 			}
-		}
-		catch (std::exception& e) {
-			std::ofstream outfile;
-			outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
-			outfile << e.what() << std::endl;
-			outfile.close();
-			
-			mEncodePreparator->add(context.getCache(), *is, initialShapeIndex);
-		}
-		catch (...) {
-			std::ofstream outfile;
-			outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
-			outfile << "Unknown exception while encoding geometry." << std::endl;
-			outfile.close();
-
-			mEncodePreparator->add(context.getCache(), *is, initialShapeIndex);
+			vertexIndexBase += (uint32_t)verts.size() / 3;
 		}
 
-		std::vector<prtx::EncodePreparator::FinalizedInstance> finalizedInstances;
-		mEncodePreparator->fetchFinalizedInstances(finalizedInstances, ENC_PREP_FLAGS);
-		uint32_t vertexIndexBase = 0;
-
-		std::vector<double> vertexCoords;
-		std::vector<uint32_t> faceIndices;
-		std::vector<uint32_t> faceCounts;
-
-		for (const auto& instance : finalizedInstances) {
-			const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
-
-			vertexCoords.clear();
-			faceIndices.clear();
-			faceCounts.clear();
-
-			for (const auto& mesh : meshes) {
-				const prtx::DoubleVector& verts = mesh->getVertexCoords();
-				vertexCoords.insert(vertexCoords.end(), verts.begin(), verts.end());
-
-				for (uint32_t fi = 0; fi < mesh->getFaceCount(); ++fi) {
-					const uint32_t* vtxIdx = mesh->getFaceVertexIndices(fi);
-					const uint32_t vtxCnt = mesh->getFaceVertexCount(fi);
-					faceCounts.push_back(vtxCnt);
-					for (uint32_t vi = 0; vi < vtxCnt; vi++)
-						faceIndices.push_back(vtxIdx[vi] + vertexIndexBase);
-				}
-				vertexIndexBase += (uint32_t)verts.size() / 3;
-			}
-
-			cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
-				faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size());
-		}
+		cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
+			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size());
 	}
 }
 
-void RhinoEncoder::finish(prtx::GenerateContext& context) {}
+void RhinoEncoder::finish(prtx::GenerateContext& context) {
+// Nothing to do here.
+}
 
 
 RhinoEncoderFactory* RhinoEncoderFactory::createInstance() {
@@ -132,7 +147,7 @@ RhinoEncoderFactory* RhinoEncoderFactory::createInstance() {
 	amb->setString(EO_BASE_NAME, L"enc_default_name");
 	amb->setBool(EO_ERROR_FALLBACK, prtx::PRTX_TRUE);
 	amb->setBool(EO_EMIT_GEOMETRY, prtx::PRTX_TRUE);
-	amb->setBool(EO_EMIT_REPORT, prtx::PRTX_TRUE);
+	amb->setBool(EO_EMIT_REPORTS, prtx::PRTX_TRUE);
 	encoderInfoBuilder.setDefaultOptions(amb->createAttributeMap());
 
 	return new RhinoEncoderFactory(encoderInfoBuilder.create());
