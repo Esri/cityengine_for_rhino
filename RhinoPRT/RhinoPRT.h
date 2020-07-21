@@ -27,7 +27,7 @@ namespace RhinoPRT {
 			return PRTContext::get().isAlive();
 		}
 
-		void ReleaseRhinoPRT() {
+		void ShutdownRhinoPRT() {
 			PRTContext::get().~PRTContext();
 		}
 
@@ -172,7 +172,7 @@ extern "C" {
 	}
 
 	inline RHINOPRT_API void ShutdownRhinoPRT() {
-		RhinoPRT::myPRTAPI->ReleaseRhinoPRT();
+		RhinoPRT::myPRTAPI->ShutdownRhinoPRT();
 	}
 
 	inline RHINOPRT_API void SetPackage(const wchar_t* rpk_path) {
