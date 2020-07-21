@@ -8,6 +8,7 @@
 *.suo
 *.user
 !*.vcxproj.user
+!*.csproj.user
 *.userosscache
 *.sln.docstates
 
