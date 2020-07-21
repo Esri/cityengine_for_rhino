@@ -13,6 +13,11 @@
 
 struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
 
+/**
+ * commonly used constant
+ */
+const std::wstring ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
+
 // forward declaration to break include loop
 class GeneratedModel;
 
@@ -95,7 +100,7 @@ namespace pcu {
 	constexpr const wchar_t STYLE_DELIMITER = L'$';
 	constexpr const wchar_t IMPORT_DELIMITER = L'.';
 
-	std::wstring removePrefix(const std::wstring& attrName);
+	std::wstring removePrefix(const std::wstring& attrName, wchar_t delim);
 	std::wstring removeImport(const std::wstring& attrName);
 	std::wstring removeStyle(const std::wstring& attrName);
 

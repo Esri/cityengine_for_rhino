@@ -6,11 +6,6 @@
 #include "PRTUtilityModels.h"
 
 /**
- * commonly used constant
- */
-const std::wstring ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
-
-/**
 * Entry point of the PRT. Is given an initial shape and rpk package, gives them to the PRT and gets the results.
 */
 class ModelGenerator {

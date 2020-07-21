@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+*******************************************************************************
+
+Rhino.Common.props
+Copyright (C) 2014, Robert McNeel & Associates
+
+Adds the MSBuild properties:
+
+  RhinoExeDir = 
+    The full path to the Rhino executable folder.
+
+  RhinoSdkDir = 
+    The full path to the Rhino SDK folder.
+	
+  RhinoBinDir = $(RhinoSdkDir)bin
+    The full path to the Rhino SDK "bin" folder.
+
+  RhinoIncDir = $(RhinoSdkDir)inc
+    The full path to the Rhino SDK "inc" folder.
+         
+  RhinoPropertySheetDir = $(RhinoSdkDir)PropertySheets
+    The full path to the Rhino SDK property sheets folder.
+  
+*******************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <RhinoExeDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\6.0\Install', 'Path', null, RegistryView.Registry64))</RhinoExeDir>
+    <RhinoSdkDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\SDK\6.0', 'InstallPath', null, RegistryView.Registry64))</RhinoSdkDir>
+    <RhinoBinDir>$(RhinoSdkDir)bin</RhinoBinDir>
+    <RhinoIncDir>$(RhinoSdkDir)inc</RhinoIncDir>
+    <RhinoPropertySheetDir>$(RhinoSdkDir)PropertySheets</RhinoPropertySheetDir>
+  </PropertyGroup>
+</Project>

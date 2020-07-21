@@ -12,21 +12,10 @@
 #include <memory>
 #include <string>
 
-#pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "ole32.lib") // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
 
 
-// The following ifdef block is the standard way of creating macros which make exporting
-// from a DLL simpler. All files within this DLL are compiled with the RHINOPRT_EXPORTS
-// symbol defined on the command line. This symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see
-// RHINOPRT_API functions as being imported from a DLL, whereas this DLL sees symbols
-// defined with this macro as being exported.
-#define RHINOPRT_EXPORTS
-#ifdef RHINOPRT_EXPORTS
 #define RHINOPRT_API __declspec(dllexport)
-#else
-#define RHINOPRT_API __declspec(dllimport)
-#endif
 
 // Exposed interface
 namespace RhinoPRT {
@@ -34,13 +23,12 @@ namespace RhinoPRT {
 	struct RhinoPRTAPI {
 	public:
 
-		// Inherited via IRhinoPRTAPI
 		bool InitializeRhinoPRT() {
 			return PRTContext::get().isAlive();
 		}
 
 		void ReleaseRhinoPRT() {
-			
+			PRTContext::get().~PRTContext();
 		}
 
 		bool IsPRTInitialized() {
@@ -95,7 +83,7 @@ namespace RhinoPRT {
 			auto rulef = mModelGenerator->getRuleFile();
 			auto ruleN = mModelGenerator->getStartingRule();
 			auto shapeN = mModelGenerator->getDefaultShapeName();
-			int seed = 555;
+			int seed = 555; // TODO: compute seed?
 
 			for (auto&shape : shapes) {
 				mShapes.push_back(shape);
@@ -109,9 +97,11 @@ namespace RhinoPRT {
 		}
 
 		std::vector<GeneratedModel> GenerateGeometry() {
-			return mModelGenerator->generateModel(mShapes, mAttributes, L"com.esri.rhinoprt.RhinoEncoder", options, mAttrBuilder);
+			return mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilder);
 		}
 
+		/// NOT USED ANYMORE.
+		/// This is the previous way of starting the geometry generation and passing back the results, before ON_SimpleArray<const ON_Mesh*> was used.
 		bool GenerateGeometry(double** vertices, int* vCount, int** indices, int* iCount, int** faceCount, int* faceCountCount) {
 
 			auto generated_models = GenerateGeometry();
@@ -190,6 +180,7 @@ extern "C" {
 		RhinoPRT::myPRTAPI->SetRPKPath(str);
 	}
 
+	/// Not used anymore
 	inline RHINOPRT_API bool AddShape(double* vertices, int vCount, int* indices, int iCount, int* faceCount, int faceCountCount) {
 		return RhinoPRT::myPRTAPI->AddInitialShape(vertices, vCount, indices, iCount, faceCount, faceCountCount);
 	}
@@ -210,6 +201,7 @@ extern "C" {
 		RhinoPRT::myPRTAPI->ClearInitialShapes();
 	}
 
+	/// Not used anymore
 	inline RHINOPRT_API bool Generate(double** vertices, int* vCount, int** indices, int* iCount, int** faceCount, int* faceCountCount) {
 		bool status = RhinoPRT::myPRTAPI->GenerateGeometry(vertices, vCount, indices, iCount, faceCount, faceCountCount);
 
@@ -223,11 +215,17 @@ extern "C" {
 	}
 
 	inline RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray) {
-		if (pMeshArray == nullptr) return false;
+		if (pMeshArray == nullptr) { 
+			LOG_ERR << L"Aborting generation, given a null Mesh array.";
+			return false;
+		}
 
 		auto meshes = RhinoPRT::myPRTAPI->GenerateGeometry();
 
-		if (meshes.size() == 0) return false;
+		if (meshes.size() == 0) {
+			LOG_ERR << L"Generation failed, returned an empty models array.";
+			return false;
+		}
 
 		for (const auto& mesh : meshes) {
 			const auto on_mesh = pcu::getMeshFromGenModel(mesh);

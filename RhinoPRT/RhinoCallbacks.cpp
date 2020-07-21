@@ -16,9 +16,6 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 
 	if (faceCounts != nullptr)
 		currentModel.mFaces.insert(currentModel.mFaces.end(), faceCounts, faceCounts + faceCountsCount);
-	
-
-	//TODO: Convert the prt geometry into Rhino geometry.
 }
 
 void RhinoCallbacks::addReports(const size_t initialShapeIndex, const wchar_t ** stringReportKeys,
@@ -26,5 +23,5 @@ void RhinoCallbacks::addReports(const size_t initialShapeIndex, const wchar_t **
 								const wchar_t ** floatReportKeys, const double * floatReportValues, size_t floatReportCount, 
 								const wchar_t ** boolReportKeys, const bool * boolReportValues, size_t boolReportCount)
 {
-	// TODO??
+	// TODO
 }

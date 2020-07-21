@@ -25,7 +25,7 @@ namespace RhinoPRT {
 		LOG_WRN << L"Ignored unsupported attribute '" << rule.mFullName << "' type: " << T << " ---- " << rule.mType << " of rule file: '" << rule.mRuleFile << "'" << std::endl;
 	}
 
-	// Specific instantiations
+	// Specific instantiations of setRuleAttributeValue.
 
 	template<>
 	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, double value) {

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+*******************************************************************************
+
+Rhino.Cpp.PlugIn.props
+Copyright (C) 2014, Robert McNeel & Associates
+
+Defines the properties for Rhino C++ plug-ins.
+
+*******************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Rhino.Common.props" />
+  <Import Project="$(RhinoPRTPropertySheets)BuildConfigurations\Rhino.Cpp.$(Platform).$(Configuration).PlugIn.props" />
+</Project>

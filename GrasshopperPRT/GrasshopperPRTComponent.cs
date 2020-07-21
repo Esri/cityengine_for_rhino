@@ -5,12 +5,6 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Parameters;
 
-using Grasshopper.GUI;
-using Grasshopper.GUI.Canvas;
-
-using GH_IO;
-using GH_IO.Serialization;
-using Grasshopper;
 using Grasshopper.Kernel.Data;
 
 using Rhino.Geometry;
@@ -25,16 +19,12 @@ namespace GrasshopperPRT
 
     public class GrasshopperPRTComponent : GH_Component
     {
-        // Constants
-
         const int DEFAULT_INPUT_PARAM_COUNT = 2;
         const string RPK_INPUT_NAME = "Path to RPK";
         const string GEOM_INPUT_NAME = "Initial Shapes";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
 
-        // Member variables:
-
-        /// Store the optional input parameters
+        /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
         int mCurrentInputCount;
 
@@ -52,15 +42,10 @@ namespace GrasshopperPRT
         {
             // Initialize PRT engine
             bool status = PRTWrapper.InitializeRhinoPRT();
-            Console.WriteLine("RhinoPRT status is: " + status);
+            if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
 
             mCurrentInputCount = 0;
             mRuleAttributes = new RuleAttribute[0];
-        }
-
-        ~GrasshopperPRTComponent()
-        {
-            PRTWrapper.ShutdownRhinoPRT();
         }
 
         /// <summary>
@@ -141,6 +126,7 @@ namespace GrasshopperPRT
             // No compatible mesh was given
             if (meshes.Count == 0) return;
 
+            // Testing the wrappers provided by Rhino SDK to pass 
             if(!PRTWrapper.AddMeshTestWrapper(meshes)) return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
@@ -153,6 +139,11 @@ namespace GrasshopperPRT
             DA.SetDataTree(0, generatedMeshes);
         }
 
+        /// <summary>
+        /// Input object types supported are: GH_Mesh, GH_Brep, GH_Rectangle, GH_Surface, GH_Box, GH_Plane.
+        /// </summary>
+        /// <param name="shape">An initial shape</param>
+        /// <returns>The shape converted to a Mesh</returns>
         private Mesh convertToMesh(IGH_GeometricGoo shape)
         {
             bool status = true;
@@ -210,6 +201,10 @@ namespace GrasshopperPRT
             return mesh;
         }
 
+        /// <summary>
+        /// Add rule attributes inputs to the grasshopper component.
+        /// </summary>
+        /// <param name="attrib">A rule attribute to add as input</param>
         public void CreateInputParameter(RuleAttribute attrib)
         {
             switch (attrib.attribType)

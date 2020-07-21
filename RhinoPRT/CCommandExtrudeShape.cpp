@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "RhinoPRTPlugIn.h"
 
+/// Helper function to open a file browser using MFC's CFileDialog class.
 bool getRpkPath(std::wstring& rpk) {
 	std::wstring ext = L".rpk";
 	std::wstring filename = L"default";
@@ -50,7 +51,8 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 	go.SetCommandPrompt(L"Select 1 or more starting shapes");
 	go.SetGeometryFilter(CRhinoGetObject::surface_object | CRhinoGetObject::mesh_object | 
 						 CRhinoGetObject::closed_polysrf | CRhinoGetObject::GEOMETRY_TYPE_FILTER::extrusion_object);
-	// Get selected objects
+	
+	// Get selected objects and convert them to ON_Mesh.
 	CRhinoGet::result res = go.GetObjects(1, 0);
 	if(res == CRhinoGet::object)
 	{
@@ -103,16 +105,19 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 	}
 	else return cancel;
 
-	if (mesh_array.Count() == 0) return failure;
+	if (mesh_array.Count() == 0) { 
+		LOG_ERR << L"No compatible initial shape was given, aborting...";
+		return failure; 
+	}
 
-	// Model generation argument setup
+	// Model generation arguments and initial shapes setup.
 	SetPackage(rpk.c_str());
 	AddMeshTest(&mesh_array);
 
 	// PRT Generation
 	auto generated_models = RhinoPRT::myPRTAPI->GenerateGeometry();
 
-	// Create Rhino object with given geometry
+	// Add the objects to the Rhino scene.
 	for (auto& model : generated_models) {
 		ON_Mesh mesh = pcu::getMeshFromGenModel(model);
 

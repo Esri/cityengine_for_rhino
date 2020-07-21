@@ -3,8 +3,6 @@
 #include "Logger.h"
 
 ModelGenerator::ModelGenerator() {
-
-	// Cache initialization
 	mCache = (pcu::CachePtr)prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT);
 }
 
@@ -122,7 +120,6 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 			}
 		}
 
-		// Initial shapes
 		std::vector<const prt::InitialShape*> initialShapes(mInitialShapesBuilders.size());
 		std::vector<pcu::InitialShapePtr> initialShapePtrs(mInitialShapesBuilders.size());
 		std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(mInitialShapesBuilders.size());
@@ -211,7 +208,7 @@ void ModelGenerator::initializeEncoderData(const std::wstring & encName, const p
 	const pcu::AttributeMapPtr encOptions{ pcu::createAttributeMapForEncoder(encOpt, *mEncoderBuilder) };
 	mEncodersOptionsPtr.push_back(createValidatedOptions(encName.c_str(), encOptions));
 
-	// TODO: initialise print and error encoder data?
+	// TODO: initialise print and error encoder data
 }
 
 void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc, std::vector<const prt::AttributeMap*>& allEncOpt) {
@@ -230,7 +227,6 @@ void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allE
 void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr, std::wstring & ruleFile, std::wstring & startRule,
 	int32_t & seed, std::wstring & shapeName, pcu::AttributeMapPtr & convertShapeAttr)
 {
-	//convertShapeAttr = pcu::createAttributeMapForShape(shapeAttr, *(pcu::AttributeMapBuilderPtr(prt::AttributeMapBuilder::create())));
 	convertShapeAttr = pcu::createAttributeMapForShape(shapeAttr, *aBuilder.get());
 
 	if (convertShapeAttr) {

@@ -4,6 +4,8 @@
 
 #include "IRhinoCallbacks.h"
 
+#include "Logger.h"
+
 #include <vector>
 #include <map>
 #include <iostream>
@@ -67,28 +69,24 @@ public:
 	}
 
 	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) {
-		//pybind11::print(L"GENERATE ERROR:", isIndex, status, message);
-		std::cout << L"GENERATE ERROR:" << isIndex << " " << status << " " << message;
+		LOG_ERR << L"GENERATE ERROR:" << isIndex << " " << status << " " << message;
 		return prt::STATUS_OK;
 	}
 
 	prt::Status assetError(size_t isIndex, prt::CGAErrorLevel level, const wchar_t* key, const wchar_t* uri,
 		const wchar_t* message) {
-		//pybind11::print(L"ASSET ERROR:", isIndex, level, key, uri, message);
-		std::cout << L"ASSET ERROR:" << isIndex << " " << level << " " << key << " " << uri << " " << message << std::endl;
+		LOG_ERR << L"ASSET ERROR:" << isIndex << " " << level << " " << key << " " << uri << " " << message << std::endl;
 		return prt::STATUS_OK;
 	}
 
 	prt::Status cgaError(size_t isIndex, int32_t shapeID, prt::CGAErrorLevel level, int32_t methodId, int32_t pc,
 		const wchar_t* message) {
-		//pybind11::print(L"CGA ERROR:", isIndex, shapeID, level, methodId, pc, message);
-		std::cout << L"CGA ERROR:" << isIndex << " " << shapeID << " " << level << " " << methodId << " " << pc << " " << message << std::endl;
+		LOG_ERR << L"CGA ERROR:" << isIndex << " " << shapeID << " " << level << " " << methodId << " " << pc << " " << message << std::endl;
 		return prt::STATUS_OK;
 	}
 
 	prt::Status cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t* txt) {
-		//pybind11::print(L"CGA PRINT:", isIndex, shapeID, txt);
-		std::cout << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
+		LOG_INF << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
 		return prt::STATUS_OK;
 	}
 

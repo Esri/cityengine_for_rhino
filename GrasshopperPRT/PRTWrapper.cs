@@ -21,9 +21,6 @@ namespace GrasshopperPRT
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention=CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ShutdownRhinoPRT();
-
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetPackage(string rpk_path);
 
@@ -61,6 +58,11 @@ namespace GrasshopperPRT
         public static extern void SetRuleAttributeString(string rule, string fullName, string value);
 
 
+        /// <summary>
+        /// NOT USED ANYMORE.
+        /// THIS IS THE PREVIOUS ADD MESH FUNCTION, BEFORE THE "SimpleArrayMeshPointer" WAS USED.
+        /// I left it there for now in case we want to stop using the rhino wrapper.
+        /// </summary>
         public static bool AddMesh(Mesh initialMesh)
         {
             // Get the initial shape params in base types.
@@ -106,6 +108,8 @@ namespace GrasshopperPRT
                 meshes = arr.ToNonConstArray();
             }
 
+            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
+            // thus a conversion is necessary.
             GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
 
             foreach(var mesh in meshes) {
@@ -117,6 +121,12 @@ namespace GrasshopperPRT
             return mesh_struct;
         }
 
+        /// <summary>
+        /// NOT USED ANYMORE.
+        /// THIS IS THE PREVIOUS GENERATE FUNCTION, BEFORE THE "SimpleArrayMeshPointer" WAS USED.
+        /// I left it there for now in case we want to stop using the rhino wrapper.
+        /// </summary>
+        /// <returns>Mesh</returns>
         public static Mesh GenerateMesh()
         {
             //TODO: change that to allocate global memory in the c++ side and free it here after copy.
@@ -152,8 +162,6 @@ namespace GrasshopperPRT
             int currID = 0;
             foreach(int face in fCountResult)
             {
-                // With some initial shapes (like Surface), the generates returns a number of face that is greater than the buffer of indices,
-                // leading to index out of bounds exceptions. This is a workaround to avoid a crash.
                 if (currID + face > indicesResult.Length) continue;
 
                 if (face == 3)

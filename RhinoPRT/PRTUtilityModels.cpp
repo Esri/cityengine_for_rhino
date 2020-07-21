@@ -4,6 +4,7 @@
 
 InitialShape::InitialShape() {}
 
+/// NOT USED ANYMORE.
 InitialShape::InitialShape(const std::vector<double> &vertices) : mVertices(vertices) {
 	mIndices.resize(vertices.size() / 3);
 	std::iota(std::begin(mIndices), std::end(mIndices), 0);
