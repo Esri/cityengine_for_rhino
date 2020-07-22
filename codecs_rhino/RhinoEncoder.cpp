@@ -1,5 +1,7 @@
 #include "RhinoEncoder.h"
 
+#include "Logger.h"
+
 #include "prtx/EncoderInfoBuilder.h"
 #include "prtx/GenerateContext.h"
 #include "prtx/Exception.h"
@@ -12,6 +14,8 @@
 
 #include <iostream>
 #include <fstream>
+
+#define DEBUG
 
 namespace {
 
@@ -29,6 +33,20 @@ namespace {
 		.cleanupUVs(false)
 		.cleanupVertexNormals(false)
 		.mergeByMaterial(true);
+
+	const prt::AttributeMap* convertReportToAttributeMap(const prtx::ReportsPtr& r) {
+
+		prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
+
+		for (const auto& b : r->mBools)
+			amb->setBool(b.first->c_str(), b.second);
+		for (const auto& f : r->mFloats)
+			amb->setFloat(f.first->c_str(), f.second);
+		for (const auto& s : r->mStrings)
+			amb->setString(s.first->c_str(), s.second->c_str());
+
+		return amb->createAttributeMap();
+	}
 }
 
 const std::wstring RhinoEncoder::ID = L"com.esri.rhinoprt.RhinoEncoder";
@@ -53,27 +71,24 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	prtx::ReportsAccumulatorPtr reportsAccumulator{ prtx::SummarizingReportsAccumulator::create() };
 	prtx::ReportingStrategyPtr reportsCollector{ prtx::AllShapesReportingStrategy::create(context, initialShapeIndex, reportsAccumulator) };
 
+#ifdef DEBUG
+	LOG_DBG << L"Starting leaf iteration";
+#endif
+
 	try {
 		prtx::LeafIteratorPtr li = prtx::LeafIterator::create(context, initialShapeIndex);
 
 		for (prtx::ShapePtr shape = li->getNext(); shape.get() != nullptr; shape = li->getNext()) {
-			prtx::ReportsPtr report = reportsCollector->getReports(shape->getID());
-			mEncodePreparator->add(context.getCache(), shape, initialShape.getAttributeMap(), report);
+			mEncodePreparator->add(context.getCache(), shape, initialShape.getAttributeMap());
 		}
 	}
 	catch (std::exception& e) {
-		std::ofstream outfile;
-		outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
-		outfile << e.what() << std::endl;
-		outfile.close();
+		LOG_ERR << e.what();
 			
 		mEncodePreparator->add(context.getCache(), initialShape, initialShapeIndex);
 	}
 	catch (...) {
-		std::ofstream outfile;
-		outfile.open("C:\\Windows\\Temp\\rhino_log_2.txt", std::ios::out | std::ios::trunc);
-		outfile << "Unknown exception while encoding geometry." << std::endl;
-		outfile.close();
+		LOG_ERR << "Unknown exception while encoding geometry." << std::endl;
 
 		mEncodePreparator->add(context.getCache(), initialShape, initialShapeIndex);
 	}
@@ -81,17 +96,20 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	prtx::EncodePreparator::InstanceVector finalizedInstances;
 	mEncodePreparator->fetchFinalizedInstances(finalizedInstances, ENC_PREP_FLAGS);
 	convertGeometry(initialShape, finalizedInstances, cb);
+
+	const bool emitReports = getOptions()->getBool(EO_EMIT_REPORTS);
+	if (emitReports) {
+		auto reports = reportsCollector->getReports();
+		auto reportMap = convertReportToAttributeMap(reports);
+		// a single report map by initial shape.
+		cb->addReport(initialShapeIndex, reportMap);
+	}
 }
 
 void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 								   const prtx::EncodePreparator::InstanceVector& instances,
 								   IRhinoCallbacks* cb) 
 {
-
-	const bool emitGeometry = getOptions()->getBool(EO_EMIT_GEOMETRY);
-	const bool emitReports = getOptions()->getBool(EO_EMIT_REPORTS);
-
-	std::vector<prtx::ReportsPtr> reports;
 	std::vector<uint32_t> shapeIDs;
 
 	uint32_t vertexIndexBase = 0;
@@ -101,7 +119,6 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 	std::vector<uint32_t> faceCounts;
 
 	for (const auto& instance : instances) {
-		const prtx::ReportsPtr& curr_report = instance.getReports();
 
 		const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
 
@@ -129,7 +146,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 }
 
 void RhinoEncoder::finish(prtx::GenerateContext& context) {
-// Nothing to do here.
+	LOG_DBG << "In finish  function...";
+
 }
 
 

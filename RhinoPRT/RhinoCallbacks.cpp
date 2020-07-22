@@ -18,10 +18,25 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 		currentModel.mFaces.insert(currentModel.mFaces.end(), faceCounts, faceCounts + faceCountsCount);
 }
 
-void RhinoCallbacks::addReports(const size_t initialShapeIndex, const wchar_t ** stringReportKeys,
-								const wchar_t ** stringReportValues, size_t stringReportCount, 
-								const wchar_t ** floatReportKeys, const double * floatReportValues, size_t floatReportCount, 
-								const wchar_t ** boolReportKeys, const bool * boolReportValues, size_t boolReportCount)
+void RhinoCallbacks::add(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount,
+						 const uint32_t * faceIndices, const size_t faceIndicesCount, 
+						 const uint32_t * faceCounts, const size_t faceCountsCount,
+						 const uint32_t * faceRanges, size_t faceRangeSize, const prt::AttributeMap ** reports)
 {
-	// TODO
+	//TODO
+}
+
+void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prt::AttributeMap * reports)
+{
+#ifdef DEBUG
+	LOG_DBG << "In RhinoCallback::addReport";
+#endif
+
+	if (reports != nullptr) {
+
+	}
+
+#ifdef DEBUG
+	LOG_DBG << "End of RhinoCallback::addReport";
+#endif
 }

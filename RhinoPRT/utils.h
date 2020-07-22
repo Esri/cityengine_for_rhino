@@ -44,7 +44,7 @@ namespace pcu {
 	};
 
 	struct EncoderOptions {
-		bool emitReport = false;
+		bool emitReport = true;
 		bool emitGeometry = true;
 	};
 

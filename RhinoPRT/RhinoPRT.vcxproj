@@ -35,6 +35,7 @@
     <ClInclude Include="ModelGenerator.h" />
     <ClInclude Include="PRTUtilityModels.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="ReportAttribute.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RhinoCallbacks.h" />
     <ClInclude Include="RhinoPRT.h" />
