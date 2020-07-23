@@ -11,6 +11,7 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <map>
 
 #pragma comment(lib, "ole32.lib") // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
 
@@ -97,7 +98,8 @@ namespace RhinoPRT {
 		}
 
 		std::vector<GeneratedModel> GenerateGeometry() {
-			return mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilder);
+			mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilder);
+			return mGeneratedModels;
 		}
 
 		/// NOT USED ANYMORE.
@@ -145,6 +147,8 @@ namespace RhinoPRT {
 		template<typename T>
 		void setRuleAttributeValue(const RuleAttribute& rule, T value);
 
+		void groupReportsByKeys();
+
 	private:
 
 		std::vector<InitialShape> mShapes;
@@ -158,6 +162,7 @@ namespace RhinoPRT {
 
 		std::unique_ptr<ModelGenerator> mModelGenerator;
 		std::vector<GeneratedModel> mGeneratedModels;
+		std::map<std::wstring, std::vector<Reporting::ReportAttribute>> mGroupedReports;
 	};
 
 	// Global PRT handle
@@ -228,7 +233,7 @@ extern "C" {
 		}
 
 		for (const auto& mesh : meshes) {
-			const auto on_mesh = pcu::getMeshFromGenModel(mesh);
+			const auto on_mesh = mesh.getMeshFromGenModel();
 			pMeshArray->Append(new ON_Mesh(on_mesh)); // must be freed my the caller of this function.
 		}
 
@@ -266,6 +271,26 @@ extern "C" {
 
 	inline RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value) {
 		RhinoPRT::myPRTAPI->fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
+	}
+
+	inline RHINOPRT_API void GroupeReportsByKeys() {
+		RhinoPRT::myPRTAPI->groupReportsByKeys();
+	}
+
+	inline RHINOPRT_API void GetAllStringReports(ON_ClassArray<ON_wString> report_keys, ON_ClassArray<ON_wString> report_values) {
+
+	}
+
+	inline RHINOPRT_API void GetAllDoubleReports(ON_ClassArray<ON_wString> report_keys, ON_SimpleArray<double> report_values) {
+
+	}
+
+	inline RHINOPRT_API void GetAllIntReports(ON_ClassArray<ON_wString> report_keys, ON_SimpleArray<int> report_values) {
+
+	}
+
+	inline RHINOPRT_API void GetAllBoolReports(ON_ClassArray<ON_wString> report_keys, ON_SimpleArray<bool> report_values) {
+
 	}
 }
 

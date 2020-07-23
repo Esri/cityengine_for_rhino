@@ -57,6 +57,8 @@ namespace GrasshopperPRT
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeString(string rule, string fullName, string value);
 
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void GroupeReportsByKeys();
 
         /// <summary>
         /// NOT USED ANYMORE.

@@ -1,13 +1,11 @@
 #include "RhinoCallbacks.h"
 
-
 void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * vertexCoords, 
 								 const size_t vextexCoordsCount, const uint32_t * faceIndices,
 								 const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount)
 {
 	Model& currentModel = mModels[initialShapeIndex];
 
-	
 	if (vertexCoords != nullptr)
 		currentModel.mVertices.insert(currentModel.mVertices.end(), vertexCoords, vertexCoords + vextexCoordsCount);
 
@@ -32,9 +30,19 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prt::Attrib
 	LOG_DBG << "In RhinoCallback::addReport";
 #endif
 
-	if (reports != nullptr) {
-
+	if (reports == nullptr) {
+		LOG_WRN << "Trying to add null report, ignoring.";
+		return;
 	}
+
+	if (mModels.size() <= initialShapeIndex) {
+		LOG_ERR << "Shape index is bigger than the number of generated models.";
+		return;
+	}
+
+	Model& model = mModels[initialShapeIndex];
+
+	Reporting::extractReports(initialShapeIndex, model, reports);
 
 #ifdef DEBUG
 	LOG_DBG << "End of RhinoCallback::addReport";

@@ -1,5 +1,7 @@
 #include "PRTUtilityModels.h"
 
+#include "Logger.h"
+
 #include <numeric>
 
 InitialShape::InitialShape() {}
@@ -62,6 +64,51 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 }
 
 GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-	const std::vector<uint32_t>& face, const std::map<std::string, std::string>& rep) :
-	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReport(rep) {}
+	const std::vector<uint32_t>& face, const ReportMap& rep):
+	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReports(rep) { }
+
+const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
+
+	size_t nbVertices = mVertices.size() / 3;
+
+	ON_Mesh mesh(mFaces.size(), nbVertices, false, false);
+
+	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
+		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
+	}
+
+	int faceid(0);
+	int currindex(0);
+	for (int face : mFaces) {
+		if (face == 3) {
+			mesh.SetTriangle(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2]);
+			currindex += face;
+			faceid++;
+		}
+		else if (face == 4) {
+			mesh.SetQuad(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2], mIndices[currindex + 3]);
+			currindex += face;
+			faceid++;
+		}
+		else {
+			//ignore face because it is invalid
+			currindex += face;
+			LOG_WRN << "Ignored face with invalid number of vertices :" << face;
+		}
+	}
+
+	// Printing a rhino error log if the created mesh is invalid
+	FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_3.txt", L"w");
+	if (fp) {
+		ON_TextLog log(fp);
+		if (!mesh.IsValid(&log))
+			mesh.Dump(log);
+	}
+	ON::CloseFile(fp);
+
+	mesh.ComputeVertexNormals();
+	mesh.Compact();
+
+	return mesh;
+}
 

@@ -135,6 +135,9 @@ namespace GrasshopperPRT
             // Testing the wrappers provided by RhinoCommon SDK to pass GH_Mesh to RhinoPRT.
             var generatedMeshes = PRTWrapper.GenerateMeshTestWrapper();
             //Mesh generatedMesh = PRTWrapper.GenerateMesh();
+
+            // Processing cga reports
+            PRTWrapper.GroupeReportsByKeys();
             
             DA.SetDataTree(0, generatedMeshes);
         }

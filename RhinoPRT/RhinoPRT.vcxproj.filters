@@ -48,6 +48,9 @@
     <ClCompile Include="CCommandApplyRulePackage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ReportAttribute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RhinoPRTApp.h">
@@ -83,10 +86,10 @@
     <ClInclude Include="RhinoCallbacks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
+    <ClInclude Include="PRTContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PRTContext.h">
+    <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ReportAttribute.h">

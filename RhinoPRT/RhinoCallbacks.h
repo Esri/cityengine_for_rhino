@@ -1,7 +1,6 @@
 #pragma once
 
 #include "prt/Callbacks.h"
-
 #include "IRhinoCallbacks.h"
 
 #include "utils.h"
@@ -14,15 +13,15 @@
 
 #define DEBUG
 
+typedef struct _Model {
+	std::vector<double> mVertices;
+	std::vector<uint32_t> mIndices;
+	std::vector<uint32_t> mFaces;
+	ReportMap mReports;
+} Model;
+
 class RhinoCallbacks : public IRhinoCallbacks {
 private:
-	struct Model {
-		// Add GCA report structure
-		std::vector<double> mVertices;
-		std::vector<uint32_t> mIndices;
-		std::vector<uint32_t> mFaces;
-		std::unordered_map<std::wstring, Reporting::ReportAttribute> mReports;
-	};
 
 	std::vector<Model> mModels;
 
@@ -64,7 +63,7 @@ public:
 		return mModels[initialShapeIdx].mFaces;
 	}
 
-	const std::unordered_map<std::wstring, Reporting::ReportAttribute>& getReport(const size_t initialShapeIdx) const {
+	const ReportMap& getReport(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 

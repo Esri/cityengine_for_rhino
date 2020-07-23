@@ -66,4 +66,27 @@ namespace RhinoPRT {
 			LOG_ERR << L"Trying to set a wstring to an attribute of type " << rule.mType << std::endl;
 		}
 	}
+
+	///<summary>
+	///The reports of all generated models will be grouped together by keys. 
+	///Meaning that all reports with the same key will be added to a vector.
+	///</summary>
+	void RhinoPRTAPI::groupReportsByKeys() {
+		if (mGeneratedModels.empty()) return;
+
+		mGroupedReports.clear();
+
+		for (const auto& model : mGeneratedModels) {
+			for (const auto& report : model.getReport()) {
+				auto it = mGroupedReports.find(report.first);
+				if (it == mGroupedReports.end()) {
+					std::vector<Reporting::ReportAttribute> newVect { report.second };
+					mGroupedReports.insert(it, std::make_pair(report.first, newVect));
+				}
+				else {
+					mGroupedReports.at(report.first).push_back(report.second);
+				}
+			}
+		}
+	}
 }

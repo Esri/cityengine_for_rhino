@@ -97,8 +97,7 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	mEncodePreparator->fetchFinalizedInstances(finalizedInstances, ENC_PREP_FLAGS);
 	convertGeometry(initialShape, finalizedInstances, cb);
 
-	const bool emitReports = getOptions()->getBool(EO_EMIT_REPORTS);
-	if (emitReports) {
+	if (getOptions()->getBool(EO_EMIT_REPORTS)) {
 		auto reports = reportsCollector->getReports();
 		auto reportMap = convertReportToAttributeMap(reports);
 		// a single report map by initial shape.

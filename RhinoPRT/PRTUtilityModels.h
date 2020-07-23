@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils.h"
+#include "ReportAttribute.h"
 
 #include <vector>
 
@@ -52,9 +53,12 @@ protected:
 class GeneratedModel {
 public:
 	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-		const std::vector<uint32_t>& face, const std::map<std::string, std::string>& rep);
+		const std::vector<uint32_t>& face, const ReportMap& rep);
+
 	GeneratedModel() {}
 	~GeneratedModel() {}
+
+	const ON_Mesh getMeshFromGenModel() const;
 
 	size_t getInitialShapeIndex() const {
 		return mInitialShapeIndex;
@@ -68,8 +72,8 @@ public:
 	const std::vector<uint32_t>& getFaces() const {
 		return mFaces;
 	}
-	const std::map<std::string, std::string>& getReport() const {
-		return mReport;
+	const ReportMap& getReport() const {
+		return mReports;
 	}
 
 private:
@@ -77,5 +81,5 @@ private:
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
-	std::map<std::string, std::string> mReport;
+	ReportMap mReports;
 };
