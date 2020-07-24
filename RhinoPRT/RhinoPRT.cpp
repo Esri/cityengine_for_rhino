@@ -71,22 +71,59 @@ namespace RhinoPRT {
 	///The reports of all generated models will be grouped together by keys. 
 	///Meaning that all reports with the same key will be added to a vector.
 	///</summary>
-	void RhinoPRTAPI::groupReportsByKeys() {
+	void RhinoPRTAPI::groupReportsByKeys(int* strReportCount, int* boolReportCount, int* doubleReportCount) {
 		if (mGeneratedModels.empty()) return;
 
-		mGroupedReports.clear();
+		auto addToMap = [](GroupedReportMap& reports, const std::pair<const std::wstring, Reporting::ReportAttribute> report) {
+			auto it = reports.find(report.first);
+			if (it == reports.end()) {
+				std::vector<Reporting::ReportAttribute> newVect{ report.second };
+				reports.insert(it, std::make_pair(report.first, newVect));
+			}
+			else {
+				reports.at(report.first).push_back(report.second);
+			}};
+
+		mGroupedStringReports.clear();
+		mGroupedBoolReports.clear();
+		mGroupedDoubleReports.clear();
 
 		for (const auto& model : mGeneratedModels) {
 			for (const auto& report : model.getReport()) {
-				auto it = mGroupedReports.find(report.first);
-				if (it == mGroupedReports.end()) {
-					std::vector<Reporting::ReportAttribute> newVect { report.second };
-					mGroupedReports.insert(it, std::make_pair(report.first, newVect));
+				if (report.second.mType == prt::AttributeMap::PrimitiveType::PT_BOOL) {
+					addToMap(mGroupedBoolReports, report);
 				}
-				else {
-					mGroupedReports.at(report.first).push_back(report.second);
+				else if (report.second.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) {
+					addToMap(mGroupedDoubleReports, report);
+				}
+				else if (report.second.mType == prt::AttributeMap::PrimitiveType::PT_STRING) {
+					addToMap(mGroupedStringReports, report);
 				}
 			}
 		}
+
+		// Counting the number of each type of report.
+		*strReportCount = mGroupedStringReports.size();
+		*boolReportCount = mGroupedBoolReports.size();
+		*doubleReportCount = mGroupedDoubleReports.size();
+	}
+
+	bool RhinoPRTAPI::getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray) {
+		auto getReportInfosFunc = [&pKeysArray, &pKeyTypeArray](auto& it) {
+			pKeysArray->Append(ON_wString(it.first.c_str()));
+			pKeyTypeArray->Append(it.second.front().mType);
+		};
+
+		if (!mGroupedDoubleReports.empty()) {
+			std::for_each(mGroupedDoubleReports.begin(), mGroupedDoubleReports.end(), getReportInfosFunc);
+		}
+		if (!mGroupedStringReports.empty()) {
+			std::for_each(mGroupedStringReports.begin(), mGroupedStringReports.end(), getReportInfosFunc);
+		}
+		if (!mGroupedBoolReports.empty()) {
+			std::for_each(mGroupedBoolReports.begin(), mGroupedBoolReports.end(), getReportInfosFunc);
+		}
+
+		return true;
 	}
 }

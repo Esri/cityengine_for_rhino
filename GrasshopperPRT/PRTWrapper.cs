@@ -58,7 +58,13 @@ namespace GrasshopperPRT
         public static extern void SetRuleAttributeString(string rule, string fullName, string value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void GroupeReportsByKeys();
+        public static extern void GroupeReportsByKeys(ref int strReportCount, ref int boolReportCount, ref int doubleReportCount);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetNumberReport(int reportId, StringBuilder ruleName, int size, [In, Out] IntPtr pReportsArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetReportKeys([In, Out] IntPtr pKeysArray, [In, Out] IntPtr pKeyTypeArray);
 
         /// <summary>
         /// NOT USED ANYMORE.
@@ -121,6 +127,41 @@ namespace GrasshopperPRT
             }
 
             return mesh_struct;
+        }
+
+        public static List<ReportAttribute> GetReportKeys()
+        {
+            var keyArray = new ClassArrayString();
+            var keyTypeArray = new SimpleArrayInt();
+
+            var ptrKeyArray = keyArray.NonConstPointer();
+            var ptrKeyTypeArray = keyTypeArray.NonConstPointer();
+            
+            bool success = PRTWrapper.GetReportKeys(ptrKeyArray, ptrKeyTypeArray);
+
+            if (!success) return null;
+
+            string[] keys = keyArray.ToArray();
+            int[] types = keyTypeArray.ToArray();
+
+            if (keys.Length != types.Length) return null;
+
+            List<ReportAttribute> reports = new List<ReportAttribute>();
+            for(int i = 0; i < keys.Length; ++i)
+            {
+                reports.Add(new ReportAttribute(keys[i], (ReportTypes)types[i]));
+            }
+
+            keyArray.Dispose();
+            keyTypeArray.Dispose();
+
+            return reports;
+        }
+
+        public static double[] GetNumberReport(int keyId, ref string key)
+        {
+            StringBuilder keyBuilder = new StringBuilder(100);
+            return new double[1] { 1 };
         }
 
         /// <summary>

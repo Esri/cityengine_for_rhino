@@ -15,11 +15,11 @@
 
 #pragma comment(lib, "ole32.lib") // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
 
-
 #define RHINOPRT_API __declspec(dllexport)
 
-// Exposed interface
 namespace RhinoPRT {
+
+	using GroupedReportMap = std::map<std::wstring, std::vector<Reporting::ReportAttribute>>;
 
 	struct RhinoPRTAPI {
 	public:
@@ -147,7 +147,9 @@ namespace RhinoPRT {
 		template<typename T>
 		void setRuleAttributeValue(const RuleAttribute& rule, T value);
 
-		void groupReportsByKeys();
+		void groupReportsByKeys(int* strReportCount, int* boolReportCount, int* doubleReportCount);
+
+		bool getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray);
 
 	private:
 
@@ -162,7 +164,9 @@ namespace RhinoPRT {
 
 		std::unique_ptr<ModelGenerator> mModelGenerator;
 		std::vector<GeneratedModel> mGeneratedModels;
-		std::map<std::wstring, std::vector<Reporting::ReportAttribute>> mGroupedReports;
+		GroupedReportMap mGroupedStringReports;
+		GroupedReportMap mGroupedBoolReports;
+		GroupedReportMap mGroupedDoubleReports;
 	};
 
 	// Global PRT handle
@@ -273,24 +277,12 @@ extern "C" {
 		RhinoPRT::myPRTAPI->fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
 	}
 
-	inline RHINOPRT_API void GroupeReportsByKeys() {
-		RhinoPRT::myPRTAPI->groupReportsByKeys();
+	inline RHINOPRT_API void GroupeReportsByKeys(int* strReportCount, int* boolReportCount, int* doubleReportCount) {
+		RhinoPRT::myPRTAPI->groupReportsByKeys(strReportCount, boolReportCount, doubleReportCount);
 	}
 
-	inline RHINOPRT_API void GetAllStringReports(ON_ClassArray<ON_wString> report_keys, ON_ClassArray<ON_wString> report_values) {
-
-	}
-
-	inline RHINOPRT_API void GetAllDoubleReports(ON_ClassArray<ON_wString> report_keys, ON_SimpleArray<double> report_values) {
-
-	}
-
-	inline RHINOPRT_API void GetAllIntReports(ON_ClassArray<ON_wString> report_keys, ON_SimpleArray<int> report_values) {
-
-	}
-
-	inline RHINOPRT_API void GetAllBoolReports(ON_ClassArray<ON_wString> report_keys, ON_SimpleArray<bool> report_values) {
-
+	inline RHINOPRT_API bool GetReportKeys(ON_ClassArray<ON_wString>* pKeysArray,  ON_SimpleArray<int>* pKeyTypeArray) {
+		return RhinoPRT::myPRTAPI->getReportKeys(pKeysArray, pKeyTypeArray);
 	}
 }
 

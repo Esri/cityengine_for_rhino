@@ -28,6 +28,10 @@ namespace GrasshopperPRT
         RuleAttribute[] mRuleAttributes;
         int mCurrentInputCount;
 
+        /// To keep track of existing output reports
+        int mReportOutputCount;
+        List<IGH_Param> mReportOutputs;
+
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
         /// constructor without any arguments.
@@ -46,6 +50,8 @@ namespace GrasshopperPRT
 
             mCurrentInputCount = 0;
             mRuleAttributes = new RuleAttribute[0];
+            mReportOutputCount = 0;
+            mReportOutputs = new List<IGH_Param>();
         }
 
         /// <summary>
@@ -137,9 +143,83 @@ namespace GrasshopperPRT
             //Mesh generatedMesh = PRTWrapper.GenerateMesh();
 
             // Processing cga reports
-            PRTWrapper.GroupeReportsByKeys();
-            
+            int strReportCount = 0;
+            int dblReportCount = 0;
+            int blReportCount = 0;
+            PRTWrapper.GroupeReportsByKeys(ref strReportCount, ref blReportCount, ref dblReportCount);
+
+            // Create new outputs if needed
+            if (mReportOutputCount != (strReportCount + blReportCount + dblReportCount))
+            {
+                var reportAttrib = PRTWrapper.GetReportKeys();
+                if(reportAttrib!= null)
+                {
+                    ResetOutputParams(reportAttrib);
+                    ExpireSolution(true);
+                    return;
+                }
+            }
+
+            OutputReports(DA, strReportCount, blReportCount, dblReportCount);
+
             DA.SetDataTree(0, generatedMeshes);
+        }
+
+        private void ResetOutputParams(List<ReportAttribute> reports)
+        {
+            //Reset outputs
+            foreach (IGH_Param param in mReportOutputs)
+            {
+                Params.UnregisterOutputParameter(param);
+            }
+            mReportOutputs.Clear();
+
+            foreach(var rep in reports)
+            {
+                var newOutput = rep.ToIGH_Param();
+                if(newOutput != null)
+                {
+                    mReportOutputs.Add(newOutput);
+                    Params.RegisterOutputParam(newOutput);
+                }
+                
+            }
+
+            mReportOutputCount = reports.Count;
+        }
+
+        private void OutputReports(IGH_DataAccess DA, int strReportCount, int blReportCount, int dblReportCount)
+        {
+            
+        }
+
+        private void CreateNumberOutputParams(IGH_DataAccess DA, int paramCount)
+        {
+            for(int i = 0; i < paramCount; ++i)
+            {
+                // Get the values from PRTWrapper
+                string key = "test";
+                double[] reports = PRTWrapper.GetNumberReport(i, ref key);
+
+                Param_Number param = new Param_Number {
+                    Name = key,
+                    NickName = key,
+                    Optional = true,
+                    Access = GH_ParamAccess.list
+                };
+
+                mReportOutputs.Add(param);
+                Params.RegisterOutputParam(param);
+            }
+        }
+
+        private void CreateStringOutputParams(IGH_DataAccess DA, int paramCount)
+        {
+
+        }
+        private void CreateBooleanOutputParams(IGH_DataAccess DA, int paramCount)
+        {
+
         }
 
         /// <summary>
@@ -208,7 +288,7 @@ namespace GrasshopperPRT
         /// Add rule attributes inputs to the grasshopper component.
         /// </summary>
         /// <param name="attrib">A rule attribute to add as input</param>
-        public void CreateInputParameter(RuleAttribute attrib)
+        private void CreateInputParameter(RuleAttribute attrib)
         {
             switch (attrib.attribType)
             {
