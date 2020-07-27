@@ -94,7 +94,11 @@ namespace RhinoPRT {
 
 		void ClearInitialShapes() {
 			mShapes.clear();
+			mGeneratedModels.clear();
 			mAttributes.clear();
+			mGroupedBoolReports.clear();
+			mGroupedStringReports.clear();
+			mGroupedDoubleReports.clear();
 		}
 
 		std::vector<GeneratedModel> GenerateGeometry() {
@@ -147,9 +151,13 @@ namespace RhinoPRT {
 		template<typename T>
 		void setRuleAttributeValue(const RuleAttribute& rule, T value);
 
-		void groupReportsByKeys(int* strReportCount, int* boolReportCount, int* doubleReportCount);
+		int groupReportsByKeys();
 
 		bool getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray);
+
+		std::vector<Reporting::ReportAttribute> getDoubleReports(std::wstring key);
+		std::vector<Reporting::ReportAttribute> getBoolReports(std::wstring key);
+		std::vector<Reporting::ReportAttribute> getStringReports(std::wstring key);
 
 	private:
 
@@ -277,12 +285,36 @@ extern "C" {
 		RhinoPRT::myPRTAPI->fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
 	}
 
-	inline RHINOPRT_API void GroupeReportsByKeys(int* strReportCount, int* boolReportCount, int* doubleReportCount) {
-		RhinoPRT::myPRTAPI->groupReportsByKeys(strReportCount, boolReportCount, doubleReportCount);
+	inline RHINOPRT_API int GroupeReportsByKeys() {
+		return RhinoPRT::myPRTAPI->groupReportsByKeys();
 	}
 
 	inline RHINOPRT_API bool GetReportKeys(ON_ClassArray<ON_wString>* pKeysArray,  ON_SimpleArray<int>* pKeyTypeArray) {
 		return RhinoPRT::myPRTAPI->getReportKeys(pKeysArray, pKeyTypeArray);
+	}
+
+	inline RHINOPRT_API void GetDoubleReports(const wchar_t* key, ON_SimpleArray<double>* pReportsArr) {
+		auto reports = RhinoPRT::myPRTAPI->getDoubleReports(std::wstring(key));
+
+		for (auto report : reports) {
+			pReportsArr->Append(report.mDoubleReport);
+		}
+	}
+
+	inline RHINOPRT_API void GetStringReports(const wchar_t* key, ON_ClassArray<ON_wString>* pReportsArr) {
+		auto reports = RhinoPRT::myPRTAPI->getStringReports(std::wstring(key));
+
+		for (auto report : reports) {
+			pReportsArr->Append(ON_wString(report.mStringReport.c_str()));
+		}
+	}
+
+	inline RHINOPRT_API void GetBoolReports(const wchar_t* key, ON_SimpleArray<int>* pReportsArr) {
+		auto reports = RhinoPRT::myPRTAPI->getBoolReports(std::wstring(key));
+
+		for (auto report : reports) {
+			pReportsArr->Append((int)report.mBoolReport);
+		}
 	}
 }
 

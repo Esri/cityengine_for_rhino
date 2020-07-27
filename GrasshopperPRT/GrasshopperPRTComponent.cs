@@ -26,11 +26,11 @@ namespace GrasshopperPRT
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
-        int mCurrentInputCount;
 
         /// To keep track of existing output reports
         int mReportOutputCount;
         List<IGH_Param> mReportOutputs;
+        List<ReportAttribute> mReportAttributes;
 
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -48,7 +48,6 @@ namespace GrasshopperPRT
             bool status = PRTWrapper.InitializeRhinoPRT();
             if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
 
-            mCurrentInputCount = 0;
             mRuleAttributes = new RuleAttribute[0];
             mReportOutputCount = 0;
             mReportOutputs = new List<IGH_Param>();
@@ -103,7 +102,6 @@ namespace GrasshopperPRT
                 foreach (RuleAttribute attrib in mRuleAttributes)
                 {
                     CreateInputParameter(attrib);
-                    mCurrentInputCount++;
                 }
 
                 // Update the node layout
@@ -132,7 +130,7 @@ namespace GrasshopperPRT
             // No compatible mesh was given
             if (meshes.Count == 0) return;
 
-            // Testing the wrappers provided by Rhino SDK to pass 
+            // Testing the wrappers provided by Rhino SDK to pass rhino objects.
             if(!PRTWrapper.AddMeshTestWrapper(meshes)) return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
@@ -143,29 +141,27 @@ namespace GrasshopperPRT
             //Mesh generatedMesh = PRTWrapper.GenerateMesh();
 
             // Processing cga reports
-            int strReportCount = 0;
-            int dblReportCount = 0;
-            int blReportCount = 0;
-            PRTWrapper.GroupeReportsByKeys(ref strReportCount, ref blReportCount, ref dblReportCount);
+            int reportCount = PRTWrapper.GroupeReportsByKeys();
 
             // Create new outputs if needed
-            if (mReportOutputCount != (strReportCount + blReportCount + dblReportCount))
+            if (mReportOutputCount != reportCount)
             {
-                var reportAttrib = PRTWrapper.GetReportKeys();
-                if(reportAttrib!= null)
+                mReportAttributes = PRTWrapper.GetReportKeys();
+                if(mReportAttributes != null)
                 {
-                    ResetOutputParams(reportAttrib);
+                    ResetOutputParams();
                     ExpireSolution(true);
                     return;
                 }
             }
 
-            OutputReports(DA, strReportCount, blReportCount, dblReportCount);
+            // Set cga report values to output
+            OutputReports(DA);
 
             DA.SetDataTree(0, generatedMeshes);
         }
 
-        private void ResetOutputParams(List<ReportAttribute> reports)
+        private void ResetOutputParams()
         {
             //Reset outputs
             foreach (IGH_Param param in mReportOutputs)
@@ -174,7 +170,7 @@ namespace GrasshopperPRT
             }
             mReportOutputs.Clear();
 
-            foreach(var rep in reports)
+            foreach(var rep in mReportAttributes)
             {
                 var newOutput = rep.ToIGH_Param();
                 if(newOutput != null)
@@ -185,41 +181,30 @@ namespace GrasshopperPRT
                 
             }
 
-            mReportOutputCount = reports.Count;
+            mReportOutputCount = mReportAttributes.Count;
         }
 
-        private void OutputReports(IGH_DataAccess DA, int strReportCount, int blReportCount, int dblReportCount)
+        private void OutputReports(IGH_DataAccess DA)
         {
-            
-        }
-
-        private void CreateNumberOutputParams(IGH_DataAccess DA, int paramCount)
-        {
-            for(int i = 0; i < paramCount; ++i)
+            foreach (var report in mReportAttributes)
             {
-                // Get the values from PRTWrapper
-                string key = "test";
-                double[] reports = PRTWrapper.GetNumberReport(i, ref key);
-
-                Param_Number param = new Param_Number {
-                    Name = key,
-                    NickName = key,
-                    Optional = true,
-                    Access = GH_ParamAccess.list
-                };
-
-                mReportOutputs.Add(param);
-                Params.RegisterOutputParam(param);
+                var type = report.getType();
+                if(type == ReportTypes.PT_BOOL)
+                {
+                    var reportList = PRTWrapper.GetBoolReports(report.getKey());
+                    DA.SetDataList(report.getKey(), reportList);
+                }
+                else if(type == ReportTypes.PT_STRING)
+                {
+                    var reportList = PRTWrapper.GetStringReports(report.getKey());
+                    DA.SetDataList(report.getKey(), reportList);
+                }
+                else if(type == ReportTypes.PT_FLOAT)
+                {
+                    var reportList = PRTWrapper.GetDoubleReports(report.getKey());
+                    DA.SetDataList(report.getKey(), reportList);
+                }
             }
-        }
-
-        private void CreateStringOutputParams(IGH_DataAccess DA, int paramCount)
-        {
-
-        }
-        private void CreateBooleanOutputParams(IGH_DataAccess DA, int paramCount)
-        {
-
         }
 
         /// <summary>

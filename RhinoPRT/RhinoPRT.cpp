@@ -71,8 +71,9 @@ namespace RhinoPRT {
 	///The reports of all generated models will be grouped together by keys. 
 	///Meaning that all reports with the same key will be added to a vector.
 	///</summary>
-	void RhinoPRTAPI::groupReportsByKeys(int* strReportCount, int* boolReportCount, int* doubleReportCount) {
-		if (mGeneratedModels.empty()) return;
+	///<return>The total number of reports.</return>
+	int RhinoPRTAPI::groupReportsByKeys() {
+		if (mGeneratedModels.empty()) return 0;
 
 		auto addToMap = [](GroupedReportMap& reports, const std::pair<const std::wstring, Reporting::ReportAttribute> report) {
 			auto it = reports.find(report.first);
@@ -102,10 +103,7 @@ namespace RhinoPRT {
 			}
 		}
 
-		// Counting the number of each type of report.
-		*strReportCount = mGroupedStringReports.size();
-		*boolReportCount = mGroupedBoolReports.size();
-		*doubleReportCount = mGroupedDoubleReports.size();
+		return mGroupedStringReports.size() + mGroupedBoolReports.size() + mGroupedDoubleReports.size();
 	}
 
 	bool RhinoPRTAPI::getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray) {
@@ -125,5 +123,17 @@ namespace RhinoPRT {
 		}
 
 		return true;
+	}
+
+	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getDoubleReports(std::wstring key) {
+		return mGroupedDoubleReports.at(key);
+	}
+
+	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getBoolReports(std::wstring key) {
+		return mGroupedBoolReports.at(key);
+	}
+
+	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getStringReports(std::wstring key) {
+		return mGroupedStringReports.at(key);
 	}
 }

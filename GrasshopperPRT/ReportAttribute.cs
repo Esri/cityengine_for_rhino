@@ -49,5 +49,8 @@ namespace GrasshopperPRT
                     return null;
             }
         }
+
+        public string getKey() { return mKey; }
+        public ReportTypes getType() { return mType; }
     }
 }

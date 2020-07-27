@@ -58,13 +58,19 @@ namespace GrasshopperPRT
         public static extern void SetRuleAttributeString(string rule, string fullName, string value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void GroupeReportsByKeys(ref int strReportCount, ref int boolReportCount, ref int doubleReportCount);
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void GetNumberReport(int reportId, StringBuilder ruleName, int size, [In, Out] IntPtr pReportsArray);
+        public static extern int GroupeReportsByKeys();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetReportKeys([In, Out] IntPtr pKeysArray, [In, Out] IntPtr pKeyTypeArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetDoubleReports(string repKey, [In, Out] IntPtr reports);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetStringReports(string repKey, [In, Out] IntPtr reports);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetBoolReports(string repKey, [In, Out] IntPtr reports);
 
         /// <summary>
         /// NOT USED ANYMORE.
@@ -158,10 +164,48 @@ namespace GrasshopperPRT
             return reports;
         }
 
-        public static double[] GetNumberReport(int keyId, ref string key)
+        public static bool[] GetBoolReports(string key)
         {
-            StringBuilder keyBuilder = new StringBuilder(100);
-            return new double[1] { 1 };
+            bool[] reports = null;
+
+            using(var reportsArray = new SimpleArrayInt())
+            {
+                var pReportsArr = reportsArray.NonConstPointer();
+
+                PRTWrapper.GetBoolReports(key, pReportsArr);
+                reports = Array.ConvertAll<int, bool>(reportsArray.ToArray(), x => Convert.ToBoolean(x));
+            }
+
+            return reports;
+        }
+
+        public static double[] GetDoubleReports(string key)
+        {
+            double[] reports = null;
+
+            using (var reportsArray = new SimpleArrayDouble()) {
+                var pReportsArr = reportsArray.NonConstPointer();
+
+                PRTWrapper.GetDoubleReports(key, pReportsArr);
+                reports = reportsArray.ToArray();
+            }
+
+            return reports;
+        }
+
+        public static string[] GetStringReports(string key)
+        {
+            string[] reports = null;
+
+            using (var reportsArray = new ClassArrayString())
+            {
+                var pReportsArr = reportsArray.NonConstPointer();
+
+                PRTWrapper.GetStringReports(key, pReportsArr);
+                reports = reportsArray.ToArray();
+            }
+
+            return reports;
         }
 
         /// <summary>
