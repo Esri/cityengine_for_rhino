@@ -126,14 +126,30 @@ namespace RhinoPRT {
 	}
 
 	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getDoubleReports(std::wstring key) {
-		return mGroupedDoubleReports.at(key);
+		try {
+			return mGroupedDoubleReports.at(key);
+		}
+		catch (const std::out_of_range& oor) {
+			return std::vector<Reporting::ReportAttribute>();
+		}
+		
 	}
 
 	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getBoolReports(std::wstring key) {
-		return mGroupedBoolReports.at(key);
+		try {
+			return mGroupedBoolReports.at(key);
+		}
+		catch (const std::out_of_range& oor) {
+			return std::vector<Reporting::ReportAttribute>();
+		}
 	}
 
 	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getStringReports(std::wstring key) {
-		return mGroupedStringReports.at(key);
+		try {
+			return mGroupedStringReports.at(key);
+		}
+		catch (const std::out_of_range& oor) {
+			return std::vector<Reporting::ReportAttribute>();
+		}
 	}
 }

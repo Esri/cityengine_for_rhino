@@ -144,15 +144,13 @@ namespace GrasshopperPRT
             int reportCount = PRTWrapper.GroupeReportsByKeys();
 
             // Create new outputs if needed
-            if (mReportOutputCount != reportCount)
+            if (mReportOutputCount < reportCount)
             {
                 mReportAttributes = PRTWrapper.GetReportKeys();
-                if(mReportAttributes != null)
-                {
-                    ResetOutputParams();
-                    ExpireSolution(true);
-                    return;
-                }
+
+                ResetOutputParams();
+                ExpireSolution(true);
+                return;
             }
 
             // Set cga report values to output
@@ -164,16 +162,17 @@ namespace GrasshopperPRT
         private void ResetOutputParams()
         {
             //Reset outputs
-            foreach (IGH_Param param in mReportOutputs)
-            {
-                Params.UnregisterOutputParameter(param);
-            }
-            mReportOutputs.Clear();
+            //foreach (IGH_Param param in mReportOutputs)
+            //{
+            //    Params.UnregisterOutputParameter(param);
+            //}
+            //mReportOutputs.Clear();
 
             foreach(var rep in mReportAttributes)
             {
+                // add output only if it is not present in mReportOutputs
                 var newOutput = rep.ToIGH_Param();
-                if(newOutput != null)
+                if(newOutput != null && isNewReport(newOutput))
                 {
                     mReportOutputs.Add(newOutput);
                     Params.RegisterOutputParam(newOutput);
@@ -182,6 +181,12 @@ namespace GrasshopperPRT
             }
 
             mReportOutputCount = mReportAttributes.Count;
+        }
+
+        private bool isNewReport(IGH_Param newOutput)
+        {
+            Predicate<IGH_Param> hasName = param => param.Name == newOutput.Name;
+            return !mReportOutputs.Exists(hasName);
         }
 
         private void OutputReports(IGH_DataAccess DA)
