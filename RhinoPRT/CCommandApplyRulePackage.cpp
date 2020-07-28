@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 //
-// BEGIN ExtrudeShape command
+// BEGIN ApplyRulePackage command
 //
 #include "stdafx.h"
 #include "RhinoPRTPlugIn.h"
@@ -18,28 +18,28 @@ bool getRpkPath(std::wstring& rpk) {
 	return true;
 }
 
-#pragma region ExtrudeShape command
+#pragma region ApplyRulePackage command
 
 
-class CCommandExtrudeShape : public CRhinoCommand
+class CCommandApplyRulePackage : public CRhinoCommand
 {
 public:
-	CCommandExtrudeShape() : CRhinoCommand(false, false, &RhinoPRTPlugIn(), false) {};
+	CCommandApplyRulePackage() : CRhinoCommand(false, false, &RhinoPRTPlugIn(), false) {};
 	UUID CommandUUID() override
 	{
 		// {B960EDCA-8D50-4293-8CD6-FE5F8843C975}
-		static const GUID ExtrudeShapeCommand_UUID =
+		static const GUID ApplyRulePackageCommand_UUID =
 		{ 0xB960EDCA, 0x8D50, 0x4293, { 0x8C, 0xD6, 0xFE, 0x5F, 0x88, 0x43, 0xC9, 0x75 } };
-		return ExtrudeShapeCommand_UUID;
+		return ApplyRulePackageCommand_UUID;
 	}
-	const wchar_t* EnglishCommandName() override { return L"ExtrudeShape"; }
+	const wchar_t* EnglishCommandName() override { return L"ApplyRulePackage"; }
 	CRhinoCommand::result RunCommand(const CRhinoCommandContext& context) override;
 };
 
 // The one and only CCommandExtrudeShape object
-static class CCommandExtrudeShape theExtrudeShapeCommand;
+static class CCommandApplyRulePackage theApplyRulePackageCommand;
 
-CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContext& context)
+CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandContext& context)
 {
 	std::wstring rpk;
 	if (!getRpkPath(rpk)) return cancel;
@@ -132,7 +132,7 @@ CRhinoCommand::result CCommandExtrudeShape::RunCommand(const CRhinoCommandContex
 #pragma endregion
 
 //
-// END ExtrudeShape command
+// END ApplyRulePackage command
 //
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
