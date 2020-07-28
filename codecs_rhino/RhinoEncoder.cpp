@@ -99,9 +99,12 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 
 	if (getOptions()->getBool(EO_EMIT_REPORTS)) {
 		auto reports = reportsCollector->getReports();
-		auto reportMap = convertReportToAttributeMap(reports);
-		// a single report map by initial shape.
-		cb->addReport(initialShapeIndex, reportMap);
+
+		if (reports) {
+			auto reportMap = convertReportToAttributeMap(reports);
+			// a single report map by initial shape.
+			cb->addReport(initialShapeIndex, reportMap);
+		}
 	}
 }
 

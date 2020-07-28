@@ -191,6 +191,8 @@ namespace GrasshopperPRT
 
         private void OutputReports(IGH_DataAccess DA)
         {
+            if (mReportAttributes == null) return;
+
             foreach (var report in mReportAttributes)
             {
                 var type = report.getType();
