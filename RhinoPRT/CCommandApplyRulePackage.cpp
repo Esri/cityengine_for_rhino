@@ -110,6 +110,8 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 		return failure; 
 	}
 
+	ClearInitialShapes();
+
 	// Model generation arguments and initial shapes setup.
 	SetPackage(rpk.c_str());
 	AddMeshTest(&mesh_array);
