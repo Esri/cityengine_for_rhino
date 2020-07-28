@@ -14,7 +14,6 @@ namespace Reporting {
 			Reporting::ReportAttribute ra;
 			ra.mInitialShapeIndex = initShapeId;
 			ra.mReportName.assign(key);
-			ra.mStringReport.assign(key);
 			ra.mType = reports->getType(key);
 
 			switch (ra.mType) {
