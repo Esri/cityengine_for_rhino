@@ -17,22 +17,6 @@ namespace prtx {
 class GenerateContext;
 }
 
-namespace GeometrySerializer {
-
-	struct SerializedGeometry {
-		// TODO: move vertices here
-
-		std::vector<prtx::DoubleVector> uvs;
-		std::vector<prtx::IndexVector> uvCounts;
-		std::vector<prtx::IndexVector> uvIndices;
-
-		SerializedGeometry(uint32_t uvSets): uvs(uvSets), uvCounts(uvSets), uvIndices(uvSets) {}
-	};
-
-	SerializedGeometry serializeGeometry(const prtx::GeometryPtrVector &geometries, const std::vector<prtx::MaterialPtrVector>& materials);
-
-}
-
 class RhinoEncoder : public prtx::GeometryEncoder {
 public:
 	static const std::wstring ID;
