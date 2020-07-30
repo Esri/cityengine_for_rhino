@@ -1,5 +1,21 @@
 #include "RhinoPRT.h"
 
+namespace {
+
+	void addToMap(RhinoPRT::GroupedReportMap& reports, const std::pair<const std::wstring, Reporting::ReportAttribute> report) 
+	{
+		auto it = reports.find(report.first);
+		if (it == reports.end()) {
+			std::vector<Reporting::ReportAttribute> newVect{ report.second };
+			reports.insert(it, std::make_pair(report.first, newVect));
+		}
+		else {
+			reports.at(report.first).push_back(report.second);
+		}
+	}
+
+}
+
 namespace RhinoPRT {
 
 	template<typename T>
@@ -74,16 +90,6 @@ namespace RhinoPRT {
 	///<return>The total number of reports.</return>
 	int RhinoPRTAPI::groupReportsByKeys() {
 		if (mGeneratedModels.empty()) return 0;
-
-		auto addToMap = [](GroupedReportMap& reports, const std::pair<const std::wstring, Reporting::ReportAttribute> report) {
-			auto it = reports.find(report.first);
-			if (it == reports.end()) {
-				std::vector<Reporting::ReportAttribute> newVect{ report.second };
-				reports.insert(it, std::make_pair(report.first, newVect));
-			}
-			else {
-				reports.at(report.first).push_back(report.second);
-			}};
 
 		mGroupedStringReports.clear();
 		mGroupedBoolReports.clear();

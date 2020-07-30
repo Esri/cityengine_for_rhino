@@ -21,7 +21,7 @@ namespace RhinoPRT {
 
 	using GroupedReportMap = std::map<std::wstring, std::vector<Reporting::ReportAttribute>>;
 
-	struct RhinoPRTAPI {
+	class RhinoPRTAPI {
 	public:
 
 		bool InitializeRhinoPRT() {

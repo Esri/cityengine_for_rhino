@@ -14,7 +14,7 @@ namespace Reporting {
 		std::wstring mReportName;
 		prt::AttributeMap::PrimitiveType mType;
 
-		std::wstring mStringReport = L"";
+		std::wstring mStringReport;
 		double mDoubleReport = 0;
 		bool mBoolReport = false;
 		int mIntReport = 0;
