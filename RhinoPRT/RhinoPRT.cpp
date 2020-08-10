@@ -1,21 +1,5 @@
 #include "RhinoPRT.h"
 
-namespace {
-
-	void addToMap(RhinoPRT::GroupedReportMap& reports, const std::pair<const std::wstring, Reporting::ReportAttribute> report) 
-	{
-		auto it = reports.find(report.first);
-		if (it == reports.end()) {
-			std::vector<Reporting::ReportAttribute> newVect{ report.second };
-			reports.insert(it, std::make_pair(report.first, newVect));
-		}
-		else {
-			reports.at(report.first).push_back(report.second);
-		}
-	}
-
-}
-
 namespace RhinoPRT {
 
 	template<typename T>
@@ -91,71 +75,15 @@ namespace RhinoPRT {
 	int RhinoPRTAPI::groupReportsByKeys() {
 		if (mGeneratedModels.empty()) return 0;
 
-		mGroupedStringReports.clear();
-		mGroupedBoolReports.clear();
-		mGroupedDoubleReports.clear();
+		mGroupedReports.clear();
 
 		for (const auto& model : mGeneratedModels) {
 			for (const auto& report : model.getReport()) {
-				if (report.second.mType == prt::AttributeMap::PrimitiveType::PT_BOOL) {
-					addToMap(mGroupedBoolReports, report);
-				}
-				else if (report.second.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) {
-					addToMap(mGroupedDoubleReports, report);
-				}
-				else if (report.second.mType == prt::AttributeMap::PrimitiveType::PT_STRING) {
-					addToMap(mGroupedStringReports, report);
-				}
+				mGroupedReports.add(report.second);
 			}
 		}
 
-		return mGroupedStringReports.size() + mGroupedBoolReports.size() + mGroupedDoubleReports.size();
+		return mGroupedReports.getReportCount();
 	}
 
-	bool RhinoPRTAPI::getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray) {
-		auto getReportInfosFunc = [&pKeysArray, &pKeyTypeArray](auto& it) {
-			pKeysArray->Append(ON_wString(it.first.c_str()));
-			pKeyTypeArray->Append(it.second.front().mType);
-		};
-
-		if (!mGroupedDoubleReports.empty()) {
-			std::for_each(mGroupedDoubleReports.begin(), mGroupedDoubleReports.end(), getReportInfosFunc);
-		}
-		if (!mGroupedStringReports.empty()) {
-			std::for_each(mGroupedStringReports.begin(), mGroupedStringReports.end(), getReportInfosFunc);
-		}
-		if (!mGroupedBoolReports.empty()) {
-			std::for_each(mGroupedBoolReports.begin(), mGroupedBoolReports.end(), getReportInfosFunc);
-		}
-
-		return true;
-	}
-
-	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getDoubleReports(std::wstring key) {
-		try {
-			return mGroupedDoubleReports.at(key);
-		}
-		catch (const std::out_of_range& oor) {
-			return std::vector<Reporting::ReportAttribute>();
-		}
-		
-	}
-
-	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getBoolReports(std::wstring key) {
-		try {
-			return mGroupedBoolReports.at(key);
-		}
-		catch (const std::out_of_range& oor) {
-			return std::vector<Reporting::ReportAttribute>();
-		}
-	}
-
-	std::vector<Reporting::ReportAttribute> RhinoPRTAPI::getStringReports(std::wstring key) {
-		try {
-			return mGroupedStringReports.at(key);
-		}
-		catch (const std::out_of_range& oor) {
-			return std::vector<Reporting::ReportAttribute>();
-		}
-	}
 }

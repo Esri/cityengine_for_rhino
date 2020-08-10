@@ -23,6 +23,7 @@ namespace GrasshopperPRT
         const string RPK_INPUT_NAME = "Path to RPK";
         const string GEOM_INPUT_NAME = "Initial Shapes";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
+        const String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -118,13 +119,17 @@ namespace GrasshopperPRT
             // Transform each geometry to a mesh
             List<Mesh> meshes = new List<Mesh>();
 
+            int initShapeIdx = 0;
             foreach(IGH_GeometricGoo geom in shapeTree.AllData(true))
             {
                 Mesh mesh = convertToMesh(geom);
+
                 if (mesh != null)
                 {
+                    mesh.SetUserString(INIT_SHAPE_IDX_KEY, initShapeIdx.ToString());
                     meshes.Add(mesh);
                 }
+                initShapeIdx++;
             }
 
             // No compatible mesh was given

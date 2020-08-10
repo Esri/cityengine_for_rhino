@@ -17,7 +17,7 @@ typedef struct _Model {
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
-	ReportMap mReports;
+	Reporting::ReportMap mReports;
 } Model;
 
 class RhinoCallbacks : public IRhinoCallbacks {
@@ -63,7 +63,7 @@ public:
 		return mModels[initialShapeIdx].mFaces;
 	}
 
-	const ReportMap& getReport(const size_t initialShapeIdx) const {
+	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 

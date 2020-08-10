@@ -19,8 +19,6 @@
 
 namespace RhinoPRT {
 
-	using GroupedReportMap = std::map<std::wstring, std::vector<Reporting::ReportAttribute>>;
-
 	class RhinoPRTAPI {
 	public:
 
@@ -96,9 +94,8 @@ namespace RhinoPRT {
 			mShapes.clear();
 			mGeneratedModels.clear();
 			mAttributes.clear();
-			mGroupedBoolReports.clear();
-			mGroupedStringReports.clear();
-			mGroupedDoubleReports.clear();
+			
+			mGroupedReports.clear();
 		}
 
 		std::vector<GeneratedModel> GenerateGeometry() {
@@ -153,11 +150,7 @@ namespace RhinoPRT {
 
 		int groupReportsByKeys();
 
-		bool getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray);
-
-		std::vector<Reporting::ReportAttribute> getDoubleReports(std::wstring key);
-		std::vector<Reporting::ReportAttribute> getBoolReports(std::wstring key);
-		std::vector<Reporting::ReportAttribute> getStringReports(std::wstring key);
+		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 
 	private:
 
@@ -172,9 +165,8 @@ namespace RhinoPRT {
 
 		std::unique_ptr<ModelGenerator> mModelGenerator;
 		std::vector<GeneratedModel> mGeneratedModels;
-		GroupedReportMap mGroupedStringReports;
-		GroupedReportMap mGroupedBoolReports;
-		GroupedReportMap mGroupedDoubleReports;
+
+		Reporting::GroupedReports mGroupedReports;
 	};
 
 	// Global PRT handle
@@ -290,29 +282,48 @@ extern "C" {
 	}
 
 	inline RHINOPRT_API bool GetReportKeys(ON_ClassArray<ON_wString>* pKeysArray,  ON_SimpleArray<int>* pKeyTypeArray) {
-		return RhinoPRT::myPRTAPI->getReportKeys(pKeysArray, pKeyTypeArray);
+		return RhinoPRT::myPRTAPI->getReports().getReportKeys(pKeysArray, pKeyTypeArray);
 	}
 
 	inline RHINOPRT_API void GetDoubleReports(const wchar_t* key, ON_SimpleArray<double>* pReportsArr) {
-		auto reports = RhinoPRT::myPRTAPI->getDoubleReports(std::wstring(key));
+		auto reports = RhinoPRT::myPRTAPI->getReports().getDoubleReports(std::wstring(key));
 
+		int currIsIdx(0);
 		for (auto report : reports) {
+			while (currIsIdx < report.mInitialShapeIndex) {
+				pReportsArr->Append(Reporting::EMPTY_REPORT_DOUBLE);			
+				currIsIdx++;
+			}
+			
 			pReportsArr->Append(report.mDoubleReport);
+			currIsIdx++;
 		}
 	}
 
 	inline RHINOPRT_API void GetStringReports(const wchar_t* key, ON_ClassArray<ON_wString>* pReportsArr) {
-		auto reports = RhinoPRT::myPRTAPI->getStringReports(std::wstring(key));
+		auto reports = RhinoPRT::myPRTAPI->getReports().getStringReports(std::wstring(key));
 
+		int currIsIdx(0);
 		for (auto report : reports) {
+			while (currIsIdx < report.mInitialShapeIndex) {
+				pReportsArr->Append(ON_wString(Reporting::EMPTY_REPORT_STRING.c_str()));
+				currIsIdx++;
+			}
+
 			pReportsArr->Append(ON_wString(report.mStringReport.c_str()));
 		}
 	}
 
 	inline RHINOPRT_API void GetBoolReports(const wchar_t* key, ON_SimpleArray<int>* pReportsArr) {
-		auto reports = RhinoPRT::myPRTAPI->getBoolReports(std::wstring(key));
+		auto reports = RhinoPRT::myPRTAPI->getReports().getBoolReports(std::wstring(key));
 
+		int currIsIdx(0);
 		for (auto report : reports) {
+			while (currIsIdx < report.mInitialShapeIndex) {
+				pReportsArr->Append(Reporting::EMPTY_REPORT_BOOL);
+				currIsIdx++;
+			}
+
 			pReportsArr->Append((int)report.mBoolReport);
 		}
 	}

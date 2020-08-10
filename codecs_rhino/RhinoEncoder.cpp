@@ -14,6 +14,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <numeric>
+#include <algorithm>
 
 #define DEBUG
 
@@ -128,6 +130,25 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		faceIndices.clear();
 		faceCounts.clear();
 
+		// 1st pass: scan the geometries to preallocate the sizes of vectors
+		uint32_t numCoords = 0;
+		uint32_t numFaceCounts = 0;
+		uint32_t numIndices = 0;
+
+		for (const auto& mesh : meshes)
+		{
+			numCoords += mesh->getVertexCoords().size();
+			numFaceCounts += mesh->getFaceCount();
+
+			const auto& vtxCnts = mesh->getFaceVertexCounts();
+			numIndices = std::accumulate(vtxCnts.begin(), vtxCnts.end(), numIndices);
+		}
+
+		vertexCoords.reserve(3 * numCoords);
+		faceCounts.reserve(numFaceCounts);
+		faceIndices.reserve(numIndices);
+
+		// 2nd pass: fill the vectors
 		for (const auto& mesh : meshes) {
 			const prtx::DoubleVector& verts = mesh->getVertexCoords();
 			vertexCoords.insert(vertexCoords.end(), verts.begin(), verts.end());
@@ -136,8 +157,13 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				const uint32_t* vtxIdx = mesh->getFaceVertexIndices(fi);
 				const uint32_t vtxCnt = mesh->getFaceVertexCount(fi);
 				faceCounts.push_back(vtxCnt);
+				
+				//std::copy(vtxIdx + 0, vtxIdx + vtxCnt, faceIndices.end());
+				//faceIndices.insert(faceIndices.end(), vtxIdx + 0, vtxIdx + vtxCnt);
 				for (uint32_t vi = 0; vi < vtxCnt; vi++)
+				{
 					faceIndices.push_back(vtxIdx[vi] + vertexIndexBase);
+				}
 			}
 			vertexIndexBase += (uint32_t)verts.size() / 3;
 		}

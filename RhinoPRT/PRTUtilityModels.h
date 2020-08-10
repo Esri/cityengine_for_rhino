@@ -42,6 +42,7 @@ public:
 
 protected:
 
+	int mID;
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaceCounts;
@@ -53,7 +54,7 @@ protected:
 class GeneratedModel {
 public:
 	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-		const std::vector<uint32_t>& face, const ReportMap& rep);
+		const std::vector<uint32_t>& face, const Reporting::ReportMap& rep);
 
 	GeneratedModel() {}
 	~GeneratedModel() {}
@@ -72,7 +73,7 @@ public:
 	const std::vector<uint32_t>& getFaces() const {
 		return mFaces;
 	}
-	const ReportMap& getReport() const {
+	const Reporting::ReportMap& getReport() const {
 		return mReports;
 	}
 
@@ -81,5 +82,5 @@ private:
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
-	ReportMap mReports;
+	Reporting::ReportMap mReports;
 };

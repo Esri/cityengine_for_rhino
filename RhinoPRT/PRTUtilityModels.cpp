@@ -38,6 +38,21 @@ InitialShape::InitialShape(const double* vertices, int vCount, const int* indice
 }
 
 InitialShape::InitialShape(const ON_Mesh& mesh) {
+	ON_wString shapeIdxStr;
+	if (!mesh.GetUserString(L"InitShapeIdx", shapeIdxStr))
+	{
+		LOG_WRN << L"InitialShapeID not found in given mesh";
+		mID = -1;
+	}
+	else
+	{
+		std::wstring str(shapeIdxStr.Array());
+
+		//cast to int
+		mID = std::stoi(str);
+	}
+
+
 	mVertices.reserve(mesh.VertexCount() * 3);
 	mIndices.reserve(mesh.FaceCount() * 4);
 	mFaceCounts.reserve(mesh.FaceCount());
@@ -64,7 +79,7 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 }
 
 GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-	const std::vector<uint32_t>& face, const ReportMap& rep):
+	const std::vector<uint32_t>& face, const Reporting::ReportMap& rep):
 	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReports(rep) { }
 
 const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
