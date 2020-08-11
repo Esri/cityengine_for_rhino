@@ -23,7 +23,6 @@ namespace GrasshopperPRT
         const string RPK_INPUT_NAME = "Path to RPK";
         const string GEOM_INPUT_NAME = "Initial Shapes";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
-        const String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -126,7 +125,7 @@ namespace GrasshopperPRT
 
                 if (mesh != null)
                 {
-                    mesh.SetUserString(INIT_SHAPE_IDX_KEY, initShapeIdx.ToString());
+                    mesh.SetUserString(PRTWrapper.INIT_SHAPE_IDX_KEY, initShapeIdx.ToString());
                     meshes.Add(mesh);
                 }
                 initShapeIdx++;
@@ -143,7 +142,6 @@ namespace GrasshopperPRT
 
             // Testing the wrappers provided by RhinoCommon SDK to pass GH_Mesh to RhinoPRT.
             var generatedMeshes = PRTWrapper.GenerateMeshTestWrapper();
-            //Mesh generatedMesh = PRTWrapper.GenerateMesh();
 
             // Processing cga reports
             int reportCount = PRTWrapper.GroupeReportsByKeys();
@@ -166,12 +164,6 @@ namespace GrasshopperPRT
 
         private void ResetOutputParams()
         {
-            //Reset outputs
-            //foreach (IGH_Param param in mReportOutputs)
-            //{
-            //    Params.UnregisterOutputParameter(param);
-            //}
-            //mReportOutputs.Clear();
 
             foreach(var rep in mReportAttributes)
             {

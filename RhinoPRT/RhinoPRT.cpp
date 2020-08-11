@@ -79,7 +79,7 @@ namespace RhinoPRT {
 
 		for (const auto& model : mGeneratedModels) {
 			for (const auto& report : model.getReport()) {
-				mGroupedReports.add(report.second);
+				mGroupedReports.add(report.second, model.getInitialShapeIndex());
 			}
 		}
 

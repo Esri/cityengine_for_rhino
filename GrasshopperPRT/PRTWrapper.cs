@@ -18,6 +18,9 @@ namespace GrasshopperPRT
     /// </summary>
     class PRTWrapper
     {
+        public static String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
+
+
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention=CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
@@ -126,7 +129,18 @@ namespace GrasshopperPRT
             // thus a conversion is necessary.
             GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
 
+            int currIsID = 0;
+
             foreach(var mesh in meshes) {
+                //if some of the initial shapes failed to be processed, add empty meshes to keep the synchronization between input and output.
+                int id = Convert.ToInt32(mesh.GetUserString(INIT_SHAPE_IDX_KEY));
+                while (currIsID < id)
+                {
+                    mesh_struct.Append(null);
+                    currIsID++;
+                }
+                currIsID++;
+
                 GH_Mesh gh_mesh = null;
                 bool status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
                 if (status) mesh_struct.Append(gh_mesh);

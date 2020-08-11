@@ -6,14 +6,28 @@
 
 namespace {
 
-	void addToMap(Reporting::GroupedReportMap& reports, const Reporting::ReportAttribute& report)
+	void syncReports(const int shapeID, std::vector<Reporting::ReportAttribute>& reports)
+	{
+		int currID = reports.size();
+
+		while (currID < shapeID) {
+			reports.push_back(Reporting::getEmptyReport(currID));
+			currID++;
+		}
+	}
+
+	void addToMap(Reporting::GroupedReportMap& reports, const Reporting::ReportAttribute& report, const int shapeID)
 	{
 		auto it = reports.find(report.mReportName);
 		if (it == reports.end()) {
-			std::vector<Reporting::ReportAttribute> newVect{ report };
+			std::vector<Reporting::ReportAttribute> newVect;
+			syncReports(shapeID, newVect);
+			newVect.push_back(report);
+
 			reports.insert(it, std::make_pair(report.mReportName, newVect));
 		}
 		else {
+			syncReports(shapeID, reports.at(report.mReportName));
 			reports.at(report.mReportName).push_back(report);
 		}
 	}
@@ -21,6 +35,16 @@ namespace {
 }
 
 namespace Reporting {
+
+	ReportAttribute getEmptyReport(int shapeID)
+	{
+		ReportAttribute report;
+		report.mInitialShapeIndex = shapeID;
+		report.mReportName = L"Empty Report";
+		report.mType = prt::AttributeMap::PrimitiveType::PT_UNDEFINED;
+
+		return report;
+	}
 
 	void extractReports(int initShapeId, Model& model, const prt::AttributeMap* reports)
 	{
@@ -58,16 +82,16 @@ namespace Reporting {
 		}
 	}
 
-	void GroupedReports::add(const ReportAttribute& report)
+	void GroupedReports::add(const ReportAttribute& report, const int shapeID)
 	{
 		if (report.mType == prt::AttributeMap::PrimitiveType::PT_BOOL) {
-			addToMap(mGroupedBoolReports, report);
+			addToMap(mGroupedBoolReports, report, shapeID);
 		}
 		else if (report.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) {
-			addToMap(mGroupedDoubleReports, report);
+			addToMap(mGroupedDoubleReports, report, shapeID);
 		}
 		else if (report.mType == prt::AttributeMap::PrimitiveType::PT_STRING) {
-			addToMap(mGroupedStringReports, report);
+			addToMap(mGroupedStringReports, report, shapeID);
 		}
 	}
 

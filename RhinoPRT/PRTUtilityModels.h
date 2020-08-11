@@ -16,6 +16,10 @@ public:
 	InitialShape(const ON_Mesh& mesh);
 	~InitialShape() {}
 
+	const int getID() const {
+		return mID;
+	}
+
 	const double* getVertices() const {
 		return mVertices.data();
 	}

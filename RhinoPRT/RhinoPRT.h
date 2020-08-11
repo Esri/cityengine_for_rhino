@@ -176,25 +176,30 @@ namespace RhinoPRT {
 // Define exposed functions here
 extern "C" {
 
-	inline RHINOPRT_API bool InitializeRhinoPRT() {
+	inline RHINOPRT_API bool InitializeRhinoPRT()
+	{
 		return RhinoPRT::myPRTAPI->InitializeRhinoPRT();
 	}
 
-	inline RHINOPRT_API void ShutdownRhinoPRT() {
+	inline RHINOPRT_API void ShutdownRhinoPRT()
+	{
 		RhinoPRT::myPRTAPI->ShutdownRhinoPRT();
 	}
 
-	inline RHINOPRT_API void SetPackage(const wchar_t* rpk_path) {
+	inline RHINOPRT_API void SetPackage(const wchar_t* rpk_path)
+	{
 		std::wstring str(rpk_path);
 		RhinoPRT::myPRTAPI->SetRPKPath(str);
 	}
 
 	/// Not used anymore
-	inline RHINOPRT_API bool AddShape(double* vertices, int vCount, int* indices, int iCount, int* faceCount, int faceCountCount) {
+	inline RHINOPRT_API bool AddShape(double* vertices, int vCount, int* indices, int iCount, int* faceCount, int faceCountCount)
+	{
 		return RhinoPRT::myPRTAPI->AddInitialShape(vertices, vCount, indices, iCount, faceCount, faceCountCount);
 	}
 
-	inline RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh) {
+	inline RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh)
+	{
 		if (pMesh == nullptr) return false;
 		
 		std::vector<InitialShape> initShapes;
@@ -206,12 +211,14 @@ extern "C" {
 		return true;
 	}
 
-	inline RHINOPRT_API void ClearInitialShapes() {
+	inline RHINOPRT_API void ClearInitialShapes()
+	{
 		RhinoPRT::myPRTAPI->ClearInitialShapes();
 	}
 
 	/// Not used anymore
-	inline RHINOPRT_API bool Generate(double** vertices, int* vCount, int** indices, int* iCount, int** faceCount, int* faceCountCount) {
+	inline RHINOPRT_API bool Generate(double** vertices, int* vCount, int** indices, int* iCount, int** faceCount, int* faceCountCount)
+	{
 		bool status = RhinoPRT::myPRTAPI->GenerateGeometry(vertices, vCount, indices, iCount, faceCount, faceCountCount);
 
 		LOG_DBG << L"Generated geometry" << std::endl;
@@ -223,7 +230,8 @@ extern "C" {
 		return status;
 	}
 
-	inline RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray) {
+	inline RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray)
+	{
 		if (pMeshArray == nullptr) { 
 			LOG_ERR << L"Aborting generation, given a null Mesh array.";
 			return false;
@@ -244,11 +252,13 @@ extern "C" {
 		return true;
 	}
 
-	inline RHINOPRT_API int GetRuleAttributesCount() {
+	inline RHINOPRT_API int GetRuleAttributesCount()
+	{
 		return RhinoPRT::myPRTAPI->GetRuleAttributeCount();
 	}
 
-	inline RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type) {
+	inline RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type)
+	{
 		RuleAttributes ruleAttributes = RhinoPRT::myPRTAPI->GetRuleAttributes();
 
 		if (attrIdx >= ruleAttributes.size()) return false;
@@ -261,70 +271,72 @@ extern "C" {
 		return true;
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value) {
+	inline RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value)
+	{
 		RhinoPRT::myPRTAPI->fillAttributeFromNode<double>(std::wstring(rule), std::wstring(fullName), value);
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value) {
+	inline RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value)
+	{
 		RhinoPRT::myPRTAPI->fillAttributeFromNode<bool>(std::wstring(rule), std::wstring(fullName), value);
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value) {
+	inline RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value)
+	{
 		RhinoPRT::myPRTAPI->fillAttributeFromNode<int>(std::wstring(rule), std::wstring(fullName), value);
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value) {
+	inline RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
+	{
 		RhinoPRT::myPRTAPI->fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
 	}
 
-	inline RHINOPRT_API int GroupeReportsByKeys() {
+	inline RHINOPRT_API int GroupeReportsByKeys()
+	{
 		return RhinoPRT::myPRTAPI->groupReportsByKeys();
 	}
 
-	inline RHINOPRT_API bool GetReportKeys(ON_ClassArray<ON_wString>* pKeysArray,  ON_SimpleArray<int>* pKeyTypeArray) {
+	inline RHINOPRT_API bool GetReportKeys(ON_ClassArray<ON_wString>* pKeysArray,  ON_SimpleArray<int>* pKeyTypeArray)
+	{
 		return RhinoPRT::myPRTAPI->getReports().getReportKeys(pKeysArray, pKeyTypeArray);
 	}
 
-	inline RHINOPRT_API void GetDoubleReports(const wchar_t* key, ON_SimpleArray<double>* pReportsArr) {
+	inline RHINOPRT_API void GetDoubleReports(const wchar_t* key, ON_SimpleArray<double>* pReportsArr)
+	{
 		auto reports = RhinoPRT::myPRTAPI->getReports().getDoubleReports(std::wstring(key));
 
-		int currIsIdx(0);
-		for (auto report : reports) {
-			while (currIsIdx < report.mInitialShapeIndex) {
-				pReportsArr->Append(Reporting::EMPTY_REPORT_DOUBLE);			
-				currIsIdx++;
-			}
-			
-			pReportsArr->Append(report.mDoubleReport);
-			currIsIdx++;
+		for (auto report : reports)
+		{
+			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
+				pReportsArr->Append(Reporting::EMPTY_REPORT_DOUBLE);
+			else
+				pReportsArr->Append(report.mDoubleReport);
 		}
 	}
 
-	inline RHINOPRT_API void GetStringReports(const wchar_t* key, ON_ClassArray<ON_wString>* pReportsArr) {
+	inline RHINOPRT_API void GetStringReports(const wchar_t* key, ON_ClassArray<ON_wString>* pReportsArr)
+	{
 		auto reports = RhinoPRT::myPRTAPI->getReports().getStringReports(std::wstring(key));
 
-		int currIsIdx(0);
-		for (auto report : reports) {
-			while (currIsIdx < report.mInitialShapeIndex) {
+		for (auto report : reports)
+		{
+			if(report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
 				pReportsArr->Append(ON_wString(Reporting::EMPTY_REPORT_STRING.c_str()));
-				currIsIdx++;
-			}
-
-			pReportsArr->Append(ON_wString(report.mStringReport.c_str()));
+			else
+				pReportsArr->Append(ON_wString(report.mStringReport.c_str()));
 		}
 	}
 
-	inline RHINOPRT_API void GetBoolReports(const wchar_t* key, ON_SimpleArray<int>* pReportsArr) {
+	inline RHINOPRT_API void GetBoolReports(const wchar_t* key, ON_SimpleArray<int>* pReportsArr)
+	{
 		auto reports = RhinoPRT::myPRTAPI->getReports().getBoolReports(std::wstring(key));
 
-		int currIsIdx(0);
-		for (auto report : reports) {
-			while (currIsIdx < report.mInitialShapeIndex) {
+		for (auto report : reports)
+		{
+			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
 				pReportsArr->Append(Reporting::EMPTY_REPORT_BOOL);
-				currIsIdx++;
-			}
-
-			pReportsArr->Append((int)report.mBoolReport);
+			else
+				pReportsArr->Append((int)report.mBoolReport);
 		}
 	}
 }

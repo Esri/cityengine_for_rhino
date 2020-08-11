@@ -23,6 +23,8 @@ namespace Reporting {
 		int mIntReport = 0;
 	};
 
+	ReportAttribute getEmptyReport(int shapeID);
+
 	void extractReports(int initShapeId, Model& model, const prt::AttributeMap* reports);
 
 	using ReportMap = std::unordered_map<std::wstring, ReportAttribute>;
@@ -36,7 +38,7 @@ namespace Reporting {
 	class GroupedReports {
 	public:
 
-		void add(const ReportAttribute& report);
+		void add(const ReportAttribute& report, const int shapeID);
 		size_t getReportCount() const;
 		bool getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray) const;
 		const std::vector<ReportAttribute>& getDoubleReports(std::wstring key) const;
