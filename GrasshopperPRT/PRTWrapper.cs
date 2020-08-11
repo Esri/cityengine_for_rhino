@@ -188,8 +188,9 @@ namespace GrasshopperPRT
 
                 PRTWrapper.GetBoolReports(key, pReportsArr);
                 reports = Array.ConvertAll<int, bool?>(reportsArray.ToArray(), x => {
-                    if (x != 0 && x != 1) return null;
-                    return Convert.ToBoolean(x); } );
+                    if (x == -1) return null;
+                    return Convert.ToBoolean(x);
+                });
             }
 
             return reports;

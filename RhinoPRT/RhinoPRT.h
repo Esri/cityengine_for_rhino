@@ -334,7 +334,7 @@ extern "C" {
 		for (auto report : reports)
 		{
 			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
-				pReportsArr->Append(std::numeric_limits<int>::quiet_NaN());
+				pReportsArr->Append(-1);
 			else
 				pReportsArr->Append((int)report.mBoolReport);
 		}
