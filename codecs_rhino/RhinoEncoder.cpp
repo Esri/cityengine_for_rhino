@@ -157,9 +157,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				const uint32_t* vtxIdx = mesh->getFaceVertexIndices(fi);
 				const uint32_t vtxCnt = mesh->getFaceVertexCount(fi);
 				faceCounts.push_back(vtxCnt);
-				
-				//std::copy(vtxIdx + 0, vtxIdx + vtxCnt, faceIndices.end());
-				//faceIndices.insert(faceIndices.end(), vtxIdx + 0, vtxIdx + vtxCnt);
+
 				for (uint32_t vi = 0; vi < vtxCnt; vi++)
 				{
 					faceIndices.push_back(vtxIdx[vi] + vertexIndexBase);

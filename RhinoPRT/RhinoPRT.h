@@ -308,7 +308,7 @@ extern "C" {
 		for (auto report : reports)
 		{
 			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
-				pReportsArr->Append(Reporting::EMPTY_REPORT_DOUBLE);
+				pReportsArr->Append(std::numeric_limits<double>::quiet_NaN());
 			else
 				pReportsArr->Append(report.mDoubleReport);
 		}
@@ -334,7 +334,7 @@ extern "C" {
 		for (auto report : reports)
 		{
 			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
-				pReportsArr->Append(Reporting::EMPTY_REPORT_BOOL);
+				pReportsArr->Append(std::numeric_limits<int>::quiet_NaN());
 			else
 				pReportsArr->Append((int)report.mBoolReport);
 		}

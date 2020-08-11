@@ -178,16 +178,18 @@ namespace GrasshopperPRT
             return reports;
         }
 
-        public static bool[] GetBoolReports(string key)
+        public static bool?[] GetBoolReports(string key)
         {
-            bool[] reports = null;
+            bool?[] reports = null;
 
             using(var reportsArray = new SimpleArrayInt())
             {
                 var pReportsArr = reportsArray.NonConstPointer();
 
                 PRTWrapper.GetBoolReports(key, pReportsArr);
-                reports = Array.ConvertAll<int, bool>(reportsArray.ToArray(), x => Convert.ToBoolean(x));
+                reports = Array.ConvertAll<int, bool?>(reportsArray.ToArray(), x => {
+                    if (x != 0 && x != 1) return null;
+                    return Convert.ToBoolean(x); } );
             }
 
             return reports;

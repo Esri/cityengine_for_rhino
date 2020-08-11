@@ -31,9 +31,8 @@ namespace Reporting {
 	using GroupedReportMap = std::map<std::wstring, std::vector<ReportAttribute>>;
 
 	const std::vector<ReportAttribute> EMPTY_REPORTS;
-	const double EMPTY_REPORT_DOUBLE = std::numeric_limits<double>::lowest();
-	const bool EMPTY_REPORT_BOOL(false);
-	const std::wstring EMPTY_REPORT_STRING;
+	//auto EMPTY_REPORT_DOUBLE = std::numeric_limits<double>::quiet_NaN;
+	const std::wstring EMPTY_REPORT_STRING(L"\0");
 
 	class GroupedReports {
 	public:
