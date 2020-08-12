@@ -3,6 +3,8 @@
 #include "prt/Callbacks.h"
 #include "IRhinoCallbacks.h"
 
+#include "prtx/PRTUtils.h"
+
 #include "utils.h"
 #include "Logger.h"
 #include "ReportAttribute.h"
@@ -36,7 +38,7 @@ public:
 	// Inherited via IRhinoCallbacks
 	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, const uint32_t * faceIndices, const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount) override;
 	void add(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, const uint32_t * faceIndices, const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount, const uint32_t* faceRanges, size_t faceRangeSize, const prt::AttributeMap** reports) override;
-	void addReport(const size_t initialShapeIndex, const prt::AttributeMap* reports) override;
+	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
 
 	size_t getInitialShapeCount() const {
 		return mModels.size();

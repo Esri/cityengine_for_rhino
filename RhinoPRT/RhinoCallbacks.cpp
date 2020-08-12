@@ -24,13 +24,13 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const double * vertexCo
 	//TODO
 }
 
-void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prt::AttributeMap * reports)
+void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports)
 {
 #ifdef DEBUG
 	LOG_DBG << "In RhinoCallback::addReport";
 #endif
 
-	if (reports == nullptr) {
+	if (!reports.get()) {
 		LOG_WRN << "Trying to add null report, ignoring.";
 		return;
 	}

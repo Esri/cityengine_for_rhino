@@ -46,9 +46,8 @@ namespace Reporting {
 		return report;
 	}
 
-	void extractReports(int initShapeId, Model& model, const prt::AttributeMap* reports)
+	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports)
 	{
-
 		size_t keyCount = 0;
 		auto keys = reports->getKeys(&keyCount);
 

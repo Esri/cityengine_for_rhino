@@ -134,10 +134,13 @@ namespace GrasshopperPRT
             foreach(var mesh in meshes) {
                 //if some of the initial shapes failed to be processed, add empty meshes to keep the synchronization between input and output.
                 int id = Convert.ToInt32(mesh.GetUserString(INIT_SHAPE_IDX_KEY));
-                while (currIsID < id)
-                {
-                    mesh_struct.Append(null);
-                    currIsID++;
+                if (id != -1) // If id == -1, we don't check syncronization since mesh id were wrongly setup at the beginning.
+                { 
+                    while (currIsID < id)
+                    {
+                        mesh_struct.Append(null);
+                        currIsID++;
+                    }
                 }
                 currIsID++;
 

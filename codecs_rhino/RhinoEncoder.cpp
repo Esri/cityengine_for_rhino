@@ -36,7 +36,7 @@ namespace {
 		.cleanupVertexNormals(false)
 		.mergeByMaterial(true);
 
-	const prt::AttributeMap* convertReportToAttributeMap(const prtx::ReportsPtr& r) {
+	const prtx::PRTUtils::AttributeMapPtr convertReportToAttributeMap(const prtx::ReportsPtr& r) {
 
 		prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
@@ -47,7 +47,7 @@ namespace {
 		for (const auto& s : r->mStrings)
 			amb->setString(s.first->c_str(), s.second->c_str());
 
-		return amb->createAttributeMap();
+		return prtx::PRTUtils::AttributeMapPtr{ amb->createAttributeMap() };
 	}
 }
 

@@ -3,6 +3,7 @@
 #include "utils.h"
 
 #include "prt/AttributeMap.h"
+#include "prtx/PRTUtils.h"
 
 #include <string>
 #include <unordered_map>
@@ -25,13 +26,12 @@ namespace Reporting {
 
 	ReportAttribute getEmptyReport(int shapeID);
 
-	void extractReports(int initShapeId, Model& model, const prt::AttributeMap* reports);
+	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
 
 	using ReportMap = std::unordered_map<std::wstring, ReportAttribute>;
 	using GroupedReportMap = std::map<std::wstring, std::vector<ReportAttribute>>;
 
 	const std::vector<ReportAttribute> EMPTY_REPORTS;
-	//auto EMPTY_REPORT_DOUBLE = std::numeric_limits<double>::quiet_NaN;
 	const std::wstring EMPTY_REPORT_STRING(L"\0");
 
 	class GroupedReports {

@@ -49,9 +49,18 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 		std::wstring str(shapeIdxStr.Array());
 
 		//cast to int
-		mID = std::stoi(str);
+		try {
+			mID = std::stoi(str);
+		}
+		catch (std::invalid_argument) {
+			LOG_WRN << "Mesh id could not be parsed meaning the mesh id was not set -> setting initial shape id to 0.";
+			mID = 0;
+		}
+		catch (std::out_of_range) {
+			LOG_ERR << "Mesh id could not be parsed, setting initial shape id to 0.";
+			mID = -1;
+		}
 	}
-
 
 	mVertices.reserve(mesh.VertexCount() * 3);
 	mIndices.reserve(mesh.FaceCount() * 4);
