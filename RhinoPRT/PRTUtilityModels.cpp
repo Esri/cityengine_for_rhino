@@ -39,7 +39,7 @@ InitialShape::InitialShape(const double* vertices, int vCount, const int* indice
 
 InitialShape::InitialShape(const ON_Mesh& mesh) {
 	ON_wString shapeIdxStr;
-	if (!mesh.GetUserString(L"InitShapeIdx", shapeIdxStr))
+	if (!mesh.GetUserString(INIT_SHAPE_ID_KEY.c_str(), shapeIdxStr))
 	{
 		LOG_WRN << L"InitialShapeID not found in given mesh";
 		mID = -1;
@@ -53,8 +53,8 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 			mID = std::stoi(str);
 		}
 		catch (std::invalid_argument) {
-			LOG_WRN << "Mesh id could not be parsed meaning the mesh id was not set -> setting initial shape id to 0.";
-			mID = 0;
+			LOG_ERR << "Mesh id string was not a number, so it could not be parsed -> setting initial shape id to -1.";
+			mID = -1;
 		}
 		catch (std::out_of_range) {
 			LOG_ERR << "Mesh id could not be parsed, setting initial shape id to 0.";
@@ -98,7 +98,7 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 	ON_Mesh mesh(mFaces.size(), nbVertices, false, false);
 
 	// Set the initial shape id.
-	mesh.SetUserString(L"InitShapeIdx", std::to_wstring(mInitialShapeIndex).c_str());
+	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
 
 	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
 		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
@@ -125,14 +125,14 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 	}
 
 	// Printing a rhino error log if the created mesh is invalid
-	FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_3.txt", L"w");
-	if (fp) {
-		ON_TextLog log(fp);
-		if (!mesh.IsValid(&log))
-			mesh.Dump(log);
+	ON_wString log_str;
+	ON_TextLog log(log_str);
+	if (!mesh.IsValid(&log))
+	{
+		mesh.Dump(log);
+		LOG_ERR << log_str;
 	}
-	ON::CloseFile(fp);
-
+	
 	mesh.ComputeVertexNormals();
 	mesh.Compact();
 

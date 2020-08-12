@@ -5,6 +5,8 @@
 
 #include <vector>
 
+const std::wstring INIT_SHAPE_ID_KEY = L"InitShapeIdx";
+
 /**
 * The Initial shape that will be given to PRT
 */
