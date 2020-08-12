@@ -117,10 +117,21 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 	std::vector<uint32_t> shapeIDs;
 
 	uint32_t vertexIndexBase = 0;
+	uint32_t maxNumUVSets = 0; // for now we support only 1 uv set.
+	std::vector<uint32_t> uvIndexBases(maxNumUVSets, 0u);
 
 	std::vector<double> vertexCoords;
 	std::vector<uint32_t> faceIndices;
 	std::vector<uint32_t> faceCounts;
+
+	std::vector<prtx::DoubleVector> uvs;
+	std::vector<prtx::IndexVector> uvCounts;
+	std::vector<prtx::IndexVector> uvIndices;
+
+	prtx::GeometryPtrVector geometries;
+	std::vector<prtx::MaterialPtrVector> materials;
+
+	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
 	for (const auto& instance : instances) {
 
@@ -164,6 +175,70 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				}
 			}
 			vertexIndexBase += (uint32_t)verts.size() / 3;
+
+			if (emitMaterials) {
+				const prtx::MaterialPtr& mat = material.at(mi);
+				const uint32_t requiredUVSetsByMaterial = scanValidTextures(mat);
+
+				//for now, only 1 uv set is supported
+				if (mesh->getUVSetsCount() > 0 && (bool)requiredUVSetsByMaterial) 
+				{ 
+					maxNumUVSets = 1; 
+					uvIndexBases.resize(maxNumUVSets, 0u);
+				}
+
+				// copy first uv set data. 
+				// TODO: For now only one is supported
+				const uint32_t numUVSets = mesh->getUVSetsCount();
+				const prtx::DoubleVector& uvs0 = (numUVSets > 0) ? mesh->getUVCoords(0) : EMPTY_UVS;
+				const prtx::IndexVector faceUVCounts0 = (numUVSets > 0) ? mesh->getFaceUVCounts(0) : prtx::IndexVector(mesh->getFaceCount(), 0);
+				
+#ifdef DEBUG 
+				LOG_DBG << "-- mesh: numUVSets = " << numUVSets;
+#endif
+
+				// FOR NOW THIS WILL ONLY BE EXECUTED FOR THE COLORMAP
+				for (auto uvSet = 0; uvSet < uvs.size(); uvSet++) {
+					// append texture coordinates
+					const prtx::DoubleVector& currUVs = (uvSet < numUVSets) ? mesh->getUVCoords(uvSet) : EMPTY_UVS;
+					const auto& src = currUVs.empty() ? uvs0 : currUVs;
+
+					//insert the curent uvs into the corresponding position in the vector of uvs
+					auto& tgt = uvs[uvSet];
+					tgt.insert(tgt.end(), src.begin(), src.end());
+
+					// append uv face counts
+					const prtx::IndexVector& faceUVCounts = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVCounts(uvSet) : faceUVCounts0;
+					assert(faceUVCounts.size() == mesh->getFaceCount());
+					auto& tgtCounts = uvCounts[uvSet];
+					tgtCounts.insert(tgtCounts.end(), faceUVCounts.begin(), faceUVCounts.end());
+
+#ifdef DEBUG
+					LOG_DBG << "  -- uvset " << uvSet << ": face counts size = " << faceUVCounts.size();
+#endif // DEBUG
+					
+					// append uv vertex indices
+					for (uint32_t faceId = 0, faceCount = faceUVCounts.size(); faceId < faceCount; ++faceId) {
+						const uint32_t* faceUVIdx0 = (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
+						const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVIndices(faceId, uvSet) : faceUVIdx0;
+						const uint32_t faceUVCnt = faceUVCounts[faceId];
+
+#ifdef DEBUG
+						LOG_DBG << "      faceId " << faceId << ": faceUVCnt = " << faceUVCnt << ", faceVtxCnt = " << mesh->getFaceVertexCount(faceId);
+#endif // DEBUG
+
+						for (uint32_t vrtxId = 0; vrtxId < faceUVCnt; ++vrtxId) {
+							uvIndices[uvSet].push_back(uvIndexBases[uvSet] + faceUVIdx[vrtxId]);
+						}
+
+					}
+
+					uvIndexBases[uvSet] += src.size() / 2u;
+				}
+
+				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys());
+				matAttrMap.push_back(amb->createAttributeMapAndReset());
+			}
 		}
 
 		cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
