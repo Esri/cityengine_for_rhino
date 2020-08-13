@@ -1,8 +1,11 @@
 #pragma once
 
 #include "utils.h"
+#include "ReportAttribute.h"
 
 #include <vector>
+
+const std::wstring INIT_SHAPE_ID_KEY = L"InitShapeIdx";
 
 /**
 * The Initial shape that will be given to PRT
@@ -14,6 +17,10 @@ public:
 	InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount);
 	InitialShape(const ON_Mesh& mesh);
 	~InitialShape() {}
+
+	const int getID() const {
+		return mID;
+	}
 
 	const double* getVertices() const {
 		return mVertices.data();
@@ -41,6 +48,7 @@ public:
 
 protected:
 
+	int mID;
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaceCounts;
@@ -52,9 +60,12 @@ protected:
 class GeneratedModel {
 public:
 	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-		const std::vector<uint32_t>& face, const std::map<std::string, std::string>& rep);
+		const std::vector<uint32_t>& face, const Reporting::ReportMap& rep);
+
 	GeneratedModel() {}
 	~GeneratedModel() {}
+
+	const ON_Mesh getMeshFromGenModel() const;
 
 	size_t getInitialShapeIndex() const {
 		return mInitialShapeIndex;
@@ -68,8 +79,8 @@ public:
 	const std::vector<uint32_t>& getFaces() const {
 		return mFaces;
 	}
-	const std::map<std::string, std::string>& getReport() const {
-		return mReport;
+	const Reporting::ReportMap& getReport() const {
+		return mReports;
 	}
 
 private:
@@ -77,5 +88,5 @@ private:
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
-	std::map<std::string, std::string> mReport;
+	Reporting::ReportMap mReports;
 };

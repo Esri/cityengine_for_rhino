@@ -120,55 +120,6 @@ namespace pcu {
 		return AttributeMapPtr(validatedOptions);
 	}
 
-	const ON_Mesh getMeshFromGenModel(const GeneratedModel& model) {
-		auto faces = model.getFaces();
-		auto vertices = model.getVertices();
-		auto indices = model.getIndices();
-
-		size_t nbVertices = vertices.size() / 3;
-
-		ON_Mesh mesh(faces.size(), nbVertices, false, false);
-
-		for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
-			mesh.SetVertex(v_id, ON_3dPoint(vertices[v_id * 3], vertices[v_id * 3 + 1], vertices[v_id * 3 + 2]));
-		}
-
-		int faceid(0);
-		int currindex(0);
-		for (int face : faces) {
-			if (face == 3) {
-				mesh.SetTriangle(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2]);
-				currindex += face;
-				faceid++;
-			}
-			else if (face == 4) {
-				mesh.SetQuad(faceid, indices[currindex], indices[currindex + 1], indices[currindex + 2], indices[currindex + 3]);
-				currindex += face;
-				faceid++;
-			}
-			else {
-				//ignore face because it is invalid
-				currindex += face;
-				LOG_WRN << "Ignored face with invalid number of vertices :" << face;
-			}
-		}
-
-		// Printing an error log if the created mesh is invalid
-		FILE* fp = ON::OpenFile(L"C:\\Windows\\Temp\\rhino_log_3.txt", L"w");
-		if (fp) {
-			ON_TextLog log(fp);
-			if (!mesh.IsValid(&log))
-				mesh.Dump(log);	
-		}
-		ON::CloseFile(fp);
-
-		mesh.ComputeVertexNormals();
-		mesh.Compact();
-
-		return mesh;
-	}
-	
-
 	template <typename inC, typename outC, typename FUNC>
 	std::basic_string<outC> callAPI(FUNC f, const std::basic_string<inC>& s) {
 		std::vector<outC> buffer(s.size());

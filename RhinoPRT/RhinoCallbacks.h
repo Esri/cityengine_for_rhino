@@ -1,24 +1,29 @@
 #pragma once
 
 #include "prt/Callbacks.h"
-
 #include "IRhinoCallbacks.h"
 
+#include "prtx/PRTUtils.h"
+
+#include "utils.h"
 #include "Logger.h"
+#include "ReportAttribute.h"
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <iostream>
+
+#define DEBUG
+
+typedef struct _Model {
+	std::vector<double> mVertices;
+	std::vector<uint32_t> mIndices;
+	std::vector<uint32_t> mFaces;
+	Reporting::ReportMap mReports;
+} Model;
 
 class RhinoCallbacks : public IRhinoCallbacks {
 private:
-	struct Model {
-		// Add GCA report structure
-		std::vector<double> mVertices;
-		std::vector<uint32_t> mIndices;
-		std::vector<uint32_t> mFaces;
-		std::map<std::string, std::string> mReport;
-	};
 
 	std::vector<Model> mModels;
 
@@ -32,9 +37,8 @@ public:
 
 	// Inherited via IRhinoCallbacks
 	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, const uint32_t * faceIndices, const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount) override;
-
-	void addReports(const size_t initialShapeIndex, const wchar_t ** stringReportKeys, const wchar_t ** stringReportValues, size_t stringReportCount, const wchar_t ** floatReportKeys, const double * floatReportValues, size_t floatReportCount, const wchar_t ** boolReportKeys, const bool * boolReportValues, size_t boolReportCount) override;
-
+	void add(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, const uint32_t * faceIndices, const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount, const uint32_t* faceRanges, size_t faceRangeSize, const prt::AttributeMap** reports) override;
+	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
 
 	size_t getInitialShapeCount() const {
 		return mModels.size();
@@ -61,11 +65,11 @@ public:
 		return mModels[initialShapeIdx].mFaces;
 	}
 
-	const std::map<std::string, std::string>& getReport(const size_t initialShapeIdx) const {
+	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
-		return mModels[initialShapeIdx].mReport;
+		return mModels[initialShapeIdx].mReports;
 	}
 
 	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) {

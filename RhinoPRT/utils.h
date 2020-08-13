@@ -1,7 +1,5 @@
 #pragma once
 
-#include "RhinoCallbacks.h"
-
 #include "stdafx.h"
 
 #include "prt/API.h"
@@ -20,6 +18,7 @@ const std::wstring ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
 
 // forward declaration to break include loop
 class GeneratedModel;
+class RhinoCallbacks;
 
 namespace pcu {
 
@@ -44,7 +43,7 @@ namespace pcu {
 	};
 
 	struct EncoderOptions {
-		bool emitReport = false;
+		bool emitReport = true;
 		bool emitGeometry = true;
 	};
 
@@ -78,9 +77,6 @@ namespace pcu {
 	AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
 	AttributeMapPtr createAttributeMapForEncoder(const EncoderOptions& attrs, prt::AttributeMapBuilder& bld);
 	AttributeMapPtr createValidatedOptions(const std::wstring& encID, const AttributeMapPtr& unvalidatedOptions);
-
-	const ON_Mesh getMeshFromGenModel(const GeneratedModel& model);
-
 
 	/**
 	 * String and URI helpers

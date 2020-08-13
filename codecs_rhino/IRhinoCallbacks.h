@@ -1,6 +1,7 @@
 #pragma once
 
 #include "prt/Callbacks.h"
+#include "prtx/PRTUtils.h"
 
 class IRhinoCallbacks : public prt::Callbacks {
 public:
@@ -10,8 +11,15 @@ public:
 		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
 		const size_t faceCountsCount) = 0;
 
-	virtual void addReports(const size_t initialShapeIndex, const wchar_t** stringReportKeys,
-		const wchar_t** stringReportValues, size_t stringReportCount,
-		const wchar_t** floatReportKeys, const double* floatReportValues, size_t floatReportCount,
-		const wchar_t** boolReportKeys, const bool* boolReportValues, size_t boolReportCount) = 0;
+	///<summary>
+	///Adds a geometry and corresponding reports.
+	///</summary>
+	///<param name='faceRanges'>The range of the reports</param>
+	///<param name='faceRangeSize'>The number of ranges</param>
+	///<param name='reports'>An array of reports</param>
+	virtual void add(const size_t initialShapeIndex, const double* vertexCoords, const size_t vextexCoordsCount,
+		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
+		const size_t faceCountsCount, const uint32_t* faceRanges, size_t faceRangeSize, const prt::AttributeMap** reports) = 0;
+
+	virtual void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) = 0;
 };

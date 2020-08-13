@@ -1,5 +1,7 @@
 #include "PRTUtilityModels.h"
 
+#include "Logger.h"
+
 #include <numeric>
 
 InitialShape::InitialShape() {}
@@ -36,6 +38,30 @@ InitialShape::InitialShape(const double* vertices, int vCount, const int* indice
 }
 
 InitialShape::InitialShape(const ON_Mesh& mesh) {
+	ON_wString shapeIdxStr;
+	if (!mesh.GetUserString(INIT_SHAPE_ID_KEY.c_str(), shapeIdxStr))
+	{
+		LOG_WRN << L"InitialShapeID not found in given mesh";
+		mID = -1;
+	}
+	else
+	{
+		std::wstring str(shapeIdxStr.Array());
+
+		//cast to int
+		try {
+			mID = std::stoi(str);
+		}
+		catch (std::invalid_argument) {
+			LOG_ERR << "Mesh id string was not a number, so it could not be parsed -> setting initial shape id to -1.";
+			mID = -1;
+		}
+		catch (std::out_of_range) {
+			LOG_ERR << "Mesh id could not be parsed, setting initial shape id to 0.";
+			mID = -1;
+		}
+	}
+
 	mVertices.reserve(mesh.VertexCount() * 3);
 	mIndices.reserve(mesh.FaceCount() * 4);
 	mFaceCounts.reserve(mesh.FaceCount());
@@ -62,6 +88,54 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 }
 
 GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-	const std::vector<uint32_t>& face, const std::map<std::string, std::string>& rep) :
-	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReport(rep) {}
+	const std::vector<uint32_t>& face, const Reporting::ReportMap& rep):
+	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReports(rep) { }
+
+const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
+
+	size_t nbVertices = mVertices.size() / 3;
+
+	ON_Mesh mesh(mFaces.size(), nbVertices, false, false);
+
+	// Set the initial shape id.
+	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
+
+	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
+		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
+	}
+
+	int faceid(0);
+	int currindex(0);
+	for (int face : mFaces) {
+		if (face == 3) {
+			mesh.SetTriangle(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2]);
+			currindex += face;
+			faceid++;
+		}
+		else if (face == 4) {
+			mesh.SetQuad(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2], mIndices[currindex + 3]);
+			currindex += face;
+			faceid++;
+		}
+		else {
+			//ignore face because it is invalid
+			currindex += face;
+			LOG_WRN << "Ignored face with invalid number of vertices :" << face;
+		}
+	}
+
+	// Printing a rhino error log if the created mesh is invalid
+	ON_wString log_str;
+	ON_TextLog log(log_str);
+	if (!mesh.IsValid(&log))
+	{
+		mesh.Dump(log);
+		LOG_ERR << log_str;
+	}
+	
+	mesh.ComputeVertexNormals();
+	mesh.Compact();
+
+	return mesh;
+}
 

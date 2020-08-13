@@ -4,8 +4,8 @@
 
 #include <memory>
 
-PRTContext& PRTContext::get() {
-	static PRTContext prtCtx;
+std::unique_ptr<PRTContext>& PRTContext::get() {
+	static std::unique_ptr<PRTContext> prtCtx = std::make_unique<PRTContext>();
 	return prtCtx;
 }
 

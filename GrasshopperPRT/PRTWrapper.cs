@@ -18,6 +18,9 @@ namespace GrasshopperPRT
     /// </summary>
     class PRTWrapper
     {
+        public static String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
+
+
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention=CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
@@ -57,6 +60,20 @@ namespace GrasshopperPRT
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeString(string rule, string fullName, string value);
 
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int GroupeReportsByKeys();
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetReportKeys([In, Out] IntPtr pKeysArray, [In, Out] IntPtr pKeyTypeArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetDoubleReports(string repKey, [In, Out] IntPtr reports);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetStringReports(string repKey, [In, Out] IntPtr reports);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetBoolReports(string repKey, [In, Out] IntPtr reports);
 
         /// <summary>
         /// NOT USED ANYMORE.
@@ -112,13 +129,103 @@ namespace GrasshopperPRT
             // thus a conversion is necessary.
             GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
 
+            int currIsID = 0;
+
             foreach(var mesh in meshes) {
+                //if some of the initial shapes failed to be processed, add empty meshes to keep the synchronization between input and output.
+                int id = Convert.ToInt32(mesh.GetUserString(INIT_SHAPE_IDX_KEY));
+                if (id != -1) // If id == -1, we don't check syncronization since mesh id were wrongly setup at the beginning.
+                { 
+                    while (currIsID < id)
+                    {
+                        mesh_struct.Append(null);
+                        currIsID++;
+                    }
+                }
+                currIsID++;
+
                 GH_Mesh gh_mesh = null;
                 bool status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
                 if (status) mesh_struct.Append(gh_mesh);
             }
 
             return mesh_struct;
+        }
+
+        public static List<ReportAttribute> GetReportKeys()
+        {
+            var keyArray = new ClassArrayString();
+            var keyTypeArray = new SimpleArrayInt();
+
+            var ptrKeyArray = keyArray.NonConstPointer();
+            var ptrKeyTypeArray = keyTypeArray.NonConstPointer();
+            
+            bool success = PRTWrapper.GetReportKeys(ptrKeyArray, ptrKeyTypeArray);
+
+            if (!success) return null;
+
+            string[] keys = keyArray.ToArray();
+            int[] types = keyTypeArray.ToArray();
+
+            if (keys.Length != types.Length) return null;
+
+            List<ReportAttribute> reports = new List<ReportAttribute>();
+            for(int i = 0; i < keys.Length; ++i)
+            {
+                reports.Add(new ReportAttribute(keys[i], (ReportTypes)types[i]));
+            }
+
+            keyArray.Dispose();
+            keyTypeArray.Dispose();
+
+            return reports;
+        }
+
+        public static bool?[] GetBoolReports(string key)
+        {
+            bool?[] reports = null;
+
+            using(var reportsArray = new SimpleArrayInt())
+            {
+                var pReportsArr = reportsArray.NonConstPointer();
+
+                PRTWrapper.GetBoolReports(key, pReportsArr);
+                reports = Array.ConvertAll<int, bool?>(reportsArray.ToArray(), x => {
+                    if (x == -1) return null;
+                    return Convert.ToBoolean(x);
+                });
+            }
+
+            return reports;
+        }
+
+        public static double[] GetDoubleReports(string key)
+        {
+            double[] reports = null;
+
+            using (var reportsArray = new SimpleArrayDouble()) {
+                var pReportsArr = reportsArray.NonConstPointer();
+
+                PRTWrapper.GetDoubleReports(key, pReportsArr);
+                reports = reportsArray.ToArray();
+            }
+
+            return reports;
+        }
+
+        public static string[] GetStringReports(string key)
+        {
+            string[] reports = null;
+
+            using (var reportsArray = new ClassArrayString())
+            {
+                var pReportsArr = reportsArray.NonConstPointer();
+
+                PRTWrapper.GetStringReports(key, pReportsArr);
+                reports = reportsArray.ToArray();
+            }
+
+            return reports;
         }
 
         /// <summary>

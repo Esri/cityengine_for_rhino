@@ -121,7 +121,7 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 
 	// Add the objects to the Rhino scene.
 	for (auto& model : generated_models) {
-		ON_Mesh mesh = pcu::getMeshFromGenModel(model);
+		const ON_Mesh mesh = model.getMeshFromGenModel();
 
 		auto meshOBject = context.m_doc.AddMeshObject(mesh);
 	}

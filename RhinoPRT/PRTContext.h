@@ -11,7 +11,7 @@
 * Helper struct to manage PRT lifetime
 */
 struct PRTContext final {
-	static PRTContext& get();
+	static std::unique_ptr<PRTContext>& get();
 
 	explicit PRTContext(prt::LogLevel minimalLogLevel = prt::LogLevel::LOG_DEBUG);
 

@@ -26,7 +26,11 @@ namespace GrasshopperPRT
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
-        int mCurrentInputCount;
+
+        /// To keep track of existing output reports
+        int mReportOutputCount;
+        List<IGH_Param> mReportOutputs;
+        List<ReportAttribute> mReportAttributes;
 
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -44,8 +48,9 @@ namespace GrasshopperPRT
             bool status = PRTWrapper.InitializeRhinoPRT();
             if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
 
-            mCurrentInputCount = 0;
             mRuleAttributes = new RuleAttribute[0];
+            mReportOutputCount = 0;
+            mReportOutputs = new List<IGH_Param>();
         }
 
         /// <summary>
@@ -97,7 +102,6 @@ namespace GrasshopperPRT
                 foreach (RuleAttribute attrib in mRuleAttributes)
                 {
                     CreateInputParameter(attrib);
-                    mCurrentInputCount++;
                 }
 
                 // Update the node layout
@@ -114,19 +118,23 @@ namespace GrasshopperPRT
             // Transform each geometry to a mesh
             List<Mesh> meshes = new List<Mesh>();
 
+            int initShapeIdx = 0;
             foreach(IGH_GeometricGoo geom in shapeTree.AllData(true))
             {
                 Mesh mesh = convertToMesh(geom);
+
                 if (mesh != null)
                 {
+                    mesh.SetUserString(PRTWrapper.INIT_SHAPE_IDX_KEY, initShapeIdx.ToString());
                     meshes.Add(mesh);
                 }
+                initShapeIdx++;
             }
 
             // No compatible mesh was given
             if (meshes.Count == 0) return;
 
-            // Testing the wrappers provided by Rhino SDK to pass 
+            // Testing the wrappers provided by Rhino SDK to pass rhino objects.
             if(!PRTWrapper.AddMeshTestWrapper(meshes)) return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
@@ -134,9 +142,73 @@ namespace GrasshopperPRT
 
             // Testing the wrappers provided by RhinoCommon SDK to pass GH_Mesh to RhinoPRT.
             var generatedMeshes = PRTWrapper.GenerateMeshTestWrapper();
-            //Mesh generatedMesh = PRTWrapper.GenerateMesh();
-            
+
+            // Processing cga reports
+            int reportCount = PRTWrapper.GroupeReportsByKeys();
+
+            // Create new outputs if needed
+            if (mReportOutputCount < reportCount)
+            {
+                mReportAttributes = PRTWrapper.GetReportKeys();
+
+                ResetOutputParams();
+                ExpireSolution(true);
+                return;
+            }
+
+            // Set cga report values to output
+            OutputReports(DA);
+
             DA.SetDataTree(0, generatedMeshes);
+        }
+
+        private void ResetOutputParams()
+        {
+
+            foreach(var rep in mReportAttributes)
+            {
+                // add output only if it is not present in mReportOutputs
+                var newOutput = rep.ToIGH_Param();
+                if(newOutput != null && isNewReport(newOutput))
+                {
+                    mReportOutputs.Add(newOutput);
+                    Params.RegisterOutputParam(newOutput);
+                }
+                
+            }
+
+            mReportOutputCount = mReportAttributes.Count;
+        }
+
+        private bool isNewReport(IGH_Param newOutput)
+        {
+            Predicate<IGH_Param> hasName = param => param.Name == newOutput.Name;
+            return !mReportOutputs.Exists(hasName);
+        }
+
+        private void OutputReports(IGH_DataAccess DA)
+        {
+            if (mReportAttributes == null) return;
+
+            foreach (var report in mReportAttributes)
+            {
+                var type = report.getType();
+                if(type == ReportTypes.PT_BOOL)
+                {
+                    var reportList = PRTWrapper.GetBoolReports(report.getKey());
+                    DA.SetDataList(report.getKey(), reportList);
+                }
+                else if(type == ReportTypes.PT_STRING)
+                {
+                    var reportList = PRTWrapper.GetStringReports(report.getKey());
+                    DA.SetDataList(report.getKey(), reportList);
+                }
+                else if(type == ReportTypes.PT_FLOAT)
+                {
+                    var reportList = PRTWrapper.GetDoubleReports(report.getKey());
+                    DA.SetDataList(report.getKey(), reportList);
+                }
+            }
         }
 
         /// <summary>
@@ -205,7 +277,7 @@ namespace GrasshopperPRT
         /// Add rule attributes inputs to the grasshopper component.
         /// </summary>
         /// <param name="attrib">A rule attribute to add as input</param>
-        public void CreateInputParameter(RuleAttribute attrib)
+        private void CreateInputParameter(RuleAttribute attrib)
         {
             switch (attrib.attribType)
             {

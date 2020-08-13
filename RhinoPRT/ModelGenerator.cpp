@@ -153,7 +153,7 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 			}
 
 			for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
-				new_geometry.emplace_back(idx, roc->getVertices(idx), roc->getIndices(idx), roc->getFaces(idx),
+				new_geometry.emplace_back(initial_geom[idx].getID(), roc->getVertices(idx), roc->getIndices(idx), roc->getFaces(idx),
 					roc->getReport(idx));
 			}
 		}
