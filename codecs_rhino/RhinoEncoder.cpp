@@ -128,8 +128,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 	std::vector<prtx::IndexVector> uvCounts;
 	std::vector<prtx::IndexVector> uvIndices;
 
-	prtx::GeometryPtrVector geometries;
-	std::vector<prtx::MaterialPtrVector> materials;
+	//prtx::GeometryPtrVector geometries;
+	//std::vector<prtx::MaterialPtrVector> materials;
 
 	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
@@ -140,6 +140,10 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		vertexCoords.clear();
 		faceIndices.clear();
 		faceCounts.clear();
+		matAttrMap.clear();
+		uvs.clear();
+		uvCounts.clear();
+		uvIndices.clear();
 
 		// 1st pass: scan the geometries to preallocate the sizes of vectors
 		uint32_t numCoords = 0;
@@ -198,7 +202,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 #endif
 
 				// FOR NOW THIS WILL ONLY BE EXECUTED FOR THE COLORMAP
-				for (auto uvSet = 0; uvSet < uvs.size(); uvSet++) {
+				for (auto uvSet = 0; uvSet < 1/*uvs.size()*/; uvSet++) {
 					// append texture coordinates
 					const prtx::DoubleVector& currUVs = (uvSet < numUVSets) ? mesh->getUVCoords(uvSet) : EMPTY_UVS;
 					const auto& src = currUVs.empty() ? uvs0 : currUVs;
@@ -242,7 +246,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		}
 
 		cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
-			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size());
+			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size(),
+			);
 	}
 }
 
