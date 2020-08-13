@@ -3,15 +3,15 @@
 namespace RhinoPRT {
 
 	bool RhinoPRTAPI::InitializeRhinoPRT() {
-		return PRTContext::get().isAlive();
+		return PRTContext::get()->isAlive();
 	}
 
 	void RhinoPRTAPI::ShutdownRhinoPRT() {
-		PRTContext::get().~PRTContext();
+		PRTContext::get().reset();
 	}
 
 	bool RhinoPRTAPI::IsPRTInitialized() {
-		return PRTContext::get().isAlive();
+		return PRTContext::get()->isAlive();
 	}
 
 	int RhinoPRTAPI::GetRuleAttributeCount() {
@@ -23,8 +23,8 @@ namespace RhinoPRT {
 	}
 
 	void RhinoPRTAPI::SetRPKPath(const std::wstring &rpk_path) {
-		if (wcscmp(mPackagePath.c_str(), rpk_path.c_str()) == 0) return;
-
+		if (mPackagePath == rpk_path) return;
+		
 		mPackagePath = rpk_path;
 
 		// initialize the resolve map and rule infos here. Create the vector of rule attributes.

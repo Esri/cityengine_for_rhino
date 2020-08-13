@@ -30,7 +30,7 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUt
 	LOG_DBG << "In RhinoCallback::addReport";
 #endif
 
-	if (!reports.get()) {
+	if (!reports) {
 		LOG_WRN << "Trying to add null report, ignoring.";
 		return;
 	}
