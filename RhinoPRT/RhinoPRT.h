@@ -46,6 +46,7 @@ namespace RhinoPRT {
 		int groupReportsByKeys();
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
+		const Reporting::ReportsVector getReportsOfModel(int initialShapeID);
 
 	private:
 

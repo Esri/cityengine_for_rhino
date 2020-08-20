@@ -140,6 +140,7 @@ namespace RhinoPRT {
 	}
 
 	///<summary>
+	/// NOT USED ANYMORE BUT WE KEEP IT FOR NOW IN CASE IT IS USEFUL IN THE FUTURE.
 	///The reports of all generated models will be grouped together by keys. 
 	///Meaning that all reports with the same key will be added to a vector.
 	///</summary>
@@ -156,6 +157,13 @@ namespace RhinoPRT {
 		}
 
 		return mGroupedReports.getReportCount();
+	}
+
+	const Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeID)
+	{
+		const auto& reports = mGeneratedModels.at(initialShapeID).getReport();
+
+		return Reporting::ToReportsVector(reports);
 	}
 
 }
@@ -304,6 +312,17 @@ extern "C" {
 			else
 				pReportsArr->Append((int)report.mBoolReport);
 		}
+	}
+
+	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray, 
+		ON_SimpleArray<double>* pDoubleReports, 
+		ON_SimpleArray<bool>* pBoolReports,
+		ON_ClassArray<ON_wString>* pStringReports)
+	{
+		const auto reports = RhinoPRT::myPRTAPI->getReportsOfModel(initialShapeId);
+
+		//Sort the reports by Type.
+
 	}
 
 }

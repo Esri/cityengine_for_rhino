@@ -81,6 +81,13 @@ namespace Reporting {
 		}
 	}
 
+	const ReportsVector ToReportsVector(const ReportMap& reports)
+	{
+		ReportsVector rep;
+		rep.insert(rep.end(), reports.begin(), reports.end());
+		return rep;
+	}
+
 	void GroupedReports::add(const ReportAttribute& report, const int shapeID)
 	{
 		if (report.mType == prt::AttributeMap::PrimitiveType::PT_BOOL) {

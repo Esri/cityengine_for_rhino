@@ -24,15 +24,36 @@ namespace GrasshopperPRT
 		PT_COUNT
     };
 
-    class ReportAttribute
+    public class ReportAttribute: Param_GenericObject
     {
+        public override GH_Exposure Exposure => GH_Exposure.hidden;
+
         string mKey;
         ReportTypes mType;
 
+        // the value of the report will be one of these
+        string mStringValue = "";
+        double mDoubleValue = 0;
+        bool mBoolValue = false;
+
         public ReportAttribute(string key, ReportTypes type)
         {
+            this.Name = key;
+            this.NickName = key;
             this.mKey = key;
             this.mType = type;
+            this.Optional = true;
+            this.Access = GH_ParamAccess.item;
+        }
+
+        public ReportAttribute(string key, string nickname, ReportTypes type)
+        {
+            this.Name = key;
+            this.NickName = nickname;
+            this.mKey = key;
+            this.mType = type;
+            this.Optional = true;
+            this.Access = GH_ParamAccess.item;
         }
 
         public IGH_Param ToIGH_Param()
@@ -52,5 +73,14 @@ namespace GrasshopperPRT
 
         public string getKey() { return mKey; }
         public ReportTypes getType() { return mType; }
+
+
+
+        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type)
+        {
+            ReportAttribute report = new ReportAttribute(name, nickname, type);
+
+            return report;
+        }
     }
 }
