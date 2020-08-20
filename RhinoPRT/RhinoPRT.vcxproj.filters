@@ -51,6 +51,9 @@
     <ClCompile Include="ReportAttribute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MaterialAttribute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RhinoPRTApp.h">
@@ -93,6 +96,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ReportAttribute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialAttribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="version.h">

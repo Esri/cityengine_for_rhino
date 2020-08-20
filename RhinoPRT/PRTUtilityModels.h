@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils.h"
+#include "MaterialAttribute.h"
 #include "ReportAttribute.h"
 
 #include <vector>
@@ -62,6 +63,9 @@ public:
 	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
 		const std::vector<uint32_t>& face, const Reporting::ReportMap& rep);
 
+	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
+		const std::vector<uint32_t>& face, const ON_2fPointArray& uvs, const ReportMap& rep, const Materials::MaterialsMap& mats);
+
 	GeneratedModel() {}
 	~GeneratedModel() {}
 
@@ -80,7 +84,16 @@ public:
 		return mFaces;
 	}
 	const Reporting::ReportMap& getReport() const {
+
+	const ON_2fPointArray& getUVs() const {
+		return mUVs;
+	}
+
 		return mReports;
+	}
+
+	const Materials::MaterialsMap& getMaterials() const {
+		return mMaterials;
 	}
 
 private:
@@ -89,4 +102,6 @@ private:
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
 	Reporting::ReportMap mReports;
+	ON_2fPointArray mUVs;
+	Materials::MaterialsMap mMaterials;
 };

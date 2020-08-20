@@ -105,6 +105,32 @@ extern "C" {
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports);
 
+	inline RHINOPRT_API bool GetMaterial(int meshID, int* uvSet, wchar_t* pColorMapTex, int pColorMapTexSize)
+	{
+		const auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
+
+		if (meshID >= genModels.size()) {
+			LOG_ERR << L"ShapeID out of range";
+			return false;
+		}
+
+		auto& currModel = genModels[meshID];
+		auto& material = currModel.getMaterials();
+		auto& mat = material.at(0); // First facerange
+
+		if (mat.mColormapTexID != -1) {
+			//a colormap is present -> get the colormap texture path
+
+			*uvSet = 0;
+			auto path = mat.mRhinoMat.m_textures[mat.mColormapTexID].m_image_file_reference.RelativePath();
+			auto path_str = std::wstring(path.Array());
+			wcscpy_s(pColorMapTex, pColorMapTexSize, path_str.c_str());
+			return true;
+		}
+
+		return false;
+	}
+
 }
 
 #endif RHINOPRT

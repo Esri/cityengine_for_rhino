@@ -16,6 +16,7 @@
 #include <fstream>
 #include <numeric>
 #include <algorithm>
+#include <set>
 
 #define DEBUG
 
@@ -32,11 +33,194 @@ namespace {
 		.instancing(false)
 		.triangulate(true)
 		.mergeVertices(false)
-		.cleanupUVs(false)
+		.cleanupUVs(true)
 		.cleanupVertexNormals(false)
 		.mergeByMaterial(true);
 
 	const prtx::PRTUtils::AttributeMapPtr convertReportToAttributeMap(const prtx::ReportsPtr& r) {
+
+	template<typename T>
+	std::pair<std::vector<const T*>, std::vector<size_t>> toPtrVec(const std::vector<std::vector<T>>& v) {
+		std::vector<const T*> pv(v.size());
+		std::vector<size_t> ps(v.size());
+		for (size_t i = 0; i < v.size(); i++) {
+			pv[i] = v[i].data();
+			ps[i] = v[i].size();
+		}
+		return std::make_pair(pv, ps);
+	}
+
+	std::wstring getTexturePath(const prtx::TexturePtr& t) {
+		return t->getURI()->getPath();
+	}
+
+	// we blacklist all CGA-style material attribute keys, see prtx/Material.h
+	const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
+		L"ambient.b",
+		L"ambient.g",
+		L"ambient.r",
+		L"bumpmap.rw",
+		L"bumpmap.su",
+		L"bumpmap.sv",
+		L"bumpmap.tu",
+		L"bumpmap.tv",
+		L"color.a",
+		L"color.b",
+		L"color.g",
+		L"color.r",
+		L"color.rgb",
+		L"colormap.rw",
+		L"colormap.su",
+		L"colormap.sv",
+		L"colormap.tu",
+		L"colormap.tv",
+		L"dirtmap.rw",
+		L"dirtmap.su",
+		L"dirtmap.sv",
+		L"dirtmap.tu",
+		L"dirtmap.tv",
+		L"normalmap.rw",
+		L"normalmap.su",
+		L"normalmap.sv",
+		L"normalmap.tu",
+		L"normalmap.tv",
+		L"opacitymap.rw",
+		L"opacitymap.su",
+		L"opacitymap.sv",
+		L"opacitymap.tu",
+		L"opacitymap.tv",
+		L"specular.b",
+		L"specular.g",
+		L"specular.r",
+		L"specularmap.rw",
+		L"specularmap.su",
+		L"specularmap.sv",
+		L"specularmap.tu",
+		L"specularmap.tv",
+		L"bumpmap",
+		/*L"colormap",*/
+		L"dirtmap",
+		L"normalmap",
+		L"opacitymap",
+		L"specularmap"
+
+	//#if PRT_VERSION_MAJOR > 1
+		// also blacklist CGA-style PBR attrs from CE 2019.0, PRT 2.x
+		,
+		L"opacitymap.mode",
+		L"emissive.b",
+		L"emissive.g",
+		L"emissive.r",
+		L"emissivemap.rw",
+		L"emissivemap.su",
+		L"emissivemap.sv",
+		L"emissivemap.tu",
+		L"emissivemap.tv",
+		L"metallicmap.rw",
+		L"metallicmap.su",
+		L"metallicmap.sv",
+		L"metallicmap.tu",
+		L"metallicmap.tv",
+		L"occlusionmap.rw",
+		L"occlusionmap.su",
+		L"occlusionmap.sv",
+		L"occlusionmap.tu",
+		L"occlusionmap.tv",
+		L"roughnessmap.rw",
+		L"roughnessmap.su",
+		L"roughnessmap.sv",
+		L"roughnessmap.tu",
+		L"roughnessmap.tv",
+		L"emissivemap",
+		L"metallicmap",
+		L"occlusionmap",
+		L"roughnessmap"
+	//#endif
+	};
+
+	void convertMaterialToAttributeMap(
+				prtx::PRTUtils::AttributeMapBuilderPtr amb,
+				const prtx::Material& prtxAttr, 
+				const prtx::WStringVector& keys)
+	{
+#ifdef DEBUG
+		LOG_DBG << L"Converting material " << prtxAttr.name();
+#endif
+
+		for (const auto& key : keys) {
+			if (MATERIAL_ATTRIBUTE_BLACKLIST.count(key) > 0)
+				continue;
+
+#ifdef DEBUG
+			LOG_DBG << L"   key: " << key;
+#endif
+
+			switch (prtxAttr.getType(key)) {
+			case prt::Attributable::PT_BOOL:
+				amb->setBool(key.c_str(), prtxAttr.getBool(key) == prtx::PRTX_TRUE);
+				break;
+			case prt::Attributable::PT_FLOAT: 
+				amb->setFloat(key.c_str(), prtxAttr.getFloat(key));
+				break;
+			case prt::Attributable::PT_INT:
+				amb->setInt(key.c_str(), prtxAttr.getInt(key));
+				break;
+			case prt::Attributable::PT_STRING: {
+				const std::wstring& v = prtxAttr.getString(key);
+				amb->setString(key.c_str(), v.c_str());
+				break;
+			}
+			case prt::Attributable::PT_BOOL_ARRAY: {
+				const prtx::BoolVector& ba = prtxAttr.getBoolArray(key);
+				auto boo = std::unique_ptr<bool[]>(new bool[ba.size()]);
+				for (size_t i = 0; i < ba.size(); ++i) {
+					boo[i] = (ba[i] == prtx::PRTX_TRUE);
+				}
+				amb->setBoolArray(key.c_str(), boo.get(), ba.size());
+				break;
+			}
+			case prt::Attributable::PT_INT_ARRAY: {
+				const auto& array = prtxAttr.getIntArray(key);
+				amb->setIntArray(key.c_str(), &array[0], array.size());
+				break;
+			}
+			case prt::AttributeMap::PT_FLOAT_ARRAY: {
+				const std::vector<double>& array = prtxAttr.getFloatArray(key);
+				amb->setFloatArray(key.c_str(), array.data(), array.size());
+				break;
+			}
+			case prt::Attributable::PT_STRING_ARRAY: {
+				const prtx::WStringVector& strVect = prtxAttr.getStringArray(key);
+				std::vector<const wchar_t*> pVect = toPtrVec(strVect);
+				amb->setStringArray(key.c_str(), pVect.data(), pVect.size());
+				break;
+			}
+			case prtx::Material::PT_TEXTURE: {
+				const auto& tex = prtxAttr.getTexture(key);
+				const std::wstring texPath = getTexturePath(tex);
+				amb->setString(key.c_str(), texPath.c_str());
+				break;
+			}
+			case prtx::Material::PT_TEXTURE_ARRAY: {
+				const auto& texArray = prtxAttr.getTextureArray(key);
+
+				prtx::WStringVector texPaths(texArray.size());
+				std::transform(texArray.begin(), texArray.end(), texPaths.begin(), getTexturePath);
+
+				std::vector<const wchar_t*> pTexPaths = toPtrVec(texPaths);
+				amb->setStringArray(key.c_str(), pTexPaths.data(), pTexPaths.size());
+				break;
+			}
+			default:
+#ifdef DEBUG
+				LOG_DBG << L"Ignored attribute " << key;
+#endif
+			}
+		}
+	}
+
+	const prt::AttributeMap* convertReportToAttributeMap(const prtx::ReportsPtr& r)
+	{
 
 		prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
@@ -114,6 +298,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 								   const prtx::EncodePreparator::InstanceVector& instances,
 								   IRhinoCallbacks* cb) 
 {
+	//bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
+	bool emitMaterials = true;
 	std::vector<uint32_t> shapeIDs;
 
 	uint32_t vertexIndexBase = 0;
@@ -124,12 +310,12 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 	std::vector<uint32_t> faceIndices;
 	std::vector<uint32_t> faceCounts;
 
+	uint32_t faceCount = 0;
+	std::vector<uint32_t> faceRanges;
+
 	std::vector<prtx::DoubleVector> uvs;
 	std::vector<prtx::IndexVector> uvCounts;
 	std::vector<prtx::IndexVector> uvIndices;
-
-	//prtx::GeometryPtrVector geometries;
-	//std::vector<prtx::MaterialPtrVector> materials;
 
 	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
@@ -181,6 +367,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 			vertexIndexBase += (uint32_t)verts.size() / 3;
 
 			if (emitMaterials) {
+				faceRanges.push_back(faceCount);
+				faceCount += mesh->getFaceCount();
+
 				const prtx::MaterialPtr& mat = material.at(mi);
 				const uint32_t requiredUVSetsByMaterial = scanValidTextures(mat);
 
@@ -189,6 +378,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				{ 
 					maxNumUVSets = 1; 
 					uvIndexBases.resize(maxNumUVSets, 0u);
+					uvs.resize(1); // TODO change that
+					uvCounts.resize(1);
+					uvIndices.resize(1);
 				}
 
 				// copy first uv set data. 
@@ -244,10 +436,34 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				matAttrMap.push_back(amb->createAttributeMapAndReset());
 			}
 		}
+		faceRanges.push_back(faceCount);
 
-		cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
+		assert(matAttrMap.empty() || matAttrMap.size() == faceRanges.size() - 1);
+		assert(shapeIDs.size() == faceRanges.size() - 1);
+
+		assert(uvs.size() == uvCounts.size());
+		assert(uvs.size() == uvIndices.size());
+
+		auto puvs = toPtrVec(uvs);
+		auto puvCounts = toPtrVec(uvCounts);
+		auto puvIndices = toPtrVec(uvIndices);
+
+		assert(uvs.size() == puvCounts.first.size());
+		assert(uvs.size() == puvCounts.second.size());
+
+		//cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
+		//	faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size());
+		cb->add(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
 			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size(),
-			);
+
+			puvs.first.data(), puvs.second.data(),
+			puvCounts.first.data(), puvCounts.second.data(),
+			puvIndices.first.data(), puvIndices.second.data(),
+			uvs.size(),
+
+			faceRanges.data(), faceRanges.size(),
+			matAttrMap.empty() ? nullptr : matAttrMap.data()
+		);
 	}
 }
 

@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CCommandApplyRulePackage.cpp" />
+    <ClCompile Include="MaterialAttribute.cpp" />
     <ClCompile Include="ModelGenerator.cpp" />
     <ClCompile Include="PRTUtilityModels.cpp" />
     <ClCompile Include="ReportAttribute.cpp" />
@@ -33,6 +34,7 @@
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MaterialAttribute.h" />
     <ClInclude Include="ModelGenerator.h" />
     <ClInclude Include="PRTUtilityModels.h" />
     <ClInclude Include="Logger.h" />

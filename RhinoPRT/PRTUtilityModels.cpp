@@ -89,17 +89,27 @@ GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<
 	const std::vector<uint32_t>& face, const Reporting::ReportMap& rep):
 	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReports(rep) { }
 
+GeneratedModel::GeneratedModel(const size_t & initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices, const std::vector<uint32_t>& face,
+	const ON_2fPointArray& uvs, const ReportMap & rep, const Materials::MaterialsMap & mats):
+	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mUVs(uvs), mReports(rep), mMaterials(mats) { }
+
 const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 
 	size_t nbVertices = mVertices.size() / 3;
 
-	ON_Mesh mesh(mFaces.size(), nbVertices, false, false);
+	ON_Mesh mesh(mFaces.size(), nbVertices, true, true);
 
 	// Set the initial shape id.
 	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
 
 	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
 		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
+	}
+
+	// Fill in texture coordinates
+	// just assigning the array doesn't work
+	for (size_t i = 0; i < mUVs.Count(); ++i) {
+		mesh.m_T.Append(mUVs[i]);
 	}
 
 	int faceid(0);
@@ -132,7 +142,7 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 	}
 	
 	mesh.ComputeVertexNormals();
-	mesh.Compact();
+	//mesh.Compact();
 
 	return mesh;
 }

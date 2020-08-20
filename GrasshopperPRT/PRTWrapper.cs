@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Rhino.DocObjects;
 
 using Rhino.Runtime.InteropWrappers;
 
@@ -62,6 +63,12 @@ namespace GrasshopperPRT
         [In, Out] IntPtr pBoolReports,
         [In, Out] IntPtr pStringReports);
 
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool GetMaterialsOf(int shapeID, [In, Out] IntPtr pMatArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetMaterial(int shapeID, ref int pUvSet, StringBuilder pColorMapTex, int pColorMapTexSize);
+
         public static bool AddMesh(List<Mesh> meshes)
         {
             bool status;
@@ -82,6 +89,9 @@ namespace GrasshopperPRT
 
         public static GH_Structure<GH_Mesh> GenerateMesh()
         {
+            // The Rhino doc is needed to add new materials
+            Rhino.RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
+
             Mesh[] meshes = null;
 
             using(var arr = new SimpleArrayMeshPointer())
@@ -115,10 +125,45 @@ namespace GrasshopperPRT
 
                 GH_Mesh gh_mesh = null;
                 bool status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
-                if (status) mesh_struct.Append(gh_mesh);
+
+                //Add material, mb in another function
+                if (status) mesh_struct.Append(gh_mesh);                
             }
 
             return mesh_struct;
+        }
+
+        public static Material GetMaterialID(int meshID)
+        {
+            StringBuilder colormapPath = new StringBuilder(500);
+            int uvSet = 0;
+
+            bool status = PRTWrapper.GetMaterial(meshID, ref uvSet, colormapPath, colormapPath.Capacity);
+            if (!status) return null;
+
+            string colormap = colormapPath.ToString();
+            Texture tex = new Texture();
+            tex.FileName = colormap;
+            tex.TextureCombineMode = TextureCombineMode.Modulate;
+            tex.TextureType = TextureType.Bitmap;
+
+            Material mat = new Material();
+            mat.SetBitmapTexture(colormap);
+            mat.CommitChanges();
+
+            //int matID = Rhino.RhinoDoc.ActiveDoc.Materials.Add(mat);
+            return mat;
+        }
+
+        public static Material[] GetAllMaterialIds(int meshCount)
+        {
+            Material[] mats = new Material[meshCount];
+
+            for(int i = 0; i < meshCount; ++i)
+            {
+                mats[i] = GetMaterialID(i);
+            }
+            return mats;
         }
 
         public static List<ReportAttribute> GetAllReports(int initialShapeId)

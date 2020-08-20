@@ -12,7 +12,7 @@ public:
 		const size_t faceCountsCount) = 0;
 
 	///<summary>
-	///Adds a geometry and corresponding reports.
+	///Adds a geometry and corresponding materials.
 	///</summary>
 	///<param name='faceRanges'>The range of the reports</param>
 	///<param name='faceRangeSize'>The number of ranges</param>
@@ -24,8 +24,8 @@ public:
 		uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
 		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
 		uint32_t uvSets,
-		const prt::AttributeMap** materials,
-		const prt::AttributeMap** reports) = 0;
+		const uint32_t* faceRanges, size_t faceRangesSize,
+		const prt::AttributeMap** materials) = 0;
 
 	virtual void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) = 0;
 };

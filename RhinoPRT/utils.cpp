@@ -107,6 +107,7 @@ namespace pcu {
 	AttributeMapPtr createAttributeMapForEncoder(const EncoderOptions& encOpts, prt::AttributeMapBuilder& bld) {
 		bld.setBool(L"emitReport", encOpts.emitReport);
 		bld.setBool(L"emitGeometry", encOpts.emitGeometry);
+		bld.setBool(L"emitMaterials", encOpts.emitMaterial);
 
 		return AttributeMapPtr{ bld.createAttributeMap() };
 	}
