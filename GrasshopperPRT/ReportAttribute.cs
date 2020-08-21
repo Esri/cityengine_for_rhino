@@ -1,5 +1,6 @@
 ﻿using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +25,8 @@ namespace GrasshopperPRT
 		PT_COUNT
     };
 
-    public class ReportAttribute: Param_GenericObject
+    public class ReportAttribute: GH_Goo<Param_GenericObject>
     {
-        public override GH_Exposure Exposure => GH_Exposure.hidden;
 
         string mKey;
         ReportTypes mType;
@@ -36,24 +36,22 @@ namespace GrasshopperPRT
         double mDoubleValue = 0;
         bool mBoolValue = false;
 
+        public override bool IsValid => true;
+
+        public override string TypeName => "ReportAttribute";
+
+        public override string TypeDescription => "Contains a cga report {key : value} where key is the report name and value is either a double, a boolean or a string.";
+
         public ReportAttribute(string key, ReportTypes type)
         {
-            this.Name = key;
-            this.NickName = key;
             this.mKey = key;
             this.mType = type;
-            this.Optional = true;
-            this.Access = GH_ParamAccess.item;
         }
 
         public ReportAttribute(string key, string nickname, ReportTypes type)
         {
-            this.Name = key;
-            this.NickName = nickname;
             this.mKey = key;
             this.mType = type;
-            this.Optional = true;
-            this.Access = GH_ParamAccess.item;
         }
 
         public IGH_Param ToIGH_Param()
@@ -74,13 +72,42 @@ namespace GrasshopperPRT
         public string getKey() { return mKey; }
         public ReportTypes getType() { return mType; }
 
-
-
-        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type)
+        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type, string value)
         {
             ReportAttribute report = new ReportAttribute(name, nickname, type);
-
+            report.mStringValue = value;
             return report;
+        }
+
+        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type, double value)
+        {
+            ReportAttribute report = new ReportAttribute(name, nickname, type);
+            report.mDoubleValue = value;
+            return report;
+        }
+
+        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type, bool value)
+        {
+            ReportAttribute report = new ReportAttribute(name, nickname, type);
+            report.mBoolValue = value;
+            return report;
+        }
+
+        public override IGH_Goo Duplicate()
+        {
+            return this;
+        }
+
+        public override string ToString()
+        {
+            string value;
+
+            if (mType == ReportTypes.PT_FLOAT) value = mDoubleValue.ToString();
+            else if (mType == ReportTypes.PT_BOOL) value = mBoolValue.ToString();
+            else if (mType == ReportTypes.PT_STRING) value = mStringValue;
+            else value = "UNDEFINED";
+
+            return "[" + mKey + ": " +  value + "]";
         }
     }
 }

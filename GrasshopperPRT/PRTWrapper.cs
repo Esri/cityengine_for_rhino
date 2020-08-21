@@ -75,6 +75,12 @@ namespace GrasshopperPRT
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetBoolReports(string repKey, [In, Out] IntPtr reports);
 
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetReports(int initialShapeId, [In, Out] IntPtr pKeysArray,
+        [In, Out] IntPtr pDoubleReports,
+        [In, Out] IntPtr pBoolReports,
+        [In, Out] IntPtr pStringReports);
+
         /// <summary>
         /// NOT USED ANYMORE.
         /// THIS IS THE PREVIOUS ADD MESH FUNCTION, BEFORE THE "SimpleArrayMeshPointer" WAS USED.
@@ -226,6 +232,58 @@ namespace GrasshopperPRT
             }
 
             return reports;
+        }
+
+        public static List<ReportAttribute> GetAllReports(int initialShapeId)
+        {
+            var keys = new ClassArrayString();
+            var stringReports = new ClassArrayString();
+            var doubleReports = new SimpleArrayDouble();
+            var boolReports = new SimpleArrayInt();
+
+            var pKeys = keys.NonConstPointer();
+            var pStrReps = stringReports.NonConstPointer();
+            var pDblReps = doubleReports.NonConstPointer();
+            var pBoolReps = boolReports.NonConstPointer();
+
+            GetReports(initialShapeId, pKeys, pDblReps, pBoolReps, pStrReps);
+
+            var keysArray = keys.ToArray();
+            var stringReportsArray = stringReports.ToArray();
+            var doubleReportsArray = doubleReports.ToArray();
+            var boolReportsArray = boolReports.ToArray();
+
+            keys.Dispose();
+            stringReports.Dispose();
+            doubleReports.Dispose();
+            boolReports.Dispose();
+
+            if (keysArray.Length != stringReportsArray.Length + doubleReportsArray.Length + boolReportsArray.Length)
+            {
+                // Something went wrong don't output anything.
+                return null;
+            }
+
+            List<ReportAttribute> ras = new List<ReportAttribute>(keysArray.Length);
+            int kId = 0;
+
+            for(int i = 0; i < doubleReportsArray.Length; ++i)
+            {
+                ras.Add(ReportAttribute.CreateReportAttribute(keysArray[kId], keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
+                kId++;
+            }
+            for(int i = 0; i < boolReportsArray.Length; ++i)
+            {
+                ras.Add(ReportAttribute.CreateReportAttribute(keysArray[kId], keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
+                kId++;    
+            }
+            for(int i = 0; i < stringReportsArray.Length; ++i)
+            {
+                ras.Add(ReportAttribute.CreateReportAttribute(keysArray[kId], keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
+                kId++;
+            }
+
+            return ras;
         }
 
         /// <summary>

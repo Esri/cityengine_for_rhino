@@ -150,20 +150,20 @@ namespace GrasshopperPRT
             var generatedMeshes = PRTWrapper.GenerateMeshTestWrapper();
 
             // Processing cga reports
-            int reportCount = PRTWrapper.GroupeReportsByKeys();
+            //int reportCount = PRTWrapper.GroupeReportsByKeys();
 
             // Create new outputs if needed
-            if (mReportOutputCount < reportCount)
+            /*if (mReportOutputCount < reportCount)
             {
                 mReportAttributes = PRTWrapper.GetReportKeys();
 
                 ResetOutputParams();
                 ExpireSolution(true);
                 return;
-            }
+            }*/
 
             // Set cga report values to output
-            OutputReports(DA);
+            OutputReports(DA, generatedMeshes);
 
             DA.SetDataTree(0, generatedMeshes);
         }
@@ -192,29 +192,21 @@ namespace GrasshopperPRT
             return !mReportOutputs.Exists(hasName);
         }
 
-        private void OutputReports(IGH_DataAccess DA)
+        private void OutputReports(IGH_DataAccess DA, GH_Structure<GH_Mesh> gh_meshes)
         {
-            if (mReportAttributes == null) return;
-
-            foreach (var report in mReportAttributes)
+            GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
+            
+            int count = gh_meshes.DataCount;
+            for(int meshID = 0; meshID < count; ++meshID)
             {
-                var type = report.getType();
-                if(type == ReportTypes.PT_BOOL)
-                {
-                    var reportList = PRTWrapper.GetBoolReports(report.getKey());
-                    DA.SetDataList(report.getKey(), reportList);
-                }
-                else if(type == ReportTypes.PT_STRING)
-                {
-                    var reportList = PRTWrapper.GetStringReports(report.getKey());
-                    DA.SetDataList(report.getKey(), reportList);
-                }
-                else if(type == ReportTypes.PT_FLOAT)
-                {
-                    var reportList = PRTWrapper.GetDoubleReports(report.getKey());
-                    DA.SetDataList(report.getKey(), reportList);
-                }
+                var reports = PRTWrapper.GetAllReports(meshID);
+
+                // The new branch
+                GH_Path path = new GH_Path(meshID);
+                reports.ForEach(x => outputTree.Append(x, path));
             }
+
+            DA.SetDataTree(1, outputTree);
         }
 
         /// <summary>

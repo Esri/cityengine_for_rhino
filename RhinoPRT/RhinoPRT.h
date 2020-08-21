@@ -46,7 +46,7 @@ namespace RhinoPRT {
 		int groupReportsByKeys();
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
-		const Reporting::ReportsVector getReportsOfModel(int initialShapeID);
+		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
 
 	private:
 
@@ -106,6 +106,11 @@ extern "C" {
 	RHINOPRT_API void GetStringReports(const wchar_t* key, ON_ClassArray<ON_wString>* pReportsArr);
 
 	RHINOPRT_API void GetBoolReports(const wchar_t* key, ON_SimpleArray<int>* pReportsArr);
+
+	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray,
+		ON_SimpleArray<double>* pDoubleReports,
+		ON_SimpleArray<bool>* pBoolReports,
+		ON_ClassArray<ON_wString>* pStringReports);
 
 }
 

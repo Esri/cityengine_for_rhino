@@ -159,7 +159,7 @@ namespace RhinoPRT {
 		return mGroupedReports.getReportCount();
 	}
 
-	const Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeID)
+	Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeID)
 	{
 		const auto& reports = mGeneratedModels.at(initialShapeID).getReport();
 
@@ -319,10 +319,44 @@ extern "C" {
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports)
 	{
-		const auto reports = RhinoPRT::myPRTAPI->getReportsOfModel(initialShapeId);
+		auto reports = RhinoPRT::myPRTAPI->getReportsOfModel(initialShapeId);
 
-		//Sort the reports by Type.
+		/*
+		left.float	-> right.all OK
+		left.bool	-> right.float OK
+					-> right.bool OK
+					-> right.string OK
+		left.string -> right.all OK
+		*/
+		//Sort the reports by Type. The order is Double -> Bool -> String
+		std::sort(reports.begin(), reports.end(), [](Reporting::ReportAttribute& left, Reporting::ReportAttribute& right) -> bool {
+			if (left.mType == right.mType) return true;
+			if (left.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) return true;
+			if (right.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) return false;
+			if (left.mType == prt::AttributeMap::PrimitiveType::PT_STRING) return false;
+			if(left.mType == prt::AttributeMap::PrimitiveType::PT_BOOL && right.mType == prt::AttributeMap::PrimitiveType::PT_STRING) return true;
+			return false;
+		});
 
+		for (const auto& report : reports)
+		{
+			pKeysArray->Append(ON_wString(report.mReportName.c_str()));
+
+			switch (report.mType)
+			{
+			case prt::AttributeMap::PrimitiveType::PT_FLOAT:
+				pDoubleReports->Append(report.mDoubleReport);
+				break;
+			case prt::AttributeMap::PrimitiveType::PT_BOOL:
+				pBoolReports->Append(report.mBoolReport);
+				break;
+			case prt::AttributeMap::PrimitiveType::PT_STRING:
+				pStringReports->Append(ON_wString(report.mStringReport.c_str()));
+				break;
+			default:
+				//REMOVE LAST KEY
+				pKeysArray->Remove(pKeysArray->Count() - 1);
+			}
+		}
 	}
-
 }

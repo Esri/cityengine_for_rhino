@@ -23,10 +23,22 @@ namespace Reporting {
 		double mDoubleReport = 0;
 		bool mBoolReport = false;
 		int mIntReport = 0;
+
+		ReportAttribute() {}
+
+		ReportAttribute(const ReportAttribute& rep) {
+			mInitialShapeIndex = rep.mInitialShapeIndex;
+			mReportName = rep.mReportName;
+			mType = rep.mType;
+			mStringReport = rep.mStringReport;
+			mDoubleReport = rep.mDoubleReport;
+			mBoolReport = rep.mBoolReport;
+			mIntReport = rep.mIntReport;
+		}
 	};
 
 	using ReportsVector = std::vector<ReportAttribute>;
-	using ReportMap = std::unordered_map<std::wstring, ReportAttribute>;
+	using ReportMap = std::map<std::wstring, ReportAttribute>;
 	using GroupedReportMap = std::map<std::wstring, std::vector<ReportAttribute>>;
 
 	const std::vector<ReportAttribute> EMPTY_REPORTS;
@@ -35,7 +47,7 @@ namespace Reporting {
 	ReportAttribute getEmptyReport(int shapeID);
 
 	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
-	const ReportsVector ToReportsVector(const ReportMap& reports);
+	ReportsVector ToReportsVector(const ReportMap& reports);
 
 	class GroupedReports {
 	public:
