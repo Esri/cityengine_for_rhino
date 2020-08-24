@@ -18,10 +18,12 @@ namespace Materials {
 
 		ON_Material mRhinoMat;
 		int mColormapTexID = -1;
+
 	};
 
 	using MaterialsMap = std::map<size_t, MaterialAttribute>;
 
+	ON_Color extractColor(const wchar_t* key, const prt::AttributeMap* attrMap);
 	void extractMaterials(const size_t initialShapeIndex, const size_t faceRangeId, const prt::AttributeMap* attrMap, MaterialsMap& matMap);
 
 } // namespace Materials

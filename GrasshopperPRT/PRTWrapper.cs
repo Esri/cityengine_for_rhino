@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Drawing;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -67,7 +68,10 @@ namespace GrasshopperPRT
         public static extern bool GetMaterialsOf(int shapeID, [In, Out] IntPtr pMatArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetMaterial(int shapeID, ref int pUvSet, StringBuilder pColorMapTex, int pColorMapTexSize);
+        public static extern bool GetMaterial(int shapeID, ref int pUvSet, StringBuilder pColorMapTex, int pColorMapTexSize, 
+                                                [In, Out] IntPtr pDiffuseColor,
+                                                [In, Out] IntPtr pAmbientColor,
+                                                [In, Out] IntPtr pSpecularColor);
 
         public static bool AddMesh(List<Mesh> meshes)
         {
@@ -138,7 +142,16 @@ namespace GrasshopperPRT
             StringBuilder colormapPath = new StringBuilder(500);
             int uvSet = 0;
 
-            bool status = PRTWrapper.GetMaterial(meshID, ref uvSet, colormapPath, colormapPath.Capacity);
+            SimpleArrayInt diffuseArray = new SimpleArrayInt();
+            var pDiffuseArray = diffuseArray.NonConstPointer();
+
+            SimpleArrayInt ambientArray = new SimpleArrayInt();
+            var pAmbientArray = ambientArray.NonConstPointer();
+
+            SimpleArrayInt specularArray = new SimpleArrayInt();
+            var pSpecularArray = specularArray.NonConstPointer();
+
+            bool status = PRTWrapper.GetMaterial(meshID, ref uvSet, colormapPath, colormapPath.Capacity, pDiffuseArray, pAmbientArray, pSpecularArray);
             if (!status) return null;
 
             string colormap = colormapPath.ToString();
@@ -147,11 +160,33 @@ namespace GrasshopperPRT
             tex.TextureCombineMode = TextureCombineMode.Modulate;
             tex.TextureType = TextureType.Bitmap;
 
+            var diffuseColor = diffuseArray.ToArray();
+            var ambientColor = ambientArray.ToArray();
+            var specularColor = specularArray.ToArray();
+            diffuseArray.Dispose();
+            ambientArray.Dispose();
+            specularArray.Dispose();
+
             Material mat = new Material();
             mat.SetBitmapTexture(colormap);
-            mat.CommitChanges();
+            
+            if(diffuseColor.Length == 3)
+            {
+                mat.DiffuseColor = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);
+            }
+
+            if(ambientColor.Length == 3)
+            {
+                mat.AmbientColor = Color.FromArgb(ambientColor[0], ambientColor[1], ambientColor[2]);
+            }
+
+            if(specularColor.Length == 3)
+            {
+                mat.SpecularColor = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
+            }
 
             //int matID = Rhino.RhinoDoc.ActiveDoc.Materials.Add(mat);
+            mat.CommitChanges();
             return mat;
         }
 

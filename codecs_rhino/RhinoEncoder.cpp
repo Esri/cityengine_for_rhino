@@ -393,45 +393,47 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				LOG_DBG << "-- mesh: numUVSets = " << numUVSets;
 #endif
 
-				// FOR NOW THIS WILL ONLY BE EXECUTED FOR THE COLORMAP
-				for (auto uvSet = 0; uvSet < 1/*uvs.size()*/; uvSet++) {
-					// append texture coordinates
-					const prtx::DoubleVector& currUVs = (uvSet < numUVSets) ? mesh->getUVCoords(uvSet) : EMPTY_UVS;
-					const auto& src = currUVs.empty() ? uvs0 : currUVs;
+				if (numUVSets > 0)
+				{
+					// FOR NOW THIS WILL ONLY BE EXECUTED FOR THE COLORMAP
+					for (auto uvSet = 0; uvSet < 1/*uvs.size()*/; uvSet++) {
+						// append texture coordinates
+						const prtx::DoubleVector& currUVs = (uvSet < numUVSets) ? mesh->getUVCoords(uvSet) : EMPTY_UVS;
+						const auto& src = currUVs.empty() ? uvs0 : currUVs;
 
-					//insert the curent uvs into the corresponding position in the vector of uvs
-					auto& tgt = uvs[uvSet];
-					tgt.insert(tgt.end(), src.begin(), src.end());
+						//insert the curent uvs into the corresponding position in the vector of uvs
+						auto& tgt = uvs[uvSet];
+						tgt.insert(tgt.end(), src.begin(), src.end());
 
-					// append uv face counts
-					const prtx::IndexVector& faceUVCounts = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVCounts(uvSet) : faceUVCounts0;
-					assert(faceUVCounts.size() == mesh->getFaceCount());
-					auto& tgtCounts = uvCounts[uvSet];
-					tgtCounts.insert(tgtCounts.end(), faceUVCounts.begin(), faceUVCounts.end());
-
-#ifdef DEBUG
-					LOG_DBG << "  -- uvset " << uvSet << ": face counts size = " << faceUVCounts.size();
-#endif // DEBUG
-					
-					// append uv vertex indices
-					for (uint32_t faceId = 0, faceCount = faceUVCounts.size(); faceId < faceCount; ++faceId) {
-						const uint32_t* faceUVIdx0 = (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
-						const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVIndices(faceId, uvSet) : faceUVIdx0;
-						const uint32_t faceUVCnt = faceUVCounts[faceId];
+						// append uv face counts
+						const prtx::IndexVector& faceUVCounts = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVCounts(uvSet) : faceUVCounts0;
+						assert(faceUVCounts.size() == mesh->getFaceCount());
+						auto& tgtCounts = uvCounts[uvSet];
+						tgtCounts.insert(tgtCounts.end(), faceUVCounts.begin(), faceUVCounts.end());
 
 #ifdef DEBUG
-						LOG_DBG << "      faceId " << faceId << ": faceUVCnt = " << faceUVCnt << ", faceVtxCnt = " << mesh->getFaceVertexCount(faceId);
+						LOG_DBG << "  -- uvset " << uvSet << ": face counts size = " << faceUVCounts.size();
 #endif // DEBUG
 
-						for (uint32_t vrtxId = 0; vrtxId < faceUVCnt; ++vrtxId) {
-							uvIndices[uvSet].push_back(uvIndexBases[uvSet] + faceUVIdx[vrtxId]);
+						// append uv vertex indices
+						for (uint32_t faceId = 0, faceCount = faceUVCounts.size(); faceId < faceCount; ++faceId) {
+							const uint32_t* faceUVIdx0 = (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
+							const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVIndices(faceId, uvSet) : faceUVIdx0;
+							const uint32_t faceUVCnt = faceUVCounts[faceId];
+
+#ifdef DEBUG
+							LOG_DBG << "      faceId " << faceId << ": faceUVCnt = " << faceUVCnt << ", faceVtxCnt = " << mesh->getFaceVertexCount(faceId);
+#endif // DEBUG
+
+							for (uint32_t vrtxId = 0; vrtxId < faceUVCnt; ++vrtxId) {
+								uvIndices[uvSet].push_back(uvIndexBases[uvSet] + faceUVIdx[vrtxId]);
+							}
+
 						}
 
+						uvIndexBases[uvSet] += src.size() / 2u;
 					}
-
-					uvIndexBases[uvSet] += src.size() / 2u;
 				}
-
 				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys());
 				matAttrMap.push_back(amb->createAttributeMapAndReset());
 			}

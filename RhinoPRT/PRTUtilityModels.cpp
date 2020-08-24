@@ -142,7 +142,7 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 	}
 	
 	mesh.ComputeVertexNormals();
-	//mesh.Compact();
+	mesh.Compact();
 
 	return mesh;
 }

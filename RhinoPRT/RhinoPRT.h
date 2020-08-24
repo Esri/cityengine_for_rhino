@@ -105,7 +105,10 @@ extern "C" {
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports);
 
-	inline RHINOPRT_API bool GetMaterial(int meshID, int* uvSet, wchar_t* pColorMapTex, int pColorMapTexSize)
+	inline RHINOPRT_API bool GetMaterial(int meshID, int* uvSet, wchar_t* pColorMapTex, int pColorMapTexSize, 
+		ON_SimpleArray<int>* pDiffuseColor,
+		ON_SimpleArray<int>* pAmbientColor,
+		ON_SimpleArray<int>* pSpecularColor)
 	{
 		const auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
 
@@ -120,15 +123,28 @@ extern "C" {
 
 		if (mat.mColormapTexID != -1) {
 			//a colormap is present -> get the colormap texture path
-
 			*uvSet = 0;
 			auto path = mat.mRhinoMat.m_textures[mat.mColormapTexID].m_image_file_reference.RelativePath();
 			auto path_str = std::wstring(path.Array());
 			wcscpy_s(pColorMapTex, pColorMapTexSize, path_str.c_str());
-			return true;
 		}
+		
+		auto diffuse = mat.mRhinoMat.Diffuse();
+		pDiffuseColor->Append(diffuse.Red());
+		pDiffuseColor->Append(diffuse.Green());
+		pDiffuseColor->Append(diffuse.Blue());
 
-		return false;
+		auto ambient = mat.mRhinoMat.Ambient();
+		pAmbientColor->Append(ambient.Red());
+		pAmbientColor->Append(ambient.Green());
+		pAmbientColor->Append(ambient.Blue());
+
+		auto specular = mat.mRhinoMat.Specular();
+		pSpecularColor->Append(specular.Red());
+		pSpecularColor->Append(specular.Green());
+		pSpecularColor->Append(specular.Blue());
+
+		return true;
 	}
 
 }
