@@ -149,19 +149,6 @@ namespace GrasshopperPRT
             // Testing the wrappers provided by RhinoCommon SDK to pass GH_Mesh to RhinoPRT.
             var generatedMeshes = PRTWrapper.GenerateMeshTestWrapper();
 
-            // Processing cga reports
-            //int reportCount = PRTWrapper.GroupeReportsByKeys();
-
-            // Create new outputs if needed
-            /*if (mReportOutputCount < reportCount)
-            {
-                mReportAttributes = PRTWrapper.GetReportKeys();
-
-                ResetOutputParams();
-                ExpireSolution(true);
-                return;
-            }*/
-
             // Set cga report values to output
             OutputReports(DA, generatedMeshes);
 

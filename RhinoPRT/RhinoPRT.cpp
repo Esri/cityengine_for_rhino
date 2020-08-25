@@ -161,9 +161,16 @@ namespace RhinoPRT {
 
 	Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeID)
 	{
-		const auto& reports = mGeneratedModels.at(initialShapeID).getReport();
+		// find the report with given shape id.
+		const auto found_reports = std::find_if(mGeneratedModels.begin(), mGeneratedModels.end(), 
+			[&initialShapeID](const GeneratedModel& model) { return model.getInitialShapeIndex() == initialShapeID; });
 
-		return Reporting::ToReportsVector(reports);
+		if (found_reports != mGeneratedModels.end()) {
+			const auto& reports = found_reports->getReport();
+			return Reporting::ToReportsVector(reports);
+		}
+
+		return Reporting::EMPTY_REPORTS;
 	}
 
 }

@@ -27,14 +27,14 @@ namespace GrasshopperPRT
 
     public class ReportAttribute: GH_Goo<Param_GenericObject>
     {
-
+        int mShapeID;
         string mKey;
         ReportTypes mType;
 
         // the value of the report will be one of these
-        string mStringValue = "";
-        double mDoubleValue = 0;
-        bool mBoolValue = false;
+        private string mStringValue = "";
+        private double mDoubleValue = 0;
+        private bool mBoolValue = false;
 
         public override bool IsValid => true;
 
@@ -42,14 +42,23 @@ namespace GrasshopperPRT
 
         public override string TypeDescription => "Contains a cga report {key : value} where key is the report name and value is either a double, a boolean or a string.";
 
-        public ReportAttribute(string key, ReportTypes type)
+        public int ShapeID { get => mShapeID; }
+        public string StringValue { get => mStringValue; set => mStringValue = value; }
+        public double DoubleValue { get => mDoubleValue; set => mDoubleValue = value; }
+        public bool BoolValue { get => mBoolValue; set => mBoolValue = value; }
+
+        public ReportAttribute(int shapeID, string key, ReportTypes type)
+           : base()
         {
+            this.mShapeID = shapeID;
             this.mKey = key;
             this.mType = type;
         }
 
-        public ReportAttribute(string key, string nickname, ReportTypes type)
+        public ReportAttribute(int shapeID, string key, string nickname, ReportTypes type)
+            : base()
         {
+            this.mShapeID = shapeID;
             this.mKey = key;
             this.mType = type;
         }
@@ -72,23 +81,23 @@ namespace GrasshopperPRT
         public string getKey() { return mKey; }
         public ReportTypes getType() { return mType; }
 
-        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type, string value)
+        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, string value)
         {
-            ReportAttribute report = new ReportAttribute(name, nickname, type);
+            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
             report.mStringValue = value;
             return report;
         }
 
-        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type, double value)
+        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, double value)
         {
-            ReportAttribute report = new ReportAttribute(name, nickname, type);
+            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
             report.mDoubleValue = value;
             return report;
         }
 
-        public static ReportAttribute CreateReportAttribute(string name, string nickname, ReportTypes type, bool value)
+        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, bool value)
         {
-            ReportAttribute report = new ReportAttribute(name, nickname, type);
+            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
             report.mBoolValue = value;
             return report;
         }
@@ -107,7 +116,7 @@ namespace GrasshopperPRT
             else if (mType == ReportTypes.PT_STRING) value = mStringValue;
             else value = "UNDEFINED";
 
-            return "[" + mKey + ": " +  value + "]";
+            return "[ ShapeID: " + mShapeID + ", Key: " + mKey + ", Value: " +  value + " ]";
         }
     }
 }

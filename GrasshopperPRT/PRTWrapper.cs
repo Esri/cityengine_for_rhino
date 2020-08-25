@@ -158,7 +158,7 @@ namespace GrasshopperPRT
             return mesh_struct;
         }
 
-        public static List<ReportAttribute> GetReportKeys()
+        /*public static List<ReportAttribute> GetReportKeys(int shapeID)
         {
             var keyArray = new ClassArrayString();
             var keyTypeArray = new SimpleArrayInt();
@@ -185,7 +185,7 @@ namespace GrasshopperPRT
             keyTypeArray.Dispose();
 
             return reports;
-        }
+        }*/
 
         public static bool?[] GetBoolReports(string key)
         {
@@ -269,17 +269,17 @@ namespace GrasshopperPRT
 
             for(int i = 0; i < doubleReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(keysArray[kId], keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeId, keysArray[kId], keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
                 kId++;
             }
             for(int i = 0; i < boolReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(keysArray[kId], keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeId, keysArray[kId], keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
                 kId++;    
             }
             for(int i = 0; i < stringReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(keysArray[kId], keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeId, keysArray[kId], keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
                 kId++;
             }
 

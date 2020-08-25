@@ -98,6 +98,10 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 	// Set the initial shape id.
 	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
 
+	//TODO
+	//ON_TextureCoordinates coords();
+	//mesh.SetTextureCoordinates(coords, nullptr, false);
+
 	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
 		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
 	}
