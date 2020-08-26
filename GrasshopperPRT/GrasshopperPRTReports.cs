@@ -32,8 +32,8 @@ namespace GrasshopperPRT
         {
             pManager.AddGenericParameter(REPORTS_INPUT_NAME, REPORTS_INPUT_NAME, "The CGA Reports", GH_ParamAccess.tree);
 
-            // The 3 filter options: GH_Interval on initial shape. String or list of String to filter keys.
-            pManager.AddIntervalParameter(FILTER_SHAPE_ID, FILTER_SHAPE_ID, "An interval on shape IDs to select.", GH_ParamAccess.item, Interval.Unset);
+            // The 3 filter options: list of GH_Interval on initial shape. String or list of String to filter keys.
+            pManager.AddIntervalParameter(FILTER_SHAPE_ID, FILTER_SHAPE_ID, "An interval on shape IDs to select.", GH_ParamAccess.list, Interval.Unset);
             pManager.AddTextParameter(FILTER_REPORT_KEY, FILTER_REPORT_KEY, "The report keys to select.", GH_ParamAccess.list, string.Empty);
             pManager.AddTextParameter(FILTER_REPORT_VALUE, FILTER_REPORT_VALUE, "The report values to select. " +
                 "Each branch of the tree must represent the chosen values for the corresponding key given in the key filter.",
@@ -58,35 +58,126 @@ namespace GrasshopperPRT
             {
                 return;
             }
+            var reports = GetReports(ref reportTree);
 
             List<int> initialShapeIds = new List<int>();
             List<string> reportKeys = new List<string>();
             List<List<string>> valueKeys = new List<List<string>>();
-            GetFilters(DA, ref initialShapeIds, ref reportKeys, ref valueKeys);
+            bool applyFilters = GetFilters(DA, ref initialShapeIds, ref reportKeys, ref valueKeys);
+
+            var filteredReports = FilterReports(applyFilters, reports, initialShapeIds, reportKeys, valueKeys);
+
+
+        }
+
+        private Dictionary<int, Dictionary<string, ReportAttribute>> FilterReports(bool applyFilters,
+                                                                                   List<Dictionary<string, ReportAttribute>> reports,
+                                                                                   List<int> initialShapeIds,
+                                                                                   List<string> reportKeys,
+                                                                                   List<List<string>> valueKeys)
+        {
+            var filteredReports = new Dictionary<int, Dictionary<string, ReportAttribute>>();
+
+            if (!applyFilters)
+            {
+                int i = 0;
+                reports.ForEach(rep => { filteredReports.Add(i, rep);
+                                         ++i; });
+                return filteredReports;
+            }
+
+            // Filtering out reports that were not selected.
+            if (initialShapeIds.Count > 0)
+            {
+                initialShapeIds.ForEach(i => filteredReports.Add(i, reports[i]));
+            }
+            else
+            {
+                // If the list of shape id is empty, keep all reports.
+                for (int i = 0; i < reports.Count; i++)
+                {
+                    filteredReports.Add(i, reports[i]);
+                }
+            }
+
+            //Filter out the report keys
+            if (reportKeys.Count > 0 && reportKeys[0] != string.Empty)
+            {
+                var tmpReports = new Dictionary<int, Dictionary<string, ReportAttribute>>();
+
+
+                foreach(var currShape in filteredReports)
+                {
+                    foreach(var currReport in currShape.Value)
+                    {
+                        int keyId = reportKeys.FindIndex(x => x == currReport.Key);
+                        if(keyId != -1)
+                        {
+                            if (!tmpReports.ContainsKey(currShape.Key))
+                            {
+                                tmpReports.Add(currShape.Key, new Dictionary<string, ReportAttribute>());
+                            }
+                            
+
+                            //filter values
+                            if(valueKeys[keyId].Count > 0 && valueKeys[keyId][0] != string.Empty)
+                            {
+                                var values = valueKeys[keyId];
+                                if(values.Contains(currReport.Value.getFormatedValue()))
+                                {
+                                    tmpReports[currShape.Key].Add(currReport.Key, currReport.Value);
+                                }
+                            }
+                            else
+                            {
+                                tmpReports[currShape.Key].Add(currReport.Key, currReport.Value);
+                            }
+                        }
+                    }
+                }
+
+                filteredReports = tmpReports;
+            }
             
+            return filteredReports;
+        }
+
+        private List<Dictionary<string, ReportAttribute>> GetReports(ref GH_Structure<IGH_Goo> reportTree)
+        {
             var reports = new List<Dictionary<string, ReportAttribute>>();
 
             // extract the report tree to have a list of attribute by initial shape.
-            foreach(var attr in reportTree.AllData(true))
+            foreach (var attr in reportTree.AllData(true))
             {
                 var report = (ReportAttribute)attr;
 
-                while(reports.Count <= report.ShapeID)
+                while (reports.Count <= report.ShapeID)
                 {
                     reports.Add(new Dictionary<string, ReportAttribute>());
                 }
 
                 reports[report.ShapeID].Add(report.getKey(), report);
             }
+
+            return reports;
         }
 
         private bool GetFilters(IGH_DataAccess DA, ref List<int> initialShapeIds, ref List<string> reportKeys, ref List<List<string>> valueKeys)
         {
-            GH_Interval id_interval = new GH_Interval();
-            if(!DA.GetData(FILTER_SHAPE_ID, ref id_interval))
+            List<GH_Interval> id_intervals = new List<GH_Interval>();
+            if(!DA.GetDataList(FILTER_SHAPE_ID, id_intervals))
             {
                 return false;
             }
+            // Going through the list of intervals to get every selected shape ids.
+            foreach(var interval in id_intervals)
+            {
+                for(int i = (int)interval.Value.T0; i <= interval.Value.T1; ++i)
+                {
+                    initialShapeIds.Add(i);
+                }
+            }
+            
 
             if(!DA.GetDataList(FILTER_REPORT_KEY, reportKeys))
             {
@@ -98,10 +189,19 @@ namespace GrasshopperPRT
             {
                 return false;
             }
+            var branches = valuesTree.Branches;
+
+            foreach(var branch in branches)
+            {
+                var tmpList = new List<string>();
+
+                branch.ForEach(x => tmpList.Add(x.Value));
+
+                valueKeys.Add(tmpList);
+            }
 
             return true;
         }
-
 
         /// <summary>
         /// Provides an Icon for the component.

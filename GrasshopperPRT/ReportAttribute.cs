@@ -78,6 +78,21 @@ namespace GrasshopperPRT
             }
         }
 
+        public string getFormatedValue()
+        {
+            switch(mType)
+            {
+                case ReportTypes.PT_FLOAT:
+                    return mDoubleValue.ToString();
+                case ReportTypes.PT_STRING:
+                    return mStringValue;
+                case ReportTypes.PT_BOOL:
+                    return mBoolValue.ToString();
+                default:
+                    return "Undefined";
+            }
+        }
+
         public string getKey() { return mKey; }
         public ReportTypes getType() { return mType; }
 
