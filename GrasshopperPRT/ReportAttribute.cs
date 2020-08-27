@@ -133,5 +133,17 @@ namespace GrasshopperPRT
 
             return "[ ShapeID: " + mShapeID + ", Key: " + mKey + ", Value: " +  value + " ]";
         }
+
+        public string ToNiceString()
+        {
+            string value;
+
+            if (mType == ReportTypes.PT_FLOAT) value = mDoubleValue.ToString();
+            else if (mType == ReportTypes.PT_BOOL) value = mBoolValue.ToString();
+            else if (mType == ReportTypes.PT_STRING) value = mStringValue;
+            else value = "UNDEFINED";
+
+            return "  " + mKey + " : " + value;
+        }
     }
 }

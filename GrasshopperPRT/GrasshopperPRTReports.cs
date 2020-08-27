@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Grasshopper.Documentation;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 
+using System.Drawing;
+
 namespace GrasshopperPRT
 {
     public class GrasshopperPRTReports : GH_Component
     {
+        const string MESH_INPUT = "Meshes";
         const string REPORTS_INPUT_NAME = "Reports";
         const string FILTER_SHAPE_ID = "Shape ID Filter";
         const string FILTER_REPORT_KEY = "Report Key Filter";
         const string FILTER_REPORT_VALUE = "Report Value Filter";
+        const string REPORTS_DISPLAY_PARAM = "Reports Display";
+        const string REPORTS_LOCATION = "Reports Location";
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -30,6 +35,7 @@ namespace GrasshopperPRT
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            pManager.AddMeshParameter(MESH_INPUT, MESH_INPUT, "Mesh input is used to compute where to put the reports display.", GH_ParamAccess.list);
             pManager.AddGenericParameter(REPORTS_INPUT_NAME, REPORTS_INPUT_NAME, "The CGA Reports", GH_ParamAccess.tree);
 
             // The 3 filter options: list of GH_Interval on initial shape. String or list of String to filter keys.
@@ -45,6 +51,12 @@ namespace GrasshopperPRT
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            //There are 2 outputs: First one is the report preview location.
+            //                     Second one is the report preview, to display the report data in rhino.
+            pManager.AddPlaneParameter(REPORTS_LOCATION, REPORTS_LOCATION, "Point location indicating the text preview position.", GH_ParamAccess.list);
+            pManager.AddTextParameter(REPORTS_DISPLAY_PARAM, REPORTS_DISPLAY_PARAM, 
+                "Formated text reports that can be displayed in Rhino using a text preview component.",
+                GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -53,8 +65,11 @@ namespace GrasshopperPRT
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var meshList = new List<GH_Mesh>();
+            bool locateFromMeshes = DA.GetDataList(0, meshList);
+
             var reportTree = new GH_Structure<IGH_Goo>();
-            if(!DA.GetDataTree<IGH_Goo>(0, out reportTree))
+            if(!DA.GetDataTree<IGH_Goo>(1, out reportTree))
             {
                 return;
             }
@@ -67,7 +82,79 @@ namespace GrasshopperPRT
 
             var filteredReports = FilterReports(applyFilters, reports, initialShapeIds, reportKeys, valueKeys);
 
+            // Format the text output
+            var previewReports = GetFormatedReports(filteredReports, meshList.Count);
 
+            if (locateFromMeshes)
+            {
+                var pointList = ComputeReportPositions(meshList);
+
+                DA.SetDataList(REPORTS_LOCATION, pointList);
+            }
+
+            DA.SetDataList(REPORTS_DISPLAY_PARAM, previewReports);
+        }
+
+        private List<Plane> ComputeReportPositions(List<GH_Mesh> meshList)
+        {
+            var pointList = new List<Plane>();
+
+            foreach (var mesh in meshList)
+            {
+                if (mesh != null)
+                {
+                    var bbox = mesh.Value.GetBoundingBox(false);
+                    var zTop = bbox.Corner(false, false, false).Z;
+                    var xLeft = bbox.Corner(true, false, false).X;
+                    var center = bbox.Center;
+                    center.X = xLeft;
+                    center.Z = zTop;
+
+                    var plane = new Plane(center, Vector3d.ZAxis);
+
+                    pointList.Add(plane);
+                }
+                else
+                {
+                    pointList.Add(Plane.Unset);
+                }
+            }
+
+            return pointList;
+        }
+
+        private List<string> GetFormatedReports(Dictionary<int, Dictionary<string, ReportAttribute>> reports, int initialReportCount)
+        {
+            List<string> output = new List<string>(); 
+
+            foreach(var currShapeReps in reports)
+            {
+                List<string> reportArray = new List<string>();
+
+                reportArray.Add("Reports of shape " + currShapeReps.Key.ToString());
+
+                foreach(var report in currShapeReps.Value)
+                {
+                    reportArray.Add(report.Value.ToNiceString());
+                }
+
+                string formatedReports = string.Join("\n", reportArray.ToArray());
+
+                while(output.Count < currShapeReps.Key)
+                {
+                    output.Add(String.Empty);
+                }
+
+                output.Add(formatedReports);
+            }
+
+            //Fill in empty reports to keep the synchronization.
+            while(output.Count < initialReportCount)
+            {
+                output.Add(String.Empty);
+            }
+
+            return output;
         }
 
         private Dictionary<int, Dictionary<string, ReportAttribute>> FilterReports(bool applyFilters,
@@ -103,8 +190,15 @@ namespace GrasshopperPRT
             //Filter out the report keys
             if (reportKeys.Count > 0 && reportKeys[0] != string.Empty)
             {
-                var tmpReports = new Dictionary<int, Dictionary<string, ReportAttribute>>();
+                // If there is only one string in the list, it could be a multiline string containing
+                // the keys to keep.
+                if (reportKeys.Count == 1 && reportKeys[0].Contains("\n"))
+                {
+                    char[] separators = { '\n', '\r' };
+                    reportKeys = new List<string>(reportKeys[0].Split(separators, StringSplitOptions.RemoveEmptyEntries));
+                }
 
+                var tmpReports = new Dictionary<int, Dictionary<string, ReportAttribute>>();
 
                 foreach(var currShape in filteredReports)
                 {
@@ -120,7 +214,7 @@ namespace GrasshopperPRT
                             
 
                             //filter values
-                            if(valueKeys[keyId].Count > 0 && valueKeys[keyId][0] != string.Empty)
+                            if(valueKeys.Count > keyId && valueKeys[keyId].Count > 0 && valueKeys[keyId][0] != string.Empty)
                             {
                                 var values = valueKeys[keyId];
                                 if(values.Contains(currReport.Value.getFormatedValue()))
@@ -169,6 +263,7 @@ namespace GrasshopperPRT
             {
                 return false;
             }
+
             // Going through the list of intervals to get every selected shape ids.
             foreach(var interval in id_intervals)
             {
@@ -177,7 +272,6 @@ namespace GrasshopperPRT
                     initialShapeIds.Add(i);
                 }
             }
-            
 
             if(!DA.GetDataList(FILTER_REPORT_KEY, reportKeys))
             {
