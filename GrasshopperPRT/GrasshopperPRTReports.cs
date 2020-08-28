@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Grasshopper.Documentation;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-
-using System.Drawing;
 
 namespace GrasshopperPRT
 {
@@ -19,6 +16,7 @@ namespace GrasshopperPRT
         const string FILTER_REPORT_VALUE = "Report Value Filter";
         const string REPORTS_DISPLAY_PARAM = "Reports Display";
         const string REPORTS_LOCATION = "Reports Location";
+        const string REPORTS_FILTERED = "Reports";
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -57,6 +55,7 @@ namespace GrasshopperPRT
             pManager.AddTextParameter(REPORTS_DISPLAY_PARAM, REPORTS_DISPLAY_PARAM, 
                 "Formated text reports that can be displayed in Rhino using a text preview component.",
                 GH_ParamAccess.list);
+            pManager.AddGenericParameter(REPORTS_FILTERED, REPORTS_FILTERED, "Filtered reports outputed for further processing.", GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -93,6 +92,18 @@ namespace GrasshopperPRT
             }
 
             DA.SetDataList(REPORTS_DISPLAY_PARAM, previewReports);
+
+            GH_Structure<ReportAttribute> filteredReportAttributes = new GH_Structure<ReportAttribute>();
+            foreach(var currShapeReports in filteredReports)
+            {
+                GH_Path path = new GH_Path(currShapeReports.Key);
+
+                foreach(var report in currShapeReports.Value)
+                {
+                    filteredReportAttributes.Append(report.Value, path);
+                }
+            }
+            DA.SetDataTree(2, filteredReportAttributes);
         }
 
         private List<Plane> ComputeReportPositions(List<GH_Mesh> meshList)
