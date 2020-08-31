@@ -182,18 +182,18 @@ extern "C" {
 		return RhinoPRT::get().InitializeRhinoPRT();
 	}
 
-	inline RHINOPRT_API void ShutdownRhinoPRT()
+	RHINOPRT_API void ShutdownRhinoPRT()
 	{
 		RhinoPRT::get().ShutdownRhinoPRT();
 	}
 
-	inline RHINOPRT_API void SetPackage(const wchar_t* rpk_path)
+	RHINOPRT_API void SetPackage(const wchar_t* rpk_path)
 	{
 		std::wstring str(rpk_path);
 		RhinoPRT::get().SetRPKPath(str);
 	}
 
-	inline RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh)
+	RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh)
 	{
 		if (pMesh == nullptr) return false;
 
@@ -206,12 +206,12 @@ extern "C" {
 		return true;
 	}
 
-	inline RHINOPRT_API void ClearInitialShapes()
+	RHINOPRT_API void ClearInitialShapes()
 	{
 		RhinoPRT::get().ClearInitialShapes();
 	}
 
-	inline RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray)
+	RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray)
 	{
 		if (pMeshArray == nullptr) {
 			LOG_ERR << L"Aborting generation, given a null Mesh array.";
@@ -233,12 +233,12 @@ extern "C" {
 		return true;
 	}
 
-	inline RHINOPRT_API int GetRuleAttributesCount()
+	RHINOPRT_API int GetRuleAttributesCount()
 	{
 		return RhinoPRT::get().GetRuleAttributeCount();
 	}
 
-	inline RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type)
+	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type)
 	{
 		RuleAttributes ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 
@@ -252,73 +252,24 @@ extern "C" {
 		return true;
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value)
+	RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value)
 	{
 		RhinoPRT::get().fillAttributeFromNode<double>(std::wstring(rule), std::wstring(fullName), value);
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value)
+	RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value)
 	{
 		RhinoPRT::get().fillAttributeFromNode<bool>(std::wstring(rule), std::wstring(fullName), value);
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value)
+	RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value)
 	{
 		RhinoPRT::get().fillAttributeFromNode<int>(std::wstring(rule), std::wstring(fullName), value);
 	}
 
-	inline RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
+	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
 	{
 		RhinoPRT::get().fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
-	}
-
-	inline RHINOPRT_API int GroupeReportsByKeys()
-	{
-		return RhinoPRT::get().groupReportsByKeys();
-	}
-
-	inline RHINOPRT_API bool GetReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray)
-	{
-		return RhinoPRT::get().getReports().getReportKeys(pKeysArray, pKeyTypeArray);
-	}
-
-	inline RHINOPRT_API void GetDoubleReports(const wchar_t* key, ON_SimpleArray<double>* pReportsArr)
-	{
-		auto reports = RhinoPRT::get().getReports().getDoubleReports(std::wstring(key));
-
-		for (auto report : reports)
-		{
-			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
-				pReportsArr->Append(std::numeric_limits<double>::quiet_NaN());
-			else
-				pReportsArr->Append(report.mDoubleReport);
-		}
-	}
-
-	inline RHINOPRT_API void GetStringReports(const wchar_t* key, ON_ClassArray<ON_wString>* pReportsArr)
-	{
-		auto reports = RhinoPRT::get().getReports().getStringReports(std::wstring(key));
-
-		for (auto report : reports)
-		{
-			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
-				pReportsArr->Append(ON_wString(Reporting::EMPTY_REPORT_STRING.c_str()));
-			else
-				pReportsArr->Append(ON_wString(report.mStringReport.c_str()));
-		}
-	}
-
-	inline RHINOPRT_API void GetBoolReports(const wchar_t* key, ON_SimpleArray<int>* pReportsArr)
-	{
-		auto reports = RhinoPRT::get().getReports().getBoolReports(std::wstring(key));
-
-		for (auto report : reports)
-		{
-			if (report.mType == prt::AttributeMap::PrimitiveType::PT_UNDEFINED)
-				pReportsArr->Append(-1); // This -1 is checked in the Grasshopper component and the corresponding output is set to null in case it is found.
-			else
-				pReportsArr->Append((int)report.mBoolReport);
-		}
 	}
 
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray, 

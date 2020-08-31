@@ -211,6 +211,7 @@ namespace GrasshopperPRT
 
                 var tmpReports = new Dictionary<int, Dictionary<string, ReportAttribute>>();
 
+                // Filter by report keys
                 foreach(var currShape in filteredReports)
                 {
                     foreach(var currReport in currShape.Value)
@@ -224,7 +225,7 @@ namespace GrasshopperPRT
                             }
                             
 
-                            //filter values
+                            // Filter by values
                             if(valueKeys.Count > keyId && valueKeys[keyId].Count > 0 && valueKeys[keyId][0] != string.Empty)
                             {
                                 var values = valueKeys[keyId];

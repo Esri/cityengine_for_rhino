@@ -20,7 +20,6 @@ namespace GrasshopperPRT
     {
         public static String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
 
-
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention=CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
@@ -28,16 +27,10 @@ namespace GrasshopperPRT
         public static extern void SetPackage(string rpk_path);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool AddShape(double[] vertices, int vCount, int[] indices, int iCount, int[] faceCount, int faceCountCount);
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool AddMeshTest([In]IntPtr pMesh);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Generate(ref IntPtr vertices, ref int vCount, ref IntPtr indices, ref int iCount, ref IntPtr faceCount, ref int faceCountCount);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GenerateTest([In,Out]IntPtr pMeshArray);
@@ -60,46 +53,13 @@ namespace GrasshopperPRT
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeString(string rule, string fullName, string value);
 
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GroupeReportsByKeys();
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetReportKeys([In, Out] IntPtr pKeysArray, [In, Out] IntPtr pKeyTypeArray);
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void GetDoubleReports(string repKey, [In, Out] IntPtr reports);
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void GetStringReports(string repKey, [In, Out] IntPtr reports);
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void GetBoolReports(string repKey, [In, Out] IntPtr reports);
-
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetReports(int initialShapeId, [In, Out] IntPtr pKeysArray,
         [In, Out] IntPtr pDoubleReports,
         [In, Out] IntPtr pBoolReports,
         [In, Out] IntPtr pStringReports);
 
-        /// <summary>
-        /// NOT USED ANYMORE.
-        /// THIS IS THE PREVIOUS ADD MESH FUNCTION, BEFORE THE "SimpleArrayMeshPointer" WAS USED.
-        /// I left it there for now in case we want to stop using the rhino wrapper.
-        /// </summary>
-        public static bool AddMesh(Mesh initialMesh)
-        {
-            // Get the initial shape params in base types.
-            initialMesh.Vertices.UseDoublePrecisionVertices = true;
-            initialMesh.Faces.ConvertTrianglesToQuads( Rhino.RhinoMath.ToRadians(2), .875 );
-
-            double[] vertices = Array.ConvertAll(initialMesh.Vertices.ToFloatArray(), x => (double)x);
-            int[] indices = initialMesh.Faces.ToIntArray(false);
-            int[] faceCount = Array.ConvertAll(initialMesh.Faces.ToArray(), x => x.IsQuad ? 4 : 3);
-            
-            return AddShape(vertices, vertices.Length, indices, indices.Length, faceCount, faceCount.Length);
-        }
-
-        public static bool AddMeshTestWrapper(List<Mesh> meshes)
+        public static bool AddMesh(List<Mesh> meshes)
         {
             bool status;
 
@@ -117,7 +77,7 @@ namespace GrasshopperPRT
             return status;
         }
 
-        public static GH_Structure<GH_Mesh> GenerateMeshTestWrapper()
+        public static GH_Structure<GH_Mesh> GenerateMesh()
         {
             Mesh[] meshes = null;
 
@@ -158,82 +118,6 @@ namespace GrasshopperPRT
             return mesh_struct;
         }
 
-        /*public static List<ReportAttribute> GetReportKeys(int shapeID)
-        {
-            var keyArray = new ClassArrayString();
-            var keyTypeArray = new SimpleArrayInt();
-
-            var ptrKeyArray = keyArray.NonConstPointer();
-            var ptrKeyTypeArray = keyTypeArray.NonConstPointer();
-            
-            bool success = PRTWrapper.GetReportKeys(ptrKeyArray, ptrKeyTypeArray);
-
-            if (!success) return null;
-
-            string[] keys = keyArray.ToArray();
-            int[] types = keyTypeArray.ToArray();
-
-            if (keys.Length != types.Length) return null;
-
-            List<ReportAttribute> reports = new List<ReportAttribute>();
-            for(int i = 0; i < keys.Length; ++i)
-            {
-                reports.Add(new ReportAttribute(keys[i], (ReportTypes)types[i]));
-            }
-
-            keyArray.Dispose();
-            keyTypeArray.Dispose();
-
-            return reports;
-        }*/
-
-        public static bool?[] GetBoolReports(string key)
-        {
-            bool?[] reports = null;
-
-            using(var reportsArray = new SimpleArrayInt())
-            {
-                var pReportsArr = reportsArray.NonConstPointer();
-
-                PRTWrapper.GetBoolReports(key, pReportsArr);
-                reports = Array.ConvertAll<int, bool?>(reportsArray.ToArray(), x => {
-                    if (x == -1) return null;
-                    return Convert.ToBoolean(x);
-                });
-            }
-
-            return reports;
-        }
-
-        public static double[] GetDoubleReports(string key)
-        {
-            double[] reports = null;
-
-            using (var reportsArray = new SimpleArrayDouble()) {
-                var pReportsArr = reportsArray.NonConstPointer();
-
-                PRTWrapper.GetDoubleReports(key, pReportsArr);
-                reports = reportsArray.ToArray();
-            }
-
-            return reports;
-        }
-
-        public static string[] GetStringReports(string key)
-        {
-            string[] reports = null;
-
-            using (var reportsArray = new ClassArrayString())
-            {
-                var pReportsArr = reportsArray.NonConstPointer();
-
-                PRTWrapper.GetStringReports(key, pReportsArr);
-                reports = reportsArray.ToArray();
-            }
-
-            return reports;
-        }
-
         public static List<ReportAttribute> GetAllReports(int initialShapeId)
         {
             var keys = new ClassArrayString();
@@ -260,7 +144,7 @@ namespace GrasshopperPRT
 
             if (keysArray.Length != stringReportsArray.Length + doubleReportsArray.Length + boolReportsArray.Length)
             {
-                // Something went wrong don't output anything.
+                // Something went wrong, don't output anything.
                 return null;
             }
 
@@ -284,64 +168,6 @@ namespace GrasshopperPRT
             }
 
             return ras;
-        }
-
-        /// <summary>
-        /// NOT USED ANYMORE.
-        /// THIS IS THE PREVIOUS GENERATE FUNCTION, BEFORE THE "SimpleArrayMeshPointer" WAS USED.
-        /// I left it there for now in case we want to stop using the rhino wrapper.
-        /// </summary>
-        /// <returns>Mesh</returns>
-        public static Mesh GenerateMesh()
-        {
-            //TODO: change that to allocate global memory in the c++ side and free it here after copy.
-            double[] vertices = new double[2000];
-            int[] indices = new int[2000];
-            int[] faceCount = new int[2000];
-            int vCount = vertices.Length;
-            int iCount = indices.Length;
-            int faceCountCount = faceCount.Length;
-
-            IntPtr vBuffer = Utils.FromArrayToIntPtr(ref vertices);
-            IntPtr iBuffer = Utils.FromArrayToIntPtr(ref indices);
-            IntPtr fCountBuffer = Utils.FromArrayToIntPtr(ref faceCount);
-           
-            bool status = Generate(ref vBuffer, ref vCount, ref iBuffer, ref iCount, ref fCountBuffer, ref faceCountCount);
-            if (!status) return new Mesh();
-
-            // Generate was successfull
-            double[] verticesResult = Utils.FromIntPtrToDoubleArray(vBuffer, vCount);
-            int[] indicesResult = Utils.FromIntPtrToIntArray(iBuffer, iCount);
-            int[] fCountResult = Utils.FromIntPtrToIntArray(fCountBuffer, faceCountCount);
-            
-            Mesh mesh = new Mesh();
-
-            // Fill vertices
-            int nbVertices = verticesResult.Length / 3;
-            for(int i = 0; i < nbVertices; ++i)
-            {
-                mesh.Vertices.Add(verticesResult[i * 3], verticesResult[i * 3 + 1], verticesResult[i * 3 + 2]);
-            }
-
-            // Fill face indices
-            int currID = 0;
-            foreach(int face in fCountResult)
-            {
-                if (currID + face > indicesResult.Length) continue;
-
-                if (face == 3)
-                {
-                    mesh.Faces.AddFace(new MeshFace(indicesResult[currID], indicesResult[currID + 1], indicesResult[currID + 2]));
-                }
-                else if( face == 4)
-                {
-                    
-                    mesh.Faces.AddFace(new MeshFace(indicesResult[currID], indicesResult[currID+1], indicesResult[currID+2], indicesResult[currID+3]));
-                }
-                currID += face;
-            }
-
-            return mesh;
         }
 
         public static RuleAttribute[] GetRuleAttributes()

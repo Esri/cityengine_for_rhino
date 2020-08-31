@@ -97,16 +97,6 @@ extern "C" {
 
 	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value);
 
-	RHINOPRT_API int GroupeReportsByKeys();
-
-	RHINOPRT_API bool GetReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray);
-
-	RHINOPRT_API void GetDoubleReports(const wchar_t* key, ON_SimpleArray<double>* pReportsArr);
-
-	RHINOPRT_API void GetStringReports(const wchar_t* key, ON_ClassArray<ON_wString>* pReportsArr);
-
-	RHINOPRT_API void GetBoolReports(const wchar_t* key, ON_SimpleArray<int>* pReportsArr);
-
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray,
 		ON_SimpleArray<double>* pDoubleReports,
 		ON_SimpleArray<bool>* pBoolReports,
