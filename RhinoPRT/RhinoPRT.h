@@ -38,6 +38,10 @@ namespace RhinoPRT {
 
 		std::vector<GeneratedModel> GenerateGeometry();
 
+		std::vector<GeneratedModel>& getGenModels() {
+			return mGeneratedModels;
+		}
+
 		template<typename T>
 		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value);
 
@@ -110,7 +114,7 @@ extern "C" {
 		ON_SimpleArray<int>* pAmbientColor,
 		ON_SimpleArray<int>* pSpecularColor)
 	{
-		const auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
+		auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
 
 		if (meshID >= genModels.size()) {
 			LOG_ERR << L"ShapeID out of range";
@@ -121,12 +125,18 @@ extern "C" {
 		auto& material = currModel.getMaterials();
 		auto& mat = material.at(0); // First facerange
 
-		if (mat.mColormapTexID != -1) {
-			//a colormap is present -> get the colormap texture path
-			*uvSet = 0;
-			auto path = mat.mRhinoMat.m_textures[mat.mColormapTexID].m_image_file_reference.RelativePath();
-			auto path_str = std::wstring(path.Array());
-			wcscpy_s(pColorMapTex, pColorMapTexSize, path_str.c_str());
+		if (mat.mDiffuseTexPath.size() > 0) { //a colormap exists
+
+			auto assetKey = pcu::toAssetKey(mat.mDiffuseTexPath);
+
+			prt::Status status;
+			const wchar_t* fullTexPath = RhinoPRT::myPRTAPI->getResolveMap()->getString(assetKey.c_str(), &status);
+
+			if (status != prt::STATUS_KEY_NOT_FOUND)
+			{
+				*uvSet = 0;
+				wcscpy_s(pColorMapTex, pColorMapTexSize, fullTexPath);
+			}
 		}
 		
 		auto diffuse = mat.mRhinoMat.Diffuse();

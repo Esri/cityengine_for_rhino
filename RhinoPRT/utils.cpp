@@ -6,7 +6,9 @@
 #include "prt/StringUtils.h"
 
 #ifdef _WIN32
-#	include <Windows.h>
+	#include <Windows.h>
+	#include <conio.h>
+	
 #else
 #	include <dlfcn.h>
 #endif
@@ -84,6 +86,34 @@ namespace pcu {
 		return std::wstring(1, getDirSeparator<wchar_t>());
 	}
 
+	std::wstring getTempDir()
+	{
+		char tempPath[_MAX_PATH];
+
+#ifdef _WIN32
+		const DWORD lgth = GetTempPathA(_MAX_PATH, tempPath);
+		if (lgth == 0) {
+			LOG_ERR << L"Failed to retrieve temp directory.";
+			return L"";
+		}
+
+		std::wstring return_path = pcu::toUTF16FromOSNarrow(tempPath);
+		return_path = return_path.append(L"PRTTemp").append(getDirSeparator<std::wstring>());
+
+		if (!PathIsDirectoryA(pcu::toOSNarrowFromUTF16(return_path).c_str())) {
+			bool status = CreateDirectoryA(pcu::toOSNarrowFromUTF16(return_path).c_str(), NULL);
+			if (!status) {
+				LOG_ERR << L"Failed to create temp directory.";
+				return L"";
+			}
+		}
+
+		return return_path;
+
+#else
+		throw std::runtime_error(L"Failed to find temp directory.");
+#endif
+	}
 	
 
 #ifdef _WIN32
@@ -223,6 +253,14 @@ namespace pcu {
 			}
 		}
 		return {};
+	}
+
+	std::wstring toAssetKey(std::wstring key)
+	{
+		// add the "asset" prefix to the key
+		std::wstring assetKey(L"assets/");
+		assetKey = assetKey.append(key);
+		return assetKey;
 	}
 
 }

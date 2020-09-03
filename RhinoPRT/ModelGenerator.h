@@ -25,6 +25,7 @@ public:
 	std::wstring getRuleFile(); 
 	std::wstring getStartingRule(); 
 	std::wstring getDefaultShapeName();
+	inline const prt::ResolveMap* getResolveMap() { return mResolveMap.get(); };
 
 private:
 	pcu::CachePtr mCache;
@@ -37,6 +38,7 @@ private:
 	RuleAttributes mRuleAttributes;
 
 	std::wstring mRulePkg = L"";
+	std::wstring mUnpackPath;
 	std::wstring mRuleFile = L"bin/rule.cgb";
 	std::wstring mStartRule = L"default$Lot";
 	int32_t mSeed = 0;

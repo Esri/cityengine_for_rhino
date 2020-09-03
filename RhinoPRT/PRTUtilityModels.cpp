@@ -90,8 +90,10 @@ GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<
 	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReports(rep) { }
 
 GeneratedModel::GeneratedModel(const size_t & initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices, const std::vector<uint32_t>& face,
-	const ON_2fPointArray& uvs, const ReportMap & rep, const Materials::MaterialsMap & mats):
-	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mUVs(uvs), mReports(rep), mMaterials(mats) { }
+	const ON_2fPointArray& uvs, const std::vector<uint32_t>& uvsIndices, const std::vector<uint32_t>& uvsCounts,
+	const ReportMap & rep, const Materials::MaterialsMap & mats):
+	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mUVs(uvs), mUVIndices(uvsIndices), mUVCounts(uvsCounts), 
+	mReports(rep), mMaterials(mats) { }
 
 const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 
@@ -104,12 +106,6 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 
 	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
 		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
-	}
-
-	// Fill in texture coordinates
-	// just assigning the array doesn't work
-	for (size_t i = 0; i < mUVs.Count(); ++i) {
-		mesh.m_T.Append(mUVs[i]);
 	}
 
 	int faceid(0);
@@ -140,10 +136,62 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 		mesh.Dump(log);
 		LOG_ERR << log_str;
 	}
-	
-	mesh.ComputeVertexNormals();
-	mesh.Compact();
+	ON::CloseFile(fp);
 
-	return mesh;
+	// Create the uv mapping
+	auto uv_mesh = getTextureMappingMesh();
+	uv_mesh.ComputeVertexNormals();
+	uv_mesh.Compact();
+
+	//ON_TextureMapping mapping;
+	//mapping.SetCustomMappingPrimitive(&uv_mesh);
+
+	//auto tex_coor = mesh.SetCachedTextureCoordinates(mapping);
+
+	mesh.ComputeVertexNormals();
+	if (!mesh.Compact()) {
+		LOG_ERR << "Mesh has been compacted.";
+	}
+
+
+	return uv_mesh;
+}
+
+const ON_Mesh GeneratedModel::getTextureMappingMesh() const {
+
+	ON_Mesh uv_mesh(this->mUVCounts.size(), this->mIndices.size(), false, true);
+	
+	// Duplicate vertices
+	for (size_t v_id = 0; v_id < this->mIndices.size(); ++v_id) {
+		auto index = this->mIndices[v_id];
+		uv_mesh.SetVertex(v_id, ON_3dPoint(mVertices[index * 3], mVertices[index * 3 + 1], mVertices[index * 3 + 2]));
+	}
+	
+	int faceid(0);
+	int currindex(0);
+	for (int face : mFaces) {
+		if (face == 3) {
+			uv_mesh.SetTriangle(faceid, currindex, currindex + 1, currindex + 2);
+			currindex += face;
+			faceid++;
+		}
+		else if (face == 4) {
+			uv_mesh.SetQuad(faceid, currindex, currindex + 1, currindex + 2, currindex + 3);
+			currindex += face;
+			faceid++;
+		}
+		else {
+			//ignore face because it is invalid
+			currindex += face;
+			LOG_WRN << "Ignored face with invalid number of vertices :" << face;
+		}
+	}
+	
+	for (size_t i = 0; i < mUVs.Count(); ++i) {
+		uv_mesh.SetTextureCoord(i, mUVs[i].x, mUVs[i].y);
+	}
+
+
+	return uv_mesh;
 }
 

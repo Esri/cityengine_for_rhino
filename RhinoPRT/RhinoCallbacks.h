@@ -20,7 +20,9 @@ typedef struct _Model {
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
-	ON_2fPointArray mUVs; // for now, only 1 uv set is supported.
+	ON_2fPointArray mUVs; // TODO for now, only 1 uv set is supported.
+	std::vector<uint32_t> mUVIndices; // TODO
+	std::vector<uint32_t> mUVCounts; // TODO
 	ReportMap mReports;
 	Materials::MaterialsMap mMaterials;
 } Model;
@@ -80,6 +82,18 @@ public:
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 		return mModels[initialShapeIdx].mUVs;
+	}
+
+	const std::vector<uint32_t> getUVIndices(const size_t initialShapeIdx) const {
+		if (initialShapeIdx >= mModels.size())
+			throw std::out_of_range("initial shape index is out of range.");
+		return mModels[initialShapeIdx].mUVIndices;
+	}
+
+	const std::vector<uint32_t> getUVCounts(const size_t initialShapeIdx) const {
+		if (initialShapeIdx >= mModels.size())
+			throw std::out_of_range("initial shape index is out of range.");
+		return mModels[initialShapeIdx].mUVCounts;
 	}
 
 	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const {

@@ -130,7 +130,6 @@ namespace GrasshopperPRT
                 GH_Mesh gh_mesh = null;
                 bool status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
 
-                //Add material, mb in another function
                 if (status) mesh_struct.Append(gh_mesh);                
             }
 
@@ -154,11 +153,23 @@ namespace GrasshopperPRT
             bool status = PRTWrapper.GetMaterial(meshID, ref uvSet, colormapPath, colormapPath.Capacity, pDiffuseArray, pAmbientArray, pSpecularArray);
             if (!status) return null;
 
+            Material mat = new Material();
+
             string colormap = colormapPath.ToString();
-            Texture tex = new Texture();
-            tex.FileName = colormap;
-            tex.TextureCombineMode = TextureCombineMode.Modulate;
-            tex.TextureType = TextureType.Bitmap;
+
+            if(colormap.Length > 0)
+            {
+                Uri fileuri = new Uri(colormap);
+
+                Texture tex = new Texture
+                {
+                    //FileName = colormap,
+                    FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(fileuri.AbsolutePath),
+                    TextureCombineMode = TextureCombineMode.None,
+                    TextureType = TextureType.Bitmap,
+                };
+                mat.SetBitmapTexture(tex);
+            }
 
             var diffuseColor = diffuseArray.ToArray();
             var ambientColor = ambientArray.ToArray();
@@ -167,9 +178,6 @@ namespace GrasshopperPRT
             ambientArray.Dispose();
             specularArray.Dispose();
 
-            Material mat = new Material();
-            mat.SetBitmapTexture(colormap);
-            
             if(diffuseColor.Length == 3)
             {
                 mat.DiffuseColor = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);

@@ -58,7 +58,13 @@ void RhinoCallbacks::add(const size_t initialShapeIndex,
 					const auto du = psUVS[uvIdx * 2 + 0];
 					const auto dv = psUVS[uvIdx * 2 + 1];
 					currentModel.mUVs.Append(ON_2fPoint(du, dv));
+					currentModel.mUVIndices.push_back(uvi);
 				}
+
+				for (size_t i = 0; i < psUVCountsSize; ++i) {
+					currentModel.mUVCounts.push_back(psUVCounts[i]);
+				}
+				
 			}
 			else
 			{

@@ -9,6 +9,8 @@
 #include <string>
 #include <map>
 
+class GeneratedModel;
+
 namespace Materials {
 
 	struct MaterialAttribute
@@ -18,6 +20,8 @@ namespace Materials {
 
 		ON_Material mRhinoMat;
 		int mColormapTexID = -1;
+
+		std::wstring mDiffuseTexPath;
 
 	};
 

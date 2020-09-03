@@ -1,5 +1,7 @@
 #include "MaterialAttribute.h"
 
+#include "PRTUtilityModels.h"
+
 #include "Logger.h"
 
 ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* attrMap)
@@ -18,7 +20,7 @@ ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* at
 	return diffuseCol;
 }
 
-void Materials::extractMaterials(const size_t initialShapeIndex, const size_t faceRangeId, const prt::AttributeMap* attrMap, MaterialsMap & matMap)
+void Materials::extractMaterials(const size_t initialShapeIndex, const size_t faceRangeId, const prt::AttributeMap* attrMap, MaterialsMap& matMap)
 {
 	MaterialAttribute ma;
 	ma.mInitialShapeId = initialShapeIndex;
@@ -41,22 +43,16 @@ void Materials::extractMaterials(const size_t initialShapeIndex, const size_t fa
 			if (strKey == L"colormap")
 			{
 				const std::wstring txPath = std::wstring(attrMap->getString(key));
+				
 
 				if (txPath.size() > 0)
 				{
+					ma.mDiffuseTexPath = txPath;
 
 					LOG_DBG << "Extracting texture colormap: " << txPath;
-
-					ON_Texture tex;
-					tex.m_image_file_reference.SetRelativePath(txPath.c_str());
-					tex.m_type = ON_Texture::TYPE::bitmap_texture;
-					tex.m_bOn = true;
-					tex.m_mode = ON_Texture::MODE::modulate_texture;
-
-					int texID = ma.mRhinoMat.AddTexture(tex);
-					ma.mColormapTexID = texID;
 				}
 				else {
+					ma.mDiffuseTexPath = L"";
 					ma.mColormapTexID = -1;
 				}
 			}

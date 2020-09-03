@@ -2,7 +2,9 @@
 
 #include "Logger.h"
 
-ModelGenerator::ModelGenerator() {
+#include <filesystem>
+
+ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir()) {
 	mCache = (pcu::CachePtr)prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT);
 }
 
@@ -12,7 +14,7 @@ bool ModelGenerator::initResolveMap() {
 		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 		try {
 			auto converted_str = pcu::toUTF16FromUTF8(rpkURI).c_str();
-			mResolveMap.reset(prt::createResolveMap(converted_str, nullptr, &status));
+			mResolveMap.reset(prt::createResolveMap(converted_str, mUnpackPath.c_str(), &status));
 
 			return status == prt::STATUS_OK;
 		}
@@ -110,7 +112,6 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 
 	try {
 
-
 		if (!mRulePkg.empty()) {
 			LOG_INF << "using rule package " << mRulePkg << std::endl;
 
@@ -153,7 +154,7 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 			}
 
 			for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
-				new_geometry.emplace_back(idx, roc->getVertices(idx), roc->getIndices(idx), roc->getFaces(idx), roc->getUVs(idx),
+				new_geometry.emplace_back(idx, roc->getVertices(idx), roc->getIndices(idx), roc->getFaces(idx), roc->getUVs(idx), roc->getUVIndices(idx), roc->getUVCounts(idx),
 					roc->getReport(idx), roc->getMaterial(idx));
 			}
 		}

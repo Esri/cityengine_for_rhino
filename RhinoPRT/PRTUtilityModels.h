@@ -64,12 +64,16 @@ public:
 		const std::vector<uint32_t>& face, const Reporting::ReportMap& rep);
 
 	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-		const std::vector<uint32_t>& face, const ON_2fPointArray& uvs, const ReportMap& rep, const Materials::MaterialsMap& mats);
+		const std::vector<uint32_t>& face, const ON_2fPointArray& uvs, const std::vector<uint32_t>& uvsIndices, const std::vector<uint32_t>& uvsCounts,
+		const ReportMap& rep, const Materials::MaterialsMap& mats);
 
 	GeneratedModel() {}
 	~GeneratedModel() {}
 
 	const ON_Mesh getMeshFromGenModel() const;
+
+	/// Duplicate the given ON_Mesh, then replace the vertices by the corresponding UV coordinates.
+	const ON_Mesh getTextureMappingMesh() const;
 
 	size_t getInitialShapeIndex() const {
 		return mInitialShapeIndex;
@@ -103,5 +107,7 @@ private:
 	std::vector<uint32_t> mFaces;
 	Reporting::ReportMap mReports;
 	ON_2fPointArray mUVs;
+	std::vector<uint32_t> mUVIndices;
+	std::vector<uint32_t> mUVCounts;
 	Materials::MaterialsMap mMaterials;
 };
