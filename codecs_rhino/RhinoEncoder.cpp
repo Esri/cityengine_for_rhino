@@ -101,7 +101,7 @@ namespace {
 		/*L"colormap",*/
 		L"dirtmap",
 		L"normalmap",
-		L"opacitymap",
+		/*L"opacitymap",*/
 		L"specularmap"
 
 	//#if PRT_VERSION_MAJOR > 1
@@ -233,7 +233,52 @@ namespace {
 
 		return prtx::PRTUtils::AttributeMapPtr{ amb->createAttributeMap() };
 	}
-}
+
+	struct TextureUVMapping {
+		std::wstring key;
+		uint8_t      index;
+		int8_t       uvSet;
+	};
+
+	/// For a first pass of material implementation, only a colormap is supported
+	const std::vector<TextureUVMapping> TEXTURE_UV_MAPPINGS = []() -> std::vector<TextureUVMapping> {
+		return {
+			// shader key   | idx | uv set  | CGA key
+			{ L"diffuseMap",   0,    0 },  // colormap
+			/*{ L"bumpMap",      0,    1 },  // bumpmap
+			{ L"diffuseMap",   1,    2 },  // dirtmap
+			{ L"specularMap",  0,    3 },*/  // specularmap
+			{ L"opacityMap",   0,    1 }  // opacitymap
+			/*{ L"normalMap",    0,    5 }   // normalmap
+
+	#if PRT_VERSION_MAJOR > 1
+			,
+			{ L"emissiveMap",  0,    6 },  // emissivemap
+			{ L"occlusionMap", 0,    7 },  // occlusionmap
+			{ L"roughnessMap", 0,    8 },  // roughnessmap
+			{ L"metallicMap",  0,    9 }   // metallicmap
+	#endif*/
+
+		};
+	}();
+
+	// return the highest required uv set (where a valid texture is present)
+	uint32_t scanValidTextures(const prtx::MaterialPtr& mat) {
+		int8_t highestUVSet = -1;
+		for (const auto& t : TEXTURE_UV_MAPPINGS) {
+			const auto& ta = mat->getTextureArray(t.key);
+			if (ta.size() > t.index && ta[t.index]->isValid())
+				highestUVSet = std::max(highestUVSet, t.uvSet);
+		}
+		if (highestUVSet < 0)
+			return 0;
+		else
+			return highestUVSet + 1;
+	}
+
+	const prtx::DoubleVector EMPTY_UVS;
+	const prtx::IndexVector EMPTY_IDX;
+} // namespace
 
 const std::wstring RhinoEncoder::ID = L"com.esri.rhinoprt.RhinoEncoder";
 const std::wstring RhinoEncoder::NAME = L"Rhino Geometry and Report Encoder";
@@ -298,8 +343,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 								   const prtx::EncodePreparator::InstanceVector& instances,
 								   IRhinoCallbacks* cb) 
 {
-	//bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
-	bool emitMaterials = true;
+	bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
+	emitMaterials = true; // ONLY TO TEST
 	std::vector<uint32_t> shapeIDs;
 
 	uint32_t vertexIndexBase = 0;
@@ -319,14 +364,21 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
+	int instance_count = instances.size();
+
+
 	for (const auto& instance : instances) {
 
 		const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
+		const prtx::MaterialPtrVector& materials = instance.getMaterials();
+
+		int material_count = materials.size();
+		LOG_DBG << L"Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << std::endl;
 
 		vertexCoords.clear();
 		faceIndices.clear();
 		faceCounts.clear();
-		matAttrMap.clear();
+		//matAttrMap.clear();
 		uvs.clear();
 		uvCounts.clear();
 		uvIndices.clear();
@@ -370,21 +422,20 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				faceRanges.push_back(faceCount);
 				faceCount += mesh->getFaceCount();
 
-				const prtx::MaterialPtr& mat = material.at(mi);
+				const prtx::MaterialPtr& mat = materials.at(mi);
 				const uint32_t requiredUVSetsByMaterial = scanValidTextures(mat);
+				maxNumUVSets = std::max(maxNumUVSets, std::max(mesh->getUVSetsCount(), requiredUVSetsByMaterial));
 
-				//for now, only 1 uv set is supported
-				if (mesh->getUVSetsCount() > 0 && (bool)requiredUVSetsByMaterial) 
+				if (mesh->getUVSetsCount() > 0 && (bool)requiredUVSetsByMaterial)
 				{ 
-					maxNumUVSets = 1; 
+					//maxNumUVSets = 1;
 					uvIndexBases.resize(maxNumUVSets, 0u);
-					uvs.resize(1); // TODO change that
-					uvCounts.resize(1);
-					uvIndices.resize(1);
+					uvs.resize(maxNumUVSets);
+					uvCounts.resize(maxNumUVSets);
+					uvIndices.resize(maxNumUVSets);
 				}
 
 				// copy first uv set data. 
-				// TODO: For now only one is supported
 				const uint32_t numUVSets = mesh->getUVSetsCount();
 				const prtx::DoubleVector& uvs0 = (numUVSets > 0) ? mesh->getUVCoords(0) : EMPTY_UVS;
 				const prtx::IndexVector faceUVCounts0 = (numUVSets > 0) ? mesh->getFaceUVCounts(0) : prtx::IndexVector(mesh->getFaceCount(), 0);
@@ -395,8 +446,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 				if (numUVSets > 0)
 				{
-					// FOR NOW THIS WILL ONLY BE EXECUTED FOR THE COLORMAP
-					for (auto uvSet = 0; uvSet < 1/*uvs.size()*/; uvSet++) {
+					for (auto uvSet = 0; uvSet < uvs.size(); uvSet++) {
 						// append texture coordinates
 						const prtx::DoubleVector& currUVs = (uvSet < numUVSets) ? mesh->getUVCoords(uvSet) : EMPTY_UVS;
 						const auto& src = currUVs.empty() ? uvs0 : currUVs;
@@ -490,6 +540,7 @@ RhinoEncoderFactory* RhinoEncoderFactory::createInstance() {
 	amb->setBool(EO_ERROR_FALLBACK, prtx::PRTX_TRUE);
 	amb->setBool(EO_EMIT_GEOMETRY, prtx::PRTX_TRUE);
 	amb->setBool(EO_EMIT_REPORTS, prtx::PRTX_TRUE);
+	amb->setBool(EO_EMIT_MATERIALS, prtx::PRTX_TRUE);
 	encoderInfoBuilder.setDefaultOptions(amb->createAttributeMap());
 
 	return new RhinoEncoderFactory(encoderInfoBuilder.create());

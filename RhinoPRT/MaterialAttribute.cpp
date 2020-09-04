@@ -7,17 +7,17 @@
 ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* attrMap)
 {
 	size_t count(0);
-	const double* diffuse = attrMap->getFloatArray(key, &count);
+	const double* color = attrMap->getFloatArray(key, &count);
 
 	if (count != 3) {
-		LOG_ERR << L"Attribute diffuseColor array has not size 3.";
+		LOG_ERR << L"Attribute " << key << ": array has not size 3.";
 		return ON_Color::White;
 	}
 
-	ON_Color diffuseCol;
-	diffuseCol.SetFractionalRGB(diffuse[0], diffuse[1], diffuse[2]);
+	ON_Color on_color;
+	on_color.SetFractionalRGB(color[0], color[1], color[2]);
 
-	return diffuseCol;
+	return on_color;
 }
 
 void Materials::extractMaterials(const size_t initialShapeIndex, const size_t faceRangeId, const prt::AttributeMap* attrMap, MaterialsMap& matMap)
