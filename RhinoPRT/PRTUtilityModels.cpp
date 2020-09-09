@@ -95,7 +95,11 @@ GeneratedModel::GeneratedModel(const size_t & initialShapeIdx, const std::vector
 	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mUVs(uvs), mUVIndices(uvsIndices), mUVCounts(uvsCounts), 
 	mReports(rep), mMaterials(mats) { }
 
-const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
+GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model, const Reporting::ReportMap& rep, const Materials::MaterialsMap& mats):
+	mInitialShapeIndex(initialShapeIdx), mModel(model), mReports(rep), mMaterials(mats) { }
+
+const ON_Mesh GeneratedModel::getMeshFromGenModel() const 
+{
 
 	size_t nbVertices = mVertices.size() / 3;
 
@@ -143,33 +147,36 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 	}
 
 	// Create the uv mapping
-	auto uv_mesh = getTextureMappingMesh();
+	/*auto uv_mesh = getTextureMappingMesh();
 	uv_mesh.ComputeVertexNormals();
-	uv_mesh.Compact();
+	uv_mesh.Compact();*/
 
-	return uv_mesh;
+	return mesh;
 }
 
-const ON_Mesh GeneratedModel::getTextureMappingMesh() const {
+const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const 
+{
+	ON_Mesh mesh(modelPart.mUVCounts.size(), modelPart.mIndices.size(), true, true);
 
-	ON_Mesh uv_mesh(this->mUVCounts.size(), this->mIndices.size(), false, true);
+	// Set the initial shape id.
+	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
 	
 	// Duplicate vertices
-	for (size_t v_id = 0; v_id < this->mIndices.size(); ++v_id) {
-		auto index = this->mIndices[v_id];
-		uv_mesh.SetVertex(v_id, ON_3dPoint(mVertices[index * 3], mVertices[index * 3 + 1], mVertices[index * 3 + 2]));
+	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
+		auto index = modelPart.mIndices[v_id];
+		mesh.SetVertex(v_id, ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 1], modelPart.mVertices[index * 3 + 2]));
 	}
 	
 	int faceid(0);
 	int currindex(0);
-	for (int face : mFaces) {
+	for (int face : modelPart.mFaces) {
 		if (face == 3) {
-			uv_mesh.SetTriangle(faceid, currindex, currindex + 1, currindex + 2);
+			mesh.SetTriangle(faceid, currindex, currindex + 1, currindex + 2);
 			currindex += face;
 			faceid++;
 		}
 		else if (face == 4) {
-			uv_mesh.SetQuad(faceid, currindex, currindex + 1, currindex + 2, currindex + 3);
+			mesh.SetQuad(faceid, currindex, currindex + 1, currindex + 2, currindex + 3);
 			currindex += face;
 			faceid++;
 		}
@@ -180,11 +187,34 @@ const ON_Mesh GeneratedModel::getTextureMappingMesh() const {
 		}
 	}
 	
-	for (size_t i = 0; i < mUVs.Count(); ++i) {
-		uv_mesh.SetTextureCoord(i, mUVs[i].x, mUVs[i].y);
+	for (size_t i = 0; i < modelPart.mUVs.Count(); ++i) {
+		mesh.SetTextureCoord(i, modelPart.mUVs[i].x, modelPart.mUVs[i].y);
 	}
 
+	mesh.ComputeVertexNormals();
+	mesh.Compact();
 
-	return uv_mesh;
+	// Printing a rhino error log if the created mesh is invalid
+	ON_wString log_str;
+	ON_TextLog log(log_str);
+	if (!mesh.IsValid(&log))
+	{
+		mesh.Dump(log);
+		LOG_ERR << log_str;
+	}
+
+	return mesh;
+}
+
+const MeshBundle GeneratedModel::getMeshesFromGenModel() const 
+{
+	MeshBundle mesh;
+
+	for (const auto& modelPart : mModel.mModelParts)
+	{
+		mesh.push_back(toON_Mesh(modelPart));
+	}
+
+	return mesh;
 }
 

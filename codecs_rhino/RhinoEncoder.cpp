@@ -382,6 +382,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		size_t mesh_count = meshes.size();
 		LOG_DBG << L"Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << ", meshes: " << mesh_count << std::endl;
 
+		vertexIndexBase = 0;
+		maxNumUVSets = 0;
+
 		vertexCoords.clear();
 		faceIndices.clear();
 		faceCounts.clear();

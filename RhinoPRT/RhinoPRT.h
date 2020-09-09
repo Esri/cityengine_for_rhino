@@ -53,6 +53,8 @@ namespace RhinoPRT {
 		
 		std::vector<GeneratedModel>& getGenModels();
 
+		std::vector<int> getModelIds();
+
 	private:
 
 		std::vector<InitialShape> mShapes;
@@ -93,6 +95,10 @@ extern "C" {
 
 	RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray);
 
+	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray);
+
+	RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs);
+
 	RHINOPRT_API int GetRuleAttributesCount();
 
 	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type);
@@ -110,7 +116,7 @@ extern "C" {
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports);
 
-	RHINOPRT_API bool GetMaterial(int meshID, int* uvSet,
+	RHINOPRT_API bool GetMaterial(int initialShapeId, int meshID, int* uvSet,
 		ON_ClassArray<ON_wString>* pTexKeys,
 		ON_ClassArray<ON_wString>* pTexPaths,
 		ON_SimpleArray<int>* pDiffuseColor,

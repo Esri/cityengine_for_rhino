@@ -178,6 +178,15 @@ namespace RhinoPRT {
 		return Reporting::EMPTY_REPORTS;
 	}
 
+	std::vector<int> RhinoPRTAPI::getModelIds()
+	{
+		std::vector<int> ids;
+		for (const auto& model : mGeneratedModels)
+		{
+			ids.push_back(model.getInitialShapeIndex());
+		}
+		return ids;
+	}
 }
 
 extern "C" {
@@ -235,10 +244,39 @@ extern "C" {
 			LOG_ERR << L"Generation failed, returned an empty models array.";
 			return false;
 		}
-
+		/*
 		for (const auto& mesh : meshes) {
-			const auto on_mesh = mesh.getMeshFromGenModel();
+			const auto on_mesh = mesh.getMeshesFromGenModel();
 			pMeshArray->Append(new ON_Mesh(on_mesh)); // must be freed my the caller of this function.
+		}
+		*/
+		return true;
+	}
+
+	RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs)
+	{
+		auto ids = RhinoPRT::myPRTAPI->getModelIds();
+
+		for (int id : ids) pMeshIDs->Append(id);
+	}
+
+	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray)
+	{
+		auto models = RhinoPRT::myPRTAPI->getGenModels();
+		
+		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeID](GeneratedModel m) { m.getInitialShapeIndex() == initShapeID; });
+
+		if (modelIt == models.end()) 
+		{
+			LOG_ERR << L"No generated model with the given initial shape ID was found. The generation of this model has probably failed.";
+			return false;
+		}
+
+		const auto meshBundle = (*modelIt).getMeshesFromGenModel();
+
+		for (const auto& meshPart : meshBundle) {
+			
+			pMeshArray->Append(new ON_Mesh(meshPart));
 		}
 
 		return true;
@@ -328,8 +366,8 @@ extern "C" {
 			}
 		}
 	}
-    
-	RHINOPRT_API bool GetMaterial(int meshID, int* uvSet,
+
+	RHINOPRT_API bool GetMaterial(int initialShapeId, int meshID, int* uvSet,
 		ON_ClassArray<ON_wString>* pTexKeys,
 		ON_ClassArray<ON_wString>* pTexPaths,
 		ON_SimpleArray<int>* pDiffuseColor,
@@ -338,14 +376,20 @@ extern "C" {
 	{
 		auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
 
-		if (meshID >= genModels.size()) {
-			LOG_ERR << L"MeshID out of range";
+		if (initialShapeId >= genModels.size()) {
+			LOG_ERR << L"Initial shape ID out of range";
 			return false;
 		}
 
-		auto& currModel = genModels[meshID];
+		auto& currModel = genModels[initialShapeId];
 		auto& material = currModel.getMaterials();
-		auto& mat = material.at(0); // First facerange
+
+		if (meshID >= material.size()) 
+		{
+			LOG_ERR << L"Mesh ID is out of range";
+			return false;
+		}
+		auto& mat = material.at(meshID);
 
 		for (auto& texture: mat.mTexturePaths) {
 

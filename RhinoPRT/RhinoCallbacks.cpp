@@ -2,37 +2,25 @@
 
 void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * vertexCoords, 
 								 const size_t vextexCoordsCount, const uint32_t * faceIndices,
-								 const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount)
+								 const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount,
+
+								 double const * const * uvs, size_t const * uvsSizes,
+								 uint32_t const * const * uvCounts, size_t const * uvCountsSizes,
+								 uint32_t const * const * uvIndices, size_t const * uvIndicesSizes,
+								 uint32_t uvSets)
 {
 	Model& currentModel = mModels[initialShapeIndex];
+	ModelPart& modelPart = currentModel.addModelPart();
 
 	if (vertexCoords != nullptr)
-		currentModel.mVertices.insert(currentModel.mVertices.end(), vertexCoords, vertexCoords + vextexCoordsCount);
+		modelPart.mVertices.insert(modelPart.mVertices.end(), vertexCoords, vertexCoords + vextexCoordsCount);
 
 	if (faceIndices != nullptr)
-		currentModel.mIndices.insert(currentModel.mIndices.end(), faceIndices, faceIndices + faceIndicesCount);
+		modelPart.mIndices.insert(modelPart.mIndices.end(), faceIndices, faceIndices + faceIndicesCount);
 
 	if (faceCounts != nullptr)
-		currentModel.mFaces.insert(currentModel.mFaces.end(), faceCounts, faceCounts + faceCountsCount);
-}
+		modelPart.mFaces.insert(modelPart.mFaces.end(), faceCounts, faceCounts + faceCountsCount);
 
-void RhinoCallbacks::add(const size_t initialShapeIndex,
-						 const double * vertexCoords, const size_t vertexCoordsCount, 
-						 const uint32_t * faceIndices, const size_t faceIndicesCount, 
-						 const uint32_t * faceCounts, const size_t faceCountsCount, 
-						 double const * const * uvs, size_t const * uvsSizes, 
-						 uint32_t const * const * uvCounts, size_t const * uvCountsSizes, 
-						 uint32_t const * const * uvIndices, size_t const * uvIndicesSizes, 
-						 uint32_t uvSets,
-						 const uint32_t* faceRanges, size_t faceRangesSize,
-						 const prt::AttributeMap ** materials, const size_t matCount)
-{
-	addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
-		faceIndices, faceIndicesCount,
-		faceCounts, faceCountsCount);
-
-	Model& currentModel = mModels[initialShapeIndex];
-	
 	// Add texture coordinates
 	for (size_t uvSet = 0; uvSet < uvSets; ++uvSet)
 	{
@@ -57,22 +45,41 @@ void RhinoCallbacks::add(const size_t initialShapeIndex,
 					const uint32_t uvIdx = psUVIndices[uvi];
 					const auto du = psUVS[uvIdx * 2 + 0];
 					const auto dv = psUVS[uvIdx * 2 + 1];
-					currentModel.mUVs.Append(ON_2fPoint(du, dv));
-					currentModel.mUVIndices.push_back(uvi);
+					modelPart.mUVs.Append(ON_2fPoint(du, dv));
+					modelPart.mUVIndices.push_back(uvi);
 				}
 
 				for (size_t i = 0; i < psUVCountsSize; ++i) {
-					currentModel.mUVCounts.push_back(psUVCounts[i]);
+					modelPart.mUVCounts.push_back(psUVCounts[i]);
 				}
-				
 			}
 			else
 			{
-				// TODO add the other uv sets if any.
 				LOG_INF << "IGNORED UV SET " << uvSet << ": Rhino does not support multiple uv sets.";
 			}
 		}
 	}
+}
+
+void RhinoCallbacks::add(const size_t initialShapeIndex,
+						 const double * vertexCoords, const size_t vertexCoordsCount, 
+						 const uint32_t * faceIndices, const size_t faceIndicesCount, 
+						 const uint32_t * faceCounts, const size_t faceCountsCount, 
+						 double const * const * uvs, size_t const * uvsSizes, 
+						 uint32_t const * const * uvCounts, size_t const * uvCountsSizes, 
+						 uint32_t const * const * uvIndices, size_t const * uvIndicesSizes, 
+						 uint32_t uvSets,
+						 const uint32_t* faceRanges, size_t faceRangesSize,
+						 const prt::AttributeMap ** materials, const size_t matCount)
+{
+	addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
+		faceIndices, faceIndicesCount,
+		faceCounts, faceCountsCount,
+		uvs, uvsSizes,
+		uvCounts, uvCountsSizes,
+		uvIndices, uvIndicesSizes, uvSets);
+
+	Model& currentModel = mModels[initialShapeIndex];
 
 	// -- convert materials into material attributes
 #ifdef DEBUG

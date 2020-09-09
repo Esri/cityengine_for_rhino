@@ -3,10 +3,13 @@
 #include "utils.h"
 #include "MaterialAttribute.h"
 #include "ReportAttribute.h"
+#include "RhinoCallbacks.h"
 
 #include <vector>
 
 const std::wstring INIT_SHAPE_ID_KEY = L"InitShapeIdx";
+
+using MeshBundle = std::vector<ON_Mesh>;
 
 /**
 * The Initial shape that will be given to PRT
@@ -67,13 +70,12 @@ public:
 		const std::vector<uint32_t>& face, const ON_2fPointArray& uvs, const std::vector<uint32_t>& uvsIndices, const std::vector<uint32_t>& uvsCounts,
 		const Reporting::ReportMap& rep, const Materials::MaterialsMap& mats);
 
+	GeneratedModel(const size_t& initialShapeIdx, const Model& model, const Reporting::ReportMap& rep, const Materials::MaterialsMap& mats);
+
 	GeneratedModel() {}
 	~GeneratedModel() {}
 
-	const ON_Mesh getMeshFromGenModel() const;
-
-	/// Duplicate the given ON_Mesh, then replace the vertices by the corresponding UV coordinates.
-	const ON_Mesh getTextureMappingMesh() const;
+	const MeshBundle getMeshesFromGenModel() const;
 
 	size_t getInitialShapeIndex() const {
 		return mInitialShapeIndex;
@@ -101,12 +103,22 @@ public:
 
 private:
 	size_t mInitialShapeIndex;
+
+	Model mModel;
+
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
-	Reporting::ReportMap mReports;
+	
 	ON_2fPointArray mUVs;
 	std::vector<uint32_t> mUVIndices;
 	std::vector<uint32_t> mUVCounts;
+
+	Reporting::ReportMap mReports;
 	Materials::MaterialsMap mMaterials;
+
+	const ON_Mesh getMeshFromGenModel() const;
+
+	/// Creates an ON_Mesh and setup its uv coordinates, for a given ModelPart.
+	const ON_Mesh toON_Mesh(const ModelPart& modelPart) const;
 };

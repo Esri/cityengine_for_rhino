@@ -16,15 +16,25 @@
 
 #define DEBUG
 
-typedef struct _Model {
+typedef struct _ModelPart {
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
-	ON_2fPointArray mUVs; // TODO for now, only 1 uv set is supported.
-	std::vector<uint32_t> mUVIndices; // TODO
-	std::vector<uint32_t> mUVCounts; // TODO
+	ON_2fPointArray mUVs;
+	std::vector<uint32_t> mUVIndices;
+	std::vector<uint32_t> mUVCounts;
+} ModelPart;
+
+typedef struct _Model {
+	std::vector<ModelPart> mModelParts;
 	Reporting::ReportMap mReports;
 	Materials::MaterialsMap mMaterials;
+
+	ModelPart& addModelPart() { 
+		mModelParts.push_back(ModelPart()); 
+		return mModelParts.at(mModelParts.size() - 1);
+	}
+
 } Model;
 
 class RhinoCallbacks : public IRhinoCallbacks {
@@ -41,7 +51,14 @@ public:
 	virtual ~RhinoCallbacks() = default;
 
 	// Inherited via IRhinoCallbacks
-	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, const uint32_t * faceIndices, const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount) override;
+	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, 
+		const uint32_t * faceIndices, const size_t faceIndicesCount, 
+		const uint32_t * faceCounts, const size_t faceCountsCount,
+
+		double const* const* uvs, size_t const* uvsSizes,
+		uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
+		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
+		uint32_t uvSets) override;
 	void add(const size_t initialShapeIndex, const double* vertexCoords, const size_t vextexCoordsCount,
 		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
 		const size_t faceCountsCount,
@@ -57,7 +74,15 @@ public:
 		return mModels.size();
 	}
 
-	const std::vector<double>& getVertices(const size_t initialShapeIdx) const {
+	const Model& getModel(const size_t initialShapeIdx) const {
+		if (initialShapeIdx >= mModels.size())
+			throw std::out_of_range("initial shape index is out of range.");
+		
+		return mModels[initialShapeIdx];
+	}
+
+	
+	/*const std::vector<double>& getVertices(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
@@ -94,7 +119,7 @@ public:
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 		return mModels[initialShapeIdx].mUVCounts;
-	}
+	}*/
 
 	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
@@ -106,6 +131,7 @@ public:
 	const Materials::MaterialsMap getMaterial(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
+
 		return mModels[initialShapeIdx].mMaterials;
 	}
 

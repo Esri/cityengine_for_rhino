@@ -9,7 +9,10 @@ public:
 
 	virtual void addGeometry(const size_t initialShapeIndex, const double* vertexCoords, const size_t vextexCoordsCount,
 		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
-		const size_t faceCountsCount) = 0;
+		const size_t faceCountsCount, double const* const* uvs, size_t const* uvsSizes,
+		uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
+		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
+		uint32_t uvSets) = 0;
 
 	///<summary>
 	///Adds a geometry and corresponding materials.

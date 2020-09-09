@@ -41,6 +41,12 @@ namespace GrasshopperPRT
         public static extern bool GenerateTest([In,Out]IntPtr pMeshArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool GetMeshBundle(int initShapeID, [In, Out]IntPtr pMeshArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void GetAllMeshIDs([In, Out]IntPtr pMeshIDs);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetRuleAttributesCount();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
@@ -68,7 +74,7 @@ namespace GrasshopperPRT
         public static extern bool GetMaterialsOf(int shapeID, [In, Out] IntPtr pMatArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetMaterial(int shapeID, ref int pUvSet,
+        public static extern bool GetMaterial(int initialShapeId, int shapeID, ref int pUvSet,
                                                 [In, Out] IntPtr pTexKeys,
                                                 [In, Out] IntPtr pTexPaths,
                                                 [In, Out] IntPtr pDiffuseColor,
@@ -95,10 +101,7 @@ namespace GrasshopperPRT
 
         public static GH_Structure<GH_Mesh> GenerateMesh()
         {
-            // The Rhino doc is needed to add new materials
-            Rhino.RhinoDoc doc = Rhino.RhinoDoc.ActiveDoc;
-
-            Mesh[] meshes = null;
+            /*Mesh[] meshes = new Mesh[];
 
             using(var arr = new SimpleArrayMeshPointer())
             {
@@ -108,12 +111,49 @@ namespace GrasshopperPRT
                 bool status = GenerateTest(ptr_array);
                 if (!status) return null;
                 meshes = arr.ToNonConstArray();
-            }
+            }*/
 
             // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
-            // thus a conversion is necessary.
+            // thus a conversion is necessary when adding Meshes.
             GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
 
+            // retrieve the meshBundle for each initial shape id
+            int[] mesh_ids = null;
+            using(var idsArray = new SimpleArrayInt())
+            {
+                var pIdsArray = idsArray.NonConstPointer();
+                GetAllMeshIDs(pIdsArray);
+                mesh_ids = idsArray.ToArray();
+            }
+
+            foreach(int id in mesh_ids)
+            {
+                using(var arr = new SimpleArrayMeshPointer())
+                {
+                    var ptr_array = arr.NonConstPointer();
+
+                    bool status = GetMeshBundle(id, ptr_array);
+
+                    if(status)
+                    {
+                        var meshBundle = arr.ToNonConstArray();
+
+                        foreach(var mesh in meshBundle)
+                        {
+                            // Directly convert to to GH_Mesh and add it to the GH_Structure at the branch corresponding to the mesh id
+                            GH_Mesh gh_mesh = null;
+                            status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+
+                            if (status)
+                            {
+                                GH_Path path = new GH_Path(id);
+                                mesh_struct.Append(gh_mesh, path);
+                            }
+                        }
+                    }                    
+                }
+            }
+            /*
             int currIsID = 0;
 
             foreach(var mesh in meshes) {
@@ -133,12 +173,12 @@ namespace GrasshopperPRT
                 bool status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
 
                 if (status) mesh_struct.Append(gh_mesh);                
-            }
+            }*/
 
             return mesh_struct;
         }
 
-        public static Material GetMaterialID(int meshID)
+        public static Material GetMaterialOfPartMesh(int initialShapeId, int meshID)
         {
             int uvSet = 0;
 
@@ -157,7 +197,7 @@ namespace GrasshopperPRT
             SimpleArrayInt specularArray = new SimpleArrayInt();
             var pSpecularArray = specularArray.NonConstPointer();
 
-            bool status = PRTWrapper.GetMaterial(meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray);
+            bool status = PRTWrapper.GetMaterial(initialShapeId, meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray);
             if (!status) return null;
 
             var texKeysArray = texKeys.ToArray();
@@ -223,20 +263,51 @@ namespace GrasshopperPRT
 
             mat.FresnelReflections = true;
 
-            //int matID = Rhino.RhinoDoc.ActiveDoc.Materials.Add(mat);
             mat.CommitChanges();
             return mat;
         }
 
-        public static Material[] GetAllMaterialIds(int meshCount)
+        public static List<GH_Material> GetMaterialsOfMesh(int initShapeId)
         {
-            Material[] mats = new Material[meshCount];
+            List<Material> materials = new List<Material>();
+
+            int meshCount = GetMeshPartCount(initShapeId);
 
             for(int i = 0; i < meshCount; ++i)
             {
-                mats[i] = GetMaterialID(i);
+                materials.Add(GetMaterialOfPartMesh(initShapeId, i));
             }
-            return mats;
+
+            // convert to GH_Materials
+            List<GH_Material> gh_mats = new List<GH_Material>();
+            materials.ForEach(mat => gh_mats.Add(new GH_Material(mat.RenderMaterial)));
+
+            return gh_mats;
+        }
+
+        public static GH_Structure<GH_Material> GetAllMaterialIds(int meshCount)
+        {
+            int[] initShapeIds = null;
+            using(var meshIdsArray = new SimpleArrayInt())
+            {
+                var pMeshIDArray = meshIdsArray.NonConstPointer();
+
+                GetAllMeshIDs(pMeshIDArray);
+                initShapeIds = meshIdsArray.ToArray();
+            }
+
+            GH_Structure<GH_Material> material_struct = new GH_Structure<GH_Material>();
+
+            foreach(int initShapeId in initShapeIds)
+            {
+                var mats = GetMaterialsOfMesh(initShapeId);
+
+                GH_Path path = new GH_Path(initShapeId);
+
+                material_struct.AppendRange(mats, path);
+            }
+
+            return material_struct;
         }
 
         public static List<ReportAttribute> GetAllReports(int initialShapeId)
