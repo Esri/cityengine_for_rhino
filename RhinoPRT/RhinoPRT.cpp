@@ -74,6 +74,11 @@ namespace RhinoPRT {
 		return mGeneratedModels;
 	}
 
+	std::vector<GeneratedModel>& RhinoPRTAPI::getGenModels()
+	{
+		return mGeneratedModels;
+	}
+
 	template<typename T>
 	void RhinoPRTAPI::fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value) {
 
@@ -322,5 +327,53 @@ extern "C" {
 				pKeysArray->Remove(pKeysArray->Count() - 1);
 			}
 		}
+	}
+    
+	RHINOPRT_API bool GetMaterial(int meshID, int* uvSet,
+		ON_ClassArray<ON_wString>* pTexKeys,
+		ON_ClassArray<ON_wString>* pTexPaths,
+		ON_SimpleArray<int>* pDiffuseColor,
+		ON_SimpleArray<int>* pAmbientColor,
+		ON_SimpleArray<int>* pSpecularColor)
+	{
+		auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
+
+		if (meshID >= genModels.size()) {
+			LOG_ERR << L"MeshID out of range";
+			return false;
+		}
+
+		auto& currModel = genModels[meshID];
+		auto& material = currModel.getMaterials();
+		auto& mat = material.at(0); // First facerange
+
+		for (auto& texture: mat.mTexturePaths) {
+
+			prt::Status status;
+			const wchar_t* fullTexPath = RhinoPRT::myPRTAPI->getResolveMap()->getString(pcu::toAssetKey(texture.second).c_str(), &status);
+
+			if (status == prt::STATUS_OK)
+			{
+				pTexKeys->Append(ON_wString(texture.first.c_str()));
+				pTexPaths->Append(ON_wString(fullTexPath));
+			}
+		}
+
+		auto diffuse = mat.mDiffuseCol;
+		pDiffuseColor->Append(diffuse.Red());
+		pDiffuseColor->Append(diffuse.Green());
+		pDiffuseColor->Append(diffuse.Blue());
+
+		auto ambient = mat.mAmbientCol;
+		pAmbientColor->Append(ambient.Red());
+		pAmbientColor->Append(ambient.Green());
+		pAmbientColor->Append(ambient.Blue());
+
+		auto specular = mat.mSpecularCol;
+		pSpecularColor->Append(specular.Red());
+		pSpecularColor->Append(specular.Green());
+		pSpecularColor->Append(specular.Blue());
+
+		return true;
 	}
 }

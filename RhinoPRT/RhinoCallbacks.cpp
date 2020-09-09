@@ -25,7 +25,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex,
 						 uint32_t const * const * uvIndices, size_t const * uvIndicesSizes, 
 						 uint32_t uvSets,
 						 const uint32_t* faceRanges, size_t faceRangesSize,
-						 const prt::AttributeMap ** materials)
+						 const prt::AttributeMap ** materials, const size_t matCount)
 {
 	addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
 		faceIndices, faceIndicesCount,
@@ -69,22 +69,25 @@ void RhinoCallbacks::add(const size_t initialShapeIndex,
 			else
 			{
 				// TODO add the other uv sets if any.
+				LOG_INF << "IGNORED UV SET " << uvSet << ": Rhino does not support multiple uv sets.";
 			}
 		}
 	}
 
 	// -- convert materials into material attributes
 #ifdef DEBUG
-	LOG_DBG << "got " << faceRangesSize - 1 << " face ranges";
+	LOG_DBG << "got " << matCount << " materials";
 #endif
-	if (faceRangesSize > 1) 
+	if (matCount > 0) 
 	{
-		for (size_t fri = 0; fri < faceRangesSize - 1; ++fri) 
+		for (size_t i = 0; i < matCount; ++i) 
 		{
 			if (materials)
 			{
-				const prt::AttributeMap* attrMap = materials[fri];
-				Materials::extractMaterials(initialShapeIndex, fri, attrMap, currentModel.mMaterials);
+				const prt::AttributeMap* attrMap = materials[i];
+
+				// TODO: should not be initialShapeIndex but faceRange
+				Materials::extractMaterials(initialShapeIndex, i, attrMap, currentModel.mMaterials);
 			}
 		}
 	}

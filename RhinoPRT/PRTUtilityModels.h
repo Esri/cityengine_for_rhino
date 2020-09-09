@@ -65,7 +65,7 @@ public:
 
 	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
 		const std::vector<uint32_t>& face, const ON_2fPointArray& uvs, const std::vector<uint32_t>& uvsIndices, const std::vector<uint32_t>& uvsCounts,
-		const ReportMap& rep, const Materials::MaterialsMap& mats);
+		const Reporting::ReportMap& rep, const Materials::MaterialsMap& mats);
 
 	GeneratedModel() {}
 	~GeneratedModel() {}
@@ -88,12 +88,11 @@ public:
 		return mFaces;
 	}
 	const Reporting::ReportMap& getReport() const {
+		return mReports;
+	}
 
 	const ON_2fPointArray& getUVs() const {
 		return mUVs;
-	}
-
-		return mReports;
 	}
 
 	const Materials::MaterialsMap& getMaterials() const {

@@ -38,10 +38,6 @@ namespace RhinoPRT {
 
 		std::vector<GeneratedModel> GenerateGeometry();
 
-		std::vector<GeneratedModel>& getGenModels() {
-			return mGeneratedModels;
-		}
-
 		template<typename T>
 		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value);
 
@@ -52,6 +48,10 @@ namespace RhinoPRT {
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
+
+		const prt::ResolveMap* getResolveMap() { return mModelGenerator->getResolveMap(); }
+		
+		std::vector<GeneratedModel>& getGenModels();
 
 	private:
 
@@ -68,6 +68,7 @@ namespace RhinoPRT {
 		std::vector<GeneratedModel> mGeneratedModels;
 
 		Reporting::GroupedReports mGroupedReports;
+
 	};
 
 	// Global PRT handle
@@ -109,53 +110,12 @@ extern "C" {
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports);
 
-	inline RHINOPRT_API bool GetMaterial(int meshID, int* uvSet, wchar_t* pColorMapTex, int pColorMapTexSize, 
+	RHINOPRT_API bool GetMaterial(int meshID, int* uvSet,
+		ON_ClassArray<ON_wString>* pTexKeys,
+		ON_ClassArray<ON_wString>* pTexPaths,
 		ON_SimpleArray<int>* pDiffuseColor,
 		ON_SimpleArray<int>* pAmbientColor,
-		ON_SimpleArray<int>* pSpecularColor)
-	{
-		auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
-
-		if (meshID >= genModels.size()) {
-			LOG_ERR << L"ShapeID out of range";
-			return false;
-		}
-
-		auto& currModel = genModels[meshID];
-		auto& material = currModel.getMaterials();
-		auto& mat = material.at(0); // First facerange
-
-		if (mat.mDiffuseTexPath.size() > 0) { //a colormap exists
-
-			auto assetKey = pcu::toAssetKey(mat.mDiffuseTexPath);
-
-			prt::Status status;
-			const wchar_t* fullTexPath = RhinoPRT::myPRTAPI->getResolveMap()->getString(assetKey.c_str(), &status);
-
-			if (status != prt::STATUS_KEY_NOT_FOUND)
-			{
-				*uvSet = 0;
-				wcscpy_s(pColorMapTex, pColorMapTexSize, fullTexPath);
-			}
-		}
-		
-		auto diffuse = mat.mRhinoMat.Diffuse();
-		pDiffuseColor->Append(diffuse.Red());
-		pDiffuseColor->Append(diffuse.Green());
-		pDiffuseColor->Append(diffuse.Blue());
-
-		auto ambient = mat.mRhinoMat.Ambient();
-		pAmbientColor->Append(ambient.Red());
-		pAmbientColor->Append(ambient.Green());
-		pAmbientColor->Append(ambient.Blue());
-
-		auto specular = mat.mRhinoMat.Specular();
-		pSpecularColor->Append(specular.Red());
-		pSpecularColor->Append(specular.Green());
-		pSpecularColor->Append(specular.Blue());
-
-		return true;
-	}
+		ON_SimpleArray<int>* pSpecularColor);
 
 }
 

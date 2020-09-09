@@ -68,7 +68,9 @@ namespace GrasshopperPRT
         public static extern bool GetMaterialsOf(int shapeID, [In, Out] IntPtr pMatArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetMaterial(int shapeID, ref int pUvSet, StringBuilder pColorMapTex, int pColorMapTexSize, 
+        public static extern bool GetMaterial(int shapeID, ref int pUvSet,
+                                                [In, Out] IntPtr pTexKeys,
+                                                [In, Out] IntPtr pTexPaths,
                                                 [In, Out] IntPtr pDiffuseColor,
                                                 [In, Out] IntPtr pAmbientColor,
                                                 [In, Out] IntPtr pSpecularColor);
@@ -138,8 +140,13 @@ namespace GrasshopperPRT
 
         public static Material GetMaterialID(int meshID)
         {
-            StringBuilder colormapPath = new StringBuilder(500);
             int uvSet = 0;
+
+            ClassArrayString texKeys = new ClassArrayString();
+            var pTexKeys = texKeys.NonConstPointer();
+
+            ClassArrayString texPaths = new ClassArrayString();
+            var pTexPaths = texPaths.NonConstPointer();
 
             SimpleArrayInt diffuseArray = new SimpleArrayInt();
             var pDiffuseArray = diffuseArray.NonConstPointer();
@@ -150,25 +157,44 @@ namespace GrasshopperPRT
             SimpleArrayInt specularArray = new SimpleArrayInt();
             var pSpecularArray = specularArray.NonConstPointer();
 
-            bool status = PRTWrapper.GetMaterial(meshID, ref uvSet, colormapPath, colormapPath.Capacity, pDiffuseArray, pAmbientArray, pSpecularArray);
+            bool status = PRTWrapper.GetMaterial(meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray);
             if (!status) return null;
+
+            var texKeysArray = texKeys.ToArray();
+            var texPathsArray = texPaths.ToArray();
 
             Material mat = new Material();
 
-            string colormap = colormapPath.ToString();
-
-            if(colormap.Length > 0)
+            for(int i = 0; i < texKeysArray.Length; ++i)
             {
-                Uri fileuri = new Uri(colormap);
+                string texKey = texKeysArray[i];
+                string texPath = texPathsArray[i];
+
+                Uri fileuri = new Uri(texPath);
 
                 Texture tex = new Texture
                 {
-                    //FileName = colormap,
                     FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(fileuri.AbsolutePath),
-                    TextureCombineMode = TextureCombineMode.None,
+                    TextureCombineMode = TextureCombineMode.Modulate,
                     TextureType = TextureType.Bitmap,
                 };
-                mat.SetBitmapTexture(tex);
+
+                switch (texKey)
+                {
+                    case "colormap":
+                        mat.SetBitmapTexture(tex);
+                        break;
+                    case "opacitymap":
+                        tex.TextureType = TextureType.Transparency;
+                        mat.SetTransparencyTexture(tex);
+                        break;
+                    case "bumpmap":
+                        tex.TextureType = TextureType.Bump;
+                        mat.SetBumpTexture(tex);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             var diffuseColor = diffuseArray.ToArray();
@@ -192,6 +218,8 @@ namespace GrasshopperPRT
             {
                 mat.SpecularColor = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
             }
+
+            mat.FresnelReflections = true;
 
             //int matID = Rhino.RhinoDoc.ActiveDoc.Materials.Add(mat);
             mat.CommitChanges();

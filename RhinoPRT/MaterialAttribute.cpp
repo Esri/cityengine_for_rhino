@@ -39,22 +39,11 @@ void Materials::extractMaterials(const size_t initialShapeIndex, const size_t fa
 		switch (type) {
 		case prt::AttributeMap::PT_STRING:
 			//This is probably a texture path. check the key against the different allowed textures.
-			// for now only colormap
-			if (strKey == L"colormap")
+			if (Materials::TEXTURE_KEYS.count(strKey) > 0)
 			{
-				const std::wstring txPath = std::wstring(attrMap->getString(key));
-				
-
-				if (txPath.size() > 0)
-				{
-					ma.mDiffuseTexPath = txPath;
-
-					LOG_DBG << "Extracting texture colormap: " << txPath;
-				}
-				else {
-					ma.mDiffuseTexPath = L"";
-					ma.mColormapTexID = -1;
-				}
+				auto tex = std::wstring(attrMap->getString(key));
+				if(tex.length() > 0)
+					ma.mTexturePaths.insert_or_assign(strKey, tex);
 			}
 			else {
 				LOG_DBG << "Ignoring unsupported texture " << key << ": " << attrMap->getString(key);
@@ -64,18 +53,15 @@ void Materials::extractMaterials(const size_t initialShapeIndex, const size_t fa
 			// Check for different type of colors
 			if (strKey == L"diffuseColor")
 			{
-				ON_Color diffuseCol = extractColor(key, attrMap);
-				ma.mRhinoMat.SetDiffuse(diffuseCol);
+				ma.mDiffuseCol = extractColor(key, attrMap);
 			}
 			else if (strKey == L"ambientColor")
 			{
-				ON_Color ambientCol = extractColor(key, attrMap);
-				ma.mRhinoMat.SetAmbient(ambientCol);
+				ma.mAmbientCol = extractColor(key, attrMap);
 			}
 			else if (strKey == L"specularColor")
 			{
-				ON_Color specularCol = extractColor(key, attrMap);
-				ma.mRhinoMat.SetSpecular(specularCol);
+				ma.mSpecularCol = extractColor(key, attrMap);
 			}
 
 			break;

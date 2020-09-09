@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <set>
 
+#include <assert.h>
+
 #define DEBUG
 
 namespace {
@@ -27,6 +29,7 @@ namespace {
 	const std::wstring ENCFILE_EXT = L".txt";
 	const wchar_t* EO_EMIT_REPORTS = L"emitReport";
 	const wchar_t* EO_EMIT_GEOMETRY = L"emitGeometry";
+	const wchar_t* EO_EMIT_MATERIALS = L"emitMaterials";
 
 	const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
 		prtx::EncodePreparator::PreparationFlags()
@@ -37,7 +40,12 @@ namespace {
 		.cleanupVertexNormals(false)
 		.mergeByMaterial(true);
 
-	const prtx::PRTUtils::AttributeMapPtr convertReportToAttributeMap(const prtx::ReportsPtr& r) {
+	std::vector<const wchar_t*> toPtrVec(const prtx::WStringVector& wsv) {
+		std::vector<const wchar_t*> pw(wsv.size());
+		for (size_t i = 0; i < wsv.size(); i++)
+			pw[i] = wsv[i].c_str();
+		return pw;
+	}
 
 	template<typename T>
 	std::pair<std::vector<const T*>, std::vector<size_t>> toPtrVec(const std::vector<std::vector<T>>& v) {
@@ -56,19 +64,19 @@ namespace {
 
 	// we blacklist all CGA-style material attribute keys, see prtx/Material.h
 	const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
-		L"ambient.b",
+		/*L"ambient.b",
 		L"ambient.g",
-		L"ambient.r",
+		L"ambient.r",*/
 		L"bumpmap.rw",
 		L"bumpmap.su",
 		L"bumpmap.sv",
 		L"bumpmap.tu",
 		L"bumpmap.tv",
-		L"color.a",
+		/*L"color.a",
 		L"color.b",
 		L"color.g",
 		L"color.r",
-		L"color.rgb",
+		L"color.rgb",*/
 		L"colormap.rw",
 		L"colormap.su",
 		L"colormap.sv",
@@ -89,24 +97,24 @@ namespace {
 		L"opacitymap.sv",
 		L"opacitymap.tu",
 		L"opacitymap.tv",
-		L"specular.b",
+		/*L"specular.b",
 		L"specular.g",
-		L"specular.r",
+		L"specular.r",*/
 		L"specularmap.rw",
 		L"specularmap.su",
 		L"specularmap.sv",
 		L"specularmap.tu",
 		L"specularmap.tv",
-		L"bumpmap",
-		/*L"colormap",*/
+		/*L"bumpmap",
+		L"colormap",
 		L"dirtmap",
 		L"normalmap",
-		/*L"opacitymap",*/
-		L"specularmap"
+		L"opacitymap",
+		L"specularmap"*/
 
 	//#if PRT_VERSION_MAJOR > 1
 		// also blacklist CGA-style PBR attrs from CE 2019.0, PRT 2.x
-		,
+		//,
 		L"opacitymap.mode",
 		L"emissive.b",
 		L"emissive.g",
@@ -219,7 +227,7 @@ namespace {
 		}
 	}
 
-	const prt::AttributeMap* convertReportToAttributeMap(const prtx::ReportsPtr& r)
+	const prtx::PRTUtils::AttributeMapPtr convertReportToAttributeMap(const prtx::ReportsPtr& r)
 	{
 
 		prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
@@ -240,17 +248,16 @@ namespace {
 		int8_t       uvSet;
 	};
 
-	/// For a first pass of material implementation, only a colormap is supported
 	const std::vector<TextureUVMapping> TEXTURE_UV_MAPPINGS = []() -> std::vector<TextureUVMapping> {
 		return {
 			// shader key   | idx | uv set  | CGA key
 			{ L"diffuseMap",   0,    0 },  // colormap
-			/*{ L"bumpMap",      0,    1 },  // bumpmap
+			{ L"bumpMap",      0,    1 },  // bumpmap
 			{ L"diffuseMap",   1,    2 },  // dirtmap
-			{ L"specularMap",  0,    3 },*/  // specularmap
-			{ L"opacityMap",   0,    1 }  // opacitymap
-			/*{ L"normalMap",    0,    5 }   // normalmap
-
+			{ L"specularMap",  0,    3 },  // specularmap
+			{ L"opacityMap",   0,    4 },  // opacitymap
+			{ L"normalMap",    0,    5 }   // normalmap
+		/*
 	#if PRT_VERSION_MAJOR > 1
 			,
 			{ L"emissiveMap",  0,    6 },  // emissivemap
@@ -345,15 +352,16 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 {
 	bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
 	emitMaterials = true; // ONLY TO TEST
-	std::vector<uint32_t> shapeIDs;
-
+	
 	uint32_t vertexIndexBase = 0;
-	uint32_t maxNumUVSets = 0; // for now we support only 1 uv set.
+	uint32_t maxNumUVSets = 0;
 	std::vector<uint32_t> uvIndexBases(maxNumUVSets, 0u);
 
+	//std::vector<uint32_t> shapeIDs;
 	std::vector<double> vertexCoords;
 	std::vector<uint32_t> faceIndices;
 	std::vector<uint32_t> faceCounts;
+	std::vector<const prt::AttributeMap*> matAttrMap;
 
 	uint32_t faceCount = 0;
 	std::vector<uint32_t> faceRanges;
@@ -364,21 +372,20 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
-	int instance_count = instances.size();
-
 
 	for (const auto& instance : instances) {
 
 		const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
 		const prtx::MaterialPtrVector& materials = instance.getMaterials();
 
-		int material_count = materials.size();
-		LOG_DBG << L"Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << std::endl;
+		size_t material_count = materials.size();
+		size_t mesh_count = meshes.size();
+		LOG_DBG << L"Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << ", meshes: " << mesh_count << std::endl;
 
 		vertexCoords.clear();
 		faceIndices.clear();
 		faceCounts.clear();
-		//matAttrMap.clear();
+		matAttrMap.clear();
 		uvs.clear();
 		uvCounts.clear();
 		uvIndices.clear();
@@ -402,7 +409,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		faceIndices.reserve(numIndices);
 
 		// 2nd pass: fill the vectors
-		for (const auto& mesh : meshes) {
+		for (size_t mi = 0; mi < meshes.size(); ++mi) {
+			const prtx::MeshPtr& mesh = meshes.at(mi);
+
 			const prtx::DoubleVector& verts = mesh->getVertexCoords();
 			vertexCoords.insert(vertexCoords.end(), verts.begin(), verts.end());
 
@@ -491,7 +500,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		faceRanges.push_back(faceCount);
 
 		assert(matAttrMap.empty() || matAttrMap.size() == faceRanges.size() - 1);
-		assert(shapeIDs.size() == faceRanges.size() - 1);
+		//assert(shapeIDs.size() == faceRanges.size() - 1);
 
 		assert(uvs.size() == uvCounts.size());
 		assert(uvs.size() == uvIndices.size());
@@ -503,8 +512,6 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		assert(uvs.size() == puvCounts.first.size());
 		assert(uvs.size() == puvCounts.second.size());
 
-		//cb->addGeometry(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
-		//	faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size());
 		cb->add(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
 			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size(),
 
@@ -514,7 +521,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 			uvs.size(),
 
 			faceRanges.data(), faceRanges.size(),
-			matAttrMap.empty() ? nullptr : matAttrMap.data()
+			matAttrMap.empty() ? nullptr : matAttrMap.data(), material_count
 		);
 	}
 }

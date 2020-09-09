@@ -25,7 +25,7 @@ public:
 		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
 		uint32_t uvSets,
 		const uint32_t* faceRanges, size_t faceRangesSize,
-		const prt::AttributeMap** materials) = 0;
+		const prt::AttributeMap** materials, size_t matCount) = 0;
 
 	virtual void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) = 0;
 };

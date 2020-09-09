@@ -91,7 +91,7 @@ GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<
 
 GeneratedModel::GeneratedModel(const size_t & initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices, const std::vector<uint32_t>& face,
 	const ON_2fPointArray& uvs, const std::vector<uint32_t>& uvsIndices, const std::vector<uint32_t>& uvsCounts,
-	const ReportMap & rep, const Materials::MaterialsMap & mats):
+	const Reporting::ReportMap & rep, const Materials::MaterialsMap & mats):
 	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mUVs(uvs), mUVIndices(uvsIndices), mUVCounts(uvsCounts), 
 	mReports(rep), mMaterials(mats) { }
 
@@ -136,23 +136,16 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 		mesh.Dump(log);
 		LOG_ERR << log_str;
 	}
-	ON::CloseFile(fp);
-
-	// Create the uv mapping
-	auto uv_mesh = getTextureMappingMesh();
-	uv_mesh.ComputeVertexNormals();
-	uv_mesh.Compact();
-
-	//ON_TextureMapping mapping;
-	//mapping.SetCustomMappingPrimitive(&uv_mesh);
-
-	//auto tex_coor = mesh.SetCachedTextureCoordinates(mapping);
 
 	mesh.ComputeVertexNormals();
 	if (!mesh.Compact()) {
 		LOG_ERR << "Mesh has been compacted.";
 	}
 
+	// Create the uv mapping
+	auto uv_mesh = getTextureMappingMesh();
+	uv_mesh.ComputeVertexNormals();
+	uv_mesh.Compact();
 
 	return uv_mesh;
 }

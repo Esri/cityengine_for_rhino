@@ -23,7 +23,7 @@ typedef struct _Model {
 	ON_2fPointArray mUVs; // TODO for now, only 1 uv set is supported.
 	std::vector<uint32_t> mUVIndices; // TODO
 	std::vector<uint32_t> mUVCounts; // TODO
-	ReportMap mReports;
+	Reporting::ReportMap mReports;
 	Materials::MaterialsMap mMaterials;
 } Model;
 
@@ -50,7 +50,7 @@ public:
 		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
 		uint32_t uvSets,
 		const uint32_t* faceRanges, size_t faceRangesSize,
-		const prt::AttributeMap** materials) override;
+		const prt::AttributeMap** materials, size_t matCount) override;
 	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
 
 	size_t getInitialShapeCount() const {
