@@ -185,10 +185,12 @@ namespace GrasshopperPRT
                         mat.SetBitmapTexture(tex);
                         break;
                     case "opacitymap":
+                        tex.TextureCombineMode = TextureCombineMode.None;
                         tex.TextureType = TextureType.Transparency;
                         mat.SetTransparencyTexture(tex);
                         break;
                     case "bumpmap":
+                        tex.TextureCombineMode = TextureCombineMode.None;
                         tex.TextureType = TextureType.Bump;
                         mat.SetBumpTexture(tex);
                         break;
