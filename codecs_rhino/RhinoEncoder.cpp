@@ -229,7 +229,6 @@ namespace {
 
 	const prtx::PRTUtils::AttributeMapPtr convertReportToAttributeMap(const prtx::ReportsPtr& r)
 	{
-
 		prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
 		for (const auto& b : r->mBools)
@@ -351,13 +350,12 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 								   IRhinoCallbacks* cb) 
 {
 	bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
-	emitMaterials = true; // ONLY TO TEST
+	//emitMaterials = true; // ONLY TO TEST
 	
 	uint32_t vertexIndexBase = 0;
 	uint32_t maxNumUVSets = 0;
 	std::vector<uint32_t> uvIndexBases(maxNumUVSets, 0u);
 
-	//std::vector<uint32_t> shapeIDs;
 	std::vector<double> vertexCoords;
 	std::vector<uint32_t> faceIndices;
 	std::vector<uint32_t> faceCounts;
@@ -384,7 +382,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 		vertexIndexBase = 0;
 		maxNumUVSets = 0;
-
+		uvIndexBases.clear();
 		vertexCoords.clear();
 		faceIndices.clear();
 		faceCounts.clear();
@@ -440,7 +438,6 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 				if (mesh->getUVSetsCount() > 0 && (bool)requiredUVSetsByMaterial)
 				{ 
-					//maxNumUVSets = 1;
 					uvIndexBases.resize(maxNumUVSets, 0u);
 					uvs.resize(maxNumUVSets);
 					uvCounts.resize(maxNumUVSets);
@@ -502,8 +499,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		}
 		faceRanges.push_back(faceCount);
 
-		assert(matAttrMap.empty() || matAttrMap.size() == faceRanges.size() - 1);
-		//assert(shapeIDs.size() == faceRanges.size() - 1);
+		assert(matAttrMap.empty() || matAttrMap.size() == 1);
 
 		assert(uvs.size() == uvCounts.size());
 		assert(uvs.size() == uvIndices.size());
