@@ -143,21 +143,13 @@ namespace GrasshopperPRT
 
             var generatedMeshes = PRTWrapper.GenerateMesh();
 
-            Material[] materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
+            GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
+
             // Set cga report values to output
             OutputReports(DA, generatedMeshes);
 
             DA.SetDataTree(0, generatedMeshes);
-
-            // convert the list of materials to IGH_DataTree
-            GH_Structure<GH_Material> output_materials = new GH_Structure<GH_Material>();
-
-            output_materials.AppendRange(Array.ConvertAll(materials, x => {
-                if (x == null) return null;
-                return new GH_Material(x.RenderMaterial);
-            } ));
-
-            DA.SetDataTree(1, output_materials);
+            DA.SetDataTree(1, materials);
         }
 
         private void OutputReports(IGH_DataAccess DA, GH_Structure<GH_Mesh> gh_meshes)

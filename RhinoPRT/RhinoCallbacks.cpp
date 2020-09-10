@@ -28,14 +28,14 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 		size_t const psUVCountsSize = uvCountsSizes[uvSet];
 		size_t const psUVIndicesSize = uvIndicesSizes[uvSet];
 
-#ifdef DEBUG
-		LOG_DBG << " -- uvset " << uvSet << ": psUVCountsSize = " << psUVCountsSize << ", psUVIndicesSize = " << psUVIndicesSize;
-#endif
-
 		if (psUVSSize > 0 && psUVIndicesSize > 0 && psUVCountsSize > 0)
 		{
 			if (uvSet == 0)
 			{
+#ifdef DEBUG
+				LOG_DBG << " -- uvset " << uvSet << ": psUVCountsSize = " << psUVCountsSize << ", psUVIndicesSize = " << psUVIndicesSize;
+#endif
+
 				double const* const psUVS = uvs[uvSet];
 				uint32_t const* const psUVCounts = uvCounts[uvSet];
 				uint32_t const* const psUVIndices = uvIndices[uvSet];
@@ -61,7 +61,7 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 	}
 }
 
-void RhinoCallbacks::add(const size_t initialShapeIndex,
+void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIndex,
 						 const double * vertexCoords, const size_t vertexCoordsCount, 
 						 const uint32_t * faceIndices, const size_t faceIndicesCount, 
 						 const uint32_t * faceCounts, const size_t faceCountsCount, 
@@ -85,19 +85,16 @@ void RhinoCallbacks::add(const size_t initialShapeIndex,
 #ifdef DEBUG
 	LOG_DBG << "got " << matCount << " materials";
 #endif
-	if (matCount > 0) 
+	if (matCount > 0 && materials) 
 	{
-		for (size_t i = 0; i < matCount; ++i) 
-		{
-			if (materials)
-			{
-				const prt::AttributeMap* attrMap = materials[i];
-
-				// TODO: should not be initialShapeIndex but faceRange
-				Materials::extractMaterials(initialShapeIndex, i, attrMap, currentModel.mMaterials);
-			}
+		if(matCount > 1) {
+			LOG_ERR << L"Multiple material for a single mesh part is not supported by Rhino. Taking only the first material" << std::endl;
 		}
+
+		const prt::AttributeMap* attrMap = materials[0];
+		Materials::extractMaterials(initialShapeIndex, instanceIndex, attrMap, currentModel.mMaterials);
 	}
+	
 }
 
 void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports)

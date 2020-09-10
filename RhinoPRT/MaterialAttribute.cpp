@@ -20,11 +20,11 @@ ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* at
 	return on_color;
 }
 
-void Materials::extractMaterials(const size_t initialShapeIndex, const size_t faceRangeId, const prt::AttributeMap* attrMap, MaterialsMap& matMap)
+void Materials::extractMaterials(const size_t initialShapeIndex, const size_t instanceIndex, const prt::AttributeMap* attrMap, MaterialsMap& matMap)
 {
 	MaterialAttribute ma;
 	ma.mInitialShapeId = initialShapeIndex;
-	ma.mMatId = faceRangeId;
+	ma.mMatId = instanceIndex;
 
 	// process all keys
 	size_t keyCount(0);
@@ -70,5 +70,5 @@ void Materials::extractMaterials(const size_t initialShapeIndex, const size_t fa
 		}
 	}
 
-	matMap.insert_or_assign(faceRangeId, ma);
+	matMap.insert_or_assign(instanceIndex, ma);
 }

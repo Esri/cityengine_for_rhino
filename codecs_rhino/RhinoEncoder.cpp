@@ -372,7 +372,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
-
+	size_t instanceIndex(0);
 	for (const auto& instance : instances) {
 
 		const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
@@ -515,7 +515,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		assert(uvs.size() == puvCounts.first.size());
 		assert(uvs.size() == puvCounts.second.size());
 
-		cb->add(instance.getInitialShapeIndex(), vertexCoords.data(), vertexCoords.size(),
+		cb->add(instance.getInitialShapeIndex(), instanceIndex, 
+			vertexCoords.data(), vertexCoords.size(),
 			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size(),
 
 			puvs.first.data(), puvs.second.data(),
@@ -526,6 +527,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 			faceRanges.data(), faceRanges.size(),
 			matAttrMap.empty() ? nullptr : matAttrMap.data(), material_count
 		);
+
+		instanceIndex++;
 	}
 }
 

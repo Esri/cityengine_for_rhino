@@ -260,11 +260,25 @@ extern "C" {
 		for (int id : ids) pMeshIDs->Append(id);
 	}
 
+	RHINOPRT_API int GetMeshPartCount(int initShapeId)
+	{
+		const auto& models = RhinoPRT::myPRTAPI->getGenModels();
+
+		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeId](GeneratedModel m) { return m.getInitialShapeIndex() == initShapeId; });
+		if (modelIt == models.end())
+		{
+			LOG_ERR << L"No generated model with the given initial shape ID was found. The generation of this model has probably failed.";
+			return 0;
+		}
+
+		return modelIt->getMeshPartCount();
+	}
+
 	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray)
 	{
 		auto models = RhinoPRT::myPRTAPI->getGenModels();
 		
-		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeID](GeneratedModel m) { m.getInitialShapeIndex() == initShapeID; });
+		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeID](GeneratedModel m) { return m.getInitialShapeIndex() == initShapeID; });
 
 		if (modelIt == models.end()) 
 		{

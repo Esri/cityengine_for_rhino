@@ -20,7 +20,8 @@ public:
 	///<param name='faceRanges'>The range of the reports</param>
 	///<param name='faceRangeSize'>The number of ranges</param>
 	///<param name='reports'>An array of reports</param>
-	virtual void add(const size_t initialShapeIndex, const double* vertexCoords, const size_t vextexCoordsCount,
+	virtual void add(const size_t initialShapeIndex, const size_t instanceIndex,
+		const double* vertexCoords, const size_t vextexCoordsCount,
 		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
 		const size_t faceCountsCount,
 		double const* const* uvs, size_t const* uvsSizes,

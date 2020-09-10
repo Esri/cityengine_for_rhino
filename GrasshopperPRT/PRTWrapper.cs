@@ -47,6 +47,9 @@ namespace GrasshopperPRT
         public static extern void GetAllMeshIDs([In, Out]IntPtr pMeshIDs);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int GetMeshPartCount(int initShapeId);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetRuleAttributesCount();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
@@ -101,7 +104,7 @@ namespace GrasshopperPRT
 
         public static GH_Structure<GH_Mesh> GenerateMesh()
         {
-            /*Mesh[] meshes = new Mesh[];
+            Mesh[] meshes = null;
 
             using(var arr = new SimpleArrayMeshPointer())
             {
@@ -111,7 +114,7 @@ namespace GrasshopperPRT
                 bool status = GenerateTest(ptr_array);
                 if (!status) return null;
                 meshes = arr.ToNonConstArray();
-            }*/
+            }
 
             // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
             // thus a conversion is necessary when adding Meshes.

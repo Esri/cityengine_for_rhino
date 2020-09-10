@@ -77,6 +77,10 @@ public:
 
 	const MeshBundle getMeshesFromGenModel() const;
 
+	const int getMeshPartCount() const {
+		return mModel.mModelParts.size();
+	}
+
 	size_t getInitialShapeIndex() const {
 		return mInitialShapeIndex;
 	}

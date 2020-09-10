@@ -99,6 +99,8 @@ extern "C" {
 
 	RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs);
 
+	RHINOPRT_API int GetMeshPartCount(int initShapeId);
+
 	RHINOPRT_API int GetRuleAttributesCount();
 
 	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type);
