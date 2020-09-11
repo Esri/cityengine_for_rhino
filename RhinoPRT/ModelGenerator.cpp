@@ -154,9 +154,7 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 			}
 
 			for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
-				/*new_geometry.emplace_back(idx, roc->getVertices(idx), roc->getIndices(idx), roc->getFaces(idx), roc->getUVs(idx), roc->getUVIndices(idx), roc->getUVCounts(idx),
-					roc->getReport(idx), roc->getMaterial(idx));*/
-				new_geometry.emplace_back(idx, roc->getModel(idx), roc->getReport(idx), roc->getMaterial(idx));
+				new_geometry.emplace_back(idx, roc->getModel(idx));
 			}
 		}
 		else {

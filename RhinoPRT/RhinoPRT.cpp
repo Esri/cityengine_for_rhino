@@ -231,25 +231,15 @@ extern "C" {
 		RhinoPRT::get().ClearInitialShapes();
 	}
 
-	RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray)
+	inline RHINOPRT_API bool GenerateTest()
 	{
-		if (pMeshArray == nullptr) {
-			LOG_ERR << L"Aborting generation, given a null Mesh array.";
-			return false;
-		}
-
 		auto meshes = RhinoPRT::get().GenerateGeometry();
 
 		if (meshes.size() == 0) {
 			LOG_ERR << L"Generation failed, returned an empty models array.";
 			return false;
 		}
-		/*
-		for (const auto& mesh : meshes) {
-			const auto on_mesh = mesh.getMeshesFromGenModel();
-			pMeshArray->Append(new ON_Mesh(on_mesh)); // must be freed my the caller of this function.
-		}
-		*/
+		
 		return true;
 	}
 

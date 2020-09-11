@@ -350,7 +350,6 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 								   IRhinoCallbacks* cb) 
 {
 	bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
-	//emitMaterials = true; // ONLY TO TEST
 	
 	uint32_t vertexIndexBase = 0;
 	uint32_t maxNumUVSets = 0;
@@ -530,7 +529,6 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 void RhinoEncoder::finish(prtx::GenerateContext& context) {
 	LOG_DBG << "In finish  function...";
-
 }
 
 

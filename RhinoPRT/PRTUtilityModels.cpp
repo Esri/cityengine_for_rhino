@@ -2,38 +2,9 @@
 
 #include "Logger.h"
 
+#include <algorithm>
 #include <numeric>
 
-/// NOT USED ANYMORE.
-InitialShape::InitialShape(const std::vector<double> &vertices) : mVertices(vertices) {
-	mIndices.resize(vertices.size() / 3);
-	std::iota(std::begin(mIndices), std::end(mIndices), 0);
-
-	// It is specific to the plane surface quad.
-	mIndices[1] = 2;
-	mIndices[2] = 3;
-	mIndices[3] = 1;
-
-	mFaceCounts.resize(1, (uint32_t)mIndices.size());
-}
-
-InitialShape::InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount) {
-	mVertices.reserve(vCount);
-	mIndices.reserve(iCount);
-	mFaceCounts.reserve(faceCountCount);
-
-	for (int i = 0; i < vCount; ++i) {
-		mVertices.push_back(vertices[i]);
-	}
-
-	for (int i = 0; i < iCount; ++i) {
-		mIndices.push_back(indices[i]);
-	}
-
-	for (int i = 0; i < faceCountCount; ++i) {
-		mFaceCounts.push_back(faceCount[i]);
-	}
-}
 
 InitialShape::InitialShape(const ON_Mesh& mesh) {
 	ON_wString shapeIdxStr;
@@ -85,74 +56,8 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 	}
 }
 
-GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-	const std::vector<uint32_t>& face, const Reporting::ReportMap& rep):
-	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReports(rep) { }
-
-GeneratedModel::GeneratedModel(const size_t & initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices, const std::vector<uint32_t>& face,
-	const ON_2fPointArray& uvs, const std::vector<uint32_t>& uvsIndices, const std::vector<uint32_t>& uvsCounts,
-	const Reporting::ReportMap & rep, const Materials::MaterialsMap & mats):
-	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mUVs(uvs), mUVIndices(uvsIndices), mUVCounts(uvsCounts), 
-	mReports(rep), mMaterials(mats) { }
-
-GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model, const Reporting::ReportMap& rep, const Materials::MaterialsMap& mats):
-	mInitialShapeIndex(initialShapeIdx), mModel(model), mReports(rep), mMaterials(mats) { }
-
-const ON_Mesh GeneratedModel::getMeshFromGenModel() const 
-{
-
-	size_t nbVertices = mVertices.size() / 3;
-
-	ON_Mesh mesh(mFaces.size(), nbVertices, true, true);
-
-	// Set the initial shape id.
-	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
-
-	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
-		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
-	}
-
-	int faceid(0);
-	int currindex(0);
-	for (int face : mFaces) {
-		if (face == 3) {
-			mesh.SetTriangle(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2]);
-			currindex += face;
-			faceid++;
-		}
-		else if (face == 4) {
-			mesh.SetQuad(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2], mIndices[currindex + 3]);
-			currindex += face;
-			faceid++;
-		}
-		else {
-			//ignore face because it is invalid
-			currindex += face;
-			LOG_WRN << "Ignored face with invalid number of vertices :" << face;
-		}
-	}
-
-	// Printing a rhino error log if the created mesh is invalid
-	ON_wString log_str;
-	ON_TextLog log(log_str);
-	if (!mesh.IsValid(&log))
-	{
-		mesh.Dump(log);
-		LOG_ERR << log_str;
-	}
-
-	mesh.ComputeVertexNormals();
-	if (!mesh.Compact()) {
-		LOG_ERR << "Mesh has been compacted.";
-	}
-
-	// Create the uv mapping
-	/*auto uv_mesh = getTextureMappingMesh();
-	uv_mesh.ComputeVertexNormals();
-	uv_mesh.Compact();*/
-
-	return mesh;
-}
+GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model):
+	mInitialShapeIndex(initialShapeIdx), mModel(model) { }
 
 const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const 
 {
@@ -209,12 +114,8 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 const MeshBundle GeneratedModel::getMeshesFromGenModel() const 
 {
 	MeshBundle mesh;
-
-	for (const auto& modelPart : mModel.mModelParts)
-	{
-		mesh.push_back(toON_Mesh(modelPart));
-	}
-
+	mesh.reserve(mModel.mModelParts.size());
+	std::transform(mModel.mModelParts.begin(), mModel.mModelParts.end(), std::back_inserter(mesh), [this](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part); });
 	return mesh;
 }
 

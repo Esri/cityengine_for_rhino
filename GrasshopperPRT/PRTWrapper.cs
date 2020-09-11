@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Drawing;
@@ -36,6 +35,9 @@ namespace GrasshopperPRT
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool GenerateTest();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GenerateTest([In,Out]IntPtr pMeshArray);
@@ -104,17 +106,8 @@ namespace GrasshopperPRT
 
         public static GH_Structure<GH_Mesh> GenerateMesh()
         {
-            Mesh[] meshes = null;
-
-            using(var arr = new SimpleArrayMeshPointer())
-            {
-                var ptr_array = arr.NonConstPointer();
-
-                // Start the geometry generation
-                bool status = GenerateTest(ptr_array);
-                if (!status) return null;
-                meshes = arr.ToNonConstArray();
-            }
+            bool status = GenerateTest();
+            if (!status) return null;
 
             // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
             // thus a conversion is necessary when adding Meshes.
@@ -135,7 +128,7 @@ namespace GrasshopperPRT
                 {
                     var ptr_array = arr.NonConstPointer();
 
-                    bool status = GetMeshBundle(id, ptr_array);
+                    status = GetMeshBundle(id, ptr_array);
 
                     if(status)
                     {
@@ -156,27 +149,6 @@ namespace GrasshopperPRT
                     }                    
                 }
             }
-            /*
-            int currIsID = 0;
-
-            foreach(var mesh in meshes) {
-                //if some of the initial shapes failed to be processed, add empty meshes to keep the synchronization between input and output.
-                int id = Convert.ToInt32(mesh.GetUserString(INIT_SHAPE_IDX_KEY));
-                if (id != -1) // If id == -1, we don't check syncronization since mesh id were wrongly setup at the beginning.
-                { 
-                    while (currIsID < id)
-                    {
-                        mesh_struct.Append(null);
-                        currIsID++;
-                    }
-                }
-                currIsID++;
-
-                GH_Mesh gh_mesh = null;
-                bool status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
-
-                if (status) mesh_struct.Append(gh_mesh);                
-            }*/
 
             return mesh_struct;
         }

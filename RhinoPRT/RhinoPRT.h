@@ -93,7 +93,7 @@ extern "C" {
 
 	RHINOPRT_API void ClearInitialShapes();
 
-	RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray);
+	RHINOPRT_API bool GenerateTest();
 
 	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray);
 

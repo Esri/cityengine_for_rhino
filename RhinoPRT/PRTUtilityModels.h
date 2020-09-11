@@ -17,8 +17,6 @@ using MeshBundle = std::vector<ON_Mesh>;
 class InitialShape {
 public:
 	InitialShape() = default;
-	InitialShape(const std::vector<double> &vertices);
-	InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount);
 	InitialShape(const ON_Mesh& mesh);
 	~InitialShape() {}
 
@@ -63,14 +61,8 @@ protected:
 */
 class GeneratedModel {
 public:
-	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-		const std::vector<uint32_t>& face, const Reporting::ReportMap& rep);
 
-	GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-		const std::vector<uint32_t>& face, const ON_2fPointArray& uvs, const std::vector<uint32_t>& uvsIndices, const std::vector<uint32_t>& uvsCounts,
-		const Reporting::ReportMap& rep, const Materials::MaterialsMap& mats);
-
-	GeneratedModel(const size_t& initialShapeIdx, const Model& model, const Reporting::ReportMap& rep, const Materials::MaterialsMap& mats);
+	GeneratedModel(const size_t& initialShapeIdx, const Model& model);
 
 	GeneratedModel() {}
 	~GeneratedModel() {}
@@ -84,44 +76,19 @@ public:
 	size_t getInitialShapeIndex() const {
 		return mInitialShapeIndex;
 	}
-	const std::vector<double>& getVertices() const {
-		return mVertices;
-	}
-	const std::vector<uint32_t>& getIndices() const {
-		return mIndices;
-	}
-	const std::vector<uint32_t>& getFaces() const {
-		return mFaces;
-	}
+	
 	const Reporting::ReportMap& getReport() const {
-		return mReports;
-	}
-
-	const ON_2fPointArray& getUVs() const {
-		return mUVs;
+		return mModel.mReports;
 	}
 
 	const Materials::MaterialsMap& getMaterials() const {
-		return mMaterials;
+		return mModel.mMaterials;
 	}
 
 private:
 	size_t mInitialShapeIndex;
 
 	Model mModel;
-
-	std::vector<double> mVertices;
-	std::vector<uint32_t> mIndices;
-	std::vector<uint32_t> mFaces;
-	
-	ON_2fPointArray mUVs;
-	std::vector<uint32_t> mUVIndices;
-	std::vector<uint32_t> mUVCounts;
-
-	Reporting::ReportMap mReports;
-	Materials::MaterialsMap mMaterials;
-
-	const ON_Mesh getMeshFromGenModel() const;
 
 	/// Creates an ON_Mesh and setup its uv coordinates, for a given ModelPart.
 	const ON_Mesh toON_Mesh(const ModelPart& modelPart) const;

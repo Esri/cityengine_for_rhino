@@ -40,6 +40,12 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 				uint32_t const* const psUVCounts = uvCounts[uvSet];
 				uint32_t const* const psUVIndices = uvIndices[uvSet];
 
+				modelPart.mUVIndices.reserve(psUVIndicesSize);
+				modelPart.mUVs.Reserve(psUVIndicesSize);
+				modelPart.mUVCounts.reserve(psUVCountsSize);
+
+				modelPart.mUVCounts.insert(modelPart.mUVCounts.end(), psUVCounts + 0, psUVCounts + psUVCountsSize);
+
 				for (size_t uvi = 0; uvi < psUVIndicesSize; ++uvi)
 				{
 					const uint32_t uvIdx = psUVIndices[uvi];
@@ -47,10 +53,6 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 					const auto dv = psUVS[uvIdx * 2 + 1];
 					modelPart.mUVs.Append(ON_2fPoint(du, dv));
 					modelPart.mUVIndices.push_back(uvi);
-				}
-
-				for (size_t i = 0; i < psUVCountsSize; ++i) {
-					modelPart.mUVCounts.push_back(psUVCounts[i]);
 				}
 			}
 			else
