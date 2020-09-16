@@ -18,10 +18,13 @@ struct PRTContext final {
 	~PRTContext();
 
 	bool isAlive() const {
-		return static_cast<bool>(mPRTHandle);
+		return alreadyInitialized/*static_cast<bool>(mPRTHandle)*/;
 	}
 
 	prt::ConsoleLogHandler* mLogHandler;
 	prt::FileLogHandler* mFileLogHandler;
 	pcu::ObjectPtr mPRTHandle;
+
+private:
+	bool alreadyInitialized;
 };

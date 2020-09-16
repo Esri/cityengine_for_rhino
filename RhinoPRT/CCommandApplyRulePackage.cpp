@@ -100,7 +100,11 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 				LOG_ERR << L"Incompatible initial shape." << std::endl;
 			}
 
-			if (mesh) mesh_array.Append(mesh);
+			if (mesh)
+			{
+				mesh->SetUserString(L"InitShapeIdx", std::to_wstring(i).c_str());
+				mesh_array.Append(mesh);
+			}
 		}
 	}
 	else return cancel;
@@ -114,7 +118,11 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 
 	// Model generation arguments and initial shapes setup.
 	SetPackage(rpk.c_str());
-	AddMeshTest(&mesh_array);
+	if(!AddMeshTest(&mesh_array))
+	{
+		LOG_ERR << L"Failed to add initial shapes, aborting command.";
+		return failure;
+	}
 
 	// PRT Generation
 	auto generated_models = RhinoPRT::myPRTAPI->GenerateGeometry();

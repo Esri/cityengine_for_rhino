@@ -133,9 +133,12 @@ BOOL CRhinoPRTPlugIn::OnLoadPlugIn()
 	//    CPlugIn::OnLoadPlugIn() from your derived class.
 
 	// TODO: Add plug-in initialization code here.
-	InitializeRhinoPRT();
-
-	return TRUE;
+	if (InitializeRhinoPRT())
+	{
+		return TRUE;
+	}
+	
+	return FALSE;
 }
 
 void CRhinoPRTPlugIn::OnUnloadPlugIn()

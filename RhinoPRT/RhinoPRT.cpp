@@ -40,14 +40,20 @@ namespace RhinoPRT {
 	void RhinoPRTAPI::AddInitialShape(std::vector<InitialShape>& shapes) {
 
 		// get the shape attributes data from ModelGenerator
-		auto rulef = mModelGenerator->getRuleFile();
-		auto ruleN = mModelGenerator->getStartingRule();
-		auto shapeN = mModelGenerator->getDefaultShapeName();
+		std::wstring rulef = mModelGenerator->getRuleFile();
+		std::wstring ruleN = mModelGenerator->getStartingRule();
+		std::wstring shapeN = mModelGenerator->getDefaultShapeName();
 		int seed = 555; // TODO: compute seed?
 
-		for (auto&shape : shapes) {
-			mShapes.push_back(shape);
-			mAttributes.push_back(pcu::ShapeAttributes(rulef, ruleN, shapeN, seed));
+		mShapes.reserve(shapes.size());
+		mAttributes.reserve(shapes.size());
+
+		mShapes.insert(mShapes.end(), shapes.begin(), shapes.end());
+
+		auto shapeAttr = pcu::ShapeAttributes(rulef, ruleN, shapeN, seed);
+		for (size_t i = 0; i < shapes.size(); ++i) 
+		{
+			mAttributes.push_back(shapeAttr);
 		}
 	}
 
