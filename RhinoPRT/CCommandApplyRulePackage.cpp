@@ -109,15 +109,16 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 	}
 	else return cancel;
 
-	if (mesh_array.Count() == 0) { 
+	if (mesh_array.Count() == 0) 
+	{ 
 		LOG_ERR << L"No compatible initial shape was given, aborting...";
 		return failure; 
 	}
 
+	SetPackage(rpk.c_str());
+	
 	ClearInitialShapes();
 
-	// Model generation arguments and initial shapes setup.
-	SetPackage(rpk.c_str());
 	if(!AddMeshTest(&mesh_array))
 	{
 		LOG_ERR << L"Failed to add initial shapes, aborting command.";
@@ -125,7 +126,7 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 	}
 
 	// PRT Generation
-	auto generated_models = RhinoPRT::myPRTAPI->GenerateGeometry();
+	auto generated_models = RhinoPRT::get().GenerateGeometry();
 
 	// Add the objects to the Rhino scene.
 	for (auto& model : generated_models) {

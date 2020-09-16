@@ -32,7 +32,7 @@ namespace RhinoPRT {
 		int GetRuleAttributeCount();
 		RuleAttributes GetRuleAttributes();
 
-		void AddInitialShape(std::vector<InitialShape>& shapes);
+		void AddInitialShape(const std::vector<InitialShape>& shapes);
 		void ClearInitialShapes();
 
 		std::vector<GeneratedModel> GenerateGeometry();
@@ -65,8 +65,10 @@ namespace RhinoPRT {
 	};
 
 	// Global PRT handle
-	const std::unique_ptr<RhinoPRT::RhinoPRTAPI> myPRTAPI(new RhinoPRT::RhinoPRTAPI());
-}
+	//const std::unique_ptr<RhinoPRT::RhinoPRTAPI> myPRTAPI(new RhinoPRT::RhinoPRTAPI());
+	RhinoPRTAPI& get();
+
+} // namespace RhinoPRT
 
 // Define exposed functions here
 extern "C" {

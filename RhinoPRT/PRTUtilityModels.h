@@ -13,6 +13,7 @@ const std::wstring INIT_SHAPE_ID_KEY = L"InitShapeIdx";
 class InitialShape {
 public:
 	InitialShape();
+	InitialShape(const InitialShape& shape);
 	InitialShape(const std::vector<double> &vertices);
 	InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount);
 	InitialShape(const ON_Mesh& mesh);
