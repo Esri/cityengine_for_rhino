@@ -58,10 +58,7 @@ namespace RhinoPRT {
 		mShapes.insert(mShapes.end(), shapes.begin(), shapes.end());
 
 		auto shapeAttr = pcu::ShapeAttributes(rulef, ruleN, shapeN, seed);
-		for (size_t i = 0; i < shapes.size(); ++i) 
-		{
-			mAttributes.push_back(shapeAttr);
-		}
+		mAttributes.resize(shapes.size(), shapeAttr);
 	}
 
 	void RhinoPRTAPI::ClearInitialShapes() {

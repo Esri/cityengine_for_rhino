@@ -65,7 +65,6 @@ namespace RhinoPRT {
 	};
 
 	// Global PRT handle
-	//const std::unique_ptr<RhinoPRT::RhinoPRTAPI> myPRTAPI(new RhinoPRT::RhinoPRTAPI());
 	RhinoPRTAPI& get();
 
 } // namespace RhinoPRT
