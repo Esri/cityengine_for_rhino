@@ -4,10 +4,6 @@
 
 #include <numeric>
 
-InitialShape::InitialShape() {}
-
-InitialShape::InitialShape(const InitialShape& shape): mID(shape.mID), mIndices(shape.mIndices), mFaceCounts(shape.mFaceCounts), mVertices(shape.mVertices) {}
-
 /// NOT USED ANYMORE.
 InitialShape::InitialShape(const std::vector<double> &vertices) : mVertices(vertices) {
 	mIndices.resize(vertices.size() / 3);

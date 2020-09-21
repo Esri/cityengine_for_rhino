@@ -23,3 +23,8 @@ After having built the plugins, they have to be installed in Rhino and Grasshopp
 #### Starting the plugins
 - To start the Rhino plugin, run the command *ApplyRulePackage*.
 - After starting Grasshopper, the new component is located in the *Special* tab.
+
+## How to run the packaging script
+Once both plugins are built, it is possible to create a RHI (Rhino Installer Engine) package using the CreateRHIPackage.py python script. A RHI package is simply a zip archive containing all files required to run a plugin. If Rhino is installed, the plugin can be installed by double-clicking the package. It will extract the files and Rhino/Grasshopper will load them when started.
+
+To run the script, open the console, navigate to the project's root and run the command _"\<path-to-your-python-executable> CreateRHIPackage.py"_. The resulting rhi package will be created in the project's root directory.
