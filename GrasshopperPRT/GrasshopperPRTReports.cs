@@ -86,12 +86,12 @@ namespace GrasshopperPRT
 
             if (locateFromMeshes)
             {
-                var pointList = ComputeReportPositions(meshList);
+                var pointList = ComputeReportPositions(meshList, previewReports.Item2);
 
                 DA.SetDataList(REPORTS_LOCATION, pointList);
             }
 
-            DA.SetDataList(REPORTS_DISPLAY_PARAM, previewReports);
+            DA.SetDataList(REPORTS_DISPLAY_PARAM, previewReports.Item1);
 
             GH_Structure<ReportAttribute> filteredReportAttributes = new GH_Structure<ReportAttribute>();
             foreach(var currShapeReports in filteredReports)
@@ -106,9 +106,10 @@ namespace GrasshopperPRT
             DA.SetDataTree(2, filteredReportAttributes);
         }
 
-        private List<Plane> ComputeReportPositions(List<GH_Mesh> meshList)
+        private List<Plane> ComputeReportPositions(List<GH_Mesh> meshList, List<int> reportCountList)
         {
             var pointList = new List<Plane>();
+            int mesh_id = 0;
 
             foreach (var mesh in meshList)
             {
@@ -119,9 +120,9 @@ namespace GrasshopperPRT
                     var xLeft = bbox.Corner(true, false, false).X;
                     var center = bbox.Center;
                     center.X = xLeft;
-                    center.Z = zTop;
+                    center.Z = zTop + reportCountList[mesh_id] * 2;
 
-                    var plane = new Plane(center, Vector3d.ZAxis);
+                    var plane = new Plane(center, Vector3d.XAxis, Vector3d.ZAxis);
 
                     pointList.Add(plane);
                 }
@@ -129,17 +130,22 @@ namespace GrasshopperPRT
                 {
                     pointList.Add(Plane.Unset);
                 }
+
+                mesh_id++;
             }
 
             return pointList;
         }
 
-        private List<string> GetFormatedReports(Dictionary<int, Dictionary<string, ReportAttribute>> reports, int initialReportCount)
+        private Tuple<List<string>, List<int>> GetFormatedReports(Dictionary<int, Dictionary<string, ReportAttribute>> reports, int initialReportCount)
         {
-            List<string> output = new List<string>(); 
+            List<string> report_output = new List<string>();
+            List<int> line_count_output = new List<int>();
 
             foreach(var currShapeReps in reports)
             {
+                int lineCount = currShapeReps.Value.Count + 1;
+
                 List<string> reportArray = new List<string>();
 
                 reportArray.Add("Reports of shape " + currShapeReps.Key.ToString());
@@ -151,21 +157,24 @@ namespace GrasshopperPRT
 
                 string formatedReports = string.Join("\n", reportArray.ToArray());
 
-                while(output.Count < currShapeReps.Key)
+                while(report_output.Count < currShapeReps.Key)
                 {
-                    output.Add(String.Empty);
+                    report_output.Add(String.Empty);
+                    line_count_output.Add(0);
                 }
 
-                output.Add(formatedReports);
+                report_output.Add(formatedReports);
+                line_count_output.Add(lineCount);
             }
 
             //Fill in empty reports to keep the synchronization.
-            while(output.Count < initialReportCount)
+            while(report_output.Count < initialReportCount)
             {
-                output.Add(String.Empty);
+                report_output.Add(String.Empty);
+                line_count_output.Add(0);
             }
 
-            return output;
+            return Tuple.Create(report_output, line_count_output);
         }
 
         private Dictionary<int, Dictionary<string, ReportAttribute>> FilterReports(bool applyFilters,

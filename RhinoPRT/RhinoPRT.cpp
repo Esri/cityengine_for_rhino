@@ -277,7 +277,7 @@ extern "C" {
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports)
 	{
-		auto reports = RhinoPRT::myPRTAPI->getReportsOfModel(initialShapeId);
+		auto reports = RhinoPRT::get().getReportsOfModel(initialShapeId);
 
 		/*
 		left.float	-> right.all OK
