@@ -24,17 +24,7 @@ namespace Reporting {
 		bool mBoolReport = false;
 		int mIntReport = 0;
 
-		ReportAttribute() {}
-
-		ReportAttribute(const ReportAttribute& rep) {
-			mInitialShapeIndex = rep.mInitialShapeIndex;
-			mReportName = rep.mReportName;
-			mType = rep.mType;
-			mStringReport = rep.mStringReport;
-			mDoubleReport = rep.mDoubleReport;
-			mBoolReport = rep.mBoolReport;
-			mIntReport = rep.mIntReport;
-		}
+		ReportAttribute() = default;
 	};
 
 	using ReportsVector = std::vector<ReportAttribute>;

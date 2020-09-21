@@ -288,7 +288,7 @@ extern "C" {
 		*/
 		//Sort the reports by Type. The order is Double -> Bool -> String
 		std::sort(reports.begin(), reports.end(), [](Reporting::ReportAttribute& left, Reporting::ReportAttribute& right) -> bool {
-			if (left.mType == right.mType) return true;
+			if (left.mType == right.mType) return left.mReportName.compare(right.mReportName) < 0; // assuming case sensitivity. assuming two reports can't have the same name.
 			if (left.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) return true;
 			if (right.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) return false;
 			if (left.mType == prt::AttributeMap::PrimitiveType::PT_STRING) return false;
