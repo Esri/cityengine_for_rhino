@@ -38,8 +38,7 @@ namespace pcu {
 		int seed;
 
 		ShapeAttributes(const std::wstring rulef = L"bin/rule.cgb", const std::wstring startRl = L"Default$Lot",
-			const std::wstring shapeN = L"Lot", int sd = 555) :
-			ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(sd) { }
+			const std::wstring shapeN = L"Lot", int sd = 555);
 	};
 
 	struct EncoderOptions {

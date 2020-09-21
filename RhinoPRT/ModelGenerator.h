@@ -22,9 +22,9 @@ public:
 	bool initResolveMap();
 	RuleAttributes updateRuleFiles(const std::wstring rulePkg);
 
-	inline std::wstring getRuleFile() { return mRuleFile; }
-	inline std::wstring getStartingRule() { return mStartRule; };
-	inline std::wstring getDefaultShapeName() { return mShapeName; };
+	std::wstring getRuleFile(); 
+	std::wstring getStartingRule(); 
+	std::wstring getDefaultShapeName();
 
 private:
 	pcu::CachePtr mCache;

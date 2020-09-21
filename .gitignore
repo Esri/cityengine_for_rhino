@@ -365,3 +365,5 @@ x64/Release_gh/*
 
 *.exp
 *.gha
+*.rhi
+.idea

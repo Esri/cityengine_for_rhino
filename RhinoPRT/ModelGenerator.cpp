@@ -243,3 +243,7 @@ void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBu
 			shapeName = convertShapeAttr->getString(L"shapeName");
 	}
 }
+
+std::wstring ModelGenerator::getRuleFile() { return this->mRuleFile; }
+std::wstring ModelGenerator::getStartingRule() { return this->mStartRule; };
+std::wstring ModelGenerator::getDefaultShapeName() { return this->mShapeName; };

@@ -17,6 +17,10 @@
 
 namespace pcu {
 
+	ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring startRl,
+		const std::wstring shapeN, int sd) : ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(sd) { }
+
+
 	// location of RhinoPRT shared library
 	std::wstring getDllLocation() {
 #ifdef _WIN32

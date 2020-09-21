@@ -4,8 +4,6 @@
 
 #include <numeric>
 
-InitialShape::InitialShape() {}
-
 /// NOT USED ANYMORE.
 InitialShape::InitialShape(const std::vector<double> &vertices) : mVertices(vertices) {
 	mIndices.resize(vertices.size() / 3);

@@ -37,9 +37,15 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel) {
 	
 	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 	mPRTHandle.reset(prt::init(prt_path, 2, minimalLogLevel, &status));
+	LOG_INF << prt::getStatusDescription(status);
 
-	if (!mPRTHandle || status != prt::STATUS_OK) {
-		LOG_ERR << L"Could not initilize PRT";
+	alreadyInitialized = true;
+
+	if (status == prt::STATUS_ALREADY_INITIALIZED) {
+		mPRTHandle.reset();
+	}
+	else if (!mPRTHandle || status != prt::STATUS_OK) {
+		alreadyInitialized = false;
 		mPRTHandle.reset();
 	}
 }
