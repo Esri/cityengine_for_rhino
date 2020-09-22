@@ -14,6 +14,7 @@ namespace RhinoPRT {
 	}
 
 	void RhinoPRTAPI::ShutdownRhinoPRT() {
+		
 		PRTContext::get().reset();
 	}
 
@@ -30,7 +31,7 @@ namespace RhinoPRT {
 	}
 
 	void RhinoPRTAPI::SetRPKPath(const std::wstring &rpk_path) {
-		if (mPackagePath == rpk_path) return;
+		//if (mPackagePath == rpk_path) return;
 		
 		mPackagePath = rpk_path;
 
@@ -38,6 +39,7 @@ namespace RhinoPRT {
 		if (!mModelGenerator)
 			mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
 
+		// This also creates the resolve map
 		mRuleAttributes = mModelGenerator->updateRuleFiles(mPackagePath);
 
 		// Also create the attribute map builder that will receive the rule attributes.
@@ -213,13 +215,14 @@ extern "C" {
 		RhinoPRT::get().SetRPKPath(str);
 	}
 
-	RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh)
+	inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh)
 	{
 		if (pMesh == nullptr) return false;
 
 		std::vector<InitialShape> initShapes;
+		initShapes.reserve(pMesh->Count());
 		for (int i = 0; i < pMesh->Count(); ++i) {
-			initShapes.push_back(InitialShape(**pMesh->At(i))); // emplace_back
+			initShapes.emplace_back(**pMesh->At(i));
 		}
 
 		RhinoPRT::get().AddInitialShape(initShapes);
@@ -231,7 +234,7 @@ extern "C" {
 		RhinoPRT::get().ClearInitialShapes();
 	}
 
-	inline RHINOPRT_API bool GenerateTest()
+	inline RHINOPRT_API bool Generate()
 	{
 		auto meshes = RhinoPRT::get().GenerateGeometry();
 
@@ -245,14 +248,14 @@ extern "C" {
 
 	RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs)
 	{
-		auto ids = RhinoPRT::myPRTAPI->getModelIds();
+		auto ids = RhinoPRT::get().getModelIds();
 
 		for (int id : ids) pMeshIDs->Append(id);
 	}
 
 	RHINOPRT_API int GetMeshPartCount(int initShapeId)
 	{
-		const auto& models = RhinoPRT::myPRTAPI->getGenModels();
+		const auto& models = RhinoPRT::get().getGenModels();
 
 		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeId](GeneratedModel m) { return m.getInitialShapeIndex() == initShapeId; });
 		if (modelIt == models.end())
@@ -266,7 +269,7 @@ extern "C" {
 
 	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray)
 	{
-		auto models = RhinoPRT::myPRTAPI->getGenModels();
+		auto models = RhinoPRT::get().getGenModels();
 		
 		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeID](GeneratedModel m) { return m.getInitialShapeIndex() == initShapeID; });
 
@@ -378,7 +381,7 @@ extern "C" {
 		ON_SimpleArray<int>* pAmbientColor,
 		ON_SimpleArray<int>* pSpecularColor)
 	{
-		auto& genModels = RhinoPRT::myPRTAPI->getGenModels();
+		auto& genModels = RhinoPRT::get().getGenModels();
 
 		if (initialShapeId >= genModels.size()) {
 			LOG_ERR << L"Initial shape ID out of range";
@@ -398,7 +401,7 @@ extern "C" {
 		for (auto& texture: mat.mTexturePaths) {
 
 			prt::Status status;
-			const wchar_t* fullTexPath = RhinoPRT::myPRTAPI->getResolveMap()->getString(pcu::toAssetKey(texture.second).c_str(), &status);
+			const wchar_t* fullTexPath = RhinoPRT::get().getResolveMap()->getString(pcu::toAssetKey(texture.second).c_str(), &status);
 
 			if (status == prt::STATUS_OK)
 			{

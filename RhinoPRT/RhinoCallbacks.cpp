@@ -1,5 +1,19 @@
 #include "RhinoCallbacks.h"
 
+void Model::addMaterial(const Materials::MaterialAttribute& ma)
+{
+	mMaterials.insert_or_assign(ma.mMatId, std::move(ma));
+}
+
+void Model::addReport(const Reporting::ReportAttribute& ra)
+{
+	mReports.emplace(ra.mReportName, std::move(ra));
+}
+
+const std::vector<ModelPart>& Model::getModelParts() const { return mModelParts; }
+const Reporting::ReportMap& Model::getReports() const { return mReports; }
+const Materials::MaterialsMap& Model::getMaterials() const { return mMaterials; }
+
 void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * vertexCoords, 
 								 const size_t vextexCoordsCount, const uint32_t * faceIndices,
 								 const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount,
@@ -94,7 +108,8 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 		}
 
 		const prt::AttributeMap* attrMap = materials[0];
-		Materials::extractMaterials(initialShapeIndex, instanceIndex, attrMap, currentModel.mMaterials);
+		auto ma = Materials::extractMaterials(initialShapeIndex, instanceIndex, attrMap);
+		currentModel.addMaterial(ma);
 	}
 	
 }

@@ -113,9 +113,11 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 
 const MeshBundle GeneratedModel::getMeshesFromGenModel() const 
 {
+	const auto& modelParts = mModel.getModelParts();
+
 	MeshBundle mesh;
-	mesh.reserve(mModel.mModelParts.size());
-	std::transform(mModel.mModelParts.begin(), mModel.mModelParts.end(), std::back_inserter(mesh), [this](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part); });
+	mesh.reserve(modelParts.size());
+	std::transform(modelParts.begin(), modelParts.end(), std::back_inserter(mesh), [this](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part); });
 	return mesh;
 }
 

@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 
-typedef struct _Model Model;
+class Model;
 
 namespace Reporting {
 

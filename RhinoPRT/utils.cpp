@@ -13,6 +13,8 @@
 #	include <dlfcn.h>
 #endif
 
+#include <filesystem>
+
 #include <cwchar>
 #include <sstream>
 #include <string>
@@ -88,33 +90,9 @@ namespace pcu {
 
 	std::wstring getTempDir()
 	{
-		char tempPath[_MAX_PATH];
-
-#ifdef _WIN32
-		const DWORD lgth = GetTempPathA(_MAX_PATH, tempPath);
-		if (lgth == 0) {
-			LOG_ERR << L"Failed to retrieve temp directory.";
-			return L"";
-		}
-
-		std::wstring return_path = pcu::toUTF16FromOSNarrow(tempPath);
-		return_path = return_path.append(L"PRTTemp").append(getDirSeparator<std::wstring>());
-
-		if (!PathIsDirectoryA(pcu::toOSNarrowFromUTF16(return_path).c_str())) {
-			bool status = CreateDirectoryA(pcu::toOSNarrowFromUTF16(return_path).c_str(), NULL);
-			if (!status) {
-				LOG_ERR << L"Failed to create temp directory.";
-				return L"";
-			}
-		}
-
-		return return_path;
-
-#else
-		throw std::runtime_error(L"Failed to find temp directory.");
-#endif
+		auto path = std::experimental::filesystem::temp_directory_path();
+		return path.generic_wstring();
 	}
-	
 
 #ifdef _WIN32
 	const std::string FILE_SCHEMA = "file:/";

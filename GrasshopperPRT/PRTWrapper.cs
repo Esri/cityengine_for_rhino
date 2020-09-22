@@ -31,13 +31,13 @@ namespace GrasshopperPRT
         public static extern void SetPackage(string rpk_path);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool AddMeshTest([In]IntPtr pMesh);
+        public static extern bool AddInitialMesh([In]IntPtr pMesh);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GenerateTest();
+        public static extern bool Generate();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GenerateTest([In,Out]IntPtr pMeshArray);
@@ -98,7 +98,7 @@ namespace GrasshopperPRT
                 }
 
                 var ptr_array = arr.ConstPointer();
-                status = AddMeshTest(ptr_array);
+                status = AddInitialMesh(ptr_array);
             }
 
             return status;
@@ -106,7 +106,7 @@ namespace GrasshopperPRT
 
         public static GH_Structure<GH_Mesh> GenerateMesh()
         {
-            bool status = GenerateTest();
+            bool status = Generate();
             if (!status) return null;
 
             // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 

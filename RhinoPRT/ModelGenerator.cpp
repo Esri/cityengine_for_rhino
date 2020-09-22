@@ -5,7 +5,7 @@
 #include <filesystem>
 
 ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir()) {
-	mCache = (pcu::CachePtr)prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT);
+	mCache = pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT));
 }
 
 bool ModelGenerator::initResolveMap() {

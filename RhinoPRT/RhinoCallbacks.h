@@ -16,26 +16,38 @@
 
 #define DEBUG
 
-typedef struct _ModelPart {
+struct ModelPart {
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
 	ON_2fPointArray mUVs;
 	std::vector<uint32_t> mUVIndices;
 	std::vector<uint32_t> mUVCounts;
-} ModelPart;
+};
 
-typedef struct _Model {
-	std::vector<ModelPart> mModelParts;
-	Reporting::ReportMap mReports;
-	Materials::MaterialsMap mMaterials;
+class Model {
+public:
+	Model() = default;
 
 	ModelPart& addModelPart() { 
 		mModelParts.push_back(ModelPart()); 
 		return mModelParts.at(mModelParts.size() - 1);
 	}
 
-} Model;
+	void addMaterial(const Materials::MaterialAttribute& ma);
+	void addReport(const Reporting::ReportAttribute& ra);
+
+	const std::vector<ModelPart>& getModelParts() const;
+	const Reporting::ReportMap& getReports() const;
+	const Materials::MaterialsMap& getMaterials() const;
+
+private:
+
+	std::vector<ModelPart> mModelParts;
+	Reporting::ReportMap mReports;
+	Materials::MaterialsMap mMaterials;
+
+};
 
 class RhinoCallbacks : public IRhinoCallbacks {
 private:
@@ -82,58 +94,18 @@ public:
 		return mModels[initialShapeIdx];
 	}
 
-	
-	/*const std::vector<double>& getVertices(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-
-		return mModels[initialShapeIdx].mVertices;
-	}
-
-	const std::vector<uint32_t>& getIndices(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-
-		return mModels[initialShapeIdx].mIndices;
-	}
-
-	const std::vector<uint32_t>& getFaces(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-
-		return mModels[initialShapeIdx].mFaces;
-	}
-
-	const ON_2fPointArray& getUVs(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-		return mModels[initialShapeIdx].mUVs;
-	}
-
-	const std::vector<uint32_t> getUVIndices(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-		return mModels[initialShapeIdx].mUVIndices;
-	}
-
-	const std::vector<uint32_t> getUVCounts(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-		return mModels[initialShapeIdx].mUVCounts;
-	}*/
-
 	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
-		return mModels[initialShapeIdx].mReports;
+		return mModels[initialShapeIdx].getReports();
 	}
 
 	const Materials::MaterialsMap getMaterial(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
-		return mModels[initialShapeIdx].mMaterials;
+		return mModels[initialShapeIdx].getMaterials();
 	}
 
 	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) {

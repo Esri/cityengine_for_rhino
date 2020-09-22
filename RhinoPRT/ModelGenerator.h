@@ -37,7 +37,7 @@ private:
 	std::vector<pcu::AttributeMapPtr> mEncodersOptionsPtr;
 	RuleAttributes mRuleAttributes;
 
-	std::wstring mRulePkg = L"";
+	std::wstring mRulePkg;
 	std::wstring mUnpackPath;
 	std::wstring mRuleFile = L"bin/rule.cgb";
 	std::wstring mStartRule = L"default$Lot";

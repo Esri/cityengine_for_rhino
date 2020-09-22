@@ -70,7 +70,7 @@ public:
 	const MeshBundle getMeshesFromGenModel() const;
 
 	const int getMeshPartCount() const {
-		return mModel.mModelParts.size();
+		return mModel.getModelParts().size();
 	}
 
 	size_t getInitialShapeIndex() const {
@@ -78,11 +78,11 @@ public:
 	}
 	
 	const Reporting::ReportMap& getReport() const {
-		return mModel.mReports;
+		return mModel.getReports();
 	}
 
 	const Materials::MaterialsMap& getMaterials() const {
-		return mModel.mMaterials;
+		return mModel.getMaterials();
 	}
 
 private:

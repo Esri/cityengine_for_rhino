@@ -89,11 +89,11 @@ extern "C" {
 
 	RHINOPRT_API void SetPackage(const wchar_t* rpk_path);
 
-	RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh);
+	RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh);
 
 	RHINOPRT_API void ClearInitialShapes();
 
-	RHINOPRT_API bool GenerateTest();
+	RHINOPRT_API bool Generate();
 
 	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray);
 
