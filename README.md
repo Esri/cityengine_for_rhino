@@ -27,4 +27,13 @@ After having built the plugins, they have to be installed in Rhino and Grasshopp
 ## How to run the packaging script
 Once both plugins are built, it is possible to create a RHI (Rhino Installer Engine) package using the CreateRHIPackage.py python script. A RHI package is simply a zip archive containing all files required to run a plugin. If Rhino is installed, the plugin can be installed by double-clicking the package. It will extract the files and Rhino/Grasshopper will load them when started.
 
-To run the script, open the console, navigate to the project's root and run the command _"\<path-to-your-python-executable> CreateRHIPackage.py"_. The resulting rhi package will be created in the project's root directory.
+To run the script:
+- Open the console, navigate to the project's root and run the command _"\<path-to-your-python-executable> CreateRHIPackage.py"_.
+- The resulting rhi package will be created in a folder named "Package_output" located in the project's root directory.
+
+Install the package:
+- In order for the plugin to be correctly loaded, it is needed to tick the "Ask to load disabled plug-ins" box located in Rhino's Tools -> Options -> Plug-ins.
+- Close Rhino if it is open.
+- Run the rhi package by double-clicking it.
+- The package installer will open. Follow the instructions.
+- The plugin will be loaded at the next start of Rhino/Grasshopper.

@@ -47,6 +47,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="PRTContext.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\RhinoPRT.rc2" />

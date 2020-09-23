@@ -41,7 +41,7 @@ namespace GrasshopperPRT
         /// </summary>
         public GrasshopperPRTComponent()
           : base("GrasshopperPRT", "GHPRT",
-              "Provide acces to the CityEngine PRT engine to Grasshopper",
+              "Provide acces to the CityEngine PRT engine in Grasshopper.\n\t",
               "Special", "Esri")
         {
             // Initialize PRT engine

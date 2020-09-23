@@ -95,6 +95,9 @@
     <ClInclude Include="ReportAttribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RhinoPRT.def">

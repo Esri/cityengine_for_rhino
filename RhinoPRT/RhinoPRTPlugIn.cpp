@@ -5,6 +5,7 @@
 #include "rhinoSdkPlugInDeclare.h"
 #include "RhinoPRTPlugIn.h"
 #include "Resource.h"
+#include "version.h"
 
 // The plug-in object must be constructed before any plug-in classes derived
 // from CRhinoCommand. The #pragma init_seg(lib) ensures that this happens.
@@ -26,7 +27,7 @@ RHINO_PLUG_IN_ID(L"1B8E4CAD-7A8F-4F05-B0A2-3BE0EC98C800");
 
 // Rhino plug-in version
 // Provide a version number string for this plug-in.
-RHINO_PLUG_IN_VERSION(__DATE__ "  " __TIME__)
+RHINO_PLUG_IN_VERSION(VER_PRODUCT_VERSION_STR/*__DATE__ "  " __TIME__*/);
 
 // Rhino plug-in description
 // Provide a description of this plug-in.

@@ -26,7 +26,8 @@ namespace GrasshopperPRT
             get
             {
                 //Return a short string describing the purpose of this GHA library.
-                return "Provide the PRT engine to process Rhino geometry.";
+                return "Provide the PRT engine to Rhino and Grasshopper.\n\t" +
+                       "Version: " + Version;
             }
         }
         public override Guid Id
