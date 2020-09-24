@@ -1,5 +1,6 @@
 ﻿using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,33 +25,90 @@ namespace GrasshopperPRT
 		PT_COUNT
     };
 
-    class ReportAttribute
+    public class ReportAttribute: GH_Goo<Param_GenericObject>
     {
-        string mKey;
-        ReportTypes mType;
+        private string mKey;
+        private ReportTypes mType;
 
-        public ReportAttribute(string key, ReportTypes type)
+        public override bool IsValid => true;
+
+        public override string TypeName => "ReportAttribute";
+
+        public override string TypeDescription => "Contains a cga report {key : value} where key is the report name and value is either a double, a boolean or a string.";
+
+        public int ShapeID { get; }
+        public string StringValue { get; set; } = "";
+        public double DoubleValue { get; set; } = 0;
+        public bool BoolValue { get; set; } = false;
+
+        public ReportAttribute(int shapeID, string key, ReportTypes type)
+           : base()
         {
+            this.ShapeID = shapeID;
             this.mKey = key;
             this.mType = type;
         }
 
-        public IGH_Param ToIGH_Param()
+        public ReportAttribute(int shapeID, string key, string nickname, ReportTypes type)
+            : base()
+        {
+            this.ShapeID = shapeID;
+            this.mKey = key;
+            this.mType = type;
+        }
+
+        public string getFormatedValue()
         {
             switch(mType)
             {
-                case ReportTypes.PT_BOOL:
-                    return new Param_Boolean { Name=mKey, NickName=mKey, Access=GH_ParamAccess.list, Optional=true };
                 case ReportTypes.PT_FLOAT:
-                    return new Param_Number { Name = mKey, NickName = mKey, Access = GH_ParamAccess.list, Optional = true };
+                    return DoubleValue.ToString();
                 case ReportTypes.PT_STRING:
-                    return new Param_String { Name = mKey, NickName = mKey, Access = GH_ParamAccess.list, Optional = true };
+                    return StringValue;
+                case ReportTypes.PT_BOOL:
+                    return BoolValue.ToString();
                 default:
-                    return null;
+                    return "UNDEFINED";
             }
         }
 
         public string getKey() { return mKey; }
         public ReportTypes getType() { return mType; }
+
+        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, string value)
+        {
+            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
+            report.StringValue = value;
+            return report;
+        }
+
+        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, double value)
+        {
+            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
+            report.DoubleValue = value;
+            return report;
+        }
+
+        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, bool value)
+        {
+            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
+            report.BoolValue = value;
+            return report;
+        }
+
+        public override IGH_Goo Duplicate()
+        {
+            return this;
+        }
+
+        public override string ToString()
+        {
+            return "[ ShapeID: " + ShapeID + ", Key: " + mKey + ", Value: " + getFormatedValue() + " ]";
+        }
+
+        public string ToNiceString()
+        {
+            return "  " + mKey + " : " + getFormatedValue();
+        }
     }
 }
