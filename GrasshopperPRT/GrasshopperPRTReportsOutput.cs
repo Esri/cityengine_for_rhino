@@ -19,7 +19,8 @@ namespace GrasshopperPRT
         /// </summary>
         public GrasshopperPRTReportsOutput()
           : base("GrasshopperPRTReportsOutput", "Reports Outputs",
-              "Description",
+              "Version: " + PRTWrapper.GetVersion() + ". " +
+              "Unpacks the report attributes objects",
               "Special", "Esri")
         {
         }

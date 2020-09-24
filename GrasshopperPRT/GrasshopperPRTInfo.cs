@@ -26,8 +26,8 @@ namespace GrasshopperPRT
             get
             {
                 //Return a short string describing the purpose of this GHA library.
-                return "Provide the PRT engine to Rhino and Grasshopper.\n\t" +
-                       "Version: " + Version;
+                return "Version: " + PRTWrapper.GetVersion() + ". " +
+                       "Provide access to the CityEngine PRT engine in Grasshopper.";
             }
         }
         public override Guid Id

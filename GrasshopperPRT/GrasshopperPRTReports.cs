@@ -23,7 +23,8 @@ namespace GrasshopperPRT
         /// </summary>
         public GrasshopperPRTReports()
           : base("GrasshopperPRTReports", "CGA Reports display",
-              "Helper component unpacking and displaying the Reports output from GrasshopperPRTComponent.",
+              "Version: " + PRTWrapper.GetVersion() + ". " + 
+              "Helper component to filter and preview the reports output from GrasshopperPRTComponent.",
               "Special", "Esri")
         {
         }

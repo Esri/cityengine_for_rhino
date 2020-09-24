@@ -20,6 +20,9 @@ namespace GrasshopperPRT
     {
         public static String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
 
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern void GetProductVersion([In, Out]IntPtr version_Str);
+
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention=CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
@@ -192,6 +195,21 @@ namespace GrasshopperPRT
             }
             
             return attributes;
+        }
+
+        public static String GetVersion()
+        {
+            string version;
+            using (StringWrapper str = new StringWrapper())
+            {
+                var str_ptr = str.NonConstPointer;
+
+                GetProductVersion(str_ptr);
+
+                version = str.ToString();
+            }
+
+            return version;
         }
     }
 }

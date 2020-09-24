@@ -177,6 +177,12 @@ namespace RhinoPRT {
 
 extern "C" {
 
+	RHINOPRT_API void GetProductVersion(ON_wString* version_str)
+	{
+		std::string str(VER_FILE_VERSION_STR);
+		version_str->Append(str.c_str(), str.size());
+	}
+
 	RHINOPRT_API bool InitializeRhinoPRT()
 	{
 		return RhinoPRT::get().InitializeRhinoPRT();

@@ -1,6 +1,7 @@
 #ifndef RHINOPRT
 #define RHINOPRT
 
+#include "version.h"
 #include "PRTContext.h"
 
 #include "ModelGenerator.h"
@@ -72,6 +73,8 @@ namespace RhinoPRT {
 
 // Define exposed functions here
 extern "C" {
+
+	RHINOPRT_API void GetProductVersion(ON_wString* version_Str);
 
 	RHINOPRT_API bool InitializeRhinoPRT();
 
