@@ -2,9 +2,12 @@
 
 #include "Logger.h"
 
+namespace {
 
-std::wstring getNiceName(const std::wstring& attrName) {
+	std::wstring getNiceName(const std::wstring& attrName) {
 		return pcu::removeImport(pcu::removeStyle(attrName));
+	}
+
 }
 
 bool annotCompatibleWithType(AttributeAnnotation annot, prt::AnnotationArgumentType type) {

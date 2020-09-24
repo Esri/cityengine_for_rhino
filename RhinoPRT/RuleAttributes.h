@@ -40,10 +40,10 @@ constexpr const wchar_t* MAX_KEY = L"max";
 
 using AttributeGroup = std::vector<std::wstring>;
 using AttributeGroupOrder = std::map<AttributeGroup, int>;
-
 	
 enum AttributeAnnotation { A_COLOR = 0, A_RANGE, A_ENUM, A_FILE, A_DIR, A_NOANNOT };
 
+using AnnotationPtr = std::unique_ptr<AnnotationBase>;
 
 class AnnotationBase {
 public:
@@ -75,6 +75,7 @@ private:
 	double mMax;
 };
 
+/// Generic enum annotation class
 /// Enum annotations can be strings, numbers or bools
 template<class T>
 class AnnotationEnum : public AnnotationBase {
