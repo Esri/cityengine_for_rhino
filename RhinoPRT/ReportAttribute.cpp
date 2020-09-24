@@ -8,7 +8,7 @@ namespace {
 
 	void syncReports(const int shapeID, std::vector<Reporting::ReportAttribute>& reports)
 	{
-		int currID = reports.size();
+		size_t currID = reports.size();
 
 		while (currID < shapeID) {
 			reports.push_back(Reporting::getEmptyReport(currID));
@@ -79,6 +79,22 @@ namespace Reporting {
 
 			model.mReports.emplace(ra.mReportName, std::move(ra));
 		}
+	}
+
+	ReportsVector ToReportsVector(const ReportMap& reports)
+	{
+		ReportsVector rep;
+		rep.reserve(reports.size());
+
+		for (const auto& report : reports) {
+			rep.push_back(report.second);
+		}
+		
+		//auto fct = [](const std::pair<std::wstring, ReportAttribute> p) { return ReportAttribute(p.second); };
+
+		//auto lastit = std::transform(reports.begin(), reports.end(), rep.end(), fct);
+
+		return rep;
 	}
 
 	void GroupedReports::add(const ReportAttribute& report, const int shapeID)

@@ -7,6 +7,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include <map>
 
 typedef struct _Model Model;
@@ -22,17 +23,21 @@ namespace Reporting {
 		double mDoubleReport = 0;
 		bool mBoolReport = false;
 		int mIntReport = 0;
+
+		ReportAttribute() = default;
 	};
 
-	ReportAttribute getEmptyReport(int shapeID);
-
-	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
-
-	using ReportMap = std::unordered_map<std::wstring, ReportAttribute>;
+	using ReportsVector = std::vector<ReportAttribute>;
+	using ReportMap = std::map<std::wstring, ReportAttribute>;
 	using GroupedReportMap = std::map<std::wstring, std::vector<ReportAttribute>>;
 
 	const std::vector<ReportAttribute> EMPTY_REPORTS;
 	const std::wstring EMPTY_REPORT_STRING(L"\0");
+
+	ReportAttribute getEmptyReport(int shapeID);
+
+	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
+	ReportsVector ToReportsVector(const ReportMap& reports);
 
 	class GroupedReports {
 	public:
