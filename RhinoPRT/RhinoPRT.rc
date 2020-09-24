@@ -87,12 +87,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "My Company Name"
             VALUE "FileDescription", "RhinoPRT"
-            VALUE "FileVersion", VER_FILE_VERSION_STR"\0"
+            VALUE "FileVersion", VER_FILE_VERSION_STR
             VALUE "InternalName", "RhinoPRT.rhp"
             VALUE "LegalCopyright", "Copyright © 2020, ESRI"
             VALUE "OriginalFilename", "RhinoPRT.rhp"
             VALUE "ProductName", "RhinoPRT"
-            VALUE "ProductVersion", VER_PRODUCT_VERSION_STR"\0"
+            VALUE "ProductVersion", VER_PRODUCT_VERSION_STR
         END
     END
     BLOCK "VarFileInfo"

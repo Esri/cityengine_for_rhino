@@ -1,10 +1,10 @@
 #define STRINGIZE2(s) #s
 #define STRINGIZE(s) STRINGIZE2(s)
 
-constexpr unsigned int VERSION_MAJOR = 0;
-constexpr unsigned int VERSION_MINOR = 1;
-constexpr unsigned int VERSION_REVISION = 0;
-constexpr unsigned int VERSION_BUILD = 0;
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 1
+#define VERSION_REVISION 0
+#define VERSION_BUILD  0
 
 #define VER_FILE_VERSION   VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD
 #define VER_FILE_VERSION_STR        STRINGIZE(VERSION_MAJOR)        \

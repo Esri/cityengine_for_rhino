@@ -44,7 +44,7 @@ v_build = 0
 with open(version_file, 'r') as file:
     lines: list = file.readlines()
     for line in lines:
-        result: re.Match = pattern.match(line)
+        result = pattern.match(line)
         if result:
             version = result.group('version')
             number = result.group('number')
