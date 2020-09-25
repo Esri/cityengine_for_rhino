@@ -166,7 +166,7 @@ namespace GrasshopperPRT
                 reports.ForEach(x => outputTree.Append(x, path));
             }
 
-            DA.SetDataTree(1, outputTree);
+            DA.SetDataTree(2, outputTree);
         }
 
         /// <summary>
