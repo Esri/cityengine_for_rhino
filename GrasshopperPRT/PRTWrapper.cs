@@ -40,9 +40,6 @@ namespace GrasshopperPRT
         public static extern bool Generate();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GenerateTest([In,Out]IntPtr pMeshArray);
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetMeshBundle(int initShapeID, [In, Out]IntPtr pMeshArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -74,9 +71,6 @@ namespace GrasshopperPRT
         [In, Out] IntPtr pDoubleReports,
         [In, Out] IntPtr pBoolReports,
         [In, Out] IntPtr pStringReports);
-
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetMaterialsOf(int shapeID, [In, Out] IntPtr pMatArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetMaterial(int initialShapeId, int shapeID, ref int pUvSet,
