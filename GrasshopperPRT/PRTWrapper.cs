@@ -67,6 +67,15 @@ namespace GrasshopperPRT
         public static extern void SetRuleAttributeString(string rule, string fullName, string value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void SetRuleAttributeDoubleArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void SetRuleAttributeBoolArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void SetRuleAttributeStringArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetReports(int initialShapeId, [In, Out] IntPtr pKeysArray,
         [In, Out] IntPtr pDoubleReports,
         [In, Out] IntPtr pBoolReports,
@@ -386,6 +395,41 @@ namespace GrasshopperPRT
             }
 
             return version;
+        }
+
+        public static void SetRuleAttributeDoubleArray(string rule, string fullName, List<double> doubleList)
+        {
+            if (doubleList.Count == 0) return;
+
+            using (SimpleArrayDouble array = new SimpleArrayDouble(doubleList))
+            {
+                var pArray = array.ConstPointer();
+                PRTWrapper.SetRuleAttributeDoubleArray(rule, fullName, pArray);
+            }
+        }
+
+        public static void SetRuleAttributeBoolArray(string rule, string fullName, List<Boolean> boolList)
+        {
+            if (boolList.Count == 0) return;
+
+            using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
+            {
+                var pArray = array.ConstPointer();
+                PRTWrapper.SetRuleAttributeBoolArray(rule, fullName, pArray);
+            }
+        }
+
+        public static void SetRuleAttributeStringArray(string rule, string fullName, List<string> stringList)
+        {
+            if (stringList.Count == 0) return;
+
+            using(ClassArrayString array = new ClassArrayString())
+            {
+                stringList.ForEach(x => array.Add(x));
+
+                var pArray = array.ConstPointer();
+                PRTWrapper.SetRuleAttributeStringArray(rule, fullName, pArray);
+            }
         }
     }
 }

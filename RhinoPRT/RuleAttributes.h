@@ -21,7 +21,7 @@ struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error
 
 constexpr auto DBG = true;
 
-typedef struct _RuleAttribute RuleAttribute;
+//typedef struct _RuleAttribute RuleAttribute;
 
 constexpr const wchar_t* ANNOT_RANGE = L"@Range";
 constexpr const wchar_t* ANNOT_ENUM = L"@Enum";
@@ -43,17 +43,20 @@ using AttributeGroupOrder = std::map<AttributeGroup, int>;
 	
 enum AttributeAnnotation { A_COLOR = 0, A_RANGE, A_ENUM, A_FILE, A_DIR, A_NOANNOT };
 
-using AnnotationPtr = std::unique_ptr<AnnotationBase>;
 
 class AnnotationBase {
 public:
 	AnnotationBase(AttributeAnnotation annot): mAnnotType(annot) {}
+
+	virtual ~AnnotationBase() {}
 
 	virtual ON_SimpleArray<int> getAnnotArguments() { return ON_SimpleArray<int>(mAnnotType); };
 
 protected:
 	AttributeAnnotation mAnnotType;
 };
+
+using AnnotationPtr = std::unique_ptr<AnnotationBase>;
 
 class AnnotationRange : public AnnotationBase {
 public:
@@ -132,7 +135,7 @@ public:
 
 AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType);
 
-struct _RuleAttribute {
+struct RuleAttribute {
 	std::wstring mRuleFile;	/// The cga file in which this rule attribute is defined.
 	std::wstring mFullName;	/// The attribute full name given to grasshopper.
 	std::wstring mNickname;	/// The attribute short name displayed in the gh node.

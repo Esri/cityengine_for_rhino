@@ -238,34 +238,76 @@ namespace GrasshopperPRT
         {
             switch (attrib.attribType)
             {
-                case AnnotationArgumentType.AAT_BOOL:
-                    Param_Boolean param_bool = new Param_Boolean
+                case AnnotationArgumentType.AAT_BOOL_ARRAY:
                     {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param_bool);
-                    return;
+                        Param_Boolean param_bool = new Param_Boolean
+                        {
+                            Name = attrib.mFullName,
+                            NickName = attrib.mNickname,
+                            Optional = true,
+                            Access = GH_ParamAccess.list
+                        };
+                        Params.RegisterInputParam(param_bool);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_BOOL:
+                    {
+                        Param_Boolean param_bool = new Param_Boolean
+                        {
+                            Name = attrib.mFullName,
+                            NickName = attrib.mNickname,
+                            Optional = true
+                        };
+                        Params.RegisterInputParam(param_bool);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                    {
+                        Param_Number param_number = new Param_Number
+                        {
+                            Name = attrib.mFullName,
+                            NickName = attrib.mNickname,
+                            Optional = true,
+                            Access = GH_ParamAccess.list
+                        };
+                        Params.RegisterInputParam(param_number);
+                        return;
+                    }
                 case AnnotationArgumentType.AAT_INT:
                 case AnnotationArgumentType.AAT_FLOAT:
-                    Param_Number param_number = new Param_Number
                     {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param_number);
-                    return;
+                        Param_Number param_number = new Param_Number
+                        {
+                            Name = attrib.mFullName,
+                            NickName = attrib.mNickname,
+                            Optional = true
+                        };
+                        Params.RegisterInputParam(param_number);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_STR_ARRAY:
+                    {
+                        Param_String param_str = new Param_String
+                        {
+                            Name = attrib.mFullName,
+                            NickName = attrib.mNickname,
+                            Optional = true,
+                            Access = GH_ParamAccess.list
+                        };
+                        Params.RegisterInputParam(param_str);
+                        return;
+                    }
                 case AnnotationArgumentType.AAT_STR:
-                    Param_String param_str = new Param_String
                     {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param_str);
-                    return;
+                        Param_String param_str = new Param_String
+                        {
+                            Name = attrib.mFullName,
+                            NickName = attrib.mNickname,
+                            Optional = true
+                        };
+                        Params.RegisterInputParam(param_str);
+                        return;
+                    }
                 default:
                     Param_GenericObject param = new Param_GenericObject
                     {
@@ -305,6 +347,21 @@ namespace GrasshopperPRT
                         GH_String gH_String = null;
                         if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
                         PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, gH_String.Value);
+                        break;
+                    case AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                        List<double> doubleList = new List<double>();
+                        if (!DA.GetDataList(attrib.mFullName, doubleList)) continue;
+                        PRTWrapper.SetRuleAttributeDoubleArray(attrib.mRuleFile, attrib.mFullName, doubleList);
+                        break;
+                    case AnnotationArgumentType.AAT_BOOL_ARRAY:
+                        List<Boolean> boolList = new List<Boolean>();
+                        if (!DA.GetDataList(attrib.mFullName, boolList)) continue;
+                        PRTWrapper.SetRuleAttributeBoolArray(attrib.mRuleFile, attrib.mFullName, boolList);
+                        break;
+                    case AnnotationArgumentType.AAT_STR_ARRAY:
+                        List<string> stringList = new List<string>();
+                        if (!DA.GetDataList(attrib.mFullName, stringList)) continue;
+                        PRTWrapper.SetRuleAttributeStringArray(attrib.mRuleFile, attrib.mFullName, stringList);
                         break;
                     default:
                         // not supporting arrays yet.

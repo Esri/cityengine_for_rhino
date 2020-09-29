@@ -39,10 +39,10 @@ namespace RhinoPRT {
 		bool GenerateGeometry();
 
 		template<typename T>
-		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value);
+		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count = 1);
 
 		template<typename T>
-		void setRuleAttributeValue(const RuleAttribute& rule, T value);
+		void setRuleAttributeValue(const RuleAttribute& rule, T value, size_t count = 1);
 
 		int groupReportsByKeys();
 
@@ -109,6 +109,12 @@ extern "C" {
 	RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value);
 
 	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value);
+
+	RHINOPRT_API void SetRuleAttributeDoubleArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray);
+	
+	RHINOPRT_API void SetRuleAttributeBoolArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray);
+
+	RHINOPRT_API void SetRuleAttributeStringArray(const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray);
 
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray,
 		ON_SimpleArray<double>* pDoubleReports,

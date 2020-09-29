@@ -64,7 +64,7 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 
 		RuleAttribute ruleAttr;
 		ruleAttr.mFullName = attr->getName();
-		ruleAttr.mRuleFile = mainCgaRuleName; // TODO: Only support 1 cgb file for now
+		ruleAttr.mRuleFile = mainCgaRuleName;
 		ruleAttr.mNickname = getNiceName(ruleAttr.mFullName);
 		ruleAttr.mType = attr->getReturnType();
 

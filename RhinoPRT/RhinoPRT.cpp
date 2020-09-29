@@ -1,5 +1,17 @@
 #include "RhinoPRT.h"
 
+namespace {
+	template <typename T>
+	struct static_cast_func
+	{
+		template<typename T1>
+		T operator()(const T1& x) const { return static_cast<T>(x); }
+
+		template<>
+		T operator()(const ON_wString& x) const { return static_cast<T>(x.Array()); }
+	};
+}
+
 namespace RhinoPRT {
 
 	// Global PRT handle
@@ -82,7 +94,7 @@ namespace RhinoPRT {
 	}
 
 	template<typename T>
-	void RhinoPRTAPI::fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value) {
+	void RhinoPRTAPI::fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count) {
 
 		// Find the RuleAttribute object corresponding to the given attribute name.
 		auto reverseLookupAttribute = [this](const std::wstring gh_attrFullName) {
@@ -96,18 +108,18 @@ namespace RhinoPRT {
 
 		// If the attribute is found, register the value in the attribute map builder
 		//TODO: check for difference with default value, only add the attribute if it is the case.
-		setRuleAttributeValue(rule, value);
+		setRuleAttributeValue(rule, value, count);
 	}
 
 	template<typename T>
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, T value) {
-		LOG_WRN << L"Ignored unsupported attribute '" << rule.mFullName << "' type: " << T << " ---- " << rule.mType << " of rule file: '" << rule.mRuleFile << "'" << std::endl;
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, T value, size_t /*count*/) {
+		LOG_WRN << L"Ignored unsupported attribute '" << rule.mFullName << "' type: " << rule.mType << " ---- " << rule.mType << " of rule file: '" << rule.mRuleFile << "'" << std::endl;
 	}
 
 	// Specific instantiations of setRuleAttributeValue.
 
 	template<>
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, double value) {
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, double value, size_t /*count*/) {
 		if (rule.mType == prt::AAT_FLOAT) {
 			mAttrBuilder->setFloat(rule.mFullName.c_str(), value);
 		}
@@ -117,7 +129,7 @@ namespace RhinoPRT {
 	}
 
 	template<>
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, int value) {
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, int value, size_t /*count*/) {
 		if (rule.mType == prt::AAT_INT) {
 			mAttrBuilder->setInt(rule.mFullName.c_str(), value);
 		}
@@ -127,7 +139,7 @@ namespace RhinoPRT {
 	}
 
 	template<>
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, bool value) {
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, bool value, size_t /*count*/) {
 		if (rule.mType == prt::AAT_BOOL) {
 			mAttrBuilder->setBool(rule.mFullName.c_str(), value);
 		}
@@ -137,12 +149,51 @@ namespace RhinoPRT {
 	}
 
 	template<>
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, std::wstring value) {
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, std::wstring value, size_t /*count*/) {
 		if (rule.mType == prt::AAT_STR) {
 			mAttrBuilder->setString(rule.mFullName.c_str(), value.c_str());
 		}
 		else {
 			LOG_ERR << L"Trying to set a wstring to an attribute of type " << rule.mType << std::endl;
+		}
+	}
+
+	template<>
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, const double* value, const size_t count)
+	{
+		if (rule.mType == prt::AAT_FLOAT_ARRAY)
+		{
+			mAttrBuilder->setFloatArray(rule.mFullName.c_str(), value, count);
+		}
+		else
+		{
+			LOG_ERR << L"Trying to set an array of double to an attribute of type " << rule.mType << std::endl;
+		}
+	}
+
+	template<>
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, bool* value, const size_t count)
+	{
+		if (rule.mType == prt::AAT_BOOL_ARRAY)
+		{
+			mAttrBuilder->setBoolArray(rule.mFullName.c_str(), value, count);
+		}
+		else
+		{
+			LOG_ERR << L"Trying to set an array of bool to an attribute of type " << rule.mType << std::endl;
+		}
+	}
+
+	template<>
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, const wchar_t**value, const size_t count)
+	{
+		if (rule.mType == prt::AAT_STR_ARRAY)
+		{
+			mAttrBuilder->setStringArray(rule.mFullName.c_str(), value, count);
+		}
+		else
+		{
+			LOG_ERR << L"Trying to set an array of wstring to an attribute of type " << rule.mType << std::endl;
 		}
 	}
 
@@ -318,6 +369,42 @@ extern "C" {
 	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
 	{
 		RhinoPRT::get().fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
+	}
+
+	RHINOPRT_API void SetRuleAttributeDoubleArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray)
+	{
+		const double* valueArray = pValueArray->Array();
+		const size_t size = pValueArray->Count();
+		
+		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), valueArray, size);
+	}
+
+	RHINOPRT_API void SetRuleAttributeBoolArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray)
+	{
+		const int* valueArray = pValueArray->Array();
+		const size_t size = pValueArray->Count();
+
+		// convert int array to boolean array
+		bool* boolArray = new bool[size];
+		std::transform(valueArray, valueArray + size, boolArray, static_cast_func<bool>());
+
+		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), boolArray, size);
+
+		delete[] boolArray;
+	}
+
+	RHINOPRT_API void SetRuleAttributeStringArray(const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray)
+	{
+		const ON_wString* valueArray = pValueArray->Array();
+		const size_t size = pValueArray->Count();
+
+		//convert the array of ON_wString to const wchar_t* const *value
+		const wchar_t** strArray = new const wchar_t*[size];
+		std::transform(valueArray, valueArray + size, strArray, static_cast_func<const wchar_t*>());
+
+		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), strArray, size);
+
+		delete[] strArray;
 	}
 
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray, 
