@@ -12,6 +12,55 @@ namespace {
 
 }
 
+AnnotationRange::AnnotationRange(const prt::Annotation* an) : AnnotationBase(A_RANGE), mStepSize(0) {
+
+	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
+		const prt::AnnotationArgument* arg = an->getArgument(argIdx);
+		const wchar_t* key = arg->getKey();
+		if (std::wcscmp(key, MIN_KEY) == 0) {
+			mMin = arg->getFloat();
+		}
+		else if (std::wcscmp(key, MAX_KEY) == 0) {
+			mMax = arg->getFloat();
+		}
+		else if (std::wcscmp(key, STEP_KEY) == 0) {
+			mStepSize = arg->getFloat();
+		}
+		else if (std::wcscmp(key, RESTRICTED_KEY) == 0) {
+			mRestricted = arg->getBool();
+		}
+	}
+}
+
+RangeAttributes AnnotationRange::getAnnotArguments() const { return { mMin, mMax, mStepSize, mRestricted }; }
+
+/// Specific implementations of enum annotation constructors
+
+template<>
+AnnotationEnum<bool>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(A_ENUM, ENUM_BOOL)
+{
+	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
+		mEnums.push_back(an->getArgument(argIdx)->getBool());
+	}
+}
+
+template<>
+AnnotationEnum<std::wstring>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(A_ENUM, ENUM_STRING)
+{
+	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
+		mEnums.push_back(std::wstring(an->getArgument(argIdx)->getStr()));
+	}
+}
+
+template<>
+AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(A_ENUM, ENUM_DOUBLE) {
+	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
+		mEnums.push_back(an->getArgument(argIdx)->getFloat());
+	}
+}
+
+/// =========================================================== ///
+
 bool annotCompatibleWithType(AttributeAnnotation annot, prt::AnnotationArgumentType type) {
 	switch (type) {
 	case prt::AnnotationArgumentType::AAT_BOOL:
