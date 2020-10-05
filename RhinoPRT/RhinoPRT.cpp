@@ -337,7 +337,7 @@ extern "C" {
 		return RhinoPRT::get().GetRuleAttributeCount();
 	}
 
-	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type)
+	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type, ON_wString* pGroup)
 	{
 		RuleAttributes ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 
@@ -347,6 +347,9 @@ extern "C" {
 		wcscpy_s(name, name_size, ruleAttributes[attrIdx].mFullName.c_str());
 		wcscpy_s(nickname, nickname_size, ruleAttributes[attrIdx].mNickname.c_str());
 		*type = ruleAttributes[attrIdx].mType;
+
+		if(ruleAttributes[attrIdx].groups.size() > 0)
+			*pGroup += ON_wString(ruleAttributes[attrIdx].groups.front().c_str());
 
 		return true;
 	}
@@ -452,6 +455,106 @@ extern "C" {
 			}
 		}
 	}
+
+	RHINOPRT_API void GetAnnotationTypes(int ruleIdx, ON_SimpleArray<AttributeAnnotation>* pAnnotTypeArray)
+	{
+		auto ruleAttributes = RhinoPRT::get().GetRuleAttributes();
+		if (ruleIdx < ruleAttributes.size())
+		{
+			RuleAttribute& attrib = ruleAttributes[ruleIdx];
+			for (const auto* annot : attrib.mAnnotations) {
+				pAnnotTypeArray->Append(annot->getType());
+			}
+		}
+	}
+
+	RHINOPRT_API bool GetEnumType(int ruleIdx, int enumIdx, EnumAnnotationType* type)
+	{
+		auto ruleAttributes = RhinoPRT::get().GetRuleAttributes();
+		if (ruleIdx < ruleAttributes.size())
+		{
+			RuleAttribute& attrib = ruleAttributes[ruleIdx];
+			if (enumIdx < attrib.mAnnotations.size())
+			{
+				const auto* annot = attrib.mAnnotations[enumIdx];
+				if (annot->getType() == A_ENUM)
+				{
+					*type = annot->getEnumType();
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	RHINOPRT_API bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, ON_SimpleArray<double>* pArray)
+	{
+		auto ruleAttributes = RhinoPRT::get().GetRuleAttributes();
+		if (ruleIdx < ruleAttributes.size())
+		{
+			RuleAttribute& attrib = ruleAttributes[ruleIdx];
+			if (enumIdx < attrib.mAnnotations.size())
+			{
+				auto* annot = attrib.mAnnotations[enumIdx];
+				if (annot->getType() == A_ENUM && annot->getEnumType() == ENUM_DOUBLE)
+				{
+					auto& enumList = dynamic_cast<AnnotationEnum<double>*>(annot)->getAnnotArguments();
+
+					std::for_each(enumList.begin(), enumList.end(), [&pArray](double& v) {pArray->Append(v); });
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	RHINOPRT_API bool GetAnnotationEnumString(int ruleIdx, int enumIdx, ON_ClassArray<ON_wString>* pArray)
+	{
+		auto ruleAttributes = RhinoPRT::get().GetRuleAttributes();
+		if (ruleIdx < ruleAttributes.size())
+		{
+			RuleAttribute& attrib = ruleAttributes[ruleIdx];
+			if (enumIdx < attrib.mAnnotations.size())
+			{
+				auto* annot = attrib.mAnnotations[enumIdx];
+				if (annot->getType() == A_ENUM && annot->getEnumType() == ENUM_STRING)
+				{
+					std::vector<std::wstring>& enumList = dynamic_cast<AnnotationEnum<std::wstring>*>(annot)->getAnnotArguments();
+
+					std::for_each(enumList.begin(), enumList.end(), [&pArray](std::wstring& v) {pArray->Append(ON_wString(v.c_str())); });
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	RHINOPRT_API bool GetAnnotationRange(int ruleIdx, int enumIdx, double* min, double* max, double* stepsize, bool* restricted)
+	{
+		auto ruleAttributes = RhinoPRT::get().GetRuleAttributes();
+		if (ruleIdx < ruleAttributes.size())
+		{
+			RuleAttribute& attrib = ruleAttributes[ruleIdx];
+			if (enumIdx < attrib.mAnnotations.size())
+			{
+				auto* annot = attrib.mAnnotations[enumIdx];
+				if (annot->getType() == A_RANGE)
+				{
+					RangeAttributes range = dynamic_cast<AnnotationRange*>(annot)->getAnnotArguments();
+					*min = range.mMin;
+					*max = range.mMax;
+					*stepsize = range.mStepSize;
+					*restricted = range.mRestricted;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 	RHINOPRT_API bool GetMaterial(int initialShapeId, int meshID, int* uvSet,
 		ON_ClassArray<ON_wString>* pTexKeys,

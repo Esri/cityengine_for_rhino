@@ -2,6 +2,8 @@
 
 #include "Logger.h"
 
+#include <algorithm>
+
 namespace {
 
 	std::wstring getNiceName(const std::wstring& attrName) {
@@ -24,14 +26,15 @@ bool annotCompatibleWithType(AttributeAnnotation annot, prt::AnnotationArgumentT
 	}
 }
 
-AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType) {
+AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType)
+{
 	if (!std::wcscmp(annotName, ANNOT_COLOR) && annotCompatibleWithType(A_COLOR, attrType)) {
 		return new AnnotationBase(A_COLOR);
 	}
 	else if (!std::wcscmp(annotName, ANNOT_ENUM)) {
 		if(attrType == prt::AAT_BOOL) return new AnnotationEnum<bool>(an);
 		if (attrType == prt::AAT_FLOAT) return new AnnotationEnum<double>(an);
-		if (attrType == prt::AAT_STR) return new AnnotationEnum<const wchar_t*>(an);
+		if (attrType == prt::AAT_STR) return new AnnotationEnum<std::wstring>(an);
 		if (attrType == prt::AAT_INT) return new AnnotationEnum<int>(an);
 		return new AnnotationBase(A_NOANNOT);
 	}
@@ -49,7 +52,8 @@ AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotat
 	}
 }
 
-RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo& ruleFileInfo) {
+RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo& ruleFileInfo)
+{
 	RuleAttributes ra;
 
 	std::wstring mainCgaRuleName = pcu::filename(ruleFile);
@@ -68,7 +72,7 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 		ruleAttr.mNickname = getNiceName(ruleAttr.mFullName);
 		ruleAttr.mType = attr->getReturnType();
 
-		// prt::Annotation
+		// process prt::Annotation
 		bool hidden = false;
 
 		for (size_t a = 0; a < attr->getNumAnnotations(); ++a) {
@@ -95,9 +99,8 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 				}
 			}
 			else {
-				ruleAttr.mAnnotation = getAnnotationObject(anName, an, attr->getReturnType());
+				ruleAttr.mAnnotations.push_back(getAnnotationObject(anName, an, attr->getReturnType()));
 			}
-			
 		}
 
 		if (hidden) continue;
@@ -105,6 +108,41 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 		ra.push_back(ruleAttr);
 		if (DBG) LOG_DBG << ruleAttr;
 	}
+
+	// Group and order attributes.
+	// Set a global order:
+	// - First sort by group / group order
+	// - Then by order in group
+	std::sort(ra.begin(), ra.end(), [](const RuleAttribute& left, const RuleAttribute& right){
+		if (left.groups.size() == 0) {
+			if (right.groups.size() == 0)
+			{
+				// No groups for both attributes: sort by order if they are set, else sort by string compare.
+				if(left.order != right.order) return left.order < right.order;
+				return left.mNickname.compare(right.mNickname) < 0;
+			}
+			else {
+				return true; // Attributes without group are placed first.
+			}
+		}
+		else if (right.groups.size() == 0) {
+			return false; // Attributes without group are placed first.
+		}
+
+		// support only first level groups for now.
+		int group_cmpr = left.groups.front().compare(right.groups.front());
+		if (group_cmpr == 0) 
+		{
+			// same group, sort by order if set.
+			if (left.order != right.order) return left.order < right.order;
+			return left.mNickname.compare(right.mNickname) < 0;
+		}
+		else {
+			// different group, sort by groupOrder if they are set, else use string compare.
+			if (left.groupOrder != right.groupOrder) return left.groupOrder < right.groupOrder;
+			return left.groups.front().compare(right.groups.front()) < 0;
+		}
+	});
 
 	return ra;
 }

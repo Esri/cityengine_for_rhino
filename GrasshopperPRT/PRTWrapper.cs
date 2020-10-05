@@ -24,7 +24,7 @@ namespace GrasshopperPRT
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void GetProductVersion([In, Out]IntPtr version_Str);
 
-        [DllImport(dllName: "RhinoPRT.dll", CallingConvention=CallingConvention.Cdecl)]
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
@@ -52,7 +52,7 @@ namespace GrasshopperPRT
         public static extern int GetRuleAttributesCount();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetRuleAttribute(int attrIdx, StringBuilder rule, int rule_size, StringBuilder name, int name_size, StringBuilder nickname, int nickname_size, ref AnnotationArgumentType type);
+        public static extern bool GetRuleAttribute(int attrIdx, StringBuilder rule, int rule_size, StringBuilder name, int name_size, StringBuilder nickname, int nickname_size, ref AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDouble(string rule, string fullName, double value);
@@ -74,6 +74,21 @@ namespace GrasshopperPRT
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeStringArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref EnumAnnotationType type);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetAnnotationEnumString(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetReports(int initialShapeId, [In, Out] IntPtr pKeysArray,
@@ -372,11 +387,17 @@ namespace GrasshopperPRT
                 StringBuilder nameBuilder = new StringBuilder(100);
                 StringBuilder nicknameBuilder = new StringBuilder(100);
                 AnnotationArgumentType type = AnnotationArgumentType.AAT_INT;
+                StringWrapper group = new StringWrapper();
+                var pGroup = group.NonConstPointer;
 
-                bool status = GetRuleAttribute(i, ruleBuilder, ruleBuilder.Capacity, nameBuilder, nameBuilder.Capacity, nicknameBuilder, nicknameBuilder.Capacity, ref type);
+                bool status = GetRuleAttribute(i, ruleBuilder, ruleBuilder.Capacity, nameBuilder, nameBuilder.Capacity, nicknameBuilder, nicknameBuilder.Capacity, ref type, pGroup);
                 if (!status) return new RuleAttribute[0] {};
 
-                attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type);
+                attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());
+
+                // get the potential annotations
+                List<Annotation> annotations = GetAnnotations(i);
+                attributes[i].mAnnotations.AddRange(annotations);
             }
             
             return attributes;
@@ -395,6 +416,114 @@ namespace GrasshopperPRT
             }
 
             return version;
+        }
+
+        public static List<Annotation> GetAnnotations(int ruleIdx)
+        {
+            int[] intArray = null;
+            using(var array = new SimpleArrayInt())
+            {
+                var pArray = array.NonConstPointer();
+
+                PRTWrapper.GetAnnotationTypes(ruleIdx, pArray);
+
+                intArray = array.ToArray();
+            }
+
+            List<Annotation> annots = new List<Annotation>();
+
+            for(int enumIdx = 0; enumIdx < intArray.Length; ++enumIdx)
+            {
+                AttributeAnnotation type = (AttributeAnnotation)intArray[enumIdx];
+                switch (type)
+                {
+                    case AttributeAnnotation.A_COLOR:
+                        annots.Add(new AnnotationColor());
+                        break;
+                    case AttributeAnnotation.A_ENUM:
+                        EnumAnnotationType enumType = EnumAnnotationType.ENUM_DOUBLE;
+                        bool status = GetEnumType(ruleIdx, enumIdx, ref enumType);
+                        if (!status) break;
+
+                        switch (enumType)
+                        {
+                            case EnumAnnotationType.ENUM_BOOL:
+                                bool[] boolArray = { true, false };
+                                annots.Add(new AnnotationEnum<bool>(boolArray));
+                                break;
+                            case EnumAnnotationType.ENUM_DOUBLE:
+                                annots.Add(GetAnnotationEnumDouble(ruleIdx, enumIdx));
+                                break;
+                            case EnumAnnotationType.ENUM_STRING:
+                                annots.Add(GetAnnotationEnumString(ruleIdx, enumIdx));
+                                break;
+                            default:
+                                break;
+                        }
+                        
+                        break;
+                    case AttributeAnnotation.A_RANGE:
+                        annots.Add(GetAnnotationRange(ruleIdx, enumIdx));
+                        break;
+                    case AttributeAnnotation.A_DIR:
+                        annots.Add(new AnnotationDir());
+                        break;
+                    case AttributeAnnotation.A_FILE:
+                        annots.Add(new AnnotationFile());
+                        break;
+                    default:
+                        continue;
+                }
+            }
+
+            return annots;
+        }
+
+        public static AnnotationEnum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
+        {
+            double[] enumArray = null;
+            using(var array = new SimpleArrayDouble())
+            {
+                var pArray = array.NonConstPointer();
+
+                bool status = GetAnnotationEnumDouble(ruleIdx, enumIdx, pArray);
+                if (!status) return null;
+
+                enumArray = array.ToArray();
+            }
+
+            return new AnnotationEnum<double>(enumArray);
+        }
+
+        public static AnnotationEnum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
+        {
+            string[] enumArray = null;
+            using(var array = new ClassArrayString())
+            {
+                var pArray = array.NonConstPointer();
+
+                bool status = GetAnnotationEnumString(ruleIdx, enumIdx, pArray);
+                if (!status) return null;
+
+                enumArray = array.ToArray();
+            }
+
+            return new AnnotationEnum<string>(enumArray);
+        }
+
+        public static AnnotationRange GetAnnotationRange(int ruleIdx, int enumIdx)
+        {
+            double min = 0;
+            double max = 0;
+            double stepsize = 0;
+            bool restricted = true;
+
+            bool status = GetAnnotationRange(ruleIdx, enumIdx, ref min, ref max, ref stepsize, ref restricted);
+            if (status)
+            {
+                return new AnnotationRange(min, max, stepsize, restricted);
+            }
+            return null;
         }
 
         public static void SetRuleAttributeDoubleArray(string rule, string fullName, List<double> doubleList)

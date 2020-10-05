@@ -7,6 +7,8 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Data;
 
 using Rhino.Geometry;
+using System.Windows.Forms;
+using System.Linq;
 using Rhino.DocObjects;
 
 // In order to load the result of this wizard, you will also need to
@@ -151,6 +153,11 @@ namespace GrasshopperPRT
             DA.SetDataTree(1, materials);
         }
 
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            
+        }
+
         private void OutputReports(IGH_DataAccess DA, GH_Structure<GH_Mesh> gh_meshes)
         {
             GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
@@ -236,88 +243,8 @@ namespace GrasshopperPRT
         /// <param name="attrib">A rule attribute to add as input</param>
         private void CreateInputParameter(RuleAttribute attrib)
         {
-            switch (attrib.attribType)
-            {
-                case AnnotationArgumentType.AAT_BOOL_ARRAY:
-                    {
-                        Param_Boolean param_bool = new Param_Boolean
-                        {
-                            Name = attrib.mFullName,
-                            NickName = attrib.mNickname,
-                            Optional = true,
-                            Access = GH_ParamAccess.list
-                        };
-                        Params.RegisterInputParam(param_bool);
-                        return;
-                    }
-                case AnnotationArgumentType.AAT_BOOL:
-                    {
-                        Param_Boolean param_bool = new Param_Boolean
-                        {
-                            Name = attrib.mFullName,
-                            NickName = attrib.mNickname,
-                            Optional = true
-                        };
-                        Params.RegisterInputParam(param_bool);
-                        return;
-                    }
-                case AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                    {
-                        Param_Number param_number = new Param_Number
-                        {
-                            Name = attrib.mFullName,
-                            NickName = attrib.mNickname,
-                            Optional = true,
-                            Access = GH_ParamAccess.list
-                        };
-                        Params.RegisterInputParam(param_number);
-                        return;
-                    }
-                case AnnotationArgumentType.AAT_INT:
-                case AnnotationArgumentType.AAT_FLOAT:
-                    {
-                        Param_Number param_number = new Param_Number
-                        {
-                            Name = attrib.mFullName,
-                            NickName = attrib.mNickname,
-                            Optional = true
-                        };
-                        Params.RegisterInputParam(param_number);
-                        return;
-                    }
-                case AnnotationArgumentType.AAT_STR_ARRAY:
-                    {
-                        Param_String param_str = new Param_String
-                        {
-                            Name = attrib.mFullName,
-                            NickName = attrib.mNickname,
-                            Optional = true,
-                            Access = GH_ParamAccess.list
-                        };
-                        Params.RegisterInputParam(param_str);
-                        return;
-                    }
-                case AnnotationArgumentType.AAT_STR:
-                    {
-                        Param_String param_str = new Param_String
-                        {
-                            Name = attrib.mFullName,
-                            NickName = attrib.mNickname,
-                            Optional = true
-                        };
-                        Params.RegisterInputParam(param_str);
-                        return;
-                    }
-                default:
-                    Param_GenericObject param = new Param_GenericObject
-                    {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param);
-                    return;
-            }
+            var parameter = attrib.GetInputParameter();
+            Params.RegisterInputParam(parameter);
         }
 
         private void fillAttributesFromNode(IGH_DataAccess DA)
@@ -326,7 +253,7 @@ namespace GrasshopperPRT
             {
                 RuleAttribute attrib = mRuleAttributes[idx];
 
-                switch (attrib.attribType)
+                switch (attrib.mAttribType)
                 {
                     case AnnotationArgumentType.AAT_FLOAT:
                         GH_Number value = new GH_Number(0.0);

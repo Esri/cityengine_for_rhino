@@ -100,7 +100,7 @@ extern "C" {
 
 	RHINOPRT_API int GetRuleAttributesCount();
 
-	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type);
+	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type, ON_wString* pGroup);
 
 	RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value);
 
@@ -120,6 +120,16 @@ extern "C" {
 		ON_SimpleArray<double>* pDoubleReports,
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports);
+
+	RHINOPRT_API void GetAnnotationTypes(int ruleIdx, ON_SimpleArray<AttributeAnnotation>* pAnnotTypeArray);
+
+	RHINOPRT_API bool GetEnumType(int ruleIdx, int enumIdx, EnumAnnotationType* type);
+
+	RHINOPRT_API bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, ON_SimpleArray<double>* pArray);
+
+	RHINOPRT_API bool GetAnnotationEnumString(int ruleIdx, int enumIdx, ON_ClassArray<ON_wString>* pArray);
+
+	RHINOPRT_API bool GetAnnotationRange(int ruleIdx, int enumIdx, double* min, double* max, double* stepsize, bool* restricted);
 
 	RHINOPRT_API bool GetMaterial(int initialShapeId, int meshID, int* uvSet,
 		ON_ClassArray<ON_wString>* pTexKeys,
