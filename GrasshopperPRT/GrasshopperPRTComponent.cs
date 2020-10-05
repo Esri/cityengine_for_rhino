@@ -271,9 +271,21 @@ namespace GrasshopperPRT
                         PRTWrapper.SetRuleAttributeInteger(attrib.mRuleFile, attrib.mFullName, integer.Value);
                         break;
                     case AnnotationArgumentType.AAT_STR:
-                        GH_String gH_String = null;
-                        if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
-                        PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, gH_String.Value);
+                        string text = null;
+                        if (attrib.mAnnotations.Any(x => x.IsColor()))
+                        {
+                            GH_Colour color = null;
+                            if(!DA.GetData<GH_Colour>(attrib.mFullName, ref color)) continue;
+                            text = Utils.hexColor(color);
+                        }
+                        else
+                        {
+                            GH_String gH_String = null;
+                            if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
+                            text = gH_String.Value;
+                        }
+
+                        PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, text);
                         break;
                     case AnnotationArgumentType.AAT_FLOAT_ARRAY:
                         List<double> doubleList = new List<double>();
