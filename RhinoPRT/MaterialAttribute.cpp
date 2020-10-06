@@ -32,7 +32,8 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 
 	for (size_t i = 0; i < keyCount; ++i) {
 		const auto& key = keys[i];
-		const std::wstring strKey = std::wstring(key);
+		const std::wstring strKey(key);
+
 
 		const prt::AttributeMap::PrimitiveType type = attrMap->getType(key);
 
