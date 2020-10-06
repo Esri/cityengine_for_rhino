@@ -130,9 +130,9 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 
 	// Add the objects to the Rhino scene.
 	for (auto& model : generated_models) {
-		//const ON_Mesh mesh = model.getMeshFromGenModel();
+		const auto& meshBundle = model.getMeshesFromGenModel();
 
-		//auto meshOBject = context.m_doc.AddMeshObject(mesh);
+		std::for_each(meshBundle.begin(), meshBundle.end(), [&context](const ON_Mesh& mesh) { context.m_doc.AddMeshObject(mesh); });
 	}
 
 	context.m_doc.Redraw();
