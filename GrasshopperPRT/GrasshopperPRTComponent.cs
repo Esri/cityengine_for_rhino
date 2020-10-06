@@ -153,11 +153,6 @@ namespace GrasshopperPRT
             DA.SetDataTree(1, materials);
         }
 
-        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
-        {
-            
-        }
-
         private void OutputReports(IGH_DataAccess DA, GH_Structure<GH_Mesh> gh_meshes)
         {
             GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
