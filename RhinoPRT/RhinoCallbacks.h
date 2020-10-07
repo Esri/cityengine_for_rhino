@@ -29,9 +29,15 @@ class Model {
 public:
 	Model() = default;
 
-	ModelPart& addModelPart() { 
+	ModelPart& addModelPart()
+	{ 
 		mModelParts.push_back(ModelPart()); 
-		return mModelParts.at(mModelParts.size() - 1);
+		return mModelParts.back();
+	}
+
+	ModelPart& getCurrentModelPart()
+	{
+		return mModelParts.back();
 	}
 
 	void addMaterial(const Materials::MaterialAttribute& ma);
@@ -65,12 +71,14 @@ public:
 	// Inherited via IRhinoCallbacks
 	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, 
 		const uint32_t * faceIndices, const size_t faceIndicesCount, 
-		const uint32_t * faceCounts, const size_t faceCountsCount,
+		const uint32_t * faceCounts, const size_t faceCountsCount) override;
 
-		double const* const* uvs, size_t const* uvsSizes,
-		uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
-		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
+	void addUVCoordinates(const size_t initialShapeIndex,
+		double const * const * uvs, size_t const * uvsSizes,
+		uint32_t const * const * uvCounts, size_t const * uvCountsSizes,
+		uint32_t const * const * uvIndices, size_t const * uvIndicesSizes,
 		uint32_t uvSets) override;
+
 	void add(const size_t initialShapeIndex, const size_t instanceIndex,
 		const double* vertexCoords, const size_t vextexCoordsCount,
 		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,

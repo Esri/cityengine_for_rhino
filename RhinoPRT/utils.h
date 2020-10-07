@@ -24,6 +24,8 @@ namespace pcu {
 
 	std::wstring getDllLocation();
 	std::wstring getTempDir();
+	std::wstring getUUID();
+	std::wstring getUniqueTempDir();
 
 	template <typename C>
 	C getDirSeparator();

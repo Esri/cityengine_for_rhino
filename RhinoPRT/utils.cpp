@@ -5,10 +5,11 @@
 
 #include "prt/StringUtils.h"
 
+#pragma comment(lib, "rpcrt4.lib")
+
 #ifdef _WIN32
 	#include <Windows.h>
 	#include <conio.h>
-	
 #else
 #	include <dlfcn.h>
 #endif
@@ -91,7 +92,46 @@ namespace pcu {
 	std::wstring getTempDir()
 	{
 		auto path = std::experimental::filesystem::temp_directory_path();
+
+		auto prtTempPath = path.append("PRTTemp");
+		if (!std::experimental::filesystem::exists(prtTempPath)) {
+			if (!std::experimental::filesystem::create_directory(prtTempPath)) 
+			{
+				LOG_ERR << L"Could not create PRT temporary directory. Returning the default temp dir.";
+				return path.generic_wstring();
+			}
+			return prtTempPath.generic_wstring();
+		}
+
 		return path.generic_wstring();
+	}
+
+	std::wstring getUniqueTempDir()
+	{
+		std::wstring temp_dir = getTempDir();
+		std::wstring uuid = getUUID();
+
+		std::experimental::filesystem::path path(temp_dir);
+		path = path.append(uuid);
+
+		if (!std::experimental::filesystem::create_directory(path))
+		{
+			LOG_ERR << L"Could not create unique temporary directory, returning default temp dir.";
+			return temp_dir;
+		}
+
+		return path.generic_wstring();
+	}
+
+	std::wstring getUUID()
+	{
+		UUID uid;
+		UuidCreate(&uid);
+
+		wchar_t* str;
+		UuidToStringW(&uid, (RPC_WSTR*)&str);
+
+		return std::wstring(str);
 	}
 
 #ifdef _WIN32

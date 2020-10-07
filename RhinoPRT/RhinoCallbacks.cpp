@@ -16,12 +16,7 @@ const Materials::MaterialsMap& Model::getMaterials() const { return mMaterials; 
 
 void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * vertexCoords, 
 								 const size_t vextexCoordsCount, const uint32_t * faceIndices,
-								 const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount,
-
-								 double const * const * uvs, size_t const * uvsSizes,
-								 uint32_t const * const * uvCounts, size_t const * uvCountsSizes,
-								 uint32_t const * const * uvIndices, size_t const * uvIndicesSizes,
-								 uint32_t uvSets)
+								 const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount)
 {
 	Model& currentModel = mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.addModelPart();
@@ -34,6 +29,16 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * 
 
 	if (faceCounts != nullptr)
 		modelPart.mFaces.insert(modelPart.mFaces.end(), faceCounts, faceCounts + faceCountsCount);
+}
+
+void RhinoCallbacks::addUVCoordinates(const size_t initialShapeIndex,
+									  double const * const * uvs, size_t const * uvsSizes,
+									  uint32_t const * const * uvCounts, size_t const * uvCountsSizes,
+									  uint32_t const * const * uvIndices, size_t const * uvIndicesSizes,
+									  uint32_t uvSets)
+{
+	Model& currentModel = mModels[initialShapeIndex];
+	ModelPart& modelPart = currentModel.getCurrentModelPart();
 
 	// Add texture coordinates
 	for (size_t uvSet = 0; uvSet < uvSets; ++uvSet)
@@ -90,8 +95,8 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 {
 	addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
 		faceIndices, faceIndicesCount,
-		faceCounts, faceCountsCount,
-		uvs, uvsSizes,
+		faceCounts, faceCountsCount);
+	addUVCoordinates(initialShapeIndex, uvs, uvsSizes,
 		uvCounts, uvCountsSizes,
 		uvIndices, uvIndicesSizes, uvSets);
 

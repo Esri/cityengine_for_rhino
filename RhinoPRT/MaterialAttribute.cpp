@@ -42,9 +42,13 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 			//This is probably a texture path. check the key against the different allowed textures.
 			if (Materials::TEXTURE_KEYS.count(strKey) > 0)
 			{
-				auto tex = std::wstring(attrMap->getString(key));
-				if(tex.length() > 0)
-					ma.mTexturePaths.insert_or_assign(strKey, tex);
+				const wchar_t* texKey = attrMap->getString(key);
+				if (texKey != nullptr)
+				{
+					auto tex = std::wstring(texKey);
+					if(tex.length() > 0)
+						ma.mTexturePaths.insert_or_assign(strKey, tex);
+				}
 			}
 			else {
 				LOG_DBG << "Ignoring unsupported texture " << key << ": " << attrMap->getString(key);

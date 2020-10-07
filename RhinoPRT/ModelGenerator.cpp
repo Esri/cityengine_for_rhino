@@ -4,17 +4,33 @@
 
 #include <filesystem>
 
-ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir()) {
+ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir())
+{
 	mCache = pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT));
 }
 
-bool ModelGenerator::initResolveMap() {
-	if (!mRulePkg.empty()) {
+ModelGenerator::~ModelGenerator()
+{
+	// Empty the temp dir
+	std::error_code error;
+	if (std::experimental::filesystem::remove_all(mUnpackPath, error) == -1) {
+		LOG_ERR << L"Error while removing the temp directory: " << error.message();
+	}
+}
+
+bool ModelGenerator::initResolveMap()
+{
+	if (!mRulePkg.empty())
+	{
 		const std::string rpkURI = pcu::toFileURI(mRulePkg);
 		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 		try {
 			auto converted_str = pcu::toUTF16FromUTF8(rpkURI).c_str();
-			mResolveMap.reset(prt::createResolveMap(converted_str, mUnpackPath.c_str(), &status));
+
+			// create a unique directory for this rpk
+			std::wstring uniqueUnpackPath = pcu::getUniqueTempDir();
+
+			mResolveMap.reset(prt::createResolveMap(converted_str, uniqueUnpackPath.c_str(), &status));
 
 			return status == prt::STATUS_OK;
 		}
@@ -26,6 +42,7 @@ bool ModelGenerator::initResolveMap() {
 }
 
 RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring rulePkg) {
+	if (mRulePkg.compare(rulePkg) == 0) return mRuleAttributes;
 	mRulePkg = rulePkg;
 
 	// Reset the rule infos

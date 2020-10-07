@@ -11,7 +11,7 @@
 class ModelGenerator {
 public:
 	ModelGenerator();
-	~ModelGenerator() {}
+	~ModelGenerator();
 
 	std::vector<GeneratedModel> generateModel(const std::vector<InitialShape>& initial_geom,
 		std::vector<pcu::ShapeAttributes>& shapeAttributes,
