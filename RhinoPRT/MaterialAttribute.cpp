@@ -38,6 +38,29 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 		const prt::AttributeMap::PrimitiveType type = attrMap->getType(key);
 
 		switch (type) {
+		case prt::AttributeMap::PT_STRING_ARRAY:
+			//This is probably an array of textures.
+			if (Materials::TEXTURE_KEYS.count(strKey) > 0)
+			{
+				size_t count = 0;
+				const auto texArray = attrMap->getStringArray(key, &count);
+				if (texArray != nullptr)
+				{
+					for (size_t i = 0; i < count; ++i)
+					{
+						const wchar_t* texPath = texArray[i];
+						if (texPath != nullptr) 
+						{
+							std::wstring texStr(texPath);
+							if (texStr.length() > 0)
+							{
+								ma.mTexturePaths.insert_or_assign(strKey, texStr);
+							}
+						}
+					}
+				}
+			}
+			break;
 		case prt::AttributeMap::PT_STRING:
 			//This is probably a texture path. check the key against the different allowed textures.
 			if (Materials::TEXTURE_KEYS.count(strKey) > 0)
@@ -51,8 +74,19 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 				}
 			}
 			else {
-				LOG_DBG << "Ignoring unsupported texture " << key << ": " << attrMap->getString(key);
+				LOG_DBG << "Ignoring unsupported key " << key << ": " << attrMap->getString(key);
 			}
+			break;
+		case prt::AttributeMap::PT_FLOAT:
+			if (strKey == L"shininess")
+			{
+				ma.mShininess = attrMap->getFloat(key);
+			}
+			else if (strKey == L"opacity")
+			{
+				ma.mOpacity = attrMap->getFloat(key);
+			}
+
 			break;
 		case prt::AttributeMap::PT_FLOAT_ARRAY:
 			// Check for different type of colors
@@ -71,7 +105,7 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 
 			break;
 		default:
-			LOG_DBG << "Ignoring unsupported key: " << key;
+			LOG_DBG << "Ignoring unsupported key: " << key << " Primitive type: " << type;
 		}
 	}
 

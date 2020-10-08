@@ -24,15 +24,18 @@ namespace Materials {
 		ON_Color mDiffuseCol;
 		ON_Color mAmbientCol;
 		ON_Color mSpecularCol;
+
+		double mShininess;
+		double mOpacity;
 	};
 
 	const std::set<std::wstring> TEXTURE_KEYS = { 
-		L"colormap", // colormap
-		L"bumpmap", // bumpmap
-		L"diffusemap", // dirtmap
-		L"specularmap", // specularmap
-		L"opacitymap", // opacitymap
-		L"normalmap" // normalmap
+		/*L"colormap",*/ L"colorMap", // colormap
+		/*L"bumpmap",*/ L"bumpMap", // bumpmap
+		/*L"diffusemap",*/ L"diffuseMap", // dirtmap
+		/*L"specularmap",*/ L"specularMap", // specularmap
+		/*L"opacitymap",*/ L"opacityMap", // opacitymap
+		/*L"normalmap",*/ L"normalMap" // normalmap
 	};
 
 	using MaterialsMap = std::map<size_t, MaterialAttribute>;

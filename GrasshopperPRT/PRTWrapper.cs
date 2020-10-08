@@ -78,7 +78,9 @@ namespace GrasshopperPRT
                                                 [In, Out] IntPtr pTexPaths,
                                                 [In, Out] IntPtr pDiffuseColor,
                                                 [In, Out] IntPtr pAmbientColor,
-                                                [In, Out] IntPtr pSpecularColor);
+                                                [In, Out] IntPtr pSpecularColor,
+                                                ref double opacity,
+                                                ref double shininess);
 
         public static bool AddMesh(List<Mesh> meshes)
         {
@@ -166,7 +168,10 @@ namespace GrasshopperPRT
             SimpleArrayInt specularArray = new SimpleArrayInt();
             var pSpecularArray = specularArray.NonConstPointer();
 
-            bool status = PRTWrapper.GetMaterial(initialShapeId, meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray);
+            double opacity = 1;
+            double shininess = 1;
+
+            bool status = PRTWrapper.GetMaterial(initialShapeId, meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray, ref opacity, ref shininess);
             if (!status) return null;
 
             var texKeysArray = texKeys.ToArray();
@@ -190,15 +195,16 @@ namespace GrasshopperPRT
 
                 switch (texKey)
                 {
-                    case "colormap":
+                    case "diffuseMap":
+                    case "colorMap":
                         mat.SetBitmapTexture(tex);
                         break;
-                    case "opacitymap":
-                        tex.TextureCombineMode = TextureCombineMode.None;
+                    case "opacityMap":
+                        tex.TextureCombineMode = TextureCombineMode.Blend;
                         tex.TextureType = TextureType.Transparency;
                         mat.SetTransparencyTexture(tex);
                         break;
-                    case "bumpmap":
+                    case "bumpMap":
                         tex.TextureCombineMode = TextureCombineMode.None;
                         tex.TextureType = TextureType.Bump;
                         mat.SetBumpTexture(tex);
@@ -229,6 +235,9 @@ namespace GrasshopperPRT
             {
                 mat.SpecularColor = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
             }
+
+            mat.Transparency = 1.0 - opacity;
+            mat.Shine = shininess;
 
             mat.FresnelReflections = true;
 

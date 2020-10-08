@@ -379,7 +379,9 @@ extern "C" {
 		ON_ClassArray<ON_wString>* pTexPaths,
 		ON_SimpleArray<int>* pDiffuseColor,
 		ON_SimpleArray<int>* pAmbientColor,
-		ON_SimpleArray<int>* pSpecularColor)
+		ON_SimpleArray<int>* pSpecularColor,
+		double* opacity,
+		double* shininess)
 	{
 		auto& genModels = RhinoPRT::get().getGenModels();
 
@@ -400,10 +402,15 @@ extern "C" {
 
 		for (auto& texture: mat.mTexturePaths) {
 
-			prt::Status status;
-			const wchar_t* fullTexPath = RhinoPRT::get().getResolveMap()->getString(pcu::toAssetKey(texture.second).c_str(), &status);
+#ifdef DEBUG
+			LOG_DBG << L"texture: [ " << texture.first << " : " << texture.second << "]";
+#endif // DEBUG
 
-			if (status == prt::STATUS_OK)
+			//prt::Status status;
+			//const wchar_t* fullTexPath = RhinoPRT::get().getResolveMap()->getString(pcu::toAssetKey(texture.second).c_str(), &status);
+			const wchar_t* fullTexPath = texture.second.c_str();
+
+			//if (status == prt::STATUS_OK)
 			{
 				pTexKeys->Append(ON_wString(texture.first.c_str()));
 				pTexPaths->Append(ON_wString(fullTexPath));
@@ -424,6 +431,9 @@ extern "C" {
 		pSpecularColor->Append(specular.Red());
 		pSpecularColor->Append(specular.Green());
 		pSpecularColor->Append(specular.Blue());
+
+		*opacity = mat.mOpacity;
+		*shininess = mat.mShininess;
 
 		return true;
 	}

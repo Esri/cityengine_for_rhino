@@ -59,6 +59,7 @@ namespace {
 	}
 
 	std::wstring getTexturePath(const prtx::TexturePtr& t) {
+		LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
 		return t->getURI()->getPath();
 	}
 
@@ -204,12 +205,20 @@ namespace {
 				break;
 			}
 			case prtx::Material::PT_TEXTURE: {
+				//const auto& diffuseMap = prtxAttr.diffuseMap()[0]->getURI()->getPath();
+				//LOG_DBG << "using diffuseMap(): " << diffuseMap;
+
 				const auto& tex = prtxAttr.getTexture(key);
 				const std::wstring texPath = getTexturePath(tex);
-				amb->setString(key.c_str(), texPath.c_str());
+				if (texPath.length() > 0)
+				{
+					LOG_DBG << "using getTexture(key) with key: " << key << " : " << texPath;
+					amb->setString(key.c_str(), texPath.c_str());
+				}
 				break;
 			}
 			case prtx::Material::PT_TEXTURE_ARRAY: {
+				LOG_DBG << "Texture array with key: " << key;
 				const auto& texArray = prtxAttr.getTextureArray(key);
 
 				prtx::WStringVector texPaths(texArray.size());

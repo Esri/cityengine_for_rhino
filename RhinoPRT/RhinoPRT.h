@@ -123,7 +123,9 @@ extern "C" {
 		ON_ClassArray<ON_wString>* pTexPaths,
 		ON_SimpleArray<int>* pDiffuseColor,
 		ON_SimpleArray<int>* pAmbientColor,
-		ON_SimpleArray<int>* pSpecularColor);
+		ON_SimpleArray<int>* pSpecularColor,
+		double* opacity,
+		double* shininess);
 
 }
 
