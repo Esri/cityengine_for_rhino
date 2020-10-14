@@ -65,19 +65,19 @@ namespace {
 
 	// we blacklist all CGA-style material attribute keys, see prtx/Material.h
 	const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
-		/*L"ambient.b",
+		L"ambient.b",
 		L"ambient.g",
-		L"ambient.r",*/
+		L"ambient.r",
 		L"bumpmap.rw",
 		L"bumpmap.su",
 		L"bumpmap.sv",
 		L"bumpmap.tu",
 		L"bumpmap.tv",
-		/*L"color.a",
+		L"color.a",
 		L"color.b",
 		L"color.g",
 		L"color.r",
-		L"color.rgb",*/
+		L"color.rgb",
 		L"colormap.rw",
 		L"colormap.su",
 		L"colormap.sv",
@@ -98,20 +98,20 @@ namespace {
 		L"opacitymap.sv",
 		L"opacitymap.tu",
 		L"opacitymap.tv",
-		/*L"specular.b",
+		L"specular.b",
 		L"specular.g",
-		L"specular.r",*/
+		L"specular.r",
 		L"specularmap.rw",
 		L"specularmap.su",
 		L"specularmap.sv",
 		L"specularmap.tu",
 		L"specularmap.tv",
-		/*L"bumpmap",
+		L"bumpmap",
 		L"colormap",
 		L"dirtmap",
 		L"normalmap",
 		L"opacitymap",
-		L"specularmap"*/
+		L"specularmap"
 
 	//#if PRT_VERSION_MAJOR > 1
 		// also blacklist CGA-style PBR attrs from CE 2019.0, PRT 2.x
@@ -153,7 +153,7 @@ namespace {
 				const prtx::WStringVector& keys)
 	{
 #ifdef DEBUG
-		LOG_DBG << L"Converting material " << prtxAttr.name();
+		LOG_DBG << L"[RHINOENCODER] Converting material " << prtxAttr.name();
 #endif
 
 		for (const auto& key : keys) {
@@ -205,32 +205,34 @@ namespace {
 				break;
 			}
 			case prtx::Material::PT_TEXTURE: {
-				//const auto& diffuseMap = prtxAttr.diffuseMap()[0]->getURI()->getPath();
-				//LOG_DBG << "using diffuseMap(): " << diffuseMap;
 
 				const auto& tex = prtxAttr.getTexture(key);
 				const std::wstring texPath = getTexturePath(tex);
 				if (texPath.length() > 0)
 				{
-					LOG_DBG << "using getTexture(key) with key: " << key << " : " << texPath;
-					amb->setString(key.c_str(), texPath.c_str());
+					LOG_DBG << "[RHINOENCODER] Using getTexture with key: " << key << " : " << texPath;
+					auto status = amb->setString(key.c_str(), texPath.c_str());
 				}
 				break;
 			}
 			case prtx::Material::PT_TEXTURE_ARRAY: {
-				LOG_DBG << "Texture array with key: " << key;
+				LOG_DBG << "[RHINOENCODER] Texture array with key: " << key;
 				const auto& texArray = prtxAttr.getTextureArray(key);
 
 				prtx::WStringVector texPaths(texArray.size());
 				std::transform(texArray.begin(), texArray.end(), texPaths.begin(), getTexturePath);
+				std::remove_if(texPaths.begin(), texPaths.end(), [](const std::wstring& tex) {return tex.size() == 0; });
 
-				std::vector<const wchar_t*> pTexPaths = toPtrVec(texPaths);
-				amb->setStringArray(key.c_str(), pTexPaths.data(), pTexPaths.size());
+				if (texPaths.size() > 0) {
+					std::vector<const wchar_t*> pTexPaths = toPtrVec(texPaths);
+					auto status = amb->setStringArray(key.c_str(), pTexPaths.data(), pTexPaths.size());
+				}
+				
 				break;
 			}
 			default:
 #ifdef DEBUG
-				LOG_DBG << L"Ignored attribute " << key;
+				LOG_DBG << L"[RHINOENCODER] Ignored attribute " << key;
 #endif
 			}
 		}
@@ -386,7 +388,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 		size_t material_count = materials.size();
 		size_t mesh_count = meshes.size();
-		LOG_DBG << L"Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << ", meshes: " << mesh_count << std::endl;
+		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << ", meshes: " << mesh_count << std::endl;
 
 		vertexIndexBase = 0;
 		maxNumUVSets = 0;

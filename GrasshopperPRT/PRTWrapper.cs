@@ -177,9 +177,11 @@ namespace GrasshopperPRT
             var texKeysArray = texKeys.ToArray();
             var texPathsArray = texPaths.ToArray();
 
-            Material mat = new Material();
+            string coloMap = "";
 
-            for(int i = 0; i < texKeysArray.Length; ++i)
+            Material mat = new Material();
+            
+            for (int i = 0; i < texKeysArray.Length; ++i)
             {
                 string texKey = texKeysArray[i];
                 string texPath = texPathsArray[i];
@@ -190,7 +192,7 @@ namespace GrasshopperPRT
                 {
                     FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(fileuri.AbsolutePath),
                     TextureCombineMode = TextureCombineMode.Modulate,
-                    TextureType = TextureType.Bitmap,
+                    TextureType = TextureType.Bitmap
                 };
 
                 switch (texKey)
@@ -198,11 +200,18 @@ namespace GrasshopperPRT
                     case "diffuseMap":
                     case "colorMap":
                         mat.SetBitmapTexture(tex);
+                        coloMap = tex.FileReference.FullPath;
                         break;
                     case "opacityMap":
-                        tex.TextureCombineMode = TextureCombineMode.Blend;
-                        tex.TextureType = TextureType.Transparency;
-                        mat.SetTransparencyTexture(tex);
+                        // if the color and opacity textures are the same, no need to set it again, it is only needed to activate alpha transparency.
+                        if(coloMap != tex.FileReference.FullPath)
+                        {
+                            tex.TextureCombineMode = TextureCombineMode.Modulate;
+                            tex.TextureType = TextureType.Transparency;
+                            mat.SetTransparencyTexture(tex);
+                        }
+                        
+                        mat.AlphaTransparency = true;
                         break;
                     case "bumpMap":
                         tex.TextureCombineMode = TextureCombineMode.None;

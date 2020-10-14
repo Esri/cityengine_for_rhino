@@ -30,12 +30,12 @@ namespace Materials {
 	};
 
 	const std::set<std::wstring> TEXTURE_KEYS = { 
-		/*L"colormap",*/ L"colorMap", // colormap
-		/*L"bumpmap",*/ L"bumpMap", // bumpmap
-		/*L"diffusemap",*/ L"diffuseMap", // dirtmap
-		/*L"specularmap",*/ L"specularMap", // specularmap
-		/*L"opacitymap",*/ L"opacityMap", // opacitymap
-		/*L"normalmap",*/ L"normalMap" // normalmap
+		L"colorMap", // colormap
+		L"bumpMap", // bumpmap
+		L"diffuseMap", // dirtmap
+		L"specularMap", // specularmap
+		L"opacityMap", // opacitymap
+		L"normalMap" // normalmap
 	};
 
 	using MaterialsMap = std::map<size_t, MaterialAttribute>;

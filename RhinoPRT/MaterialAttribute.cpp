@@ -34,7 +34,6 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 		const auto& key = keys[i];
 		const std::wstring strKey(key);
 
-
 		const prt::AttributeMap::PrimitiveType type = attrMap->getType(key);
 
 		switch (type) {
@@ -46,10 +45,11 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 				const auto texArray = attrMap->getStringArray(key, &count);
 				if (texArray != nullptr)
 				{
-					for (size_t i = 0; i < count; ++i)
+					// If key is diffuseMap: first tex is the colormap and the second is the dirtmap. DirtMap are not supported, thus they are ignored.
+					if (strKey == L"diffuseMap") 
 					{
-						const wchar_t* texPath = texArray[i];
-						if (texPath != nullptr) 
+						const wchar_t* texPath = texArray[0];
+						if (texPath != nullptr)
 						{
 							std::wstring texStr(texPath);
 							if (texStr.length() > 0)
@@ -57,6 +57,11 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 								ma.mTexturePaths.insert_or_assign(strKey, texStr);
 							}
 						}
+					}
+					else 
+					{
+						// This case should never happen.
+						LOG_DBG << L"TEXTURE ARRAY that is not diffuseMap, key is: " << strKey;
 					}
 				}
 			}
