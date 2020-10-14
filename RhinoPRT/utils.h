@@ -76,6 +76,8 @@ namespace pcu {
 	using DecoderInfoPtr = std::unique_ptr<const prt::DecoderInfo, PRTDestroyer>;
 	using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRTDestroyer>;
 	using RhinoCallbacksPtr = std::unique_ptr<RhinoCallbacks>;
+	using ResolveMapSPtr = std::shared_ptr<const prt::ResolveMap>;
+	using ResolveMapUPtr = std::unique_ptr<const prt::ResolveMap, PRTDestroyer>;
 
 	AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
 	AttributeMapPtr createAttributeMapForEncoder(const EncoderOptions& attrs, prt::AttributeMapBuilder& bld);

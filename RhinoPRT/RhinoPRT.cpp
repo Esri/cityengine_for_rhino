@@ -31,7 +31,6 @@ namespace RhinoPRT {
 	}
 
 	void RhinoPRTAPI::SetRPKPath(const std::wstring &rpk_path) {
-		//if (mPackagePath == rpk_path) return;
 		
 		mPackagePath = rpk_path;
 
@@ -406,15 +405,10 @@ extern "C" {
 			LOG_DBG << L"texture: [ " << texture.first << " : " << texture.second << "]";
 #endif // DEBUG
 
-			//prt::Status status;
-			//const wchar_t* fullTexPath = RhinoPRT::get().getResolveMap()->getString(pcu::toAssetKey(texture.second).c_str(), &status);
 			const wchar_t* fullTexPath = texture.second.c_str();
-
-			//if (status == prt::STATUS_OK)
-			{
-				pTexKeys->Append(ON_wString(texture.first.c_str()));
-				pTexPaths->Append(ON_wString(fullTexPath));
-			}
+			
+			pTexKeys->Append(ON_wString(texture.first.c_str()));
+			pTexPaths->Append(ON_wString(fullTexPath));
 		}
 
 		auto diffuse = mat.mDiffuseCol;
