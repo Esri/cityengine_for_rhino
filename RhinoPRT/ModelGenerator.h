@@ -4,6 +4,7 @@
 #include "RhinoCallbacks.h"
 #include "RuleAttributes.h"
 #include "PRTUtilityModels.h"
+#include "ResolveMapCache.h"
 
 /**
 * Entry point of the PRT. Is given an initial shape and rpk package, gives them to the PRT and gets the results.
@@ -29,8 +30,9 @@ public:
 
 private:
 	pcu::CachePtr mCache;
+	ResolveMapCacheUPtr mResolveMapCache;
 	pcu::RuleFileInfoPtr mRuleFileInfo;
-	pcu::ResolveMapPtr mResolveMap;
+	pcu::ResolveMapSPtr mResolveMap;
 	pcu::AttributeMapBuilderPtr mEncoderBuilder;
 	std::vector<pcu::InitialShapeBuilderPtr> mInitialShapesBuilders;
 	std::vector<std::wstring> mEncodersNames;
@@ -60,4 +62,6 @@ private:
 	void extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr,
 		std::wstring& ruleFile, std::wstring& startRule, int32_t& seed, std::wstring& shapeName,
 		pcu::AttributeMapPtr& convertShapeAttr);
+
+	pcu::ResolveMapSPtr getResolveMap(const std::experimental::filesystem::path& rpk);
 };

@@ -9,7 +9,8 @@ std::unique_ptr<PRTContext>& PRTContext::get() {
 	return prtCtx;
 }
 
-PRTContext::PRTContext(prt::LogLevel minimalLogLevel) {
+PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
+{
 	mLogHandler = prt::ConsoleLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT);
 	mFileLogHandler = prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT, L"C:/Windows/Temp/rhino_log.txt");
 	prt::addLogHandler(mLogHandler);

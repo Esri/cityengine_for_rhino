@@ -70,7 +70,6 @@ namespace RhinoPRT {
 		std::vector<GeneratedModel> mGeneratedModels;
 
 		Reporting::GroupedReports mGroupedReports;
-
 	};
 
 	// Global PRT handle
@@ -126,7 +125,6 @@ extern "C" {
 		ON_SimpleArray<int>* pSpecularColor,
 		double* opacity,
 		double* shininess);
-
 }
 
 #endif RHINOPRT

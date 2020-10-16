@@ -8,36 +8,37 @@ namespace {
 	constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
 }
 
-ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir(RESOLVEMAP_EXTRACTION_PREFIX))
-{
-	mCache = pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT));
-}
+ModelGenerator::ModelGenerator()
+	: mCache{ pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT)) },
+	  mResolveMapCache{ new ResolveMapCache(pcu::getTempDir(RESOLVEMAP_EXTRACTION_PREFIX)) } { }
 
 ModelGenerator::~ModelGenerator()
 {
-	if (std::experimental::filesystem::remove_all(mUnpackPath) == -1)
-		LOG_ERR << L"Error while removing the temp directory";
+	mResolveMapCache.reset();
+	LOG_INF << "Released RPK Cache";
+
+	mCache.reset();
+	LOG_INF << "Released PRT Cache";
+}
+
+pcu::ResolveMapSPtr ModelGenerator::getResolveMap(const std::experimental::filesystem::path& rpk)
+{
+	auto lookupResult = mResolveMapCache->get(rpk.string());
+	if (lookupResult.second == ResolveMapCache::CacheStatus::MISS)
+	{
+		mCache->flushAll();
+	}
+	return lookupResult.first;
 }
 
 bool ModelGenerator::initResolveMap()
 {
 	if (!mRulePkg.empty())
-	{
-		const std::string rpkURI = pcu::toFileURI(mRulePkg);
-		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-		try {
-			auto converted_str = pcu::toUTF16FromUTF8(rpkURI).c_str();
+	{		
+		// Get the resolvemap from the resolve map cache
+		mResolveMap = getResolveMap(mRulePkg);
 
-			// create a unique directory for this rpk
-			std::wstring uniqueUnpackPath = pcu::getUniqueTempDir(RESOLVEMAP_EXTRACTION_PREFIX);
-
-			mResolveMap.reset(prt::createResolveMap(converted_str, uniqueUnpackPath.c_str(), &status));
-
-			return status == prt::STATUS_OK;
-		}
-		catch (std::exception& e) {
-			LOG_ERR << L"CAUGHT EXCEPTION: " << e.what() << std::endl;
-		}
+		return true;
 	}
 	return false;
 }

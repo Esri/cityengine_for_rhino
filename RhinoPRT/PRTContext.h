@@ -3,6 +3,7 @@
 // Wrapper for PRT classes
 
 #include "utils.h"
+#include "ResolveMapCache.h"
 
 #include "prt/LogLevel.h"
 #include "prt/ContentType.h"
@@ -18,7 +19,7 @@ struct PRTContext final {
 	~PRTContext();
 
 	bool isAlive() const {
-		return alreadyInitialized/*static_cast<bool>(mPRTHandle)*/;
+		return alreadyInitialized;
 	}
 
 	prt::ConsoleLogHandler* mLogHandler;

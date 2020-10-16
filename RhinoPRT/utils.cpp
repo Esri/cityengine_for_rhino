@@ -252,7 +252,7 @@ namespace pcu {
 		return removePrefix(attrName, STYLE_DELIMITER);
 	}
 
-	std::wstring getRuleFileEntry(const ResolveMapPtr& resolveMap) {
+	std::wstring getRuleFileEntry(const ResolveMapSPtr& resolveMap) {
 		const std::wstring sCGB(L".cgb");
 
 		size_t nKeys;
