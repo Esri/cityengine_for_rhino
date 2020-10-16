@@ -20,7 +20,7 @@
 
 #include <assert.h>
 
-#define DEBUG
+//#define DEBUG
 
 namespace {
 
@@ -35,7 +35,7 @@ namespace {
 		prtx::EncodePreparator::PreparationFlags()
 		.instancing(false)
 		.triangulate(true)
-		.mergeVertices(false)
+		.mergeVertices(true)
 		.cleanupUVs(true)
 		.cleanupVertexNormals(false)
 		.mergeByMaterial(true);
@@ -59,7 +59,9 @@ namespace {
 	}
 
 	std::wstring getTexturePath(const prtx::TexturePtr& t) {
+#ifdef DEBUG
 		LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
+#endif
 		return t->getURI()->getPath();
 	}
 
@@ -210,13 +212,17 @@ namespace {
 				const std::wstring texPath = getTexturePath(tex);
 				if (texPath.length() > 0)
 				{
+#ifdef DEBUG
 					LOG_DBG << "[RHINOENCODER] Using getTexture with key: " << key << " : " << texPath;
+#endif
 					auto status = amb->setString(key.c_str(), texPath.c_str());
 				}
 				break;
 			}
 			case prtx::Material::PT_TEXTURE_ARRAY: {
+#ifdef DEBUG
 				LOG_DBG << "[RHINOENCODER] Texture array with key: " << key;
+#endif
 				const auto& texArray = prtxAttr.getTextureArray(key);
 
 				prtx::WStringVector texPaths(texArray.size());
@@ -234,6 +240,7 @@ namespace {
 #ifdef DEBUG
 				LOG_DBG << L"[RHINOENCODER] Ignored attribute " << key;
 #endif
+				continue;
 			}
 		}
 	}
@@ -388,7 +395,10 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 		size_t material_count = materials.size();
 		size_t mesh_count = meshes.size();
+
+#ifdef DEBUG
 		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << ", meshes: " << mesh_count << std::endl;
+#endif
 
 		vertexIndexBase = 0;
 		maxNumUVSets = 0;
@@ -539,7 +549,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 }
 
 void RhinoEncoder::finish(prtx::GenerateContext& context) {
+#ifdef DEBUG
 	LOG_DBG << "In finish  function...";
+#endif
 }
 
 

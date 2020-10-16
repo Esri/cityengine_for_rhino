@@ -10,7 +10,7 @@ using Rhino.Geometry;
 using Rhino.DocObjects;
 
 using Rhino.Runtime.InteropWrappers;
-
+using Rhino.Display;
 
 namespace GrasshopperPRT
 {
@@ -149,7 +149,7 @@ namespace GrasshopperPRT
             return mesh_struct;
         }
 
-        public static Material GetMaterialOfPartMesh(int initialShapeId, int meshID)
+        public static GH_Material GetMaterialOfPartMesh(int initialShapeId, int meshID)
         {
             int uvSet = 0;
 
@@ -212,6 +212,7 @@ namespace GrasshopperPRT
                         }
                         
                         mat.AlphaTransparency = true;
+                        
                         break;
                     case "bumpMap":
                         tex.TextureCombineMode = TextureCombineMode.None;
@@ -233,16 +234,19 @@ namespace GrasshopperPRT
             if(diffuseColor.Length == 3)
             {
                 mat.DiffuseColor = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);
+                //mat.Diffuse = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);
             }
 
             if(ambientColor.Length == 3)
             {
                 mat.AmbientColor = Color.FromArgb(ambientColor[0], ambientColor[1], ambientColor[2]);
+                //mat.Emission = Color.FromArgb(ambientColor[0], ambientColor[1], ambientColor[2]);
             }
 
             if(specularColor.Length == 3)
             {
                 mat.SpecularColor = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
+                //mat.Specular = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
             }
 
             mat.Transparency = 1.0 - opacity;
@@ -251,12 +255,13 @@ namespace GrasshopperPRT
             mat.FresnelReflections = true;
 
             mat.CommitChanges();
-            return mat;
+            
+            return new GH_Material(mat.RenderMaterial);
         }
 
         public static List<GH_Material> GetMaterialsOfMesh(int initShapeId)
         {
-            List<Material> materials = new List<Material>();
+            List<GH_Material> materials = new List<GH_Material>();
 
             int meshCount = GetMeshPartCount(initShapeId);
 
@@ -265,11 +270,7 @@ namespace GrasshopperPRT
                 materials.Add(GetMaterialOfPartMesh(initShapeId, i));
             }
 
-            // convert to GH_Materials
-            List<GH_Material> gh_mats = new List<GH_Material>();
-            materials.ForEach(mat => gh_mats.Add(new GH_Material(mat.RenderMaterial)));
-
-            return gh_mats;
+            return materials;
         }
 
         public static GH_Structure<GH_Material> GetAllMaterialIds(int meshCount)

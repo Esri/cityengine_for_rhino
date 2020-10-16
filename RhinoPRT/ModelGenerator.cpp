@@ -92,7 +92,8 @@ std::vector<GeneratedModel> ModelGenerator::generateModel(const std::vector<Init
 	std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	const std::wstring& geometryEncoderName,
 	const pcu::EncoderOptions& geometryEncoderOptions,
-	pcu::AttributeMapBuilderPtr& aBuilder) {
+	pcu::AttributeMapBuilderPtr& aBuilder)
+{
 	mInitialShapesBuilders.resize(initial_geom.size());
 
 	// Initial shapes initializing
