@@ -234,19 +234,16 @@ namespace GrasshopperPRT
             if(diffuseColor.Length == 3)
             {
                 mat.DiffuseColor = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);
-                //mat.Diffuse = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);
             }
 
             if(ambientColor.Length == 3)
             {
                 mat.AmbientColor = Color.FromArgb(ambientColor[0], ambientColor[1], ambientColor[2]);
-                //mat.Emission = Color.FromArgb(ambientColor[0], ambientColor[1], ambientColor[2]);
             }
 
             if(specularColor.Length == 3)
             {
                 mat.SpecularColor = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
-                //mat.Specular = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
             }
 
             mat.Transparency = 1.0 - opacity;
@@ -255,8 +252,14 @@ namespace GrasshopperPRT
             mat.FresnelReflections = true;
 
             mat.CommitChanges();
-            
-            return new GH_Material(mat.RenderMaterial);
+
+            var renderMat = Rhino.Render.RenderMaterial.CreateBasicMaterial(mat);
+
+            // Using DisplayMaterial is faster but textures are not present.
+            //var displayMat = new Rhino.Display.DisplayMaterial(mat);
+            //string displayMatString = displayMat.ToString();
+
+            return new GH_Material(renderMat);
         }
 
         public static List<GH_Material> GetMaterialsOfMesh(int initShapeId)

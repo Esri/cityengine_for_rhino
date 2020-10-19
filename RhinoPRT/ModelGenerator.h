@@ -14,11 +14,12 @@ public:
 	ModelGenerator();
 	~ModelGenerator();
 
-	std::vector<GeneratedModel> generateModel(const std::vector<InitialShape>& initial_geom,
+	void generateModel(const std::vector<InitialShape>& initial_geom,
 		std::vector<pcu::ShapeAttributes>& shapeAttributes,
 		const std::wstring& geometryEncoderName,
 		const pcu::EncoderOptions& geometryEncoderOptions,
-		pcu::AttributeMapBuilderPtr& aBuilder);
+		pcu::AttributeMapBuilderPtr& aBuilder,
+		std::vector<GeneratedModel>& generated_models);
 
 	bool initResolveMap();
 	RuleAttributes updateRuleFiles(const std::wstring rulePkg);

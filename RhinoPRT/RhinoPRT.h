@@ -31,12 +31,12 @@ namespace RhinoPRT {
 		void SetRPKPath(const std::wstring &rpk_path);
 
 		int GetRuleAttributeCount();
-		RuleAttributes GetRuleAttributes();
+		RuleAttributes& GetRuleAttributes();
 
 		void AddInitialShape(const std::vector<InitialShape>& shapes);
 		void ClearInitialShapes();
 
-		std::vector<GeneratedModel> GenerateGeometry();
+		bool GenerateGeometry();
 
 		template<typename T>
 		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value);
