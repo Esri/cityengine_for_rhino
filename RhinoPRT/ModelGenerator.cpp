@@ -55,7 +55,7 @@ RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring rulePkg) {
 	// Get the resolve map
 	bool status = initResolveMap();
 	if (!status) {
-		LOG_ERR << "failed to get resolve map from rule package " << mRulePkg << std::endl;
+		LOG_ERR << "Failed to get resolve map from rule package " << mRulePkg << std::endl;
 		return {};
 	}
 

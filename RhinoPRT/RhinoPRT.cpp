@@ -183,10 +183,9 @@ namespace RhinoPRT {
 	std::vector<int> RhinoPRTAPI::getModelIds()
 	{
 		std::vector<int> ids;
-		for (const auto& model : mGeneratedModels)
-		{
-			ids.push_back(model.getInitialShapeIndex());
-		}
+
+		std::for_each(mGeneratedModels.begin(), mGeneratedModels.end(), [&ids](const GeneratedModel& model) { ids.push_back(model.getInitialShapeIndex()); });
+
 		return ids;
 	}
 }
