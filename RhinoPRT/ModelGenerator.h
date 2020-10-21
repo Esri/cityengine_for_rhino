@@ -21,8 +21,8 @@ public:
 		pcu::AttributeMapBuilderPtr& aBuilder,
 		std::vector<GeneratedModel>& generated_models);
 
-	bool initResolveMap();
-	RuleAttributes updateRuleFiles(const std::wstring rulePkg);
+	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::wstring& rulePkg);
+	RuleAttributes updateRuleFiles(const std::wstring& rulePkg);
 
 	std::wstring getRuleFile(); 
 	std::wstring getStartingRule(); 
@@ -31,7 +31,7 @@ public:
 
 private:
 	pcu::CachePtr mCache;
-	ResolveMapCacheUPtr mResolveMapCache;
+	ResolveMap::ResolveMapCacheUPtr mResolveMapCache;
 	pcu::RuleFileInfoPtr mRuleFileInfo;
 	pcu::ResolveMapSPtr mResolveMap;
 	pcu::AttributeMapBuilderPtr mEncoderBuilder;
@@ -41,7 +41,6 @@ private:
 	RuleAttributes mRuleAttributes;
 
 	std::wstring mRulePkg;
-	std::wstring mUnpackPath;
 	std::wstring mRuleFile = L"bin/rule.cgb";
 	std::wstring mStartRule = L"default$Lot";
 	int32_t mSeed = 0;
@@ -64,5 +63,5 @@ private:
 		std::wstring& ruleFile, std::wstring& startRule, int32_t& seed, std::wstring& shapeName,
 		pcu::AttributeMapPtr& convertShapeAttr);
 
-	pcu::ResolveMapSPtr getResolveMap(const std::experimental::filesystem::path& rpk);
+	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::experimental::filesystem::path& rpk);
 };

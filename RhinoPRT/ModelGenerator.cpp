@@ -21,43 +21,54 @@ ModelGenerator::~ModelGenerator()
 	LOG_INF << "Released PRT Cache";
 }
 
-pcu::ResolveMapSPtr ModelGenerator::getResolveMap(const std::experimental::filesystem::path& rpk)
+ResolveMap::ResolveMapCache::LookupResult ModelGenerator::getResolveMap(const std::experimental::filesystem::path& rpk)
 {
-	auto lookupResult = mResolveMapCache->get(rpk.string());
-	if (lookupResult.second == ResolveMapCache::CacheStatus::MISS)
+	auto lookupResult = mResolveMapCache->get(rpk);
+	if (lookupResult.second == ResolveMap::ResolveMapCache::CacheStatus::MISS)
 	{
 		mCache->flushAll();
 	}
-	return lookupResult.first;
+	return lookupResult;
 }
 
-bool ModelGenerator::initResolveMap()
+ResolveMap::ResolveMapCache::CacheStatus ModelGenerator::initResolveMap(const std::wstring& rulePkg)
 {
-	if (!mRulePkg.empty())
+	if (!rulePkg.empty())
 	{		
 		// Get the resolvemap from the resolve map cache
-		mResolveMap = getResolveMap(mRulePkg);
+		auto lookup = getResolveMap(rulePkg);
 
-		return true;
+		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::FAILURE)
+			return lookup.second;
+
+		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::MISS)
+			mResolveMap = lookup.first;
+
+		return lookup.second;
 	}
-	return false;
+
+	return ResolveMap::ResolveMapCache::CacheStatus::FAILURE;
 }
 
-RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring rulePkg) {
-	if (mRulePkg.compare(rulePkg) == 0) return mRuleAttributes;
-	mRulePkg = rulePkg;
+RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
+	// Get the resolve map.
+	auto cacheStatus = initResolveMap(rulePkg);
+	if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::FAILURE) {
+		LOG_ERR << "Failed to create the resolve map from rule package " << mRulePkg << std::endl;
+		return {};
+	}
+	else if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::HIT)
+	{
+		// resolvemap exists already, no need to update.
+		return mRuleAttributes;
+	}
 
+	//Cache miss -> initialize everything
 	// Reset the rule infos
 	mRuleAttributes.clear();
 	mRuleFile.clear();
 	mStartRule.clear();
-
-	// Get the resolve map
-	bool status = initResolveMap();
-	if (!status) {
-		LOG_ERR << "Failed to get resolve map from rule package " << mRulePkg << std::endl;
-		return {};
-	}
+	mRulePkg = rulePkg;
 
 	// Extract the rule package info.
 	mRuleFile = pcu::getRuleFileEntry(mResolveMap);
