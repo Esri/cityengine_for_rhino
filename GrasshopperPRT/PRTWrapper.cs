@@ -255,10 +255,6 @@ namespace GrasshopperPRT
 
             var renderMat = Rhino.Render.RenderMaterial.CreateBasicMaterial(mat);
 
-            // Using DisplayMaterial is faster but textures are not present.
-            //var displayMat = new Rhino.Display.DisplayMaterial(mat);
-            //string displayMatString = displayMat.ToString();
-
             return new GH_Material(renderMat);
         }
 
