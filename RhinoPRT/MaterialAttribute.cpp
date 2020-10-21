@@ -73,7 +73,7 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t initialSha
 				const wchar_t* texKey = attrMap->getString(key);
 				if (texKey != nullptr)
 				{
-					auto tex = std::wstring(texKey);
+					std::wstring tex(texKey);
 					if(tex.length() > 0)
 						ma.mTexturePaths.insert_or_assign(strKey, tex);
 				}

@@ -23,9 +23,9 @@ class RhinoCallbacks;
 namespace pcu {
 
 	std::wstring getDllLocation();
-	std::wstring getTempDir();
+	std::wstring getTempDir(const std::wstring& tmp_prefix);
 	std::wstring getUUID();
-	std::wstring getUniqueTempDir();
+	std::wstring getUniqueTempDir(const std::wstring& tmp_prefix);
 
 	template <typename C>
 	C getDirSeparator();

@@ -5,7 +5,8 @@
 
 #include "prt/StringUtils.h"
 
-#pragma comment(lib, "rpcrt4.lib")
+//#pragma comment(lib, "rpcrt4.lib")
+#include <rpc.h>
 
 #ifdef _WIN32
 	#include <Windows.h>
@@ -89,11 +90,11 @@ namespace pcu {
 		return std::wstring(1, getDirSeparator<wchar_t>());
 	}
 
-	std::wstring getTempDir()
+	std::wstring getTempDir(const std::wstring& tmp_prefix)
 	{
 		auto path = std::experimental::filesystem::temp_directory_path();
 
-		auto prtTempPath = path.append("PRTTemp");
+		auto prtTempPath = path.append(tmp_prefix);
 		if (!std::experimental::filesystem::exists(prtTempPath)) {
 			if (!std::experimental::filesystem::create_directory(prtTempPath)) 
 			{
@@ -106,13 +107,16 @@ namespace pcu {
 		return path.generic_wstring();
 	}
 
-	std::wstring getUniqueTempDir()
+	std::wstring getUniqueTempDir(const std::wstring& tmp_prefix)
 	{
-		std::wstring temp_dir = getTempDir();
-		std::wstring uuid = getUUID();
-
+		std::wstring temp_dir = getTempDir(tmp_prefix);
 		std::experimental::filesystem::path path(temp_dir);
-		path = path.append(uuid);
+
+		std::wstring uuid = getUUID();
+		if (uuid.size() == 0)
+			LOG_ERR << L"Could not create uuid.";
+		else
+			path = path.append(uuid);
 
 		if (!std::experimental::filesystem::create_directory(path))
 		{
@@ -125,13 +129,18 @@ namespace pcu {
 
 	std::wstring getUUID()
 	{
+#ifdef _WIN32
 		UUID uid;
 		UuidCreate(&uid);
 
 		wchar_t* str;
-		UuidToStringW(&uid, (RPC_WSTR*)&str);
-
-		return std::wstring(str);
+		auto status = UuidToStringW(&uid, (RPC_WSTR*)&str);
+		if(status == RPC_S_OK) return std::wstring(str);
+#else
+#error Windows platform required
+#endif
+		LOG_ERR << "Failed to create UUID";
+		return L"";
 	}
 
 #ifdef _WIN32

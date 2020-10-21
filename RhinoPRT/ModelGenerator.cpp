@@ -4,18 +4,15 @@
 
 #include <filesystem>
 
-ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir())
+ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir(std::wstring(RESOLVEMAP_EXTRACTION_PREFIX)))
 {
 	mCache = pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT));
 }
 
 ModelGenerator::~ModelGenerator()
 {
-	// Empty the temp dir
-	std::error_code error;
-	if (std::experimental::filesystem::remove_all(mUnpackPath, error) == -1) {
-		LOG_ERR << L"Error while removing the temp directory: " << error.message();
-	}
+	if (std::experimental::filesystem::remove_all(mUnpackPath) == -1)
+		LOG_ERR << L"Error while removing the temp directory";
 }
 
 bool ModelGenerator::initResolveMap()
@@ -28,7 +25,7 @@ bool ModelGenerator::initResolveMap()
 			auto converted_str = pcu::toUTF16FromUTF8(rpkURI).c_str();
 
 			// create a unique directory for this rpk
-			std::wstring uniqueUnpackPath = pcu::getUniqueTempDir();
+			std::wstring uniqueUnpackPath = pcu::getUniqueTempDir(std::wstring(RESOLVEMAP_EXTRACTION_PREFIX));
 
 			mResolveMap.reset(prt::createResolveMap(converted_str, uniqueUnpackPath.c_str(), &status));
 
