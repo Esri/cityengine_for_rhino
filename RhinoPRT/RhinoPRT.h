@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <array>
 
 #pragma comment(lib, "ole32.lib") // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
 
@@ -100,7 +101,7 @@ extern "C" {
 
 	RHINOPRT_API int GetRuleAttributesCount();
 
-	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type, ON_wString* pGroup);
+	RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname, prt::AnnotationArgumentType* type, ON_wString* pGroup);
 
 	RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value);
 

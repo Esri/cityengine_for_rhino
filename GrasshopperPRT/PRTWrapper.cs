@@ -52,7 +52,7 @@ namespace GrasshopperPRT
         public static extern int GetRuleAttributesCount();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetRuleAttribute(int attrIdx, StringBuilder rule, int rule_size, StringBuilder name, int name_size, StringBuilder nickname, int nickname_size, ref AnnotationArgumentType type, [In,Out]IntPtr pGroup);
+        public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDouble(string rule, string fullName, double value);
@@ -383,14 +383,19 @@ namespace GrasshopperPRT
 
             for(int i = 0; i < attribCount; ++i)
             {
-                StringBuilder ruleBuilder = new StringBuilder(100);
-                StringBuilder nameBuilder = new StringBuilder(100);
-                StringBuilder nicknameBuilder = new StringBuilder(100);
-                AnnotationArgumentType type = AnnotationArgumentType.AAT_INT;
+                StringWrapper ruleBuilder = new StringWrapper();
+                StringWrapper nameBuilder = new StringWrapper();
+                StringWrapper nicknameBuilder = new StringWrapper();
                 StringWrapper group = new StringWrapper();
+
+                var pRuleBuilder = ruleBuilder.NonConstPointer;
+                var pNameBuilder = nameBuilder.NonConstPointer;
+                var pNickNameBuilder = nicknameBuilder.NonConstPointer;
                 var pGroup = group.NonConstPointer;
 
-                bool status = GetRuleAttribute(i, ruleBuilder, ruleBuilder.Capacity, nameBuilder, nameBuilder.Capacity, nicknameBuilder, nicknameBuilder.Capacity, ref type, pGroup);
+                AnnotationArgumentType type = AnnotationArgumentType.AAT_INT;
+
+                bool status = GetRuleAttribute(i, pRuleBuilder, pNameBuilder, pNickNameBuilder, ref type, pGroup);
                 if (!status) return new RuleAttribute[0] {};
 
                 attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());

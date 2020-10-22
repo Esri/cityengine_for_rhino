@@ -333,7 +333,7 @@ extern "C" {
 		return RhinoPRT::get().GetRuleAttributeCount();
 	}
 
-	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type, ON_wString* pGroup)
+	RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname, prt::AnnotationArgumentType* type, ON_wString* pGroup)
 	{
 		RuleAttributes ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 
@@ -341,9 +341,9 @@ extern "C" {
 
 		const RuleAttribute& ruleAttr = ruleAttributes[attrIdx];
 
-		wcscpy_s(rule, rule_size, ruleAttr.mRuleFile.c_str());
-		wcscpy_s(name, name_size, ruleAttr.mFullName.c_str());
-		wcscpy_s(nickname, nickname_size, ruleAttr.mNickname.c_str());
+		pRule->Append(ruleAttr.mRuleFile.c_str(), ruleAttr.mRuleFile.size());
+		pName->Append(ruleAttr.mFullName.c_str(), ruleAttr.mFullName.size());
+		pNickname->Append(ruleAttr.mNickname.c_str(), ruleAttr.mNickname.size());
 		*type = ruleAttr.mType;
 
 		if(ruleAttr.groups.size() > 0)
@@ -354,48 +354,57 @@ extern "C" {
 
 	RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value)
 	{
-		RhinoPRT::get().fillAttributeFromNode<double>(std::wstring(rule), std::wstring(fullName), value);
+		if (!rule || !fullName) return;
+		RhinoPRT::get().fillAttributeFromNode<double>(rule, fullName, value);
 	}
 
 	RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value)
 	{
-		RhinoPRT::get().fillAttributeFromNode<bool>(std::wstring(rule), std::wstring(fullName), value);
+		if (!rule || !fullName) return;
+		RhinoPRT::get().fillAttributeFromNode<bool>(rule, fullName, value);
 	}
 
 	RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value)
 	{
-		RhinoPRT::get().fillAttributeFromNode<int>(std::wstring(rule), std::wstring(fullName), value);
+		if (!rule || !fullName) return;
+		RhinoPRT::get().fillAttributeFromNode<int>(rule, fullName, value);
 	}
 
 	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
 	{
-		RhinoPRT::get().fillAttributeFromNode<std::wstring>(std::wstring(rule), std::wstring(fullName), std::wstring(value));
+		if (!rule || !fullName || !value) return;
+		RhinoPRT::get().fillAttributeFromNode<std::wstring>(rule, fullName, value);
 	}
 
 	RHINOPRT_API void SetRuleAttributeDoubleArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray)
 	{
+		if (!rule || !fullName || !pValueArray) return;
+
 		const double* valueArray = pValueArray->Array();
 		const size_t size = pValueArray->Count();
 		
-		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), valueArray, size);
+		RhinoPRT::get().fillAttributeFromNode(rule, fullName, valueArray, size);
 	}
 
 	RHINOPRT_API void SetRuleAttributeBoolArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray)
 	{
+		if (!rule || !fullName || !pValueArray) return;
+
 		const int* valueArray = pValueArray->Array();
 		const size_t size = pValueArray->Count();
 
 		// convert int array to boolean array
-		bool* boolArray = new bool[size];
-		std::transform(valueArray, valueArray + size, boolArray, static_cast_fct<bool, int>);
+		//bool* boolArray = new bool[size];
+		std::unique_ptr<bool[]> boolArray(new bool[size]);
+		std::transform(valueArray, valueArray + size, boolArray.get(), static_cast_fct<bool, int>);
 
-		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), boolArray, size);
-
-		delete[] boolArray;
+		RhinoPRT::get().fillAttributeFromNode(rule, fullName, boolArray.get(), size);
 	}
 
 	RHINOPRT_API void SetRuleAttributeStringArray(const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray)
 	{
+		if (!rule || !fullName || !pValueArray) return;
+
 		const ON_wString* valueArray = pValueArray->Array();
 		const size_t size = pValueArray->Count();
 
@@ -403,7 +412,7 @@ extern "C" {
 		const wchar_t** strArray = new const wchar_t*[size];
 		std::transform(valueArray, valueArray + size, strArray, static_cast_fct<const wchar_t*>);
 
-		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), strArray, size);
+		RhinoPRT::get().fillAttributeFromNode(rule, fullName, strArray, size);
 
 		delete[] strArray;
 	}
