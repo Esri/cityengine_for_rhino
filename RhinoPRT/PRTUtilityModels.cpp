@@ -2,38 +2,9 @@
 
 #include "Logger.h"
 
+#include <algorithm>
 #include <numeric>
 
-/// NOT USED ANYMORE.
-InitialShape::InitialShape(const std::vector<double> &vertices) : mVertices(vertices) {
-	mIndices.resize(vertices.size() / 3);
-	std::iota(std::begin(mIndices), std::end(mIndices), 0);
-
-	// It is specific to the plane surface quad.
-	mIndices[1] = 2;
-	mIndices[2] = 3;
-	mIndices[3] = 1;
-
-	mFaceCounts.resize(1, (uint32_t)mIndices.size());
-}
-
-InitialShape::InitialShape(const double* vertices, int vCount, const int* indices, const int iCount, const int* faceCount, const int faceCountCount) {
-	mVertices.reserve(vCount);
-	mIndices.reserve(iCount);
-	mFaceCounts.reserve(faceCountCount);
-
-	for (int i = 0; i < vCount; ++i) {
-		mVertices.push_back(vertices[i]);
-	}
-
-	for (int i = 0; i < iCount; ++i) {
-		mIndices.push_back(indices[i]);
-	}
-
-	for (int i = 0; i < faceCountCount; ++i) {
-		mFaceCounts.push_back(faceCount[i]);
-	}
-}
 
 InitialShape::InitialShape(const ON_Mesh& mesh) {
 	ON_wString shapeIdxStr;
@@ -85,33 +56,32 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 	}
 }
 
-GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const std::vector<double>& vert, const std::vector<uint32_t>& indices,
-	const std::vector<uint32_t>& face, const Reporting::ReportMap& rep):
-	mInitialShapeIndex(initialShapeIdx), mVertices(vert), mIndices(indices), mFaces(face), mReports(rep) { }
+GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model):
+	mInitialShapeIndex(initialShapeIdx), mModel(model) { }
 
-const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
-
-	size_t nbVertices = mVertices.size() / 3;
-
-	ON_Mesh mesh(mFaces.size(), nbVertices, false, false);
+const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const 
+{
+	ON_Mesh mesh(modelPart.mUVCounts.size(), modelPart.mIndices.size(), true, true);
 
 	// Set the initial shape id.
 	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
-
-	for (size_t v_id = 0; v_id < nbVertices; ++v_id) {
-		mesh.SetVertex(v_id, ON_3dPoint(mVertices[v_id * 3], mVertices[v_id * 3 + 1], mVertices[v_id * 3 + 2]));
+	
+	// Duplicate vertices
+	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
+		auto index = modelPart.mIndices[v_id];
+		mesh.SetVertex(v_id, ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 1], modelPart.mVertices[index * 3 + 2]));
 	}
-
+	
 	int faceid(0);
 	int currindex(0);
-	for (int face : mFaces) {
+	for (int face : modelPart.mFaces) {
 		if (face == 3) {
-			mesh.SetTriangle(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2]);
+			mesh.SetTriangle(faceid, currindex, currindex + 1, currindex + 2);
 			currindex += face;
 			faceid++;
 		}
 		else if (face == 4) {
-			mesh.SetQuad(faceid, mIndices[currindex], mIndices[currindex + 1], mIndices[currindex + 2], mIndices[currindex + 3]);
+			mesh.SetQuad(faceid, currindex, currindex + 1, currindex + 2, currindex + 3);
 			currindex += face;
 			faceid++;
 		}
@@ -121,6 +91,13 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 			LOG_WRN << "Ignored face with invalid number of vertices :" << face;
 		}
 	}
+	
+	for (size_t i = 0; i < modelPart.mUVs.Count(); ++i) {
+		mesh.SetTextureCoord(i, modelPart.mUVs[i].x, modelPart.mUVs[i].y);
+	}
+
+	mesh.ComputeVertexNormals();
+	mesh.Compact();
 
 	// Printing a rhino error log if the created mesh is invalid
 	ON_wString log_str;
@@ -130,10 +107,17 @@ const ON_Mesh GeneratedModel::getMeshFromGenModel() const {
 		mesh.Dump(log);
 		LOG_ERR << log_str;
 	}
-	
-	mesh.ComputeVertexNormals();
-	mesh.Compact();
 
+	return mesh;
+}
+
+const MeshBundle GeneratedModel::getMeshesFromGenModel() const 
+{
+	const auto& modelParts = mModel.getModelParts();
+
+	MeshBundle mesh;
+	mesh.reserve(modelParts.size());
+	std::transform(modelParts.begin(), modelParts.end(), std::back_inserter(mesh), [this](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part); });
 	return mesh;
 }
 

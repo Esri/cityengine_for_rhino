@@ -77,7 +77,8 @@ namespace Reporting {
 				return;
 			}
 
-			model.mReports.emplace(ra.mReportName, std::move(ra));
+			//model.mReports.emplace(ra.mReportName, std::move(ra));
+			model.addReport(ra);
 		}
 	}
 

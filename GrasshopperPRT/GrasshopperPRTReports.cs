@@ -34,7 +34,7 @@ namespace GrasshopperPRT
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddMeshParameter(MESH_INPUT, MESH_INPUT, "Mesh input is used to compute where to put the reports display.", GH_ParamAccess.list);
+            pManager.AddMeshParameter(MESH_INPUT, MESH_INPUT, "Mesh input is used to compute where to put the reports display.", GH_ParamAccess.tree);
             pManager.AddGenericParameter(REPORTS_INPUT_NAME, REPORTS_INPUT_NAME, "The CGA Reports", GH_ParamAccess.tree);
 
             // The 3 filter options: list of GH_Interval on initial shape. String or list of String to filter keys.
@@ -65,8 +65,8 @@ namespace GrasshopperPRT
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            var meshList = new List<GH_Mesh>();
-            bool locateFromMeshes = DA.GetDataList(0, meshList);
+            var meshTree = new GH_Structure<GH_Mesh>();
+            bool locateFromMeshes = DA.GetDataTree(0, out meshTree);
 
             var reportTree = new GH_Structure<IGH_Goo>();
             if(!DA.GetDataTree<IGH_Goo>(1, out reportTree))
@@ -83,11 +83,11 @@ namespace GrasshopperPRT
             var filteredReports = FilterReports(applyFilters, reports, initialShapeIds, reportKeys, valueKeys);
 
             // Format the text output
-            var previewReports = GetFormatedReports(filteredReports, meshList.Count);
+            var previewReports = GetFormatedReports(filteredReports, meshTree.PathCount);
 
             if (locateFromMeshes)
             {
-                var pointList = ComputeReportPositions(meshList, previewReports.Item2);
+                var pointList = ComputeReportPositions(meshTree, previewReports.Item2);
 
                 DA.SetDataList(REPORTS_LOCATION, pointList);
             }
@@ -107,21 +107,32 @@ namespace GrasshopperPRT
             DA.SetDataTree(2, filteredReportAttributes);
         }
 
-        private List<Plane> ComputeReportPositions(List<GH_Mesh> meshList, List<int> reportCountList)
+        private List<Plane> ComputeReportPositions(GH_Structure<GH_Mesh> meshTree, List<int> reportCountList)
         {
             var pointList = new List<Plane>();
             int mesh_id = 0;
 
-            foreach (var mesh in meshList)
+            // for each mesh branch, locate the highest point.
+            foreach (var meshBundle in meshTree.Branches)
             {
-                if (mesh != null)
+                if (meshBundle != null && meshBundle.Count > 0)
                 {
-                    var bbox = mesh.Value.GetBoundingBox(false);
-                    var zTop = bbox.Corner(false, false, false).Z;
-                    var xLeft = bbox.Corner(true, false, false).X;
-                    var center = bbox.Center;
-                    center.X = xLeft;
-                    center.Z = zTop + reportCountList[mesh_id] * 2;
+                    // find highest point
+                    BoundingBox bbox;
+                    double zTop;
+                    double xLeft;
+                    Point3d center = meshBundle[0].Value.GetBoundingBox(false).Center;
+
+                    foreach (var m in meshBundle)
+                    {
+                        bbox = m.Value.GetBoundingBox(false);
+                        zTop = bbox.Corner(false, false, false).Z;
+                        xLeft = bbox.Corner(true, false, false).X;
+                        Point3d new_center = bbox.Center;
+                        center.X = (center.X + xLeft) * 0.5;
+                        center.Z = Math.Max(center.Z, zTop);
+                    }
+                    center.Z += reportCountList[mesh_id] * 2;
 
                     var plane = new Plane(center, Vector3d.XAxis, Vector3d.ZAxis);
 

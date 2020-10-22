@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "Logger.h"
 #include "ReportAttribute.h"
+#include "MaterialAttribute.h"
 
 #include <vector>
 #include <unordered_map>
@@ -15,12 +16,44 @@
 
 #define DEBUG
 
-typedef struct _Model {
+struct ModelPart {
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
+	ON_2fPointArray mUVs;
+	std::vector<uint32_t> mUVIndices;
+	std::vector<uint32_t> mUVCounts;
+};
+
+class Model {
+public:
+	Model() = default;
+
+	ModelPart& addModelPart()
+	{ 
+		mModelParts.push_back(ModelPart()); 
+		return mModelParts.back();
+	}
+
+	ModelPart& getCurrentModelPart()
+	{
+		return mModelParts.back();
+	}
+
+	void addMaterial(const Materials::MaterialAttribute& ma);
+	void addReport(const Reporting::ReportAttribute& ra);
+
+	const std::vector<ModelPart>& getModelParts() const;
+	const Reporting::ReportMap& getReports() const;
+	const Materials::MaterialsMap& getMaterials() const;
+
+private:
+
+	std::vector<ModelPart> mModelParts;
 	Reporting::ReportMap mReports;
-} Model;
+	Materials::MaterialsMap mMaterials;
+
+};
 
 class RhinoCallbacks : public IRhinoCallbacks {
 private:
@@ -36,40 +69,51 @@ public:
 	virtual ~RhinoCallbacks() = default;
 
 	// Inherited via IRhinoCallbacks
-	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, const uint32_t * faceIndices, const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount) override;
-	void add(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, const uint32_t * faceIndices, const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount, const uint32_t* faceRanges, size_t faceRangeSize, const prt::AttributeMap** reports) override;
+	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, 
+		const uint32_t * faceIndices, const size_t faceIndicesCount, 
+		const uint32_t * faceCounts, const size_t faceCountsCount) override;
+
+	void addUVCoordinates(const size_t initialShapeIndex,
+		double const * const * uvs, size_t const * uvsSizes,
+		uint32_t const * const * uvCounts, size_t const * uvCountsSizes,
+		uint32_t const * const * uvIndices, size_t const * uvIndicesSizes,
+		uint32_t uvSets) override;
+
+	void add(const size_t initialShapeIndex, const size_t instanceIndex,
+		const double* vertexCoords, const size_t vextexCoordsCount,
+		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
+		const size_t faceCountsCount,
+		double const* const* uvs, size_t const* uvsSizes,
+		uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
+		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
+		uint32_t uvSets,
+		const uint32_t* faceRanges, size_t faceRangesSize,
+		const prt::AttributeMap** materials, size_t matCount) override;
 	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
 
 	size_t getInitialShapeCount() const {
 		return mModels.size();
 	}
 
-	const std::vector<double>& getVertices(const size_t initialShapeIdx) const {
+	const Model& getModel(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
-
-		return mModels[initialShapeIdx].mVertices;
-	}
-
-	const std::vector<uint32_t>& getIndices(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-
-		return mModels[initialShapeIdx].mIndices;
-	}
-
-	const std::vector<uint32_t>& getFaces(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-
-		return mModels[initialShapeIdx].mFaces;
+		
+		return mModels[initialShapeIdx];
 	}
 
 	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
-		return mModels[initialShapeIdx].mReports;
+		return mModels[initialShapeIdx].getReports();
+	}
+
+	const Materials::MaterialsMap getMaterial(const size_t initialShapeIdx) const {
+		if (initialShapeIdx >= mModels.size())
+			throw std::out_of_range("initial shape index is out of range.");
+
+		return mModels[initialShapeIdx].getMaterials();
 	}
 
 	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) {

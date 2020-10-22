@@ -23,6 +23,9 @@ class RhinoCallbacks;
 namespace pcu {
 
 	std::wstring getDllLocation();
+	std::wstring getTempDir(const std::wstring& tmp_prefix);
+	std::wstring getUUID();
+	std::wstring getUniqueTempDir(const std::wstring& tmp_prefix);
 
 	template <typename C>
 	C getDirSeparator();
@@ -44,6 +47,7 @@ namespace pcu {
 	struct EncoderOptions {
 		bool emitReport = true;
 		bool emitGeometry = true;
+		bool emitMaterial = true;
 	};
 
 
@@ -105,5 +109,7 @@ namespace pcu {
 	constexpr const wchar_t* ANNOT_START_RULE = L"@StartRule";
 	std::wstring getRuleFileEntry(const ResolveMapPtr& resolveMap);
 	std::wstring detectStartRule(const RuleFileInfoPtr& ruleFileInfo);
+
+	std::wstring toAssetKey(std::wstring key);
 
 } // namespace pcu

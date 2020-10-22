@@ -49,6 +49,12 @@ namespace RhinoPRT {
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
 
+		const prt::ResolveMap* getResolveMap() { return mModelGenerator->getResolveMap(); }
+		
+		std::vector<GeneratedModel>& getGenModels();
+
+		std::vector<int> getModelIds();
+
 	private:
 
 		std::vector<InitialShape> mShapes;
@@ -64,6 +70,7 @@ namespace RhinoPRT {
 		std::vector<GeneratedModel> mGeneratedModels;
 
 		Reporting::GroupedReports mGroupedReports;
+
 	};
 
 	// Global PRT handle
@@ -82,11 +89,17 @@ extern "C" {
 
 	RHINOPRT_API void SetPackage(const wchar_t* rpk_path);
 
-	RHINOPRT_API bool AddMeshTest(ON_SimpleArray<const ON_Mesh*>* pMesh);
+	RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh);
 
 	RHINOPRT_API void ClearInitialShapes();
 
-	RHINOPRT_API bool GenerateTest(ON_SimpleArray<ON_Mesh*>* pMeshArray);
+	RHINOPRT_API bool Generate();
+
+	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray);
+
+	RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs);
+
+	RHINOPRT_API int GetMeshPartCount(int initShapeId);
 
 	RHINOPRT_API int GetRuleAttributesCount();
 
@@ -104,6 +117,15 @@ extern "C" {
 		ON_SimpleArray<double>* pDoubleReports,
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports);
+
+	RHINOPRT_API bool GetMaterial(int initialShapeId, int meshID, int* uvSet,
+		ON_ClassArray<ON_wString>* pTexKeys,
+		ON_ClassArray<ON_wString>* pTexPaths,
+		ON_SimpleArray<int>* pDiffuseColor,
+		ON_SimpleArray<int>* pAmbientColor,
+		ON_SimpleArray<int>* pSpecularColor,
+		double* opacity,
+		double* shininess);
 
 }
 

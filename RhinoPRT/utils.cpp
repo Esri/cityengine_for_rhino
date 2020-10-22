@@ -5,11 +5,16 @@
 
 #include "prt/StringUtils.h"
 
+#include <rpc.h>
+
 #ifdef _WIN32
-#	include <Windows.h>
+	#include <Windows.h>
+	#include <conio.h>
 #else
 #	include <dlfcn.h>
 #endif
+
+#include <filesystem>
 
 #include <cwchar>
 #include <sstream>
@@ -84,7 +89,60 @@ namespace pcu {
 		return std::wstring(1, getDirSeparator<wchar_t>());
 	}
 
-	
+	std::wstring getTempDir(const std::wstring& tmp_prefix)
+	{
+		auto path = std::experimental::filesystem::temp_directory_path();
+
+		auto prtTempPath = path.append(tmp_prefix);
+		if (!std::experimental::filesystem::exists(prtTempPath)) {
+			if (!std::experimental::filesystem::create_directory(prtTempPath)) 
+			{
+				LOG_ERR << L"Could not create PRT temporary directory. Returning the default temp dir.";
+				return path.generic_wstring();
+			}
+			return prtTempPath.generic_wstring();
+		}
+
+		return path.generic_wstring();
+	}
+
+	std::wstring getUniqueTempDir(const std::wstring& tmp_prefix)
+	{
+		std::wstring temp_dir = getTempDir(tmp_prefix);
+		std::experimental::filesystem::path path(temp_dir);
+
+		std::wstring uuid = getUUID();
+		if (uuid.size() == 0)
+			LOG_ERR << L"Could not create uuid.";
+		else
+			path = path.append(uuid);
+
+		if (!std::experimental::filesystem::create_directory(path))
+		{
+			LOG_ERR << L"Could not create unique temporary directory, returning default temp dir.";
+			return temp_dir;
+		}
+
+		return path.generic_wstring();
+	}
+
+	std::wstring getUUID()
+	{
+#ifdef _WIN32
+		UUID uid;
+		UuidCreate(&uid);
+
+		wchar_t* str;
+		auto status = UuidToStringW(&uid, (RPC_WSTR*)&str);
+		if(status == RPC_S_OK) return std::wstring(str);
+		else {
+			LOG_ERR << "Failed to create UUID";
+			throw std::runtime_error("Failed to create UUID");
+		}
+#else
+#error Windows platform required
+#endif
+	}
 
 #ifdef _WIN32
 	const std::string FILE_SCHEMA = "file:/";
@@ -107,6 +165,7 @@ namespace pcu {
 	AttributeMapPtr createAttributeMapForEncoder(const EncoderOptions& encOpts, prt::AttributeMapBuilder& bld) {
 		bld.setBool(L"emitReport", encOpts.emitReport);
 		bld.setBool(L"emitGeometry", encOpts.emitGeometry);
+		bld.setBool(L"emitMaterials", encOpts.emitMaterial);
 
 		return AttributeMapPtr{ bld.createAttributeMap() };
 	}
@@ -222,6 +281,14 @@ namespace pcu {
 			}
 		}
 		return {};
+	}
+
+	std::wstring toAssetKey(std::wstring key)
+	{
+		// add the "asset" prefix to the key
+		std::wstring assetKey(L"assets/");
+		assetKey = assetKey.append(key);
+		return assetKey;
 	}
 
 }

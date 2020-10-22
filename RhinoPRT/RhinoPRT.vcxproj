@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CCommandApplyRulePackage.cpp" />
+    <ClCompile Include="MaterialAttribute.cpp" />
     <ClCompile Include="ModelGenerator.cpp" />
     <ClCompile Include="PRTUtilityModels.cpp" />
     <ClCompile Include="ReportAttribute.cpp" />
@@ -33,6 +34,7 @@
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MaterialAttribute.h" />
     <ClInclude Include="ModelGenerator.h" />
     <ClInclude Include="PRTUtilityModels.h" />
     <ClInclude Include="Logger.h" />
@@ -157,7 +159,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)x64\Release;$(SolutionDir)esri_sdk\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>codecs_rhino.lib;com.esri.prt.core.lib;glutess.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>codecs_rhino.lib;com.esri.prt.core.lib;glutess.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/std:c++17 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -176,15 +179,16 @@
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN64;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN64;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)codecs_rhino;$(SolutionDir)esri_sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/std:c++17 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)x64\Release;$(SolutionDir)esri_sdk\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>codecs_rhino.lib;com.esri.prt.core.lib;glutess.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>codecs_rhino.lib;com.esri.prt.core.lib;glutess.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <Midl>
