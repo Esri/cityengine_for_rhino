@@ -1,15 +1,11 @@
 #include "RhinoPRT.h"
 
 namespace {
-	template <typename T>
-	struct static_cast_func
-	{
-		template<typename T1>
-		T operator()(const T1& x) const { return static_cast<T>(x); }
+	template<typename T, typename T1>
+	T static_cast_fct(const T1& x) { return static_cast<T>(x); }
 
-		template<>
-		T operator()(const ON_wString& x) const { return static_cast<T>(x.Array()); }
-	};
+	template<typename T>
+	T static_cast_fct(const ON_wString& x) { return static_cast<T>(x.Array()); }
 }
 
 namespace RhinoPRT {
@@ -343,13 +339,15 @@ extern "C" {
 
 		if (attrIdx >= ruleAttributes.size()) return false;
 
-		wcscpy_s(rule, rule_size, ruleAttributes[attrIdx].mRuleFile.c_str());
-		wcscpy_s(name, name_size, ruleAttributes[attrIdx].mFullName.c_str());
-		wcscpy_s(nickname, nickname_size, ruleAttributes[attrIdx].mNickname.c_str());
-		*type = ruleAttributes[attrIdx].mType;
+		const RuleAttribute& ruleAttr = ruleAttributes[attrIdx];
 
-		if(ruleAttributes[attrIdx].groups.size() > 0)
-			*pGroup += ON_wString(ruleAttributes[attrIdx].groups.front().c_str());
+		wcscpy_s(rule, rule_size, ruleAttr.mRuleFile.c_str());
+		wcscpy_s(name, name_size, ruleAttr.mFullName.c_str());
+		wcscpy_s(nickname, nickname_size, ruleAttr.mNickname.c_str());
+		*type = ruleAttr.mType;
+
+		if(ruleAttr.groups.size() > 0)
+			*pGroup += ON_wString(ruleAttr.groups.front().c_str());
 
 		return true;
 	}
@@ -389,7 +387,7 @@ extern "C" {
 
 		// convert int array to boolean array
 		bool* boolArray = new bool[size];
-		std::transform(valueArray, valueArray + size, boolArray, static_cast_func<bool>());
+		std::transform(valueArray, valueArray + size, boolArray, static_cast_fct<bool, int>);
 
 		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), boolArray, size);
 
@@ -403,7 +401,7 @@ extern "C" {
 
 		//convert the array of ON_wString to const wchar_t* const *value
 		const wchar_t** strArray = new const wchar_t*[size];
-		std::transform(valueArray, valueArray + size, strArray, static_cast_func<const wchar_t*>());
+		std::transform(valueArray, valueArray + size, strArray, static_cast_fct<const wchar_t*>);
 
 		RhinoPRT::get().fillAttributeFromNode(std::wstring(rule), std::wstring(fullName), strArray, size);
 

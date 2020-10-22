@@ -251,54 +251,67 @@ namespace GrasshopperPRT
                 switch (attrib.mAttribType)
                 {
                     case AnnotationArgumentType.AAT_FLOAT:
-                        GH_Number value = new GH_Number(0.0);
-                        if (!DA.GetData<GH_Number>(attrib.mFullName, ref value)) continue;
-                        PRTWrapper.SetRuleAttributeDouble(attrib.mRuleFile, attrib.mFullName, value.Value);
-                        break;
+                        {
+                            GH_Number value = new GH_Number(0.0);
+                            if (!DA.GetData<GH_Number>(attrib.mFullName, ref value)) continue;
+                            PRTWrapper.SetRuleAttributeDouble(attrib.mRuleFile, attrib.mFullName, value.Value);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_BOOL:
-                        GH_Boolean boolean = new GH_Boolean();
-                        if (!DA.GetData<GH_Boolean>(attrib.mFullName, ref boolean)) continue;
-                        PRTWrapper.SetRuleAttributeBoolean(attrib.mRuleFile, attrib.mFullName, boolean.Value);
-                        break;
+                        {
+                            GH_Boolean boolean = new GH_Boolean();
+                            if (!DA.GetData<GH_Boolean>(attrib.mFullName, ref boolean)) continue;
+                            PRTWrapper.SetRuleAttributeBoolean(attrib.mRuleFile, attrib.mFullName, boolean.Value);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_INT:
-                        GH_Integer integer = null;
-                        if (!DA.GetData<GH_Integer>(attrib.mFullName, ref integer)) continue;
-                        PRTWrapper.SetRuleAttributeInteger(attrib.mRuleFile, attrib.mFullName, integer.Value);
-                        break;
+                        {
+                            GH_Integer integer = null;
+                            if (!DA.GetData<GH_Integer>(attrib.mFullName, ref integer)) continue;
+                            PRTWrapper.SetRuleAttributeInteger(attrib.mRuleFile, attrib.mFullName, integer.Value);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_STR:
-                        string text = null;
-                        if (attrib.mAnnotations.Any(x => x.IsColor()))
                         {
-                            GH_Colour color = null;
-                            if(!DA.GetData<GH_Colour>(attrib.mFullName, ref color)) continue;
-                            text = Utils.hexColor(color);
-                        }
-                        else
-                        {
-                            GH_String gH_String = null;
-                            if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
-                            text = gH_String.Value;
-                        }
+                            string text = null;
+                            if (attrib.mAnnotations.Any(x => x.IsColor()))
+                            {
+                                GH_Colour color = null;
+                                if (!DA.GetData<GH_Colour>(attrib.mFullName, ref color)) continue;
+                                text = Utils.hexColor(color);
+                            }
+                            else
+                            {
+                                GH_String gH_String = null;
+                                if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
+                                text = gH_String.Value;
+                            }
 
-                        PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, text);
-                        break;
+                            PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, text);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                        List<double> doubleList = new List<double>();
-                        if (!DA.GetDataList(attrib.mFullName, doubleList)) continue;
-                        PRTWrapper.SetRuleAttributeDoubleArray(attrib.mRuleFile, attrib.mFullName, doubleList);
-                        break;
+                        {
+                            List<double> doubleList = new List<double>();
+                            if (!DA.GetDataList(attrib.mFullName, doubleList)) continue;
+                            PRTWrapper.SetRuleAttributeDoubleArray(attrib.mRuleFile, attrib.mFullName, doubleList);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_BOOL_ARRAY:
-                        List<Boolean> boolList = new List<Boolean>();
-                        if (!DA.GetDataList(attrib.mFullName, boolList)) continue;
-                        PRTWrapper.SetRuleAttributeBoolArray(attrib.mRuleFile, attrib.mFullName, boolList);
-                        break;
+                        {
+                            List<Boolean> boolList = new List<Boolean>();
+                            if (!DA.GetDataList(attrib.mFullName, boolList)) continue;
+                            PRTWrapper.SetRuleAttributeBoolArray(attrib.mRuleFile, attrib.mFullName, boolList);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_STR_ARRAY:
-                        List<string> stringList = new List<string>();
-                        if (!DA.GetDataList(attrib.mFullName, stringList)) continue;
-                        PRTWrapper.SetRuleAttributeStringArray(attrib.mRuleFile, attrib.mFullName, stringList);
-                        break;
+                        {
+                            List<string> stringList = new List<string>();
+                            if (!DA.GetDataList(attrib.mFullName, stringList)) continue;
+                            PRTWrapper.SetRuleAttributeStringArray(attrib.mRuleFile, attrib.mFullName, stringList);
+                            break;
+                        }
                     default:
-                        // not supporting arrays yet.
                         continue;
                 }
             }
