@@ -10,7 +10,7 @@ namespace {
 
 ModelGenerator::ModelGenerator()
 	: mCache{ pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT)) },
-	  mResolveMapCache{ new ResolveMapCache(pcu::getTempDir(RESOLVEMAP_EXTRACTION_PREFIX)) } { }
+	  mResolveMapCache{ new ResolveMap::ResolveMapCache(pcu::getTempDir(RESOLVEMAP_EXTRACTION_PREFIX)) } { }
 
 ModelGenerator::~ModelGenerator()
 {
