@@ -5,7 +5,6 @@
 
 #include "prt/StringUtils.h"
 
-//#pragma comment(lib, "rpcrt4.lib")
 #include <rpc.h>
 
 #ifdef _WIN32

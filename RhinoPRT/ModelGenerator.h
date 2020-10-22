@@ -5,7 +5,7 @@
 #include "RuleAttributes.h"
 #include "PRTUtilityModels.h"
 
-constexpr wchar_t RESOLVEMAP_EXTRACTION_PREFIX[] = L"rhino_prt";
+constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
 
 /**
 * Entry point of the PRT. Is given an initial shape and rpk package, gives them to the PRT and gets the results.

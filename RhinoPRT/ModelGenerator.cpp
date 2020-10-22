@@ -4,7 +4,7 @@
 
 #include <filesystem>
 
-ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir(std::wstring(RESOLVEMAP_EXTRACTION_PREFIX)))
+ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir(RESOLVEMAP_EXTRACTION_PREFIX))
 {
 	mCache = pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT));
 }
@@ -25,7 +25,7 @@ bool ModelGenerator::initResolveMap()
 			auto converted_str = pcu::toUTF16FromUTF8(rpkURI).c_str();
 
 			// create a unique directory for this rpk
-			std::wstring uniqueUnpackPath = pcu::getUniqueTempDir(std::wstring(RESOLVEMAP_EXTRACTION_PREFIX));
+			std::wstring uniqueUnpackPath = pcu::getUniqueTempDir(RESOLVEMAP_EXTRACTION_PREFIX);
 
 			mResolveMap.reset(prt::createResolveMap(converted_str, uniqueUnpackPath.c_str(), &status));
 
