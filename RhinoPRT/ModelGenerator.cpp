@@ -4,6 +4,10 @@
 
 #include <filesystem>
 
+namespace {
+	constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
+}
+
 ModelGenerator::ModelGenerator(): mUnpackPath(pcu::getTempDir(RESOLVEMAP_EXTRACTION_PREFIX))
 {
 	mCache = pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT));
