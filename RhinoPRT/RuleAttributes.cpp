@@ -12,7 +12,7 @@ namespace {
 
 }
 
-AnnotationRange::AnnotationRange(const prt::Annotation* an) : AnnotationBase(A_RANGE), mStepSize(0) {
+AnnotationRange::AnnotationRange(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::RANGE), mStepSize(0) {
 
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
 		const prt::AnnotationArgument* arg = an->getArgument(argIdx);
@@ -37,25 +37,32 @@ RangeAttributes AnnotationRange::getAnnotArguments() const { return { mMin, mMax
 /// Specific implementations of enum annotation constructors
 
 template<>
-AnnotationEnum<bool>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(A_ENUM, ENUM_BOOL)
+AnnotationEnum<bool>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::BOOL)
 {
+	mEnums.reserve(an->getNumArguments());
+
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
-		mEnums.push_back(an->getArgument(argIdx)->getBool());
+		mEnums.emplace_back(an->getArgument(argIdx)->getBool());
 	}
 }
 
 template<>
-AnnotationEnum<std::wstring>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(A_ENUM, ENUM_STRING)
+AnnotationEnum<std::wstring>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::STRING)
 {
+	mEnums.reserve(an->getNumArguments());
+
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
-		mEnums.push_back(std::wstring(an->getArgument(argIdx)->getStr()));
+		mEnums.emplace_back(an->getArgument(argIdx)->getStr());
 	}
 }
 
 template<>
-AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(A_ENUM, ENUM_DOUBLE) {
+AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::DOUBLE)
+{
+	mEnums.reserve(an->getNumArguments());
+
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
-		mEnums.push_back(an->getArgument(argIdx)->getFloat());
+		mEnums.emplace_back(an->getArgument(argIdx)->getFloat());
 	}
 }
 
@@ -64,12 +71,12 @@ AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an) : AnnotationBa
 bool annotCompatibleWithType(AttributeAnnotation annot, prt::AnnotationArgumentType type) {
 	switch (type) {
 	case prt::AnnotationArgumentType::AAT_BOOL:
-		return annot == AttributeAnnotation::A_ENUM;
+		return annot == AttributeAnnotation::ENUM;
 	case prt::AnnotationArgumentType::AAT_INT:
 	case prt::AnnotationArgumentType::AAT_FLOAT:
-		return annot == A_ENUM || annot == A_RANGE;
+		return annot == AttributeAnnotation::ENUM || annot == AttributeAnnotation::RANGE;
 	case prt::AnnotationArgumentType::AAT_STR:
-		return annot != A_RANGE;
+		return annot != AttributeAnnotation::RANGE;
 	default:
 		return false;
 	}
@@ -77,27 +84,27 @@ bool annotCompatibleWithType(AttributeAnnotation annot, prt::AnnotationArgumentT
 
 AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType)
 {
-	if (!std::wcscmp(annotName, ANNOT_COLOR) && annotCompatibleWithType(A_COLOR, attrType)) {
-		return new AnnotationBase(A_COLOR);
+	if (!std::wcscmp(annotName, ANNOT_COLOR) && annotCompatibleWithType(AttributeAnnotation::COLOR, attrType)) {
+		return new AnnotationBase(AttributeAnnotation::COLOR);
 	}
 	else if (!std::wcscmp(annotName, ANNOT_ENUM)) {
 		if(attrType == prt::AAT_BOOL) return new AnnotationEnum<bool>(an);
 		if (attrType == prt::AAT_FLOAT) return new AnnotationEnum<double>(an);
 		if (attrType == prt::AAT_STR) return new AnnotationEnum<std::wstring>(an);
 		if (attrType == prt::AAT_INT) return new AnnotationEnum<int>(an);
-		return new AnnotationBase(A_NOANNOT);
+		return new AnnotationBase(AttributeAnnotation::NOANNOT);
 	}
-	else if (!std::wcscmp(annotName, ANNOT_RANGE) && annotCompatibleWithType(A_RANGE, attrType)) {
+	else if (!std::wcscmp(annotName, ANNOT_RANGE) && annotCompatibleWithType(AttributeAnnotation::RANGE, attrType)) {
 		return new AnnotationRange(an);
 	}
-	else if (!std::wcscmp(annotName, ANNOT_DIR) && annotCompatibleWithType(A_DIR, attrType)) {
-		return new AnnotationBase(A_DIR);
+	else if (!std::wcscmp(annotName, ANNOT_DIR) && annotCompatibleWithType(AttributeAnnotation::DIR, attrType)) {
+		return new AnnotationBase(AttributeAnnotation::DIR);
 	}
-	else if(!std::wcscmp(annotName, ANNOT_FILE) && annotCompatibleWithType(A_FILE, attrType)) {
+	else if(!std::wcscmp(annotName, ANNOT_FILE) && annotCompatibleWithType(AttributeAnnotation::FILE, attrType)) {
 		return new AnnotationFile(an);
 	}
 	else {
-		return new AnnotationBase(A_NOANNOT);
+		return new AnnotationBase(AttributeAnnotation::NOANNOT);
 	}
 }
 
@@ -148,7 +155,7 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 				}
 			}
 			else {
-				ruleAttr.mAnnotations.push_back(getAnnotationObject(anName, an, attr->getReturnType()));
+				ruleAttr.mAnnotations.emplace_back(getAnnotationObject(anName, an, attr->getReturnType()));
 			}
 		}
 

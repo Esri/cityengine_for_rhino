@@ -4,8 +4,7 @@ namespace {
 	template<typename T, typename T1>
 	T static_cast_fct(const T1& x) { return static_cast<T>(x); }
 
-	template<typename T>
-	T static_cast_fct(const ON_wString& x) { return static_cast<T>(x.Array()); }
+	const wchar_t* to_wchar_array(const ON_wString& x) { return x.Array(); }
 }
 
 namespace RhinoPRT {
@@ -181,11 +180,11 @@ namespace RhinoPRT {
 	}
 
 	template<>
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, const wchar_t**value, const size_t count)
+	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttribute& rule, std::vector<const wchar_t *> value, const size_t /*count*/)
 	{
 		if (rule.mType == prt::AAT_STR_ARRAY)
 		{
-			mAttrBuilder->setStringArray(rule.mFullName.c_str(), value, count);
+			mAttrBuilder->setStringArray(rule.mFullName.c_str(), value.data(), value.size());
 		}
 		else
 		{
@@ -257,8 +256,8 @@ extern "C" {
 
 	RHINOPRT_API void SetPackage(const wchar_t* rpk_path)
 	{
-		std::wstring str(rpk_path);
-		RhinoPRT::get().SetRPKPath(str);
+		if (!rpk_path) return;
+		RhinoPRT::get().SetRPKPath(rpk_path);
 	}
 
 	inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh)
@@ -394,7 +393,6 @@ extern "C" {
 		const size_t size = pValueArray->Count();
 
 		// convert int array to boolean array
-		//bool* boolArray = new bool[size];
 		std::unique_ptr<bool[]> boolArray(new bool[size]);
 		std::transform(valueArray, valueArray + size, boolArray.get(), static_cast_fct<bool, int>);
 
@@ -408,13 +406,11 @@ extern "C" {
 		const ON_wString* valueArray = pValueArray->Array();
 		const size_t size = pValueArray->Count();
 
-		//convert the array of ON_wString to const wchar_t* const *value
-		const wchar_t** strArray = new const wchar_t*[size];
-		std::transform(valueArray, valueArray + size, strArray, static_cast_fct<const wchar_t*>);
+		//convert the array of ON_wString to a std::vector of wstring.
+		std::vector<const wchar_t*> strVector(size);
+		std::transform(valueArray, valueArray + size, strVector.begin(), to_wchar_array);
 
-		RhinoPRT::get().fillAttributeFromNode(rule, fullName, strArray, size);
-
-		delete[] strArray;
+		RhinoPRT::get().fillAttributeFromNode(rule, fullName, strVector, size);
 	}
 
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray, 
@@ -469,9 +465,8 @@ extern "C" {
 		if (ruleIdx < ruleAttributes.size())
 		{
 			RuleAttribute& attrib = ruleAttributes[ruleIdx];
-			for (const auto* annot : attrib.mAnnotations) {
-				pAnnotTypeArray->Append(annot->getType());
-			}
+			std::for_each(attrib.mAnnotations.begin(), attrib.mAnnotations.end(), [pAnnotTypeArray](const AnnotationBase* p) 
+				{ pAnnotTypeArray->Append(p->getType()); });
 		}
 	}
 
@@ -484,7 +479,7 @@ extern "C" {
 			if (enumIdx < attrib.mAnnotations.size())
 			{
 				const auto* annot = attrib.mAnnotations[enumIdx];
-				if (annot->getType() == A_ENUM)
+				if (annot->getType() == AttributeAnnotation::ENUM)
 				{
 					*type = annot->getEnumType();
 					return true;
@@ -504,7 +499,7 @@ extern "C" {
 			if (enumIdx < attrib.mAnnotations.size())
 			{
 				auto* annot = attrib.mAnnotations[enumIdx];
-				if (annot->getType() == A_ENUM && annot->getEnumType() == ENUM_DOUBLE)
+				if (annot->getType() == AttributeAnnotation::ENUM && annot->getEnumType() == EnumAnnotationType::DOUBLE)
 				{
 					auto& enumList = dynamic_cast<AnnotationEnum<double>*>(annot)->getAnnotArguments();
 
@@ -526,9 +521,9 @@ extern "C" {
 			if (enumIdx < attrib.mAnnotations.size())
 			{
 				auto* annot = attrib.mAnnotations[enumIdx];
-				if (annot->getType() == A_ENUM && annot->getEnumType() == ENUM_STRING)
+				if (annot->getType() == AttributeAnnotation::ENUM && annot->getEnumType() == EnumAnnotationType::STRING)
 				{
-					std::vector<std::wstring>& enumList = dynamic_cast<AnnotationEnum<std::wstring>*>(annot)->getAnnotArguments();
+					std::vector<std::wstring> enumList = dynamic_cast<AnnotationEnum<std::wstring>*>(annot)->getAnnotArguments();
 
 					std::for_each(enumList.begin(), enumList.end(), [&pArray](std::wstring& v) {pArray->Append(ON_wString(v.c_str())); });
 					return true;
@@ -547,8 +542,8 @@ extern "C" {
 			RuleAttribute& attrib = ruleAttributes[ruleIdx];
 			if (enumIdx < attrib.mAnnotations.size())
 			{
-				auto* annot = attrib.mAnnotations[enumIdx];
-				if (annot->getType() == A_RANGE)
+				const auto annot = attrib.mAnnotations[enumIdx];
+				if (annot->getType() == AttributeAnnotation::RANGE)
 				{
 					RangeAttributes range = dynamic_cast<AnnotationRange*>(annot)->getAnnotArguments();
 					*min = range.mMin;

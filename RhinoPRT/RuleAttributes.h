@@ -42,8 +42,8 @@ constexpr const wchar_t* RESTRICTED_KEY = L"restricted";
 using AttributeGroup = std::vector<std::wstring>;
 using AttributeGroupOrder = std::map<AttributeGroup, int>;
 
-enum AttributeAnnotation { A_COLOR = 0, A_RANGE, A_ENUM, A_FILE, A_DIR, A_NOANNOT };
-enum EnumAnnotationType { ENUM_DOUBLE = 0, ENUM_BOOL, ENUM_STRING, ENUM_INVALID };
+enum class AttributeAnnotation { COLOR = 0, RANGE, ENUM, FILE, DIR, NOANNOT };
+enum class EnumAnnotationType { DOUBLE = 0, BOOL, STRING, INVALID };
 
 
 struct RangeAttributes {
@@ -55,7 +55,7 @@ struct RangeAttributes {
 
 class AnnotationBase {
 public:
-	AnnotationBase(AttributeAnnotation annot, EnumAnnotationType enumType = ENUM_INVALID): mAnnotType(annot), mEnumType(enumType) {}
+	AnnotationBase(AttributeAnnotation annot, EnumAnnotationType enumType = EnumAnnotationType::INVALID): mAnnotType(annot), mEnumType(enumType) {}
 
 	virtual ~AnnotationBase() {}
 
@@ -86,7 +86,7 @@ private:
 template<class T>
 class AnnotationEnum : public AnnotationBase {
 public:
-	AnnotationEnum(const prt::Annotation* an) : AnnotationBase(A_NOANNOT) {
+	AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::NOANNOT) {
 		LOG_WRN << L"Rule type incompatible with enum.";
 	}
 
@@ -98,12 +98,12 @@ private:
 
 class AnnotationFile : public AnnotationBase {
 public:
-	AnnotationFile(const prt::Annotation* an) : AnnotationBase(A_FILE) {}
+	AnnotationFile(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::FILE) {}
 };
 
 class AnnotationDir : public AnnotationBase {
 public:
-	AnnotationDir(const prt::Annotation* an) : AnnotationBase(A_DIR) {}
+	AnnotationDir(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::DIR) {}
 };
 
 AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType);
