@@ -18,6 +18,8 @@ struct PRTContext final {
 
 	~PRTContext();
 
+	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::experimental::filesystem::path& rpk);
+
 	bool isAlive() const {
 		return alreadyInitialized;
 	}
@@ -25,6 +27,8 @@ struct PRTContext final {
 	prt::ConsoleLogHandler* mLogHandler;
 	prt::FileLogHandler* mFileLogHandler;
 	pcu::ObjectPtr mPRTHandle;
+	pcu::CachePtr mPRTCache;
+	ResolveMap::ResolveMapCacheUPtr mResolveMapCache;
 
 private:
 	bool alreadyInitialized;

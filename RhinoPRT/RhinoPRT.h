@@ -48,8 +48,6 @@ namespace RhinoPRT {
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
-
-		const prt::ResolveMap* getResolveMap() { return mModelGenerator->getResolveMap(); }
 		
 		std::vector<GeneratedModel>& getGenModels();
 

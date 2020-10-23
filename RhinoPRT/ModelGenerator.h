@@ -5,14 +5,13 @@
 #include "RuleAttributes.h"
 #include "PRTUtilityModels.h"
 #include "ResolveMapCache.h"
+#include "PRTContext.h"
 
 /**
 * Entry point of the PRT. Is given an initial shape and rpk package, gives them to the PRT and gets the results.
 */
 class ModelGenerator {
 public:
-	ModelGenerator();
-	~ModelGenerator();
 
 	void generateModel(const std::vector<InitialShape>& initial_geom,
 		std::vector<pcu::ShapeAttributes>& shapeAttributes,
@@ -21,7 +20,7 @@ public:
 		pcu::AttributeMapBuilderPtr& aBuilder,
 		std::vector<GeneratedModel>& generated_models);
 
-	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::wstring& rulePkg);
+	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::experimental::filesystem::path& rpk);
 	RuleAttributes updateRuleFiles(const std::wstring& rulePkg);
 
 	std::wstring getRuleFile(); 
@@ -30,8 +29,6 @@ public:
 	inline const prt::ResolveMap* getResolveMap() { return mResolveMap.get(); };
 
 private:
-	pcu::CachePtr mCache;
-	ResolveMap::ResolveMapCacheUPtr mResolveMapCache;
 	pcu::RuleFileInfoPtr mRuleFileInfo;
 	pcu::ResolveMapSPtr mResolveMap;
 	pcu::AttributeMapBuilderPtr mEncoderBuilder;
@@ -62,6 +59,4 @@ private:
 	void extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr,
 		std::wstring& ruleFile, std::wstring& startRule, int32_t& seed, std::wstring& shapeName,
 		pcu::AttributeMapPtr& convertShapeAttr);
-
-	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::experimental::filesystem::path& rpk);
 };

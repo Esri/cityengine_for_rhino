@@ -8,46 +8,19 @@ namespace {
 	constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
 }
 
-ModelGenerator::ModelGenerator()
-	: mCache{ pcu::CachePtr(prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT)) },
-	  mResolveMapCache{ new ResolveMap::ResolveMapCache(pcu::getTempDir(RESOLVEMAP_EXTRACTION_PREFIX)) } { }
-
-ModelGenerator::~ModelGenerator()
+ResolveMap::ResolveMapCache::CacheStatus ModelGenerator::initResolveMap(const std::experimental::filesystem::path& rpk)
 {
-	mResolveMapCache.reset();
-	LOG_INF << "Released RPK Cache";
+	if (rpk.empty()) return ResolveMap::ResolveMapCache::CacheStatus::FAILURE;
+		
+	// Get the resolvemap from the resolve map cache
+	auto lookup = PRTContext::get()->getResolveMap(rpk);
 
-	mCache.reset();
-	LOG_INF << "Released PRT Cache";
-}
-
-ResolveMap::ResolveMapCache::LookupResult ModelGenerator::getResolveMap(const std::experimental::filesystem::path& rpk)
-{
-	auto lookupResult = mResolveMapCache->get(rpk);
-	if (lookupResult.second == ResolveMap::ResolveMapCache::CacheStatus::MISS)
+	if (lookup.second != ResolveMap::ResolveMapCache::CacheStatus::FAILURE)
 	{
-		mCache->flushAll();
-	}
-	return lookupResult;
-}
-
-ResolveMap::ResolveMapCache::CacheStatus ModelGenerator::initResolveMap(const std::wstring& rulePkg)
-{
-	if (!rulePkg.empty())
-	{		
-		// Get the resolvemap from the resolve map cache
-		auto lookup = getResolveMap(rulePkg);
-
-		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::FAILURE)
-			return lookup.second;
-
-		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::MISS)
-			mResolveMap = lookup.first;
-
-		return lookup.second;
+		mResolveMap = lookup.first;
 	}
 
-	return ResolveMap::ResolveMapCache::CacheStatus::FAILURE;
+	return lookup.second;
 }
 
 RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
@@ -57,9 +30,10 @@ RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 		LOG_ERR << "Failed to create the resolve map from rule package " << mRulePkg << std::endl;
 		return {};
 	}
-	else if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::HIT)
+	else if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::HIT
+		&& rulePkg == mRulePkg)
 	{
-		// resolvemap exists already, no need to update.
+		// resolvemap already exists and the rule file was not changed, no need to update.
 		return mRuleAttributes;
 	}
 
@@ -86,7 +60,7 @@ RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 
 	// Create RuleFileInfo
 	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
-	mRuleFileInfo = pcu::RuleFileInfoPtr(prt::createRuleFileInfo(ruleFileURI, mCache.get(), &infoStatus));
+	mRuleFileInfo = pcu::RuleFileInfoPtr(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
 	if (!mRuleFileInfo || infoStatus != prt::STATUS_OK) {
 		LOG_ERR << "could not get rule file info from rule file " << mRuleFile;
 		return {};
@@ -176,7 +150,7 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 			// GENERATE!
 			const prt::Status genStat =
 				prt::generate(initialShapes.data(), initialShapes.size(), nullptr, encoders.data(), encoders.size(),
-					encodersOptions.data(), roc.get(), mCache.get(), nullptr);
+					encodersOptions.data(), roc.get(), PRTContext::get()->mPRTCache.get(), nullptr);
 
 			if (genStat != prt::STATUS_OK) {
 				LOG_ERR << "prt::generate() failed with status: '" << prt::getStatusDescription(genStat) << "' ("
