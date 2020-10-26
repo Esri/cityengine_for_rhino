@@ -31,12 +31,12 @@ namespace RhinoPRT {
 		void SetRPKPath(const std::wstring &rpk_path);
 
 		int GetRuleAttributeCount();
-		RuleAttributes GetRuleAttributes();
+		RuleAttributes& GetRuleAttributes();
 
 		void AddInitialShape(const std::vector<InitialShape>& shapes);
 		void ClearInitialShapes();
 
-		std::vector<GeneratedModel> GenerateGeometry();
+		bool GenerateGeometry();
 
 		template<typename T>
 		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value);
@@ -48,8 +48,6 @@ namespace RhinoPRT {
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
-
-		const prt::ResolveMap* getResolveMap() { return mModelGenerator->getResolveMap(); }
 		
 		std::vector<GeneratedModel>& getGenModels();
 
@@ -70,7 +68,6 @@ namespace RhinoPRT {
 		std::vector<GeneratedModel> mGeneratedModels;
 
 		Reporting::GroupedReports mGroupedReports;
-
 	};
 
 	// Global PRT handle
@@ -126,7 +123,6 @@ extern "C" {
 		ON_SimpleArray<int>* pSpecularColor,
 		double* opacity,
 		double* shininess);
-
 }
 
 #endif RHINOPRT

@@ -20,7 +20,7 @@
 
 #include <assert.h>
 
-#define DEBUG
+#define ENC_DBG 0
 
 namespace {
 
@@ -59,7 +59,9 @@ namespace {
 	}
 
 	std::wstring getTexturePath(const prtx::TexturePtr& t) {
+#if ENC_DBG == 1
 		LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
+#endif
 		return t->getURI()->getPath();
 	}
 
@@ -152,7 +154,7 @@ namespace {
 				const prtx::Material& prtxAttr, 
 				const prtx::WStringVector& keys)
 	{
-#ifdef DEBUG
+#if ENC_DBG == 1
 		LOG_DBG << L"[RHINOENCODER] Converting material " << prtxAttr.name();
 #endif
 
@@ -160,7 +162,7 @@ namespace {
 			if (MATERIAL_ATTRIBUTE_BLACKLIST.count(key) > 0)
 				continue;
 
-#ifdef DEBUG
+#if ENC_DBG == 1
 			LOG_DBG << L"   key: " << key;
 #endif
 
@@ -210,13 +212,17 @@ namespace {
 				const std::wstring texPath = getTexturePath(tex);
 				if (texPath.length() > 0)
 				{
+#if ENC_DBG == 1
 					LOG_DBG << "[RHINOENCODER] Using getTexture with key: " << key << " : " << texPath;
+#endif
 					auto status = amb->setString(key.c_str(), texPath.c_str());
 				}
 				break;
 			}
 			case prtx::Material::PT_TEXTURE_ARRAY: {
+#if ENC_DBG == 1
 				LOG_DBG << "[RHINOENCODER] Texture array with key: " << key;
+#endif
 				const auto& texArray = prtxAttr.getTextureArray(key);
 
 				prtx::WStringVector texPaths(texArray.size());
@@ -231,9 +237,10 @@ namespace {
 				break;
 			}
 			default:
-#ifdef DEBUG
+#if ENC_DBG == 1
 				LOG_DBG << L"[RHINOENCODER] Ignored attribute " << key;
 #endif
+				continue;
 			}
 		}
 	}
@@ -319,7 +326,7 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	prtx::ReportsAccumulatorPtr reportsAccumulator{ prtx::SummarizingReportsAccumulator::create() };
 	prtx::ReportingStrategyPtr reportsCollector{ prtx::AllShapesReportingStrategy::create(context, initialShapeIndex, reportsAccumulator) };
 
-#ifdef DEBUG
+#if ENC_DBG == 1
 	LOG_DBG << L"Starting leaf iteration";
 #endif
 
@@ -388,7 +395,10 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 		size_t material_count = materials.size();
 		size_t mesh_count = meshes.size();
+
+#if ENC_DBG == 1
 		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << ", meshes: " << mesh_count << std::endl;
+#endif
 
 		vertexIndexBase = 0;
 		maxNumUVSets = 0;
@@ -459,7 +469,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				const prtx::DoubleVector& uvs0 = (numUVSets > 0) ? mesh->getUVCoords(0) : EMPTY_UVS;
 				const prtx::IndexVector faceUVCounts0 = (numUVSets > 0) ? mesh->getFaceUVCounts(0) : prtx::IndexVector(mesh->getFaceCount(), 0);
 				
-#ifdef DEBUG 
+#if ENC_DBG == 1 
 				LOG_DBG << "-- mesh: numUVSets = " << numUVSets;
 #endif
 
@@ -480,9 +490,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 						auto& tgtCounts = uvCounts[uvSet];
 						tgtCounts.insert(tgtCounts.end(), faceUVCounts.begin(), faceUVCounts.end());
 
-#ifdef DEBUG
+#if ENC_DBG == 1
 						LOG_DBG << "  -- uvset " << uvSet << ": face counts size = " << faceUVCounts.size();
-#endif // DEBUG
+#endif
 
 						// append uv vertex indices
 						for (uint32_t faceId = 0, faceCount = faceUVCounts.size(); faceId < faceCount; ++faceId) {
@@ -490,9 +500,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 							const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVIndices(faceId, uvSet) : faceUVIdx0;
 							const uint32_t faceUVCnt = faceUVCounts[faceId];
 
-#ifdef DEBUG
+#if ENC_DBG == 1
 							LOG_DBG << "      faceId " << faceId << ": faceUVCnt = " << faceUVCnt << ", faceVtxCnt = " << mesh->getFaceVertexCount(faceId);
-#endif // DEBUG
+#endif
 
 							for (uint32_t vrtxId = 0; vrtxId < faceUVCnt; ++vrtxId) {
 								uvIndices[uvSet].push_back(uvIndexBases[uvSet] + faceUVIdx[vrtxId]);
@@ -539,7 +549,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 }
 
 void RhinoEncoder::finish(prtx::GenerateContext& context) {
+#if ENC_DBG == 1
 	LOG_DBG << "In finish  function...";
+#endif
 }
 
 

@@ -126,7 +126,10 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 	}
 
 	// PRT Generation
-	auto generated_models = RhinoPRT::get().GenerateGeometry();
+	bool status = RhinoPRT::get().GenerateGeometry();
+	if (!status) return CRhinoCommand::failure;
+
+	const auto& generated_models = RhinoPRT::get().getGenModels();
 
 	// Add the objects to the Rhino scene.
 	for (auto& model : generated_models) {

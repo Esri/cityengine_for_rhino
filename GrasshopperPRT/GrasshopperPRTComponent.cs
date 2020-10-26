@@ -135,7 +135,6 @@ namespace GrasshopperPRT
             // No compatible mesh was given
             if (meshes.Count == 0) return;
 
-            // Testing the wrappers provided by Rhino SDK to pass rhino objects.
             if(!PRTWrapper.AddMesh(meshes)) return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.

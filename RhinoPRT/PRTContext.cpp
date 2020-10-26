@@ -9,9 +9,12 @@ std::unique_ptr<PRTContext>& PRTContext::get() {
 	return prtCtx;
 }
 
-PRTContext::PRTContext(prt::LogLevel minimalLogLevel) {
-	mLogHandler = prt::ConsoleLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT);
-	mFileLogHandler = prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT, L"C:/Windows/Temp/rhino_log.txt");
+PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
+	: mLogHandler(prt::ConsoleLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT)),
+	  mFileLogHandler(prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT, L"C:/Windows/Temp/rhino_log.txt")),
+	  mPRTCache{prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT)},
+	  mResolveMapCache{new ResolveMap::ResolveMapCache(pcu::getTempDir(L"prt_temp"))}
+{
 	prt::addLogHandler(mLogHandler);
 	prt::addLogHandler(mFileLogHandler);
 
@@ -51,8 +54,15 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel) {
 }
 
 PRTContext::~PRTContext() {
+	mResolveMapCache.reset();
+	LOG_INF << "Released RPK Cache";
+
+	mPRTCache.reset();
+	LOG_INF << "Released PRT Cache";
+
 	// shutdown PRT
 	mPRTHandle.reset();
+	LOG_INF << "Shutdown PRT";
 
 	prt::removeLogHandler(mFileLogHandler);
 	prt::removeLogHandler(mLogHandler);
@@ -65,4 +75,14 @@ PRTContext::~PRTContext() {
 		mFileLogHandler->destroy();
 	}
 	mFileLogHandler = nullptr;
+}
+
+ResolveMap::ResolveMapCache::LookupResult PRTContext::getResolveMap(const std::experimental::filesystem::path& rpk)
+{
+	auto lookupResult = mResolveMapCache->get(rpk);
+	if (lookupResult.second == ResolveMap::ResolveMapCache::CacheStatus::MISS) {
+		mPRTCache->flushAll();
+	}
+
+	return lookupResult;
 }

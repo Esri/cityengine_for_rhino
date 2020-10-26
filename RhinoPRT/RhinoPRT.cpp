@@ -26,12 +26,11 @@ namespace RhinoPRT {
 		return mRuleAttributes.size();
 	}
 
-	RuleAttributes RhinoPRTAPI::GetRuleAttributes() {
+	RuleAttributes& RhinoPRTAPI::GetRuleAttributes() {
 		return mRuleAttributes;
 	}
 
 	void RhinoPRTAPI::SetRPKPath(const std::wstring &rpk_path) {
-		//if (mPackagePath == rpk_path) return;
 		
 		mPackagePath = rpk_path;
 
@@ -67,13 +66,14 @@ namespace RhinoPRT {
 		mShapes.clear();
 		mGeneratedModels.clear();
 		mAttributes.clear();
-
 		mGroupedReports.clear();
+		mGeneratedModels.clear();
 	}
 
-	std::vector<GeneratedModel> RhinoPRTAPI::GenerateGeometry() {
-		mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilder);
-		return mGeneratedModels;
+	bool RhinoPRTAPI::GenerateGeometry() {
+		mGeneratedModels.clear();
+		mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilder, mGeneratedModels);
+		return mGeneratedModels.size() > 0;
 	}
 
 	std::vector<GeneratedModel>& RhinoPRTAPI::getGenModels()
@@ -183,10 +183,9 @@ namespace RhinoPRT {
 	std::vector<int> RhinoPRTAPI::getModelIds()
 	{
 		std::vector<int> ids;
-		for (const auto& model : mGeneratedModels)
-		{
-			ids.push_back(model.getInitialShapeIndex());
-		}
+
+		std::for_each(mGeneratedModels.begin(), mGeneratedModels.end(), [&ids](const GeneratedModel& model) { ids.push_back(model.getInitialShapeIndex()); });
+
 		return ids;
 	}
 }
@@ -236,14 +235,7 @@ extern "C" {
 
 	inline RHINOPRT_API bool Generate()
 	{
-		auto meshes = RhinoPRT::get().GenerateGeometry();
-
-		if (meshes.size() == 0) {
-			LOG_ERR << L"Generation failed, returned an empty models array.";
-			return false;
-		}
-		
-		return true;
+		return RhinoPRT::get().GenerateGeometry();
 	}
 
 	RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs)
@@ -260,7 +252,7 @@ extern "C" {
 		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeId](GeneratedModel m) { return m.getInitialShapeIndex() == initShapeId; });
 		if (modelIt == models.end())
 		{
-			LOG_ERR << L"No generated model with the given initial shape ID was found. The generation of this model has probably failed.";
+			LOG_ERR << L"No generated model with initial shape ID " << initShapeId << " was found. The generation of this model has probably failed.";
 			return 0;
 		}
 
@@ -406,15 +398,10 @@ extern "C" {
 			LOG_DBG << L"texture: [ " << texture.first << " : " << texture.second << "]";
 #endif // DEBUG
 
-			//prt::Status status;
-			//const wchar_t* fullTexPath = RhinoPRT::get().getResolveMap()->getString(pcu::toAssetKey(texture.second).c_str(), &status);
 			const wchar_t* fullTexPath = texture.second.c_str();
-
-			//if (status == prt::STATUS_OK)
-			{
-				pTexKeys->Append(ON_wString(texture.first.c_str()));
-				pTexPaths->Append(ON_wString(fullTexPath));
-			}
+			
+			pTexKeys->Append(ON_wString(texture.first.c_str()));
+			pTexPaths->Append(ON_wString(fullTexPath));
 		}
 
 		auto diffuse = mat.mDiffuseCol;

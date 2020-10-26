@@ -64,6 +64,7 @@ namespace pcu {
 	using ObjectPtr = std::unique_ptr<const prt::Object, PRTDestroyer>;
 	using CachePtr = std::unique_ptr<prt::CacheObject, PRTDestroyer>;
 	using ResolveMapPtr = std::unique_ptr<const prt::ResolveMap, PRTDestroyer>;
+	using ResolveMapSPtr = std::shared_ptr<const prt::ResolveMap>;
 	using InitialShapePtr = std::unique_ptr<const prt::InitialShape, PRTDestroyer>;
 	using InitialShapeBuilderPtr = std::unique_ptr<prt::InitialShapeBuilder, PRTDestroyer>;
 	using AttributeMapPtr = std::unique_ptr<const prt::AttributeMap, PRTDestroyer>;
@@ -107,7 +108,7 @@ namespace pcu {
 	 * Resolve map helpers
 	 */
 	constexpr const wchar_t* ANNOT_START_RULE = L"@StartRule";
-	std::wstring getRuleFileEntry(const ResolveMapPtr& resolveMap);
+	std::wstring getRuleFileEntry(const ResolveMapSPtr& resolveMap);
 	std::wstring detectStartRule(const RuleFileInfoPtr& ruleFileInfo);
 
 	std::wstring toAssetKey(std::wstring key);

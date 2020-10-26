@@ -4,23 +4,24 @@
 #include "RhinoCallbacks.h"
 #include "RuleAttributes.h"
 #include "PRTUtilityModels.h"
+#include "ResolveMapCache.h"
+#include "PRTContext.h"
 
 /**
 * Entry point of the PRT. Is given an initial shape and rpk package, gives them to the PRT and gets the results.
 */
 class ModelGenerator {
 public:
-	ModelGenerator();
-	~ModelGenerator();
 
-	std::vector<GeneratedModel> generateModel(const std::vector<InitialShape>& initial_geom,
+	void generateModel(const std::vector<InitialShape>& initial_geom,
 		std::vector<pcu::ShapeAttributes>& shapeAttributes,
 		const std::wstring& geometryEncoderName,
 		const pcu::EncoderOptions& geometryEncoderOptions,
-		pcu::AttributeMapBuilderPtr& aBuilder);
+		pcu::AttributeMapBuilderPtr& aBuilder,
+		std::vector<GeneratedModel>& generated_models);
 
-	bool initResolveMap();
-	RuleAttributes updateRuleFiles(const std::wstring rulePkg);
+	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::experimental::filesystem::path& rpk);
+	RuleAttributes updateRuleFiles(const std::wstring& rulePkg);
 
 	std::wstring getRuleFile(); 
 	std::wstring getStartingRule(); 
@@ -28,9 +29,8 @@ public:
 	inline const prt::ResolveMap* getResolveMap() { return mResolveMap.get(); };
 
 private:
-	pcu::CachePtr mCache;
 	pcu::RuleFileInfoPtr mRuleFileInfo;
-	pcu::ResolveMapPtr mResolveMap;
+	pcu::ResolveMapSPtr mResolveMap;
 	pcu::AttributeMapBuilderPtr mEncoderBuilder;
 	std::vector<pcu::InitialShapeBuilderPtr> mInitialShapesBuilders;
 	std::vector<std::wstring> mEncodersNames;
@@ -38,7 +38,6 @@ private:
 	RuleAttributes mRuleAttributes;
 
 	std::wstring mRulePkg;
-	std::wstring mUnpackPath;
 	std::wstring mRuleFile = L"bin/rule.cgb";
 	std::wstring mStartRule = L"default$Lot";
 	int32_t mSeed = 0;

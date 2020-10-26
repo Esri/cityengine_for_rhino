@@ -20,6 +20,7 @@
     <ClCompile Include="ModelGenerator.cpp" />
     <ClCompile Include="PRTUtilityModels.cpp" />
     <ClCompile Include="ReportAttribute.cpp" />
+    <ClCompile Include="ResolveMapCache.cpp" />
     <ClCompile Include="RhinoCallbacks.cpp" />
     <ClCompile Include="RhinoPRT.cpp" />
     <ClCompile Include="RhinoPRTApp.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="PRTUtilityModels.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="ReportAttribute.h" />
+    <ClInclude Include="ResolveMapCache.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RhinoCallbacks.h" />
     <ClInclude Include="RhinoPRT.h" />
