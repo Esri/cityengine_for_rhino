@@ -328,7 +328,7 @@ namespace GrasshopperPRT
             get
             {
                 // You can add image files to your project resources and access them like this:
-                return Resources.MainCompIcon;
+                return Resources.gh_prt_main_component;
             }
         }
 

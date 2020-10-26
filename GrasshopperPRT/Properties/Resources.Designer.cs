@@ -63,9 +63,29 @@ namespace GrasshopperPRT.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap MainCompIcon {
+        internal static System.Drawing.Bitmap gh_prt_main_component {
             get {
-                object obj = ResourceManager.GetObject("MainCompIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("gh_prt_main_component", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap gh_prt_report_filter {
+            get {
+                object obj = ResourceManager.GetObject("gh_prt_report_filter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap gh_prt_report_unpack {
+            get {
+                object obj = ResourceManager.GetObject("gh_prt_report_unpack", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

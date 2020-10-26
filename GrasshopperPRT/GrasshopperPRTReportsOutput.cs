@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using GrasshopperPRT.Properties;
 using Rhino.Geometry;
 
 namespace GrasshopperPRT
@@ -96,7 +97,7 @@ namespace GrasshopperPRT
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Resources.gh_prt_report_unpack;
             }
         }
 
