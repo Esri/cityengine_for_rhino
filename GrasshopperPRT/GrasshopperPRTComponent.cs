@@ -7,6 +7,8 @@ using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Data;
 
 using Rhino.Geometry;
+using System.Windows.Forms;
+using System.Linq;
 using Rhino.DocObjects;
 
 // In order to load the result of this wizard, you will also need to
@@ -105,8 +107,8 @@ namespace GrasshopperPRT
                     CreateInputParameter(attrib);
                 }
 
-                // Update the node layout
                 ExpireSolution(true);
+                
                 return;
             }
 
@@ -236,46 +238,8 @@ namespace GrasshopperPRT
         /// <param name="attrib">A rule attribute to add as input</param>
         private void CreateInputParameter(RuleAttribute attrib)
         {
-            switch (attrib.attribType)
-            {
-                case AnnotationArgumentType.AAT_BOOL:
-                    Param_Boolean param_bool = new Param_Boolean
-                    {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param_bool);
-                    return;
-                case AnnotationArgumentType.AAT_INT:
-                case AnnotationArgumentType.AAT_FLOAT:
-                    Param_Number param_number = new Param_Number
-                    {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param_number);
-                    return;
-                case AnnotationArgumentType.AAT_STR:
-                    Param_String param_str = new Param_String
-                    {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param_str);
-                    return;
-                default:
-                    Param_GenericObject param = new Param_GenericObject
-                    {
-                        Name = attrib.mFullName,
-                        NickName = attrib.mNickname,
-                        Optional = true
-                    };
-                    Params.RegisterInputParam(param);
-                    return;
-            }
+            var parameter = attrib.GetInputParameter();
+            Params.RegisterInputParam(parameter);
         }
 
         private void fillAttributesFromNode(IGH_DataAccess DA)
@@ -284,30 +248,70 @@ namespace GrasshopperPRT
             {
                 RuleAttribute attrib = mRuleAttributes[idx];
 
-                switch (attrib.attribType)
+                switch (attrib.mAttribType)
                 {
                     case AnnotationArgumentType.AAT_FLOAT:
-                        GH_Number value = new GH_Number(0.0);
-                        if (!DA.GetData<GH_Number>(attrib.mFullName, ref value)) continue;
-                        PRTWrapper.SetRuleAttributeDouble(attrib.mRuleFile, attrib.mFullName, value.Value);
-                        break;
+                        {
+                            GH_Number value = new GH_Number(0.0);
+                            if (!DA.GetData<GH_Number>(attrib.mFullName, ref value)) continue;
+                            PRTWrapper.SetRuleAttributeDouble(attrib.mRuleFile, attrib.mFullName, value.Value);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_BOOL:
-                        GH_Boolean boolean = new GH_Boolean();
-                        if (!DA.GetData<GH_Boolean>(attrib.mFullName, ref boolean)) continue;
-                        PRTWrapper.SetRuleAttributeBoolean(attrib.mRuleFile, attrib.mFullName, boolean.Value);
-                        break;
+                        {
+                            GH_Boolean boolean = new GH_Boolean();
+                            if (!DA.GetData<GH_Boolean>(attrib.mFullName, ref boolean)) continue;
+                            PRTWrapper.SetRuleAttributeBoolean(attrib.mRuleFile, attrib.mFullName, boolean.Value);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_INT:
-                        GH_Integer integer = null;
-                        if (!DA.GetData<GH_Integer>(attrib.mFullName, ref integer)) continue;
-                        PRTWrapper.SetRuleAttributeInteger(attrib.mRuleFile, attrib.mFullName, integer.Value);
-                        break;
+                        {
+                            GH_Integer integer = null;
+                            if (!DA.GetData<GH_Integer>(attrib.mFullName, ref integer)) continue;
+                            PRTWrapper.SetRuleAttributeInteger(attrib.mRuleFile, attrib.mFullName, integer.Value);
+                            break;
+                        }
                     case AnnotationArgumentType.AAT_STR:
-                        GH_String gH_String = null;
-                        if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
-                        PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, gH_String.Value);
-                        break;
+                        {
+                            string text = null;
+                            if (attrib.mAnnotations.Any(x => x.IsColor()))
+                            {
+                                GH_Colour color = null;
+                                if (!DA.GetData<GH_Colour>(attrib.mFullName, ref color)) continue;
+                                text = Utils.hexColor(color);
+                            }
+                            else
+                            {
+                                GH_String gH_String = null;
+                                if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
+                                text = gH_String.Value;
+                            }
+
+                            PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, text);
+                            break;
+                        }
+                    case AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                        {
+                            List<double> doubleList = new List<double>();
+                            if (!DA.GetDataList(attrib.mFullName, doubleList)) continue;
+                            PRTWrapper.SetRuleAttributeDoubleArray(attrib.mRuleFile, attrib.mFullName, doubleList);
+                            break;
+                        }
+                    case AnnotationArgumentType.AAT_BOOL_ARRAY:
+                        {
+                            List<Boolean> boolList = new List<Boolean>();
+                            if (!DA.GetDataList(attrib.mFullName, boolList)) continue;
+                            PRTWrapper.SetRuleAttributeBoolArray(attrib.mRuleFile, attrib.mFullName, boolList);
+                            break;
+                        }
+                    case AnnotationArgumentType.AAT_STR_ARRAY:
+                        {
+                            List<string> stringList = new List<string>();
+                            if (!DA.GetDataList(attrib.mFullName, stringList)) continue;
+                            PRTWrapper.SetRuleAttributeStringArray(attrib.mRuleFile, attrib.mFullName, stringList);
+                            break;
+                        }
                     default:
-                        // not supporting arrays yet.
                         continue;
                 }
             }

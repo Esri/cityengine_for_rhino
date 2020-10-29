@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <array>
 
 #pragma comment(lib, "ole32.lib") // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when using /permissive-
 
@@ -22,7 +23,7 @@ namespace RhinoPRT {
 
 	class RhinoPRTAPI {
 	public:
-		const RuleAttribute RULE_NOT_FOUND{};
+		const RuleAttributeUPtr RULE_NOT_FOUND{};
 
 		bool InitializeRhinoPRT();
 		void ShutdownRhinoPRT();
@@ -39,12 +40,15 @@ namespace RhinoPRT {
 		bool GenerateGeometry();
 
 		template<typename T>
-		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value);
+		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count = 1);
 
-		template<typename T>
-		void setRuleAttributeValue(const RuleAttribute& rule, T value);
-
-		int groupReportsByKeys();
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, double value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, int value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, bool value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, const double* value, const size_t count);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, bool* value, const size_t count);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/);
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
@@ -59,7 +63,6 @@ namespace RhinoPRT {
 		std::wstring mPackagePath;
 		std::vector<pcu::ShapeAttributes> mAttributes;
 
-		RuleAttributes mRuleAttributes;
 		pcu::AttributeMapBuilderPtr mAttrBuilder;
 
 		pcu::EncoderOptions options;
@@ -100,7 +103,7 @@ extern "C" {
 
 	RHINOPRT_API int GetRuleAttributesCount();
 
-	RHINOPRT_API bool GetRuleAttribute(int attrIdx, wchar_t* rule, int rule_size, wchar_t* name, int name_size, wchar_t* nickname, int nickname_size, prt::AnnotationArgumentType* type);
+	RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname, prt::AnnotationArgumentType* type, ON_wString* pGroup);
 
 	RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value);
 
@@ -110,10 +113,26 @@ extern "C" {
 
 	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value);
 
+	RHINOPRT_API void SetRuleAttributeDoubleArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray);
+	
+	RHINOPRT_API void SetRuleAttributeBoolArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray);
+
+	RHINOPRT_API void SetRuleAttributeStringArray(const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray);
+
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray,
 		ON_SimpleArray<double>* pDoubleReports,
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports);
+
+	RHINOPRT_API void GetAnnotationTypes(int ruleIdx, ON_SimpleArray<AttributeAnnotation>* pAnnotTypeArray);
+
+	RHINOPRT_API bool GetEnumType(int ruleIdx, int enumIdx, EnumAnnotationType* type);
+
+	RHINOPRT_API bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, ON_SimpleArray<double>* pArray);
+
+	RHINOPRT_API bool GetAnnotationEnumString(int ruleIdx, int enumIdx, ON_ClassArray<ON_wString>* pArray);
+
+	RHINOPRT_API bool GetAnnotationRange(int ruleIdx, int enumIdx, double* min, double* max, double* stepsize, bool* restricted);
 
 	RHINOPRT_API bool GetMaterial(int initialShapeId, int meshID, int* uvSet,
 		ON_ClassArray<ON_wString>* pTexKeys,

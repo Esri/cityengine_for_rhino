@@ -235,6 +235,11 @@ namespace pcu {
 		return toFileURI(toOSNarrowFromUTF16(p));
 	}
 
+	bool isDefaultStyle(const std::wstring& attrName)
+	{
+		return attrName.find(DEFAULT_STYLE_PREFIX) != std::wstring::npos;
+	}
+
 	std::wstring removePrefix(const std::wstring& attrName, wchar_t delim) {
 		const auto sepPos = attrName.find(delim);
 

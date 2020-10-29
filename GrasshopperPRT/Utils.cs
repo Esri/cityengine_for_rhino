@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Runtime.InteropServices;
+using Grasshopper.Kernel.Types;
 
 namespace GrasshopperPRT
 {
@@ -49,6 +50,20 @@ namespace GrasshopperPRT
             Marshal.Copy(buffer, array, 0, size);
             Marshal.FreeCoTaskMem(buffer);
             return array;
+        }
+
+        /// <summary>
+        /// Returns a string representation of a hex color given a GH_Colour object
+        /// </summary>
+        /// <param name="ghColor">the grasshopper color to convert</param>
+        /// <returns>a hex color string</returns>
+        public static string hexColor(GH_Colour ghColor)
+        {
+            string hexStr = "#" + ghColor.Value.R.ToString("X2") +
+                ghColor.Value.G.ToString("X2") +
+                ghColor.Value.B.ToString("X2");
+
+            return hexStr;
         }
     }
 }

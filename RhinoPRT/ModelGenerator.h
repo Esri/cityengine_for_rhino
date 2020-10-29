@@ -21,7 +21,9 @@ public:
 		std::vector<GeneratedModel>& generated_models);
 
 	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::experimental::filesystem::path& rpk);
-	RuleAttributes updateRuleFiles(const std::wstring& rulePkg);
+	void updateRuleFiles(const std::wstring& rulePkg);
+
+	RuleAttributes& getRuleAttributes() { return mRuleAttributes; }
 
 	std::wstring getRuleFile(); 
 	std::wstring getStartingRule(); 
