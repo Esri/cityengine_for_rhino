@@ -82,36 +82,34 @@ bool annotCompatibleWithType(AttributeAnnotation annot, prt::AnnotationArgumentT
 	}
 }
 
-AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType)
+void addAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType, std::vector<AnnotationUPtr>& annotVector)
 {
 	if (!std::wcscmp(annotName, ANNOT_COLOR) && annotCompatibleWithType(AttributeAnnotation::COLOR, attrType)) {
-		return new AnnotationBase(AttributeAnnotation::COLOR);
+		annotVector.emplace_back(new AnnotationBase(AttributeAnnotation::COLOR));
 	}
 	else if (!std::wcscmp(annotName, ANNOT_ENUM)) {
-		if(attrType == prt::AAT_BOOL) return new AnnotationEnum<bool>(an);
-		if (attrType == prt::AAT_FLOAT) return new AnnotationEnum<double>(an);
-		if (attrType == prt::AAT_STR) return new AnnotationEnum<std::wstring>(an);
-		if (attrType == prt::AAT_INT) return new AnnotationEnum<int>(an);
-		return new AnnotationBase(AttributeAnnotation::NOANNOT);
+		if(attrType == prt::AAT_BOOL) annotVector.emplace_back(new AnnotationEnum<bool>(an));
+		if (attrType == prt::AAT_FLOAT) annotVector.emplace_back(new AnnotationEnum<double>(an));
+		if (attrType == prt::AAT_STR) annotVector.emplace_back(new AnnotationEnum<std::wstring>(an));
+		if (attrType == prt::AAT_INT) annotVector.emplace_back(new AnnotationEnum<int>(an));
+		annotVector.emplace_back(new AnnotationBase(AttributeAnnotation::NOANNOT));
 	}
 	else if (!std::wcscmp(annotName, ANNOT_RANGE) && annotCompatibleWithType(AttributeAnnotation::RANGE, attrType)) {
-		return new AnnotationRange(an);
+		annotVector.emplace_back(new AnnotationRange(an));
 	}
 	else if (!std::wcscmp(annotName, ANNOT_DIR) && annotCompatibleWithType(AttributeAnnotation::DIR, attrType)) {
-		return new AnnotationBase(AttributeAnnotation::DIR);
+		annotVector.emplace_back(new AnnotationBase(AttributeAnnotation::DIR));
 	}
 	else if(!std::wcscmp(annotName, ANNOT_FILE) && annotCompatibleWithType(AttributeAnnotation::FILE, attrType)) {
-		return new AnnotationFile(an);
+		annotVector.emplace_back(new AnnotationFile(an));
 	}
 	else {
-		return new AnnotationBase(AttributeAnnotation::NOANNOT);
+		annotVector.emplace_back(new AnnotationBase(AttributeAnnotation::NOANNOT));
 	}
 }
 
-RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo& ruleFileInfo)
+void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo& ruleFileInfo, RuleAttributes& ra)
 {
-	RuleAttributes ra;
-
 	std::wstring mainCgaRuleName = pcu::filename(ruleFile);
 	size_t idxExtension = mainCgaRuleName.find(L".cgb");
 	if (idxExtension != std::wstring::npos)
@@ -122,11 +120,14 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 
 		if (attr->getNumParameters() != 0) continue;
 
-		RuleAttribute ruleAttr;
-		ruleAttr.mFullName = attr->getName();
-		ruleAttr.mRuleFile = mainCgaRuleName;
-		ruleAttr.mNickname = getNiceName(ruleAttr.mFullName);
-		ruleAttr.mType = attr->getReturnType();
+		// Skip attributes that are not default style.
+		if (!pcu::isDefaultStyle(attr->getName())) continue;
+
+		RuleAttributeUPtr ruleAttr{new RuleAttribute()};
+		ruleAttr->mFullName = attr->getName();
+		ruleAttr->mRuleFile = mainCgaRuleName;
+		ruleAttr->mNickname = getNiceName(ruleAttr->mFullName);
+		ruleAttr->mType = attr->getReturnType();
 
 		// process prt::Annotation
 		bool hidden = false;
@@ -140,28 +141,28 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 			}
 			else if (!std::wcscmp(anName, ANNOT_ORDER)) {
 				if (an->getNumArguments() >= 1 && an->getArgument(0)->getType() == prt::AAT_FLOAT) {
-					ruleAttr.order = static_cast<int>(an->getArgument(0)->getFloat());
+					ruleAttr->order = static_cast<int>(an->getArgument(0)->getFloat());
 				}
 			}
 			else if (!std::wcscmp(anName, ANNOT_GROUP)) {
 				for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
 					if (an->getArgument(argIdx)->getType() == prt::AAT_STR) {
-						ruleAttr.groups.push_back(an->getArgument(argIdx)->getStr());
+						ruleAttr->groups.push_back(an->getArgument(argIdx)->getStr());
 					}
 					else if (argIdx == an->getNumArguments() - 1 &&
 						an->getArgument(argIdx)->getType() == prt::AAT_FLOAT) {
-						ruleAttr.groupOrder = static_cast<int>(an->getArgument(argIdx)->getFloat());
+						ruleAttr->groupOrder = static_cast<int>(an->getArgument(argIdx)->getFloat());
 					}
 				}
 			}
 			else {
-				ruleAttr.mAnnotations.emplace_back(getAnnotationObject(anName, an, attr->getReturnType()));
+				addAnnotationObject(anName, an, attr->getReturnType(), ruleAttr->mAnnotations);
 			}
 		}
 
 		if (hidden) continue;
 
-		ra.push_back(ruleAttr);
+		ra.emplace_back(std::move(ruleAttr));
 		if (DBG) LOG_DBG << ruleAttr;
 	}
 
@@ -169,38 +170,36 @@ RuleAttributes getRuleAttributes(const std::wstring& ruleFile, const prt::RuleFi
 	// Set a global order:
 	// - First sort by group / group order
 	// - Then by order in group
-	std::sort(ra.begin(), ra.end(), [](const RuleAttribute& left, const RuleAttribute& right){
-		if (left.groups.size() == 0) {
-			if (right.groups.size() == 0)
+	std::sort(ra.begin(), ra.end(), [](const RuleAttributeUPtr& left, const RuleAttributeUPtr& right){
+		if (left->groups.size() == 0) {
+			if (right->groups.size() == 0)
 			{
 				// No groups for both attributes: sort by order if they are set, else sort by string compare.
-				if(left.order != right.order) return left.order < right.order;
-				return left.mNickname.compare(right.mNickname) < 0;
+				if(left->order != right->order) return left->order < right->order;
+				return left->mNickname.compare(right->mNickname) < 0;
 			}
 			else {
 				return true; // Attributes without group are placed first.
 			}
 		}
-		else if (right.groups.size() == 0) {
+		else if (right->groups.size() == 0) {
 			return false; // Attributes without group are placed first.
 		}
 
 		// support only first level groups for now.
-		int group_cmpr = left.groups.front().compare(right.groups.front());
+		int group_cmpr = left->groups.front().compare(right->groups.front());
 		if (group_cmpr == 0) 
 		{
 			// same group, sort by order if set.
-			if (left.order != right.order) return left.order < right.order;
-			return left.mNickname.compare(right.mNickname) < 0;
+			if (left->order != right->order) return left->order < right->order;
+			return left->mNickname.compare(right->mNickname) < 0;
 		}
 		else {
 			// different group, sort by groupOrder if they are set, else use string compare.
-			if (left.groupOrder != right.groupOrder) return left.groupOrder < right.groupOrder;
-			return left.groups.front().compare(right.groups.front()) < 0;
+			if (left->groupOrder != right->groupOrder) return left->groupOrder < right->groupOrder;
+			return left->groups.front().compare(right->groups.front()) < 0;
 		}
 	});
-
-	return ra;
 }
 
 std::wostream& operator<<(std::wostream& ostr, const RuleAttribute& ap) {

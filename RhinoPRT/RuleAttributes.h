@@ -56,6 +56,7 @@ struct RangeAttributes {
 class AnnotationBase {
 public:
 	AnnotationBase(AttributeAnnotation annot, EnumAnnotationType enumType = EnumAnnotationType::INVALID): mAnnotType(annot), mEnumType(enumType) {}
+	AnnotationBase(const AnnotationBase&) = delete;
 
 	virtual ~AnnotationBase() {}
 
@@ -106,7 +107,9 @@ public:
 	AnnotationDir(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::DIR) {}
 };
 
-AnnotationBase* getAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType);
+using AnnotationUPtr = std::unique_ptr<AnnotationBase>;
+
+void addAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType, std::vector<AnnotationUPtr>& annotVector);
 
 struct RuleAttribute {
 	std::wstring mRuleFile;	/// The cga file in which this rule attribute is defined.
@@ -118,13 +121,15 @@ struct RuleAttribute {
 	int order = ORDER_NONE;
 	int groupOrder = ORDER_NONE;
 
-	std::vector<AnnotationBase*> mAnnotations;
+	std::vector<AnnotationUPtr> mAnnotations;
 };
 
-using RuleAttributes = std::vector<RuleAttribute>;
+using RuleAttributeUPtr = std::unique_ptr<RuleAttribute>;
+using RuleAttributes = std::vector<RuleAttributeUPtr>;
 
-RuleAttributes getRuleAttributes(const std::wstring& ruleFile,
-								 const prt::RuleFileInfo& ruleFileInfo);
+void createRuleAttributes(const std::wstring& ruleFile,
+					   const prt::RuleFileInfo& ruleFileInfo,
+					   RuleAttributes& ra);
 
 std::wostream& operator<<(std::wostream& ostr, const RuleAttribute& ap);
 std::ostream& operator<<(std::ostream& ostr, const RuleAttribute& ap);

@@ -17,7 +17,6 @@ using Rhino.DocObjects;
 // You can use the _GrasshopperDeveloperSettings Rhino command for that.
 namespace GrasshopperPRT
 {
-    public delegate void DeledateExpireSolution(Boolean recompute);
 
     public class GrasshopperPRTComponent : GH_Component
     {
@@ -108,8 +107,7 @@ namespace GrasshopperPRT
                     CreateInputParameter(attrib);
                 }
 
-                var d = new DeledateExpireSolution(ExpireSolution);
-                Rhino.RhinoApp.InvokeOnUiThread(d);
+                ExpireSolution(true);
                 
                 return;
             }

@@ -23,7 +23,7 @@ namespace RhinoPRT {
 
 	class RhinoPRTAPI {
 	public:
-		const RuleAttribute RULE_NOT_FOUND{};
+		const RuleAttributeUPtr RULE_NOT_FOUND{};
 
 		bool InitializeRhinoPRT();
 		void ShutdownRhinoPRT();
@@ -42,10 +42,13 @@ namespace RhinoPRT {
 		template<typename T>
 		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count = 1);
 
-		template<typename T>
-		void setRuleAttributeValue(const RuleAttribute& rule, T value, size_t count = 1);
-
-		int groupReportsByKeys();
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, double value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, int value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, bool value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, const double* value, const size_t count);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, bool* value, const size_t count);
+		void setRuleAttributeValue(const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/);
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
@@ -60,7 +63,6 @@ namespace RhinoPRT {
 		std::wstring mPackagePath;
 		std::vector<pcu::ShapeAttributes> mAttributes;
 
-		RuleAttributes mRuleAttributes;
 		pcu::AttributeMapBuilderPtr mAttrBuilder;
 
 		pcu::EncoderOptions options;

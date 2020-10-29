@@ -23,21 +23,22 @@ ResolveMap::ResolveMapCache::CacheStatus ModelGenerator::initResolveMap(const st
 	return lookup.second;
 }
 
-RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
+void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	// Get the resolve map.
 	auto cacheStatus = initResolveMap(rulePkg);
 	if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::FAILURE) {
 		LOG_ERR << "Failed to create the resolve map from rule package " << mRulePkg << std::endl;
-		return {};
+		mRuleAttributes.clear();
+		return;
 	}
 	else if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::HIT
 		&& rulePkg == mRulePkg)
 	{
 		// resolvemap already exists and the rule file was not changed, no need to update.
-		return mRuleAttributes;
+		return;
 	}
 
-	//Cache miss -> initialize everything
+	// Cache miss -> initialize everything
 	// Reset the rule infos
 	mRuleAttributes.clear();
 	mRuleFile.clear();
@@ -48,14 +49,14 @@ RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	mRuleFile = pcu::getRuleFileEntry(mResolveMap);
 	if (mRuleFile.empty()) {
 		LOG_ERR << "Could not find rule file in rule package " << mRulePkg;
-		return {};
+		return;
 	}
 
 	// To create the ruleFileInfo, we first need the ruleFileURI
 	const wchar_t* ruleFileURI = mResolveMap->getString(mRuleFile.c_str());
 	if (ruleFileURI == nullptr) {
 		LOG_ERR << "could not find rule file URI in resolve map of rule package " << mRulePkg;
-		return {};
+		return;
 	}
 
 	// Create RuleFileInfo
@@ -63,14 +64,13 @@ RuleAttributes ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	mRuleFileInfo = pcu::RuleFileInfoPtr(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
 	if (!mRuleFileInfo || infoStatus != prt::STATUS_OK) {
 		LOG_ERR << "could not get rule file info from rule file " << mRuleFile;
-		return {};
+		return;
 	}
 
 	mStartRule = pcu::detectStartRule(mRuleFileInfo);
 
 	// Fill the list of rule attributes
-	mRuleAttributes = getRuleAttributes(mRuleFile, *mRuleFileInfo.get());
-	return mRuleAttributes;
+	createRuleAttributes(mRuleFile, *mRuleFileInfo.get(), mRuleAttributes);
 }
 
 void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
