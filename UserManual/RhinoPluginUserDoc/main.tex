@@ -1,14 +1,26 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6in, 10in}]{geometry}
+\usepackage{titling}
+
+\newcommand{\subtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\large#1\end{center}
+    \vskip0.5em}%
+}
 
 \title{Rhino/Grasshopper Plugin User Manual}
-\author{Esri  Aiulfi Loris}
-\date{October 2020}
+\subtitle{Esri}
+\author{Aiulfi Loris}
+\date{Version 0.5, October 2020}
 
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{caption}
+\usepackage{subcaption}
 \usepackage{enumitem}
+\usepackage{wrapfig}
 
 \begin{document}
 
@@ -26,5 +38,6 @@
 \include{installation}
 \include{rhino_command}
 \include{grasshopper_components}
+\include{known_issues}
 
 \end{document}

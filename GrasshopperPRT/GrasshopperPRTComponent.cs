@@ -19,7 +19,7 @@ using GrasshopperPRT.Properties;
 namespace GrasshopperPRT
 {
 
-    public class GrasshopperPRTComponent : GH_Component
+    public class GrasshopperPRTComponent : GH_Component, IGH_VariableParameterComponent
     {
         const int DEFAULT_INPUT_PARAM_COUNT = 2;
         const string RPK_INPUT_NAME = "Path to RPK";
@@ -29,8 +29,11 @@ namespace GrasshopperPRT
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
+        List<IGH_Param> mParams;
 
-        List<IGH_Param> mReportOutputs;
+        //List<IGH_Param> mReportOutputs;
+
+        string mCurrentRPK = "";
 
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -49,7 +52,7 @@ namespace GrasshopperPRT
             if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
 
             mRuleAttributes = new RuleAttribute[0];
-            mReportOutputs = new List<IGH_Param>();
+            mParams = new List<IGH_Param>();
         }
 
         /// <summary>
@@ -99,17 +102,30 @@ namespace GrasshopperPRT
             // Once we have a rpk file, directly extract the rule attributes
             PRTWrapper.SetPackage(rpk_file);
 
-            // Update the rule attributes only the first time rpk is set.
-            if (mRuleAttributes.Length == 0)
+            // Update the rule attributes only if the rpk is changed.
+            if (mCurrentRPK != rpk_file)
             {
+                mCurrentRPK = rpk_file;
+
+                //if rule attributes input parameters are already existing, remove them.
+                if(mRuleAttributes.Length > 0)
+                {
+                    foreach(var param in mParams)
+                    {
+                        Params.UnregisterInputParameter(param);
+                    }
+
+                    mParams.Clear();
+                }
+
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
                 foreach (RuleAttribute attrib in mRuleAttributes)
                 {
                     CreateInputParameter(attrib);
                 }
 
+                Params.OnParametersChanged();
                 ExpireSolution(true);
-                
                 return;
             }
 
@@ -240,6 +256,7 @@ namespace GrasshopperPRT
         private void CreateInputParameter(RuleAttribute attrib)
         {
             var parameter = attrib.GetInputParameter();
+            mParams.Add(parameter);
             Params.RegisterInputParam(parameter);
         }
 
@@ -317,6 +334,31 @@ namespace GrasshopperPRT
                 }
             }
 
+        }
+
+        public bool CanInsertParameter(GH_ParameterSide side, int index)
+        {
+            return false;
+        }
+
+        public bool CanRemoveParameter(GH_ParameterSide side, int index)
+        {
+            return false;
+        }
+
+        public IGH_Param CreateParameter(GH_ParameterSide side, int index)
+        {
+            return null;
+        }
+
+        public bool DestroyParameter(GH_ParameterSide side, int index)
+        {
+            return false;
+        }
+
+        public void VariableParameterMaintenance()
+        {
+            return;
         }
 
         /// <summary>
