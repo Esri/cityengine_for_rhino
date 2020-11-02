@@ -356,12 +356,10 @@ codecs_rhino/x64/
 RhinoPRT/x64/
 GrasshopperPRT/x64
 
+x64
+x64/*
 x64/Release/*
 x64/Release_gh/*
-!x64/Release/com.esri.prt.core.dll
-!x64/Release/glutess.dll
-!x64/Release_gh/com.esri.prt.core.dll
-!x64/Release_gh/glutess.dll
 
 *.exp
 *.gha
