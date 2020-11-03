@@ -3,14 +3,10 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Data;
 
 using Rhino.Geometry;
-using System.Windows.Forms;
 using System.Linq;
-using Rhino.DocObjects;
-using GrasshopperPRT.Properties;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded

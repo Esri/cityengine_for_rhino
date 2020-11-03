@@ -79,7 +79,8 @@ enum PRT_EXPORTS_API Status {
 	STATUS_ATTRIBUTES_NOT_SET,			    ///< Attributes not set.
 	STATUS_GEOMETRY_ALREADY_SET,		    ///< Geometry already set.
 	STATUS_GEOMETRY_NOT_SET,			    ///< Geometry not set.
-	STATUS_ILLEGAL_GEOMETRY				    ///< Illegal geometry.
+	STATUS_ILLEGAL_GEOMETRY,			    ///< Illegal geometry.
+	STATUS_NO_GEOMETRY				    	///< No geometry.
 };
 
 

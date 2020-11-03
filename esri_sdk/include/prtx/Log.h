@@ -164,6 +164,9 @@ public:
 	LogFormatter& operator=(LogFormatter&&) = delete;
 	virtual ~LogFormatter();
 
+protected:
+	std::wstring getMessage() const;
+
 private:
 	BEGIN_SUPPRESS_EXPORT_WARNINGS
 	class LogFormatterImpl;

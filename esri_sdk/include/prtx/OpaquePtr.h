@@ -29,6 +29,8 @@ template<typename T>
 class OpaquePtr {
 public:
 	OpaquePtr();
+  OpaquePtr(OpaquePtr<T> const& other);
+  OpaquePtr<T>& operator=(OpaquePtr<T> const& other);
 
 	template<typename ...Args>
 	OpaquePtr(Args&&...);
@@ -36,6 +38,7 @@ public:
 	~OpaquePtr();
 
 	T* operator->();
+	T const* operator->() const;
 	T& operator*();
 
 private:

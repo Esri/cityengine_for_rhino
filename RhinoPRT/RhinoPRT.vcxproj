@@ -181,6 +181,10 @@
     <PreBuildEvent>
       <Command>
       </Command>
+      <Outputs>
+      </Outputs>
+      <Inputs>
+      </Inputs>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_gh|x64'">

@@ -28,12 +28,24 @@ OpaquePtr<T>::OpaquePtr() : m{ new T{} } { }
 template<typename T>
 template<typename ...Args>
 OpaquePtr<T>::OpaquePtr( Args&& ...args ) : m{ new T{ std::forward<Args>(args)... } } { }
+
+template<typename T>
+OpaquePtr<T>::OpaquePtr(OpaquePtr<T> const& other) : m{ new T(*other.m) } { };
+
+template<typename T>
+OpaquePtr<T>& OpaquePtr<T>::operator=(OpaquePtr<T> const& other) {
+  *m = *other.m;
+  return *this;
+}
  
 template<typename T>
 OpaquePtr<T>::~OpaquePtr() = default;
 
 template<typename T>
 T* OpaquePtr<T>::operator->() { return m.get(); }
+
+template<typename T>
+T const* OpaquePtr<T>::operator->() const { return m.get(); }
 
 template<typename T>
 T& OpaquePtr<T>::operator*() { return *m.get(); }

@@ -98,6 +98,11 @@ public:
 	static uint8_t getBytesPerPixel(PixelFormat format);
 	/**
 	 * @param format PixelFormat to query.
+	 * @returns number of channels provided in by the format.
+	 */
+	static uint8_t getChannelCount(PixelFormat format);
+	/**
+	 * @param format PixelFormat to query.
 	 * @returns true if the format has an alpha channel, false if not.
 	 */
 	static bool hasAlpha(PixelFormat format);

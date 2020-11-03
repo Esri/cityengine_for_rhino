@@ -52,9 +52,10 @@ public:
 	 * @param         query			The search query. See the CGA @cgaref{func_fileSearch.html,fileSearch()}
 	 * 								function for syntax documentation.
 	 *
-	 * @param[in,out] result		Pointer to buffer to receive the xml encoded representation.
+	 * @param[in,out] result		Pointer to buffer to receive a string which contains the semicolon
+	 *                              separated list of keys
 	 * @param[in,out] resultSize	Pointer to size of reserved buffer; receives the size of
-	 * 								the actual result (incl. terminating 0).
+	 * 								the actual result (incl. terminating 0). Must be >= 1.
      * @param[out]    stat			Optional pointer to return the status.
 	 * @returns result.
 	 */

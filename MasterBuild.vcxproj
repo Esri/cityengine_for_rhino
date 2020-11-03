@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3834552A-23FC-4584-850C-D823CA9F4227}</ProjectGuid>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.3.6821/esri_ce_sdk-2.3.6821-win10-vc142-x86_64-rel-opt.zip</PRTUrl>
+  </PropertyGroup>
+
+  <Target Name="DownloadPRT" BeforeTargets="Build">
+    <Message Importance="High" Text="Downloading Esri SDK" />
+    <DownLoadFile
+      SourceUrl="$(PRTUrl)"
+      DestinationFolder="$(SolutionDir)"
+      SkipUnchangedFiles="true">
+      <Output TaskParameter="DownloadedFile" ItemName="esri_sdk_zip" />
+    </DownLoadFile>
+    <Unzip SourceFiles="@(esri_sdk_zip)" DestinationFolder="$(SolutionDir)esri_sdk\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+    <Delete Files="@(esri_sdk_zip)" >
+      <Output TaskParameter="DeletedFiles" ItemName="DeletedList"/>
+    </Delete>
+    <Message Importance="High" Text="Deleted files: '@(DeletedList)'" />
+  </Target>
+
+  <Target Name="CopyDLLs" AfterTargets="Build">
+    <Message Importance="High" Text="Copying dlls..." />
+
+  </Target>
+
+  <Target Name="Build">
+    <Message Importance="High" Text="Starting Build" />
+    <MSBuild Projects="codecs_rhino\codecs_rhino.vcxproj" Targets="Build" />
+    <MSBuild Projects="RhinoPRT\RhinoPRT.vcxproj" Targets="Build" Properties="Configuration=Release" />
+    <MSBuild Projects="RhinoPRT\RhinoPRT.vcxproj" Targets="Build" Properties="Configuration=Release_gh" />
+    <MSBuild Projects="GrasshopperPRT\GrasshopperPRT.csproj" Targets="Build" Properties="Configuration=Release_gh;Platform=AnyCPU"/>
+    <Message Importance="High" Text="Build finished" />
+  </Target>
+
+</Project>
