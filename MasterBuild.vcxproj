@@ -16,7 +16,6 @@
   <PropertyGroup>
     <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.3.6821/esri_ce_sdk-2.3.6821-win10-vc142-x86_64-rel-opt.zip</PRTUrl>
     <OutputDirectory>.\x64\Release\</OutputDirectory>
-    <TempDirectory>.\x64\Release_gh\</TempDirectory>
   </PropertyGroup>
 
   <Target Name="DownloadPRT" BeforeTargets="Build">
@@ -50,27 +49,9 @@
     </ItemGroup>
     <Message Importance="High" Text="Copying dlls..." />
     <Copy
-      SourceFiles="@(Release_gh_items)"
-      DestinationFiles="@(Release_gh_items->'.\x64\Release\%(Filename)%(Extension)')">
-      <Output TaskParameter="CopiedFiles" ItemName="CopiedList"/>
-    </Copy>
-    <Message Importance="High" Text="Copied files: '@(CopiedList)'" />
-    <Copy
       SourceFiles="@(Sdk_Dlls)"
       DestinationFolder=".\x64\Release"
     />
-  </Target>
-
-  <Target Name="PostBuildClean" AfterTargets="CopyDLLs">
-    <Message Importance="High" Text="Post build clean..." />
-    <Delete Files="@(Release_gh_items)">
-      <Output TaskParameter="DeletedFiles" ItemName="DeletedList"/>
-    </Delete>
-    <Message Importance="High" Text="Deleted files: '@(DeletedList)'"/>
-    <RemoveDir Directories="$(TempDirectory)">
-      <Output TaskParameter="RemovedDirectories" ItemName="DeletedDirs"/>
-    </RemoveDir>
-    <Message Importance="High" Text="Deleted folders: '@(DeletedDirs)'"/>
   </Target>
 
   <Target Name="Clean">

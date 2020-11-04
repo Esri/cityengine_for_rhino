@@ -45,7 +45,7 @@ extern "C" {
 	}
 
 	RHENC_EXPORTS_API int getVersionMinor() {
-		return 2;
+		return 3;
 	}
 
 }

@@ -84,12 +84,10 @@ Global
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release_gh|Any CPU.ActiveCfg = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release_gh|Any CPU.Build.0 = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release_gh|x64.ActiveCfg = Release|x64
-		{3834552A-23FC-4584-850C-D823CA9F4227}.Release_gh|x64.Build.0 = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release_gh|x86.ActiveCfg = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release_gh|x86.Build.0 = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release|Any CPU.ActiveCfg = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release|x64.ActiveCfg = Release|x64
-		{3834552A-23FC-4584-850C-D823CA9F4227}.Release|x64.Build.0 = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution

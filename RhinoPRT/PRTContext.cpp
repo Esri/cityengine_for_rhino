@@ -20,7 +20,7 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
 
 	// create the list of extension path dynamicaly using getDllLocation
 	std::wstring dll_location = pcu::getDllLocation();
-	size_t idx = dll_location.find(L"Release_gh");
+	size_t idx = dll_location.find(L"Release");
 
 	if (idx != std::wstring::npos) {
 		dll_location = dll_location.substr(0, idx);
