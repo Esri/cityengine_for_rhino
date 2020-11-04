@@ -348,9 +348,8 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-esri_sdk/doc/
-esri_sdk/cmake/
-!esri_sdk/bin/
+esri_sdk
+esri_sdk/*
 
 codecs_rhino/x64/
 RhinoPRT/x64/
