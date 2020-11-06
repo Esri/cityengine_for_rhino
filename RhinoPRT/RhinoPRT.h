@@ -57,6 +57,8 @@ namespace RhinoPRT {
 
 		std::vector<int> getModelIds();
 
+		void setMaterialGeneration(bool emitMaterial);
+
 	private:
 
 		std::vector<InitialShape> mShapes;
@@ -142,6 +144,9 @@ extern "C" {
 		ON_SimpleArray<int>* pSpecularColor,
 		double* opacity,
 		double* shininess);
+
+	RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate);
+
 }
 
 #endif RHINOPRT
