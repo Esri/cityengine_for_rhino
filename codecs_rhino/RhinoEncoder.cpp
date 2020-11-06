@@ -37,7 +37,9 @@ namespace {
 		.triangulate(true)
 		.mergeVertices(false)
 		.cleanupUVs(true)
-		.cleanupVertexNormals(false)
+		.cleanupVertexNormals(true)
+		.processVertexNormals(prtx::VertexNormalProcessor::SET_MISSING_TO_FACE_NORMALS)
+		.indexSharing(prtx::EncodePreparator::PreparationFlags::INDICES_SAME_FOR_ALL_VERTEX_ATTRIBUTES)
 		.mergeByMaterial(true);
 
 	std::vector<const wchar_t*> toPtrVec(const prtx::WStringVector& wsv) {
@@ -374,6 +376,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 	std::vector<uint32_t> uvIndexBases(maxNumUVSets, 0u);
 
 	std::vector<double> vertexCoords;
+	prtx::DoubleVector normals;
 	std::vector<uint32_t> faceIndices;
 	std::vector<uint32_t> faceCounts;
 	std::vector<const prt::AttributeMap*> matAttrMap;
@@ -404,6 +407,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		maxNumUVSets = 0;
 		uvIndexBases.clear();
 		vertexCoords.clear();
+		normals.clear();
 		faceIndices.clear();
 		faceCounts.clear();
 		matAttrMap.clear();
@@ -413,12 +417,14 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 		// 1st pass: scan the geometries to preallocate the sizes of vectors
 		uint32_t numCoords = 0;
+		uint32_t numNormalCoords = 0;
 		uint32_t numFaceCounts = 0;
 		uint32_t numIndices = 0;
 
 		for (const auto& mesh : meshes)
 		{
 			numCoords += mesh->getVertexCoords().size();
+			numNormalCoords += mesh->getVertexNormalsCoords().size();
 			numFaceCounts += mesh->getFaceCount();
 
 			const auto& vtxCnts = mesh->getFaceVertexCounts();
@@ -426,6 +432,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		}
 
 		vertexCoords.reserve(3 * numCoords);
+		normals.reserve(3 * numNormalCoords);
 		faceCounts.reserve(numFaceCounts);
 		faceIndices.reserve(numIndices);
 
@@ -435,6 +442,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 			const prtx::DoubleVector& verts = mesh->getVertexCoords();
 			vertexCoords.insert(vertexCoords.end(), verts.begin(), verts.end());
+
+			const prtx::DoubleVector& norms = mesh->getVertexNormalsCoords();
+			normals.insert(normals.end(), norms.begin(), norms.end());
 
 			for (uint32_t fi = 0; fi < mesh->getFaceCount(); ++fi) {
 				const uint32_t* vtxIdx = mesh->getFaceVertexIndices(fi);
@@ -533,6 +543,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 		cb->add(instance.getInitialShapeIndex(), instanceIndex, 
 			vertexCoords.data(), vertexCoords.size(),
+			normals.data(), normals.size(),
 			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size(),
 
 			puvs.first.data(), puvs.second.data(),

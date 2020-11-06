@@ -70,6 +70,7 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
 		auto index = modelPart.mIndices[v_id];
 		mesh.SetVertex(v_id, ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 1], modelPart.mVertices[index * 3 + 2]));
+		mesh.SetVertexNormal(v_id, ON_3dVector(modelPart.mNormals[index * 3], modelPart.mNormals[index * 3 + 1], modelPart.mNormals[index * 3 + 2]));
 	}
 	
 	int faceid(0);
@@ -96,7 +97,6 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 		mesh.SetTextureCoord(i, modelPart.mUVs[i].x, modelPart.mUVs[i].y);
 	}
 
-	mesh.ComputeVertexNormals();
 	mesh.Compact();
 
 	// Printing a rhino error log if the created mesh is invalid

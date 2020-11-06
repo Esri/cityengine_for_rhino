@@ -14,15 +14,25 @@ const std::vector<ModelPart>& Model::getModelParts() const { return mModelParts;
 const Reporting::ReportMap& Model::getReports() const { return mReports; }
 const Materials::MaterialsMap& Model::getMaterials() const { return mMaterials; }
 
-void RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double * vertexCoords, 
-								 const size_t vextexCoordsCount, const uint32_t * faceIndices,
-								 const size_t faceIndicesCount, const uint32_t * faceCounts, const size_t faceCountsCount)
+void RhinoCallbacks::addGeometry(const size_t initialShapeIndex,
+								 const double * vertexCoords, const size_t vertexCoordsCount,
+								 const double * normals, const size_t normalsCount,
+								 const uint32_t * faceIndices, const size_t faceIndicesCount,
+								 const uint32_t * faceCounts, const size_t faceCountsCount)
 {
 	Model& currentModel = mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.addModelPart();
 
+	modelPart.mVertices.reserve(vertexCoordsCount);
+	modelPart.mNormals.reserve(normalsCount);
+	modelPart.mIndices.reserve(faceIndicesCount);
+	modelPart.mFaces.reserve(faceCountsCount);
+
 	if (vertexCoords != nullptr)
-		modelPart.mVertices.insert(modelPart.mVertices.end(), vertexCoords, vertexCoords + vextexCoordsCount);
+		modelPart.mVertices.insert(modelPart.mVertices.end(), vertexCoords, vertexCoords + vertexCoordsCount);
+
+	if (normals != nullptr)
+		modelPart.mNormals.insert(modelPart.mNormals.end(), normals, normals + normalsCount);
 
 	if (faceIndices != nullptr)
 		modelPart.mIndices.insert(modelPart.mIndices.end(), faceIndices, faceIndices + faceIndicesCount);
@@ -83,8 +93,9 @@ void RhinoCallbacks::addUVCoordinates(const size_t initialShapeIndex,
 }
 
 void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIndex,
-						 const double * vertexCoords, const size_t vertexCoordsCount, 
-						 const uint32_t * faceIndices, const size_t faceIndicesCount, 
+						 const double * vertexCoords, const size_t vertexCoordsCount,
+						 const double * normals, const size_t normalsCount,
+						 const uint32_t * faceIndices, const size_t faceIndicesCount,
 						 const uint32_t * faceCounts, const size_t faceCountsCount, 
 						 double const * const * uvs, size_t const * uvsSizes, 
 						 uint32_t const * const * uvCounts, size_t const * uvCountsSizes, 
@@ -94,6 +105,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 						 const prt::AttributeMap ** materials, const size_t matCount)
 {
 	addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
+		normals, normalsCount,
 		faceIndices, faceIndicesCount,
 		faceCounts, faceCountsCount);
 	addUVCoordinates(initialShapeIndex, uvs, uvsSizes,
