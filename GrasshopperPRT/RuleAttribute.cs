@@ -23,6 +23,8 @@ namespace GrasshopperPRT
 
         public virtual bool IsColor() { return false; }
 
+        public AttributeAnnotation GetAnnotationType() { return mAnnotType; }
+
         protected AttributeAnnotation mAnnotType;
     }
 
@@ -124,22 +126,14 @@ namespace GrasshopperPRT
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case AnnotationArgumentType.AAT_BOOL:
                     {
-                        ParamBoolCustom param_bool = new ParamBoolCustom
+                        ParamBoolCustom param_bool = new ParamBoolCustom(mAnnotations)
                         {
                             Name = mFullName,
                             NickName = mNickname,
                             Description = GetDescriptions(),
                             Optional = true,
-                            Access = GetAccess(),
+                            Access = GetAccess()
                         };
-                        //Param_Boolean param_bool = new Param_Boolean
-                        //{
-                        //    Name = mFullName,
-                        //    NickName = mNickname,
-                        //    Description = GetDescriptions(),
-                        //    Optional = true,
-                        //    Access = GetAccess(),
-                        //};
 
                         return param_bool;
                     }
