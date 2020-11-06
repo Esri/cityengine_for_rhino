@@ -124,7 +124,7 @@ namespace GrasshopperPRT
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case AnnotationArgumentType.AAT_BOOL:
                     {
-                        Param_Boolean param_bool = new Param_Boolean
+                        ParamBoolCustom param_bool = new ParamBoolCustom
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -132,6 +132,14 @@ namespace GrasshopperPRT
                             Optional = true,
                             Access = GetAccess(),
                         };
+                        //Param_Boolean param_bool = new Param_Boolean
+                        //{
+                        //    Name = mFullName,
+                        //    NickName = mNickname,
+                        //    Description = GetDescriptions(),
+                        //    Optional = true,
+                        //    Access = GetAccess(),
+                        //};
 
                         return param_bool;
                     }
