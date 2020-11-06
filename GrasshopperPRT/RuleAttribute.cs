@@ -174,14 +174,6 @@ namespace GrasshopperPRT
                             Optional = true,
                             Access = GetAccess()
                         };
-                        //Param_Boolean param_bool = new Param_Boolean
-                        //{
-                        //    Name = mFullName,
-                        //    NickName = mNickname,
-                        //    Description = GetDescriptions(),
-                        //    Optional = true,
-                        //    Access = GetAccess(),
-                        //};
 
                         return param_bool;
                     }
