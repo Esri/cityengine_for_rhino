@@ -257,7 +257,16 @@ namespace GrasshopperPRT
         {
             var parameter = attrib.GetInputParameter();
             mParams.Add(parameter);
-            Params.RegisterInputParam(parameter);
+
+            // Check if the param already exists and replace it to avoid adding duplicates.
+            int index = Params.IndexOfInputParam(parameter.Name);
+            if (index != -1)
+            {
+                Params.Input.RemoveAt(index);
+                Params.Input.Insert(index, parameter);
+            }
+            else
+                Params.RegisterInputParam(parameter);
         }
 
         private void fillAttributesFromNode(IGH_DataAccess DA)
