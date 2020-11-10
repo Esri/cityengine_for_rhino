@@ -14,12 +14,15 @@ const std::vector<ModelPart>& Model::getModelParts() const { return mModelParts;
 const Reporting::ReportMap& Model::getReports() const { return mReports; }
 const Materials::MaterialsMap& Model::getMaterials() const { return mMaterials; }
 
-void RhinoCallbacks::addGeometry(const size_t initialShapeIndex,
+bool RhinoCallbacks::addGeometry(const size_t initialShapeIndex,
 								 const double * vertexCoords, const size_t vertexCoordsCount,
 								 const double * normals, const size_t normalsCount,
 								 const uint32_t * faceIndices, const size_t faceIndicesCount,
 								 const uint32_t * faceCounts, const size_t faceCountsCount)
 {
+	if (vertexCoords == nullptr || normals == nullptr || faceIndices == nullptr || faceCounts == nullptr)
+		return false;
+
 	Model& currentModel = mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.addModelPart();
 
@@ -28,17 +31,12 @@ void RhinoCallbacks::addGeometry(const size_t initialShapeIndex,
 	modelPart.mIndices.reserve(faceIndicesCount);
 	modelPart.mFaces.reserve(faceCountsCount);
 
-	if (vertexCoords != nullptr)
-		modelPart.mVertices.insert(modelPart.mVertices.end(), vertexCoords, vertexCoords + vertexCoordsCount);
+	modelPart.mVertices.assign(vertexCoords, vertexCoords + vertexCoordsCount);
+	modelPart.mNormals.assign(normals, normals + normalsCount);
+	modelPart.mIndices.assign(faceIndices, faceIndices + faceIndicesCount);
+	modelPart.mFaces.assign(faceCounts, faceCounts + faceCountsCount);
 
-	if (normals != nullptr)
-		modelPart.mNormals.insert(modelPart.mNormals.end(), normals, normals + normalsCount);
-
-	if (faceIndices != nullptr)
-		modelPart.mIndices.insert(modelPart.mIndices.end(), faceIndices, faceIndices + faceIndicesCount);
-
-	if (faceCounts != nullptr)
-		modelPart.mFaces.insert(modelPart.mFaces.end(), faceCounts, faceCounts + faceCountsCount);
+	return true;
 }
 
 void RhinoCallbacks::addUVCoordinates(const size_t initialShapeIndex,
@@ -104,10 +102,10 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 						 const uint32_t* faceRanges, size_t faceRangesSize,
 						 const prt::AttributeMap ** materials, const size_t matCount)
 {
-	addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
+	if (!addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
 		normals, normalsCount,
 		faceIndices, faceIndicesCount,
-		faceCounts, faceCountsCount);
+		faceCounts, faceCountsCount)) return;
 	addUVCoordinates(initialShapeIndex, uvs, uvsSizes,
 		uvCounts, uvCountsSizes,
 		uvIndices, uvIndicesSizes, uvSets);

@@ -71,7 +71,7 @@ public:
 	virtual ~RhinoCallbacks() = default;
 
 	// Inherited via IRhinoCallbacks
-	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vertexCoordsCount,
+	bool addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vertexCoordsCount,
 		const double * normals, const size_t normalsCount,
 		const uint32_t * faceIndices, const size_t faceIndicesCount, 
 		const uint32_t * faceCounts, const size_t faceCountsCount);
