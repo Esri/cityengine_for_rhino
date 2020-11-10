@@ -258,8 +258,14 @@ namespace GrasshopperPRT
             var parameter = attrib.GetInputParameter();
             mParams.Add(parameter);
 
-            // Check if the param already exists to avoid adding duplicates.
-            if(Params.IndexOfInputParam(parameter.Name) == -1)
+            // Check if the param already exists and replace it to avoid adding duplicates.
+            int index = Params.IndexOfInputParam(parameter.Name);
+            if (index != -1)
+            {
+                Params.Input.RemoveAt(index);
+                Params.Input.Insert(index, parameter);
+            }
+            else
                 Params.RegisterInputParam(parameter);
         }
 
