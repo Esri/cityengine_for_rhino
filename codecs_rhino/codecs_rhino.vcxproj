@@ -195,7 +195,7 @@
   <ItemGroup>
     <PRTVersionFile Include="$(SolutionDir)esri_sdk\cmake\prtVersion.properties"/>
   </ItemGroup>
-  <Target Name="ReadPRTVersion" BeforeTargets="ClCompile">
+  <Target Name="ReadPRTVersion" Outputs="$(MyPRTVersions)">
     <ReadLinesFromFile File="@(PRTVersionFile)">
       <Output TaskParameter="Lines" ItemName="PRTVersions" />
     </ReadLinesFromFile>
@@ -204,13 +204,18 @@
         @(PRTVersions->'%(FileName)')
       </MyPRTVersions>
     </PropertyGroup>
-    <ItemGroup>
-      <PRT_VERSION_MAJOR Include="$(MyPRTVersions)(1)" />
-      <PRT_VERSION_MINOR Include="$(MyPRTVersions)(2)" />
-    </ItemGroup>
-    <Message Importance="High" Text="Item read: $(Output)"/>
+    <Message Importance="High" Text="Item read: $(MyPRTVersions)"/>
   </Target>
+
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PropertyGroup>
+      <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    </PropertyGroup>
+    <CustomBuildStep>
+      <CallTarget Targets="ReadPRTVersion">
+        <Output TaskParameter="TargetOutputs" PropertyName="MyPRTVersionsList"/>
+      </CallTarget>
+    </CustomBuildStep>
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -218,7 +223,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PRT_VERSION_MAJOR=$(PRT_VERSION_MAJOR);PRT_VERSION_MINOR=3;NDEBUG;CODECSRHINO_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(MyPRTVersionsList);NDEBUG;CODECSRHINO_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)esri_sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
