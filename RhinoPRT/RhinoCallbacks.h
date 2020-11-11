@@ -4,6 +4,7 @@
 #include "IRhinoCallbacks.h"
 
 #include "prtx/PRTUtils.h"
+#include "prtx/Types.h"
 
 #include "utils.h"
 #include "Logger.h"
@@ -18,6 +19,7 @@
 
 struct ModelPart {
 	std::vector<double> mVertices;
+	prtx::DoubleVector mNormals;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaces;
 	ON_2fPointArray mUVs;
@@ -69,18 +71,20 @@ public:
 	virtual ~RhinoCallbacks() = default;
 
 	// Inherited via IRhinoCallbacks
-	void addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vextexCoordsCount, 
+	bool addGeometry(const size_t initialShapeIndex, const double * vertexCoords, const size_t vertexCoordsCount,
+		const double * normals, const size_t normalsCount,
 		const uint32_t * faceIndices, const size_t faceIndicesCount, 
-		const uint32_t * faceCounts, const size_t faceCountsCount) override;
+		const uint32_t * faceCounts, const size_t faceCountsCount);
 
 	void addUVCoordinates(const size_t initialShapeIndex,
 		double const * const * uvs, size_t const * uvsSizes,
 		uint32_t const * const * uvCounts, size_t const * uvCountsSizes,
 		uint32_t const * const * uvIndices, size_t const * uvIndicesSizes,
-		uint32_t uvSets) override;
+		uint32_t uvSets);
 
 	void add(const size_t initialShapeIndex, const size_t instanceIndex,
-		const double* vertexCoords, const size_t vextexCoordsCount,
+		const double* vertexCoords, const size_t vertexCoordsCount,
+		const double* normals, const size_t normalsCount,
 		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
 		const size_t faceCountsCount,
 		double const* const* uvs, size_t const* uvsSizes,
