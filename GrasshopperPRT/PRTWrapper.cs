@@ -106,6 +106,9 @@ namespace GrasshopperPRT
                                                 ref double opacity,
                                                 ref double shininess);
 
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetMaterialGenerationOption(bool doGenerate);
+
         public static bool AddMesh(List<Mesh> meshes)
         {
             bool status;

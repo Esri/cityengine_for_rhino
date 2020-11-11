@@ -201,6 +201,11 @@ namespace RhinoPRT {
 
 		return ids;
 	}
+
+	void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial)
+	{
+		options.emitMaterial = emitMaterial;
+	}
 }
 
 extern "C" {
@@ -582,5 +587,10 @@ extern "C" {
 		*shininess = mat.mShininess;
 
 		return true;
+	}
+
+	RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate)
+	{
+		RhinoPRT::get().setMaterialGeneration(doGenerate);
 	}
 }

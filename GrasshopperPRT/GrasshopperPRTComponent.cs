@@ -31,7 +31,7 @@ namespace GrasshopperPRT
         RuleAttribute[] mRuleAttributes;
         List<IGH_Param> mParams;
 
-        //List<IGH_Param> mReportOutputs;
+        bool mDoGenerateMaterials;
 
         string mCurrentRPK = "";
 
@@ -53,6 +53,8 @@ namespace GrasshopperPRT
 
             mRuleAttributes = new RuleAttribute[0];
             mParams = new List<IGH_Param>();
+
+            mDoGenerateMaterials = true;
         }
 
         /// <summary>
@@ -161,13 +163,29 @@ namespace GrasshopperPRT
 
             var generatedMeshes = PRTWrapper.GenerateMesh();
 
-            GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
-
-            // Set cga report values to output
+            if (mDoGenerateMaterials)
+            {
+                GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
+                DA.SetDataTree(1, materials);
+            }
+            
             OutputReports(DA, generatedMeshes);
-
             DA.SetDataTree(0, generatedMeshes);
-            DA.SetDataTree(1, materials);
+        }
+
+        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+
+            Menu_AppendItem(menu, "Generate Materials", OnMaterialToggleClicked, true, mDoGenerateMaterials);
+        }
+
+        private void OnMaterialToggleClicked(object sender, EventArgs e)
+        {
+            mDoGenerateMaterials = !mDoGenerateMaterials;
+            PRTWrapper.SetMaterialGenerationOption(mDoGenerateMaterials);
+
+            ExpireSolution(true);
         }
 
         private void OutputReports(IGH_DataAccess DA, GH_Structure<GH_Mesh> gh_meshes)
