@@ -26,11 +26,6 @@ bool RhinoCallbacks::addGeometry(const size_t initialShapeIndex,
 	Model& currentModel = mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.addModelPart();
 
-	modelPart.mVertices.reserve(vertexCoordsCount);
-	modelPart.mNormals.reserve(normalsCount);
-	modelPart.mIndices.reserve(faceIndicesCount);
-	modelPart.mFaces.reserve(faceCountsCount);
-
 	modelPart.mVertices.assign(vertexCoords, vertexCoords + vertexCoordsCount);
 	modelPart.mNormals.assign(normals, normals + normalsCount);
 	modelPart.mIndices.assign(faceIndices, faceIndices + faceIndicesCount);
