@@ -192,6 +192,24 @@
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <PRTVersionFile Include="$(SolutionDir)esri_sdk\cmake\prtVersion.properties"/>
+  </ItemGroup>
+  <Target Name="ReadPRTVersion" BeforeTargets="ClCompile">
+    <ReadLinesFromFile File="@(PRTVersionFile)">
+      <Output TaskParameter="Lines" ItemName="PRTVersions" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <MyPRTVersions>
+        @(PRTVersions->'%(FileName)')
+      </MyPRTVersions>
+    </PropertyGroup>
+    <ItemGroup>
+      <PRT_VERSION_MAJOR Include="$(MyPRTVersions)(1)" />
+      <PRT_VERSION_MINOR Include="$(MyPRTVersions)(2)" />
+    </ItemGroup>
+    <Message Importance="High" Text="Item read: $(Output)"/>
+  </Target>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -200,7 +218,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;CODECSRHINO_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PRT_VERSION_MAJOR=$(PRT_VERSION_MAJOR);PRT_VERSION_MINOR=3;NDEBUG;CODECSRHINO_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)esri_sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

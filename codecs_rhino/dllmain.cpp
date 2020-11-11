@@ -8,6 +8,11 @@
 
 #define RHENC_EXPORTS_API __declspec(dllexport)
 
+namespace {
+	const int VERSION_MAJOR = PRT_VERSION_MAJOR;
+	const int VERSION_MINOR = PRT_VERSION_MINOR;
+}
+
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -41,11 +46,11 @@ extern "C" {
 	RHENC_EXPORTS_API void unregisterExtensionFactories(prtx::ExtensionManager* /*manager*/) { }
 
 	RHENC_EXPORTS_API int getVersionMajor() {
-		return 2;
+		return VERSION_MAJOR;
 	}
 
 	RHENC_EXPORTS_API int getVersionMinor() {
-		return 3;
+		return VERSION_MINOR;
 	}
 
 }
