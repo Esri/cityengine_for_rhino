@@ -81,7 +81,12 @@ namespace GrasshopperPRT
             if (group.Count() == 0)
             {
                 grp = new GH_Group();
+                grp.CreateAttributes();
                 grp.Name = groupName;
+                grp.NickName = groupName;
+                grp.Colour = System.Drawing.Color.Aquamarine;
+                grp.Border = GH_GroupBorder.Box;
+                doc.AddObject(grp, false);
             }
             else if (group.Count() == 1)
             {
@@ -90,7 +95,8 @@ namespace GrasshopperPRT
             else return;
 
             grp.AddObject(guid);
-            doc.AddObject(grp, false);
+
+            doc.ExpirePreview(true);
         }
     }
 }
