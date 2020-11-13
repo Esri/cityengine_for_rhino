@@ -8,8 +8,9 @@ To install and build the Plugins:
 3. Follow the instructions from the [Rhino documentation](https://developer.rhino3d.com/guides/grasshopper/installing-tools-windows/) to install the Grasshoper SDK.
 4. Checkout this repository.
 5. Open the solution with vs2017.
-6. To build the Rhino Plugin, select the *Release* configuration with target platform *x64*.
-7. To build the Grasshopper Plugin, select the *Release_gh* configuration with target platform *x64*.
+6. Build the *MasterBuild* project to download PRT and build the 3 other projects. **It is necessary to do this step at least once. When PRT is installed, projects can be built independently(7. and 8.).**
+7. To build the Rhino Plugin, select the *Release* configuration with target platform *x64*.
+8. To build the Grasshopper Plugin, select the *Release_gh* configuration with target platform *x64*.
 
 #### Plugin Installation
 After having built the plugins, they have to be installed in Rhino and Grasshopper respectively.
