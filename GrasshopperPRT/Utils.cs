@@ -95,8 +95,7 @@ namespace GrasshopperPRT
             else return;
 
             grp.AddObject(guid);
-
-            doc.ExpirePreview(true);
+            grp.ExpireCaches();
         }
     }
 }
