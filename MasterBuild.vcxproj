@@ -15,6 +15,7 @@
 
   <PropertyGroup>
     <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.3.6821/esri_ce_sdk-2.3.6821-win10-vc142-x86_64-rel-opt.zip</PRTUrl>
+    <ArchiveName>esrisdk.zip</ArchiveName>
     <OutputDirectory>.\x64\Release\</OutputDirectory>
   </PropertyGroup>
 
@@ -23,14 +24,12 @@
     <DownLoadFile
       SourceUrl="$(PRTUrl)"
       DestinationFolder="$(SolutionDir)"
+      DestinationFileName="$(ArchiveName)"
       SkipUnchangedFiles="true">
       <Output TaskParameter="DownloadedFile" ItemName="esri_sdk_zip" />
     </DownLoadFile>
+    <Message Importance="High" Text="Finished download of '@(esri_sdk_zip)'"/>
     <Unzip SourceFiles="@(esri_sdk_zip)" DestinationFolder="$(SolutionDir)esri_sdk\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-    <Delete Files="@(esri_sdk_zip)" >
-      <Output TaskParameter="DeletedFiles" ItemName="DeletedList"/>
-    </Delete>
-    <Message Importance="High" Text="Deleted files: '@(DeletedList)'" />
   </Target>
 
   <Target Name="Build">

@@ -1,6 +1,7 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "RhinoEncoder.h"
+#include "prtversion.h"
 
 #include "prtx/ExtensionManager.h"
 

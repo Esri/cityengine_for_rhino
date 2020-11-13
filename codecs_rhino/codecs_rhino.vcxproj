@@ -194,18 +194,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <PRTVersionFile Include="$(SolutionDir)esri_sdk\cmake\prtVersion.properties"/>
+    <VersionHeader Include="prtversion.h"/>
   </ItemGroup>
-  <Target Name="ReadPRTVersion" BeforeTargets="ClCompile" Outputs="$(PRT_VERSION_MAJOR)">
+  <Target Name="ReadPRTVersion" BeforeTargets="ClCompile">
     <ReadLinesFromFile File="@(PRTVersionFile)">
       <Output TaskParameter="Lines" ItemName="PRTVersions" />
     </ReadLinesFromFile>
     <PropertyGroup>
       <MyPRTVersions>
-        @(PRTVersions->'%(FileName)')
+        @(PRTVersions->Replace('=', ' ')->'#define %(FileName)')
       </MyPRTVersions>
-      <PRT_VERSION_MAJOR>2</PRT_VERSION_MAJOR>
-      <PRT_VERSION_MINOR>3</PRT_VERSION_MINOR>
     </PropertyGroup>
+    <WriteLinesToFile
+      File="@(VersionHeader)"
+      Lines="$(MyPRTVersions)"
+      Overwrite="true"/>
     <Message Importance="High" Text="Item read: $(MyPRTVersions)"/>
   </Target>
 
@@ -217,7 +220,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>$(MyPRTVersions);NDEBUG;CODECSRHINO_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;CODECSRHINO_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)esri_sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -261,6 +264,7 @@
     <ClInclude Include="IRhinoCallbacks.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RhinoEncoder.h" />
+    <ClInclude Include="prtversion.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
