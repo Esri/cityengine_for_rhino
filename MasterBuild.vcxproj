@@ -17,14 +17,14 @@
     <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.3.6821/esri_ce_sdk-2.3.6821-win10-vc142-x86_64-rel-opt.zip</PRTUrl>
     <ArchiveName>esrisdk.zip</ArchiveName>
     <OutputDirectory>.\x64\Release\</OutputDirectory>
+    <DownloadDir>$(SolutionDir)Downloads\</DownloadDir>
   </PropertyGroup>
 
   <Target Name="DownloadPRT" BeforeTargets="Build">
     <Message Importance="High" Text="Downloading Esri SDK" />
     <DownLoadFile
       SourceUrl="$(PRTUrl)"
-      DestinationFolder="$(SolutionDir)"
-      DestinationFileName="$(ArchiveName)"
+      DestinationFolder="$(DownloadDir)"
       SkipUnchangedFiles="true">
       <Output TaskParameter="DownloadedFile" ItemName="esri_sdk_zip" />
     </DownLoadFile>

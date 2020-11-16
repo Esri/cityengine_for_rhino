@@ -355,6 +355,8 @@ codecs_rhino/x64/
 RhinoPRT/x64/
 GrasshopperPRT/x64
 
+codecs_rhino/prtversion.h
+
 x64
 x64/*
 x64/Release/*
@@ -364,3 +366,6 @@ x64/Release_gh/*
 *.gha
 *.rhi
 .idea
+
+Downloads/
+Downloads/*
