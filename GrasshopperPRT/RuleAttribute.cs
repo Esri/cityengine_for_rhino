@@ -87,7 +87,7 @@ namespace GrasshopperPRT
             vList.ListItems.Clear();
             foreach (var item in mEnumList)
             {
-                vList.ListItems.Add(new GH_ValueListItem(item.ToString(), item.ToString()));
+                vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"",item.ToString())));
             }
 
             return vList;
@@ -166,7 +166,7 @@ namespace GrasshopperPRT
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case AnnotationArgumentType.AAT_BOOL:
                     {
-                        ParamBoolCustom param_bool = new ParamBoolCustom(mAnnotations, mGroup)
+                        BooleanRuleAttribute param_bool = new BooleanRuleAttribute(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -181,7 +181,7 @@ namespace GrasshopperPRT
                 case AnnotationArgumentType.AAT_INT:
                 case AnnotationArgumentType.AAT_FLOAT:
                     {
-                        ParamNumberCustom param_number = new ParamNumberCustom(mAnnotations, mGroup)
+                        NumberRuleAttribute param_number = new NumberRuleAttribute(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -198,7 +198,7 @@ namespace GrasshopperPRT
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            ParamColourCustom param_color = new ParamColourCustom(mAnnotations, mGroup)
+                            ColourRuleAttribute param_color = new ColourRuleAttribute(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -210,7 +210,7 @@ namespace GrasshopperPRT
                         }
                         else
                         {
-                            ParamStringCustom param_str = new ParamStringCustom(mAnnotations, mGroup)
+                            StringRuleAttribute param_str = new StringRuleAttribute(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,

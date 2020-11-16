@@ -8,12 +8,12 @@ using System.Windows.Forms;
 
 namespace GrasshopperPRT
 {
-    public class ParamBoolCustom : Param_Boolean
+    public class BooleanRuleAttribute : Param_Boolean
     {
         private List<Annotation> mAnnotation;
         private string mGroupName;
 
-        public ParamBoolCustom(List<Annotation> annot, string groupName = ""): base()
+        public BooleanRuleAttribute(List<Annotation> annot, string groupName = ""): base()
         {
             mAnnotation = annot;
             mGroupName = groupName;
@@ -45,12 +45,12 @@ namespace GrasshopperPRT
         }
     }
 
-    public class ParamNumberCustom: Param_Number
+    public class NumberRuleAttribute: Param_Number
     {
         private List<Annotation> mAnnotations;
         private string mGroupName;
 
-        public ParamNumberCustom(List<Annotation> annots, string groupName = ""): base()
+        public NumberRuleAttribute(List<Annotation> annots, string groupName = ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -89,12 +89,12 @@ namespace GrasshopperPRT
         }
     }
 
-    public class ParamStringCustom: Param_String
+    public class StringRuleAttribute: Param_String
     {
         private List<Annotation> mAnnotations;
         private string mGroupName;
 
-        public ParamStringCustom(List<Annotation> annots, string groupName = ""): base()
+        public StringRuleAttribute(List<Annotation> annots, string groupName = ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -135,12 +135,12 @@ namespace GrasshopperPRT
         }
     }
 
-    public class ParamColourCustom: Param_Colour
+    public class ColourRuleAttribute: Param_Colour
     {
         private List<Annotation> mAnnotations;
         private string mGroupName;
 
-        public ParamColourCustom(List<Annotation> annots, string groupName= ""): base()
+        public ColourRuleAttribute(List<Annotation> annots, string groupName= ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
