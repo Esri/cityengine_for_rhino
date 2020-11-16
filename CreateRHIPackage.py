@@ -22,7 +22,6 @@ def copytree(src, dst: zipfile.ZipFile, arch_path: str, symlinks=False, ignore: 
 curr_dir: str = os.getcwd()
 esri_lib_dir: str = os.path.join(curr_dir, 'esri_sdk')
 release_dir: str = os.path.join(curr_dir, 'x64', 'Release')
-release_gh: str = os.path.join(curr_dir, 'x64', 'Release_gh')
 
 if os.path.exists('Package_output'):
     shutil.rmtree('Package_output')
@@ -70,5 +69,5 @@ with zipfile.ZipFile(f'Package_output/RhinoPRT_{version_str}.rhi', 'w') as myZip
                                                                                                    '.dll'))
     myZip.write(os.path.join(release_dir, 'glutess.dll'), os.path.join(arch_release_dir, 'glutess.dll'))
     myZip.write(os.path.join(release_dir, 'RhinoPRT.rhp'), os.path.join(arch_release_dir, 'RhinoPRT.rhp'))
-    myZip.write(os.path.join(release_gh, 'RhinoPRT.dll'), os.path.join(arch_release_dir, 'RhinoPRT.dll'))
-    myZip.write(os.path.join(release_gh, 'GrasshopperPRT.gha'), os.path.join(arch_release_dir, 'GrasshopperPRT.gha'))
+    myZip.write(os.path.join(release_dir, 'RhinoPRT.dll'), os.path.join(arch_release_dir, 'RhinoPRT.dll'))
+    myZip.write(os.path.join(release_dir, 'GrasshopperPRT.gha'), os.path.join(arch_release_dir, 'GrasshopperPRT.gha'))

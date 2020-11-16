@@ -348,22 +348,24 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-esri_sdk/doc/
-esri_sdk/cmake/
-!esri_sdk/bin/
+esri_sdk
+esri_sdk/*
 
 codecs_rhino/x64/
 RhinoPRT/x64/
 GrasshopperPRT/x64
 
+codecs_rhino/prtversion.h
+
+x64
+x64/*
 x64/Release/*
 x64/Release_gh/*
-!x64/Release/com.esri.prt.core.dll
-!x64/Release/glutess.dll
-!x64/Release_gh/com.esri.prt.core.dll
-!x64/Release_gh/glutess.dll
 
 *.exp
 *.gha
 *.rhi
 .idea
+
+Downloads/
+Downloads/*
