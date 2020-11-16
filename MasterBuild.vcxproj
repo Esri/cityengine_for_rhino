@@ -43,13 +43,23 @@
 
   <Target Name="CopyDLLs" AfterTargets="Build">
     <ItemGroup>
-      <Release_gh_items Include="x64\Release_gh\*.*" />
+      <RhinoPRTFiles Include="x64\Release\RhinoPRT.rhp;x64\Release\GrasshopperPRT.gha;x64\Release\RhinoPRT.dll" />
+      <Codec Include="x64\Release\codecs_rhino.dll"/>
       <Sdk_Dlls Include=".\esri_sdk\bin\*.dll" />
+      <libDir Include=".\esri_sdk\lib\" />
+      <libs Include="$(libDir)VueExport.dll;$(libDir)com.esri.prt.adaptors.dll;$(libDir)com.esri.prt.codecs.dll" />
     </ItemGroup>
     <Message Importance="High" Text="Copying dlls..." />
+    <!-- Copy SDK files to Release folder -->
     <Copy
       SourceFiles="@(Sdk_Dlls)"
       DestinationFolder=".\x64\Release"
+    />
+    <!-- Copy RhinoPRT files to package folder -->
+    <Copy
+    />
+    <!-- Copy SDK files to package folder -->
+    <Copy
     />
   </Target>
 
