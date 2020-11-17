@@ -1,12 +1,23 @@
 #include "ModelGenerator.h"
 
+#include "AttrEvalCallbacks.h"
 #include "Logger.h"
 
 #include <filesystem>
 
 namespace {
 	constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
-}
+	constexpr const wchar_t* ENCODER_ID_CGA_EVALATTR = L"com.esri.prt.core.AttributeEvalEncoder";
+
+	pcu::AttributeMapPtr getAttrEvalEncoderInfo()
+	{
+		const pcu::EncoderInfoPtr encInfo(prt::createEncoderInfo(ENCODER_ID_CGA_EVALATTR));
+		const prt::AttributeMap* encOpts = nullptr;
+		encInfo->createValidatedOptionsAndStates(nullptr, &encOpts);
+		return pcu::AttributeMapPtr(encOpts);
+	}
+
+}//namespace
 
 ResolveMap::ResolveMapCache::CacheStatus ModelGenerator::initResolveMap(const std::experimental::filesystem::path& rpk)
 {
@@ -71,6 +82,38 @@ void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 
 	// Fill the list of rule attributes
 	createRuleAttributes(mRuleFile, *mRuleFileInfo.get(), mRuleAttributes);
+}
+
+bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
+	std::vector<pcu::ShapeAttributes>& shapeAttributes)
+{
+	// setup encoder options for attribute evaluation encoder
+	constexpr const wchar_t* encs[] = { ENCODER_ID_CGA_EVALATTR };
+	constexpr size_t encsCount = sizeof(encs) / (sizeof(encs[0]));
+	const pcu::AttributeMapPtr encOpts = getAttrEvalEncoderInfo();
+	const prt::AttributeMap* encsOpts[] = { encOpts.get() };
+
+	const size_t numShapes = initial_geom.size();
+
+	// keep rule file info per initial shape to filter generated attributes.
+	std::vector<pcu::RuleFileInfoPtr> ruleFileInfos(numShapes);
+
+	// create the initial shapes
+	std::vector<const prt::InitialShape*> initShapes(mInitialShapesBuilders.size());
+
+	pcu::AttributeMapBuilderVector attribMapBuilders(mInitialShapesBuilders.size());
+
+
+	// run generate
+	AttrEvalCallbacks aec(attribMapBuilders, ruleFileInfos);
+	const prt::Status status = prt::generate(initShapes.data(), initShapes.size(), nullptr, encs, encsCount, encsOpts, &aec,
+		PRTContext::get()->mPRTCache.get(), nullptr, nullptr, nullptr);
+	if (status != prt::STATUS_OK)
+	{
+		LOG_ERR << "assign: prt::generate() failed with status: '" << prt::getStatusDescription(status) << "' (" << status << ")";
+	}
+	
+	return true;
 }
 
 void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,

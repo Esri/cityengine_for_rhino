@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AttrEvalCallbacks.cpp" />
     <ClCompile Include="CCommandApplyRulePackage.cpp" />
     <ClCompile Include="MaterialAttribute.cpp" />
     <ClCompile Include="ModelGenerator.cpp" />
@@ -35,6 +36,7 @@
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AttrEvalCallbacks.h" />
     <ClInclude Include="MaterialAttribute.h" />
     <ClInclude Include="ModelGenerator.h" />
     <ClInclude Include="PRTUtilityModels.h" />

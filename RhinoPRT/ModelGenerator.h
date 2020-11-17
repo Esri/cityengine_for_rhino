@@ -20,6 +20,9 @@ public:
 		pcu::AttributeMapBuilderPtr& aBuilder,
 		std::vector<GeneratedModel>& generated_models);
 
+	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
+		std::vector<pcu::ShapeAttributes>& shapeAttributes);
+
 	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::experimental::filesystem::path& rpk);
 	void updateRuleFiles(const std::wstring& rulePkg);
 
