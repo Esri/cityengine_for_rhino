@@ -97,34 +97,22 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& init
 
 	fillInitialShapeBuilder(initial_geom);
 
-	// create the initial shapes
-	std::vector<const prt::InitialShape*> initShapes;
 	pcu::AttributeMapBuilderVector attribMapBuilders;
-
-	initShapes.reserve(numShapes);
 	attribMapBuilders.reserve(numShapes);
 
 	for (size_t isIdx = 0; isIdx < numShapes; ++isIdx)
 	{
 		pcu::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 		pcu::AttributeMapPtr ruleAttr(amb->createAttributeMap());
-
-		auto& isb = mInitialShapesBuilders[isIdx];
-		isb->setAttributes(mRuleFile.c_str(), mStartRule.c_str(), mSeed, mShapeName.c_str(), ruleAttr.get(), mResolveMap.get());
-
-		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-		const prt::InitialShape* initShape = isb->createInitialShape(&status);
-		if (status == prt::STATUS_OK && initShape != nullptr) {
-			initShapes.emplace_back(std::move(initShape));
-		}
-		else
-			LOG_WRN << "failed to create initial shape for id " << isIdx << ": " << prt::getStatusDescription(status);
-
 		attribMapBuilders.emplace_back(std::move(amb));
 	}
 
+	std::vector<const prt::InitialShape*> initShapes(numShapes);
+	std::vector<pcu::InitialShapePtr> initialShapePtrs(numShapes);
+	std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(numShapes);
+	setAndCreateInitialShape(attribMapBuilders, shapeAttributes, initShapes, initialShapePtrs, convertedShapeAttrVec);
+
 	assert(attribMapBuilders.size() == initShapes.size());
-	//assert(initShapes.size() == ruleFileInfos.size());
 	assert(initShapes.size() == mInitialShapesBuilders.size());
 
 	// run generate
@@ -134,7 +122,10 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& init
 	if (status != prt::STATUS_OK)
 	{
 		LOG_ERR << "assign: prt::generate() failed with status: '" << prt::getStatusDescription(status) << "' (" << status << ")";
+		return false;
 	}
+
+	// assign values to rule attributes
 	
 	return true;
 }
@@ -244,6 +235,33 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 	catch (...) {
 		LOG_ERR << "caught unknown exception.";
 		return;
+	}
+}
+
+void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
+	const std::vector<pcu::ShapeAttributes>& shapesAttr,
+	std::vector<const prt::InitialShape*>& initShapes,
+	std::vector<pcu::InitialShapePtr>& initShapesPtrs,
+	std::vector<pcu::AttributeMapPtr>& convertedShapeAttr)
+{
+	for (size_t i = 0; i < mInitialShapesBuilders.size(); ++i) {
+		pcu::ShapeAttributes shapeAttr = shapesAttr[0];
+		if (shapesAttr.size() > i) {
+			shapeAttr = shapesAttr[i];
+		}
+
+		// Set to default values
+		std::wstring ruleF = mRuleFile;
+		std::wstring startR = mStartRule;
+		int32_t randomS = mSeed;
+		std::wstring shapeN = mShapeName;
+		extractMainShapeAttributes(aBuilders[i], shapeAttr, ruleF, startR, randomS, shapeN, convertedShapeAttr[i]);
+
+		mInitialShapesBuilders[i]->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(), convertedShapeAttr[i].get(),
+			mResolveMap.get());
+
+		initShapesPtrs[i].reset(mInitialShapesBuilders[i]->createInitialShape());
+		initShapes[i] = initShapesPtrs[i].get();
 	}
 }
 

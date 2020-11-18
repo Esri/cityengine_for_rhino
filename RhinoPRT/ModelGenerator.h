@@ -56,6 +56,12 @@ private:
 		std::vector<pcu::InitialShapePtr>& initShapesPtrs,
 		std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
 
+	void setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
+		const std::vector<pcu::ShapeAttributes>& shapesAttr,
+		std::vector<const prt::InitialShape*>& initShapes,
+		std::vector<pcu::InitialShapePtr>& initShapesPtrs,
+		std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
+
 	void initializeEncoderData(const std::wstring& encName, const pcu::EncoderOptions& encOpt);
 
 	void fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom);
