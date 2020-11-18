@@ -58,6 +58,8 @@ private:
 
 	void initializeEncoderData(const std::wstring& encName, const pcu::EncoderOptions& encOpt);
 
+	void fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom);
+
 	void getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,
 		std::vector<const prt::AttributeMap*>& allEncOpt);
 

@@ -9,7 +9,7 @@
 class AttrEvalCallbacks: public prt::Callbacks
 {
 public:
-	explicit AttrEvalCallbacks(pcu::AttributeMapBuilderVector& ambs, const std::vector<pcu::RuleFileInfoPtr>& ruleFileInfo): mAMBS(ambs), mRuleFileInfo(ruleFileInfo) {}
+	explicit AttrEvalCallbacks(pcu::AttributeMapBuilderVector& ambs, pcu::RuleFileInfoPtr& ruleFileInfo): mAMBS(ambs), mRuleFileInfo(ruleFileInfo) {}
 	~AttrEvalCallbacks() override = default;
 
 	// Inherited via Callbacks
@@ -29,6 +29,6 @@ public:
 
 private:
 	pcu::AttributeMapBuilderVector& mAMBS;
-	const std::vector<pcu::RuleFileInfoPtr>& mRuleFileInfo;
+	pcu::RuleFileInfoPtr& mRuleFileInfo;
 };
 

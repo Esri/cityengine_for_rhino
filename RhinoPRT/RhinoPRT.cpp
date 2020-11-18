@@ -67,6 +67,9 @@ namespace RhinoPRT {
 
 		auto shapeAttr = pcu::ShapeAttributes(rulef, ruleN, shapeN, seed);
 		mAttributes.resize(shapes.size(), shapeAttr);
+
+		// compute the default values of rule attributes for each initial shape
+		mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
 	}
 
 	void RhinoPRTAPI::ClearInitialShapes() {

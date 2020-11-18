@@ -95,19 +95,42 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& init
 
 	const size_t numShapes = initial_geom.size();
 
-	// keep rule file info per initial shape to filter generated attributes.
-	std::vector<pcu::RuleFileInfoPtr> ruleFileInfos(numShapes);
+	fillInitialShapeBuilder(initial_geom);
 
 	// create the initial shapes
-	std::vector<const prt::InitialShape*> initShapes(mInitialShapesBuilders.size());
+	std::vector<const prt::InitialShape*> initShapes;
+	pcu::AttributeMapBuilderVector attribMapBuilders;
 
-	pcu::AttributeMapBuilderVector attribMapBuilders(mInitialShapesBuilders.size());
+	initShapes.reserve(numShapes);
+	attribMapBuilders.reserve(numShapes);
 
+	for (size_t isIdx = 0; isIdx < numShapes; ++isIdx)
+	{
+		pcu::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
+		pcu::AttributeMapPtr ruleAttr(amb->createAttributeMap());
+
+		auto& isb = mInitialShapesBuilders[isIdx];
+		isb->setAttributes(mRuleFile.c_str(), mStartRule.c_str(), mSeed, mShapeName.c_str(), ruleAttr.get(), mResolveMap.get());
+
+		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+		const prt::InitialShape* initShape = isb->createInitialShape(&status);
+		if (status == prt::STATUS_OK && initShape != nullptr) {
+			initShapes.emplace_back(std::move(initShape));
+		}
+		else
+			LOG_WRN << "failed to create initial shape for id " << isIdx << ": " << prt::getStatusDescription(status);
+
+		attribMapBuilders.emplace_back(std::move(amb));
+	}
+
+	assert(attribMapBuilders.size() == initShapes.size());
+	//assert(initShapes.size() == ruleFileInfos.size());
+	assert(initShapes.size() == mInitialShapesBuilders.size());
 
 	// run generate
-	AttrEvalCallbacks aec(attribMapBuilders, ruleFileInfos);
+	AttrEvalCallbacks aec(attribMapBuilders, mRuleFileInfo);
 	const prt::Status status = prt::generate(initShapes.data(), initShapes.size(), nullptr, encs, encsCount, encsOpts, &aec,
-		PRTContext::get()->mPRTCache.get(), nullptr, nullptr, nullptr);
+		PRTContext::get()->mPRTCache.get(), nullptr);
 	if (status != prt::STATUS_OK)
 	{
 		LOG_ERR << "assign: prt::generate() failed with status: '" << prt::getStatusDescription(status) << "' (" << status << ")";
@@ -116,12 +139,7 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& init
 	return true;
 }
 
-void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
-	std::vector<pcu::ShapeAttributes>& shapeAttributes,
-	const std::wstring& geometryEncoderName,
-	const pcu::EncoderOptions& geometryEncoderOptions,
-	pcu::AttributeMapBuilderPtr& aBuilder,
-	std::vector<GeneratedModel>& generated_models)
+void ModelGenerator::fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom)
 {
 	mInitialShapesBuilders.resize(initial_geom.size());
 
@@ -141,6 +159,16 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 			mInitialShapesBuilders[i] = std::move(isb);
 		}
 	}
+}
+
+void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
+	std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	const std::wstring& geometryEncoderName,
+	const pcu::EncoderOptions& geometryEncoderOptions,
+	pcu::AttributeMapBuilderPtr& aBuilder,
+	std::vector<GeneratedModel>& generated_models)
+{
+	fillInitialShapeBuilder(initial_geom);
 
 	if (!mValid) {
 		LOG_ERR << "invalid ModelGenerator instance.";

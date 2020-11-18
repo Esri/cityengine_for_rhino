@@ -60,7 +60,7 @@ prt::Status AttrEvalCallbacks::cgaReportString(size_t isIndex, int32_t shapeID, 
 prt::Status AttrEvalCallbacks::attrBool(size_t isIndex, int32_t shapeID, const wchar_t * key, bool value)
 {
 	if (DBG) LOG_DBG << "attrBool: isIndex = " << isIndex << ", key = " << key << " = " << value;
-	if (mRuleFileInfo[isIndex] && !isHiddenAttribute(mRuleFileInfo[isIndex], key))
+	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
 		mAMBS[isIndex]->setBool(key, value);
 	return prt::STATUS_OK;
 }
@@ -68,7 +68,7 @@ prt::Status AttrEvalCallbacks::attrBool(size_t isIndex, int32_t shapeID, const w
 prt::Status AttrEvalCallbacks::attrFloat(size_t isIndex, int32_t shapeID, const wchar_t * key, double value)
 {
 	if (DBG) LOG_DBG << "attrFloat: isIndex = " << isIndex << ", key = " << key << " = " << value;
-	if (mRuleFileInfo[isIndex] && !isHiddenAttribute(mRuleFileInfo[isIndex], key))
+	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
 		mAMBS[isIndex]->setFloat(key, value);
 	return prt::STATUS_OK;
 }
@@ -76,7 +76,7 @@ prt::Status AttrEvalCallbacks::attrFloat(size_t isIndex, int32_t shapeID, const 
 prt::Status AttrEvalCallbacks::attrString(size_t isIndex, int32_t shapeID, const wchar_t * key, const wchar_t * value)
 {
 	if (DBG) LOG_DBG << "attrString: isIndex = " << isIndex << ", key = " << key << " = " << value;
-	if (mRuleFileInfo[isIndex] && !isHiddenAttribute(mRuleFileInfo[isIndex], key))
+	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
 		mAMBS[isIndex]->setString(key, value);
 	return prt::STATUS_OK;
 }
@@ -84,7 +84,7 @@ prt::Status AttrEvalCallbacks::attrString(size_t isIndex, int32_t shapeID, const
 prt::Status AttrEvalCallbacks::attrBoolArray(size_t isIndex, int32_t shapeID, const wchar_t * key, const bool * ptr, size_t size, size_t nRows)
 {
 	if (DBG) LOG_DBG << "attrBoolArray: isIndex = " << isIndex << ", key = " << key << " = " << *ptr << " size = " << size;
-	if (mRuleFileInfo[isIndex] && !isHiddenAttribute(mRuleFileInfo[isIndex], key))
+	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
 		mAMBS[isIndex]->setBoolArray(key, ptr, size);
 	return prt::STATUS_OK;
 }
@@ -92,7 +92,7 @@ prt::Status AttrEvalCallbacks::attrBoolArray(size_t isIndex, int32_t shapeID, co
 prt::Status AttrEvalCallbacks::attrFloatArray(size_t isIndex, int32_t shapeID, const wchar_t * key, const double * ptr, size_t size, size_t nRows)
 {
 	if (DBG) LOG_DBG << "attrFloatArray: isIndex = " << isIndex << ", key = " << key << " = " << *ptr << " size = " << size;
-	if (mRuleFileInfo[isIndex] && !isHiddenAttribute(mRuleFileInfo[isIndex], key))
+	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
 		mAMBS[isIndex]->setFloatArray(key, ptr, size);
 	return prt::STATUS_OK;
 }
@@ -100,7 +100,7 @@ prt::Status AttrEvalCallbacks::attrFloatArray(size_t isIndex, int32_t shapeID, c
 prt::Status AttrEvalCallbacks::attrStringArray(size_t isIndex, int32_t shapeID, const wchar_t * key, const wchar_t * const * ptr, size_t size, size_t nRows)
 {
 	if (DBG) LOG_DBG << "attrStringArray: isIndex = " << isIndex << ", key = " << key << " = " << *ptr << " size = " << size;
-	if (mRuleFileInfo[isIndex] && !isHiddenAttribute(mRuleFileInfo[isIndex], key))
+	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
 		mAMBS[isIndex]->setStringArray(key, ptr, size);
 	return prt::STATUS_OK;
 }
