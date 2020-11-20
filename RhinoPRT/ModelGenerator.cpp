@@ -125,9 +125,20 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& init
 		return false;
 	}
 
-	// assign values to rule attributes
+	createDefaultValueMaps(attribMapBuilders);
 	
 	return true;
+}
+
+void ModelGenerator::createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv)
+{
+	for each (auto& amb in ambv)
+	{
+		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+		pcu::AttributeMapPtr am{ amb->createAttributeMap(&status) };
+		if (status == prt::STATUS_OK)
+			mDefaultValuesMap.emplace_back(std::move(am));
+	}
 }
 
 void ModelGenerator::fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom)
@@ -339,3 +350,34 @@ void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBu
 std::wstring ModelGenerator::getRuleFile() { return this->mRuleFile; }
 std::wstring ModelGenerator::getStartingRule() { return this->mStartRule; };
 std::wstring ModelGenerator::getDefaultShapeName() { return this->mShapeName; };
+
+bool ModelGenerator::getDefaultValueBoolean(const std::wstring key, bool* value)
+{
+	if (mDefaultValuesMap.empty()) return false;
+
+	for each(const auto& am in mDefaultValuesMap)
+	{
+		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_BOOL)
+		{
+			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+			*value = am->getBool(key.c_str(), &status);
+			if (status == prt::STATUS_OK) return true;
+			else
+			{
+				LOG_ERR << "Impossible to get default value for rule attribute: " << key << " with error: " << prt::getStatusDescription(status);
+			}
+		}
+	}
+
+	return false;
+}
+
+bool ModelGenerator::getDefaultValueNumber(const std::wstring key, double* value)
+{
+	if (mDefaultValuesMap.empty()) return false;
+}
+
+bool ModelGenerator::getDefaultValueText(const std::wstring key, ON_wString* pText)
+{
+	if (mDefaultValuesMap.empty()) return false;
+}

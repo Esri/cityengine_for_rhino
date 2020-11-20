@@ -209,6 +209,21 @@ namespace RhinoPRT {
 	{
 		options.emitMaterial = emitMaterial;
 	}
+
+	bool RhinoPRTAPI::getDefaultValueBoolean(const std::wstring key, bool* value)
+	{
+		return mModelGenerator->getDefaultValueBoolean(key, value);
+	}
+
+	bool RhinoPRTAPI::getDefaultValueNumber(const std::wstring key, double* value)
+	{
+		return mModelGenerator->getDefaultValueNumber(key, value);
+	}
+
+	bool RhinoPRTAPI::getDefaultValueText(const std::wstring key, ON_wString* pText)
+	{
+		return mModelGenerator->getDefaultValueText(key, pText);
+	}
 }
 
 extern "C" {
@@ -595,5 +610,20 @@ extern "C" {
 	RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate)
 	{
 		RhinoPRT::get().setMaterialGeneration(doGenerate);
+	}
+
+	RHINOPRT_API bool GetDefaultValueBoolean(const wchar_t* key, bool* value)
+	{
+		return RhinoPRT::get().getDefaultValueBoolean(key, value);
+	}
+
+	RHINOPRT_API bool GetDefaultValueNumber(const wchar_t* key, double* value)
+	{
+		return RhinoPRT::get().getDefaultValueNumber(key, value);
+	}
+
+	RHINOPRT_API bool GetDefaultValueText(const wchar_t* key, ON_wString* pText)
+	{
+		return RhinoPRT::get().getDefaultValueText(key, pText);
 	}
 }

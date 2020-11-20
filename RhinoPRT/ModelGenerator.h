@@ -32,6 +32,11 @@ public:
 	std::wstring getStartingRule(); 
 	std::wstring getDefaultShapeName();
 	inline const prt::ResolveMap* getResolveMap() { return mResolveMap.get(); };
+	const pcu::AttributeMapPtrVector& getDefaultValueAttributeMap() { return mDefaultValuesMap; };
+
+	bool getDefaultValueBoolean(const std::wstring key, bool* value);
+	bool getDefaultValueNumber(const std::wstring key, double* value);
+	bool getDefaultValueText(const std::wstring key, ON_wString* pText);
 
 private:
 	pcu::RuleFileInfoPtr mRuleFileInfo;
@@ -41,6 +46,9 @@ private:
 	std::vector<std::wstring> mEncodersNames;
 	std::vector<pcu::AttributeMapPtr> mEncodersOptionsPtr;
 	RuleAttributes mRuleAttributes;
+
+	// contains the rule attributes evaluated
+	pcu::AttributeMapPtrVector mDefaultValuesMap;
 
 	std::wstring mRulePkg;
 	std::wstring mRuleFile = L"bin/rule.cgb";
@@ -65,6 +73,8 @@ private:
 	void initializeEncoderData(const std::wstring& encName, const pcu::EncoderOptions& encOpt);
 
 	void fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom);
+
+	void createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv);
 
 	void getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,
 		std::vector<const prt::AttributeMap*>& allEncOpt);

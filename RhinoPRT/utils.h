@@ -68,6 +68,7 @@ namespace pcu {
 	using InitialShapePtr = std::unique_ptr<const prt::InitialShape, PRTDestroyer>;
 	using InitialShapeBuilderPtr = std::unique_ptr<prt::InitialShapeBuilder, PRTDestroyer>;
 	using AttributeMapPtr = std::unique_ptr<const prt::AttributeMap, PRTDestroyer>;
+	using AttributeMapPtrVector = std::vector<AttributeMapPtr>;
 	using AttributeMapBuilderPtr = std::unique_ptr<prt::AttributeMapBuilder, PRTDestroyer>;
 	using AttributeMapBuilderVector = std::vector<AttributeMapBuilderPtr>;
 	using FileOutputCallbacksPtr = std::unique_ptr<prt::FileOutputCallbacks, PRTDestroyer>;

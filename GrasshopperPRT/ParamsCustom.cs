@@ -30,8 +30,20 @@ namespace GrasshopperPRT
             toggle.CreateAttributes();
             toggle.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Location.X - toggle.Attributes.Bounds.Width - 20, 
                                                                 Attributes.Pivot.Y - toggle.Attributes.Bounds.Height/2);
-            toggle.Value = false;
             toggle.Description = Description;
+
+            //Get the default value from the Rhino side.
+            if (Access == GH_ParamAccess.item)
+            {
+                bool val = false;
+                if (PRTWrapper.GetDefaultValueBoolean(Name, ref val))
+                    toggle.Value = val;
+            }
+            else if(Access == GH_ParamAccess.list)
+            {
+                //TODO
+            }
+
 
             var doc = OnPingDocument();
             doc.AddObject(toggle, false);

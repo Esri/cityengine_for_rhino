@@ -109,6 +109,15 @@ namespace GrasshopperPRT
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetMaterialGenerationOption(bool doGenerate);
 
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetDefaultValueBoolean(string key, ref bool value);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetDefaultValueNumber(string key, ref double value);
+
+        [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetDefaultValueText(string key, [In, Out] IntPtr pText);
+
         public static bool AddMesh(List<Mesh> meshes)
         {
             bool status;
