@@ -9,6 +9,7 @@ using Rhino.Geometry;
 using System.Linq;
 using GrasshopperPRT.Properties;
 using System.Windows.Forms;
+using Grasshopper.Kernel.Parameters;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -61,7 +62,7 @@ namespace GrasshopperPRT
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             // The default parameters are a rpk package and a set of geometries.
-            pManager.AddTextParameter(RPK_INPUT_NAME, "RPK",
+            pManager.AddParameter(new Param_FilePath(), RPK_INPUT_NAME, "RPK", 
                 "The path to a runtime package containing the rules to execute on the input geometry.",
                 GH_ParamAccess.item);
             pManager.AddGeometryParameter(GEOM_INPUT_NAME, "Shape",

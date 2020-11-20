@@ -49,7 +49,7 @@ namespace GrasshopperPRT
         public override IGH_Param GetGhSpecializedParam()
         {
             GH_NumberSlider slider = new GH_NumberSlider();
-
+            
             slider.Slider.Minimum = (decimal)mMin;
             slider.Slider.Maximum = (decimal)mMax;
             slider.SetSliderValue(new Decimal((mMin + mMax) * 0.5));
