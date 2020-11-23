@@ -375,9 +375,53 @@ bool ModelGenerator::getDefaultValueBoolean(const std::wstring key, bool* value)
 bool ModelGenerator::getDefaultValueNumber(const std::wstring key, double* value)
 {
 	if (mDefaultValuesMap.empty()) return false;
+
+	for each(const auto& am in mDefaultValuesMap)
+	{
+		if (am->hasKey(key.c_str()))
+		{
+			prt::Status status = prt::STATUS_OK;
+
+			if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_FLOAT)
+			{
+				*value = am->getFloat(key.c_str(), &status);
+				if (status == prt::STATUS_OK) return true;
+			}
+			else if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_INT)
+			{
+				*value = am->getInt(key.c_str(), &status);
+				if (status == prt::STATUS_OK) return true;
+			}
+
+			if(status != prt::STATUS_OK)
+				LOG_ERR << "Impossible to get default value for rule attribute: " << key << " with error: " << prt::getStatusDescription(status);
+		}
+	}
+
+	return false;
 }
 
 bool ModelGenerator::getDefaultValueText(const std::wstring key, ON_wString* pText)
 {
 	if (mDefaultValuesMap.empty()) return false;
+
+	for each(const auto& am in mDefaultValuesMap)
+	{
+		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_STRING)
+		{
+			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+			std::wstring valueStr(am->getString(key.c_str(), &status));
+			if (status == prt::STATUS_OK)
+			{
+				pText->Append(valueStr.c_str(), valueStr.size());
+				if (status == prt::STATUS_OK) return true;
+				else
+				{
+					LOG_ERR << "Impossible to get default value for rule attribute: " << key << " with error: " << prt::getStatusDescription(status);
+				}
+			}
+		}
+	}
+
+	return false;
 }

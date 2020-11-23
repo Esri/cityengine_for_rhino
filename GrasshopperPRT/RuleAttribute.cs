@@ -52,7 +52,8 @@ namespace GrasshopperPRT
             
             slider.Slider.Minimum = (decimal)mMin;
             slider.Slider.Maximum = (decimal)mMax;
-            slider.SetSliderValue(new Decimal((mMin + mMax) * 0.5));
+            slider.Slider.Value = (decimal)((mMin + mMax) * 0.5);
+            
             slider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Float;
 
             if (Utils.isInteger(mStepSize) && Utils.isInteger(mMin) && mStepSize != 0)
