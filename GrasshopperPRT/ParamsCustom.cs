@@ -1,4 +1,5 @@
-﻿using Grasshopper.Kernel;
+﻿using GH_IO.Serialization;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
@@ -236,7 +237,7 @@ namespace GrasshopperPRT
             var pValue = value.NonConstPointer;
 
             // TODO: String of a hexadecimal color does not get converted correctly -> No default value for colors yet.
-            
+
             var doc = OnPingDocument();
             doc.AddObject(param, false);
 

@@ -3,7 +3,7 @@
 #include "Logger.h"
 
 namespace {
-	constexpr bool DBG = true;
+	constexpr bool DBG = false;
 	constexpr const wchar_t* CGA_ANNOTATION_HIDDEN = L"@Hidden";
 
 	bool isHiddenAttribute(const pcu::RuleFileInfoPtr& ruleFileInfo, const wchar_t* key) {

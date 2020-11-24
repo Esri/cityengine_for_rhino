@@ -10,6 +10,7 @@ using System.Linq;
 using GrasshopperPRT.Properties;
 using System.Windows.Forms;
 using Grasshopper.Kernel.Parameters;
+using GH_IO.Serialization;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -25,6 +26,7 @@ namespace GrasshopperPRT
         const string GEOM_INPUT_NAME = "Initial Shapes";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
         const string REPORTS_OUTPUT_NAME = "Reports";
+        const string RPK_PATH_SERIALIZE = "RPK_PATH";
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -279,6 +281,12 @@ namespace GrasshopperPRT
             int index = Params.IndexOfInputParam(parameter.Name);
             if (index != -1)
             {
+                //If the existing parameter is connected to a remote source, the wire connection need to be ported.
+                for(int i = 0; i < Params.Input[index].SourceCount; ++i)
+                {
+                    parameter.AddSource(Params.Input[index].Sources[i]);
+                }
+
                 Params.Input.RemoveAt(index);
                 Params.Input.Insert(index, parameter);
             }
@@ -385,6 +393,19 @@ namespace GrasshopperPRT
         public void VariableParameterMaintenance()
         {
             return;
+        }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetString(RPK_PATH_SERIALIZE, mCurrentRPK);
+            return base.Write(writer);
+        }
+
+        public override bool Read(GH_IReader reader)
+        {
+            if(reader.ChunkExists(RPK_PATH_SERIALIZE))
+                mCurrentRPK = reader.GetString(RPK_PATH_SERIALIZE);
+            return base.Read(reader);
         }
 
         /// <summary>
