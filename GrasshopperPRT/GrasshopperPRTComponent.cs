@@ -164,7 +164,7 @@ namespace GrasshopperPRT
 
             var generatedMeshes = PRTWrapper.GenerateMesh();
 
-            if (mDoGenerateMaterials)
+            if (mDoGenerateMaterials && generatedMeshes != null)
             {
                 GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
                 DA.SetDataTree(1, materials);
