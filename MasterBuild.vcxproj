@@ -16,7 +16,7 @@
   <PropertyGroup>
     <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.3.6821/esri_ce_sdk-2.3.6821-win10-vc142-x86_64-rel-opt.zip</PRTUrl>
     <ArchiveName>esrisdk.zip</ArchiveName>
-    <OutputDirectory>.\x64\Release\</OutputDirectory>
+    <OutputDirectory>.\buid\</OutputDirectory>
   </PropertyGroup>
 
   <Target Name="DownloadPRT" BeforeTargets="Build">
@@ -46,20 +46,18 @@
       <RhinoPRTFiles Include="x64\Release\RhinoPRT.rhp;x64\Release\GrasshopperPRT.gha;x64\Release\RhinoPRT.dll" />
       <Codec Include="x64\Release\codecs_rhino.dll"/>
       <Sdk_Dlls Include=".\esri_sdk\bin\*.dll" />
-      <libDir Include=".\esri_sdk\lib\" />
-      <libs Include="$(libDir)VueExport.dll;$(libDir)com.esri.prt.adaptors.dll;$(libDir)com.esri.prt.codecs.dll" />
+      <libDir Include="$(SolutionDir)esri_sdk\lib\" />
+      <libs Include="$(SolutionDir)esri_sdk\lib\VueExport.dll;$(SolutionDir)esri_sdk\lib\com.esri.prt.adaptors.dll;$(SolutionDir)esri_sdk\lib\com.esri.prt.codecs.dll" />
     </ItemGroup>
     <Message Importance="High" Text="Copying dlls..." />
     <!-- Copy SDK files to Release folder -->
     <Copy
       SourceFiles="@(Sdk_Dlls)"
-      DestinationFolder=".\x64\Release"
+      DestinationFolder=".\build\bin"
     />
-    <!-- Copy RhinoPRT files to package folder -->
     <Copy
-    />
-    <!-- Copy SDK files to package folder -->
-    <Copy
+      SourceFiles="@(libs)"
+      DestinationFolder=".\build\lib"
     />
   </Target>
 

@@ -21,20 +21,17 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
 	// create the list of extension path dynamicaly using getDllLocation
 	std::wstring dll_location = pcu::getDllLocation();
 
-	std::wstring rhino_codecs_dir = dll_location.append(L"codecs_rhino.dll");
-
-	// Get the esri_sdk location
-	auto id = dll_location.find(L"x64");
+	// build root dir
+	auto id = dll_location.find(L"bin");
 	if (id == std::wstring::npos) {
-		LOG_ERR << L"Invalid target platform, must be x64.";
+		LOG_ERR << L"Invalid build directory layout.";
 		return;
 	}
-	std::wstring root_dir = dll_location.substr(0, id);
-	std::wstring esri_sdk_dir = root_dir.append(L"esri_sdk\\lib");
-	const wchar_t* prt_path[2] = { esri_sdk_dir.c_str(), rhino_codecs_dir.c_str() };
+	std::wstring esri_sdk_dir = dll_location.substr(0, id).append(L"lib");
+	const wchar_t* prt_path[1] = { esri_sdk_dir.c_str() };
 	
 	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-	mPRTHandle.reset(prt::init(prt_path, 2, minimalLogLevel, &status));
+	mPRTHandle.reset(prt::init(prt_path, 1, minimalLogLevel, &status));
 	LOG_INF << prt::getStatusDescription(status);
 
 	alreadyInitialized = true;
