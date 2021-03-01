@@ -24,6 +24,7 @@ namespace GrasshopperPRT
         const string GEOM_INPUT_NAME = "Initial Shapes";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
         const string REPORTS_OUTPUT_NAME = "Reports";
+        const string RPK_PATH_SERIALIZE = "RPK_PATH";
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -61,7 +62,7 @@ namespace GrasshopperPRT
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             // The default parameters are a rpk package and a set of geometries.
-            pManager.AddTextParameter(RPK_INPUT_NAME, "RPK",
+            pManager.AddParameter(new Param_FilePath(), RPK_INPUT_NAME, "RPK", 
                 "The path to a runtime package containing the rules to execute on the input geometry.",
                 GH_ParamAccess.item);
             pManager.AddGeometryParameter(GEOM_INPUT_NAME, "Shape",
@@ -161,7 +162,7 @@ namespace GrasshopperPRT
 
             var generatedMeshes = PRTWrapper.GenerateMesh();
 
-            if (mDoGenerateMaterials)
+            if (mDoGenerateMaterials && generatedMeshes != null)
             {
                 GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
                 DA.SetDataTree(1, materials);
@@ -278,6 +279,12 @@ namespace GrasshopperPRT
             int index = Params.IndexOfInputParam(parameter.Name);
             if (index != -1)
             {
+                //If the existing parameter is connected to a remote source, the wire connection need to be ported.
+                for(int i = 0; i < Params.Input[index].SourceCount; ++i)
+                {
+                    parameter.AddSource(Params.Input[index].Sources[i]);
+                }
+
                 Params.Input.RemoveAt(index);
                 Params.Input.Insert(index, parameter);
             }
@@ -384,6 +391,19 @@ namespace GrasshopperPRT
         public void VariableParameterMaintenance()
         {
             return;
+        }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetString(RPK_PATH_SERIALIZE, mCurrentRPK);
+            return base.Write(writer);
+        }
+
+        public override bool Read(GH_IReader reader)
+        {
+            if(reader.ChunkExists(RPK_PATH_SERIALIZE))
+                mCurrentRPK = reader.GetString(RPK_PATH_SERIALIZE);
+            return base.Read(reader);
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using Grasshopper.Kernel.Special;
 
 namespace GrasshopperPRT
 {
@@ -23,6 +24,10 @@ namespace GrasshopperPRT
 
         public virtual bool IsColor() { return false; }
 
+        public virtual IGH_Param GetGhSpecializedParam() { return new Param_GenericObject(); }
+
+        public AttributeAnnotation GetAnnotationType() { return mAnnotType; }
+
         protected AttributeAnnotation mAnnotType;
     }
 
@@ -30,10 +35,10 @@ namespace GrasshopperPRT
     {
         public AnnotationRange(double min, double max, double stepsize = 0, bool restricted=true): base(AttributeAnnotation.A_RANGE)
         {
-            this.mMin = min;
-            this.mMax = max;
-            this.mStepSize = stepsize;
-            this.mRestricted = restricted;
+            mMin = min;
+            mMax = max;
+            mStepSize = stepsize;
+            mRestricted = restricted;
         }
 
         public override string GetDescription()
@@ -41,10 +46,26 @@ namespace GrasshopperPRT
             return "Range: Min: " + mMin + " Max: " + mMax + ((mStepSize > 0)? " StepSize: " + mStepSize.ToString() : "") + (mRestricted? " Restricted" : "");
         }
 
-        double mMin;
-        double mMax;
-        double mStepSize;
-        bool mRestricted;
+        public override IGH_Param GetGhSpecializedParam()
+        {
+            GH_NumberSlider slider = new GH_NumberSlider();
+            
+            slider.Slider.Minimum = (decimal)mMin;
+            slider.Slider.Maximum = (decimal)mMax;
+            slider.Slider.Value = (decimal)((mMin + mMax) * 0.5);
+            
+            slider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Float;
+
+            if (Utils.isInteger(mStepSize) && Utils.isInteger(mMin) && mStepSize != 0)
+                slider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Integer;
+
+            return slider;
+        }
+
+        private double mMax;
+        private double mMin;
+        private double mStepSize;
+        private bool mRestricted;
     }
 
     public class AnnotationEnum<T>: Annotation
@@ -59,6 +80,18 @@ namespace GrasshopperPRT
             string concatenation = mEnumList.Aggregate<T, string>("", (accu, val) => accu.ToString() + " - " + val.ToString() + "\n");
 
             return "Enumeration, allowed values are:\n" + concatenation;
+        }
+
+        public override IGH_Param GetGhSpecializedParam()
+        {
+            GH_ValueList vList = new GH_ValueList();
+            vList.ListItems.Clear();
+            foreach (var item in mEnumList)
+            {
+                vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"",item.ToString())));
+            }
+
+            return vList;
         }
 
         private T[] mEnumList;
@@ -84,6 +117,11 @@ namespace GrasshopperPRT
         {
             return "This attribute accepts a file path.";
         }
+
+        public override IGH_Param GetGhSpecializedParam()
+        {
+            return new Param_FilePath();
+        }
     }
 
     public class AnnotationDir: Annotation
@@ -93,6 +131,11 @@ namespace GrasshopperPRT
         public override string GetDescription()
         {
             return "This attribute accepts a folder path.";
+        }
+
+        public override IGH_Param GetGhSpecializedParam()
+        {
+            return new Param_FilePath();
         }
     }
 
@@ -124,13 +167,13 @@ namespace GrasshopperPRT
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case AnnotationArgumentType.AAT_BOOL:
                     {
-                        Param_Boolean param_bool = new Param_Boolean
+                        BooleanRuleAttribute param_bool = new BooleanRuleAttribute(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
                             Description = GetDescriptions(),
                             Optional = true,
-                            Access = GetAccess(),
+                            Access = GetAccess()
                         };
 
                         return param_bool;
@@ -139,7 +182,7 @@ namespace GrasshopperPRT
                 case AnnotationArgumentType.AAT_INT:
                 case AnnotationArgumentType.AAT_FLOAT:
                     {
-                        Param_Number param_number = new Param_Number
+                        NumberRuleAttribute param_number = new NumberRuleAttribute(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -156,7 +199,7 @@ namespace GrasshopperPRT
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            Param_Colour param_color = new Param_Colour
+                            ColourRuleAttribute param_color = new ColourRuleAttribute(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -168,7 +211,7 @@ namespace GrasshopperPRT
                         }
                         else
                         {
-                            Param_String param_str = new Param_String
+                            StringRuleAttribute param_str = new StringRuleAttribute(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,

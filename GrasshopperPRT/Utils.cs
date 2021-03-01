@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using System.Runtime.InteropServices;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel;
+using Grasshopper.Kernel.Special;
 
 namespace GrasshopperPRT
 {
@@ -64,6 +66,36 @@ namespace GrasshopperPRT
                 ghColor.Value.B.ToString("X2");
 
             return hexStr;
+        }
+
+        public static bool isInteger(double d)
+        {
+            return Math.Abs(d % 1) <= (Double.Epsilon * 100);
+        }
+
+        public static void AddToGroup(GH_Document doc, string groupName, Guid guid)
+        {
+            GH_Group grp;
+
+            var group = doc.Objects.OfType<GH_Group>().Where(gr => gr.Name == groupName);
+            if (group.Count() == 0)
+            {
+                grp = new GH_Group();
+                grp.CreateAttributes();
+                grp.Name = groupName;
+                grp.NickName = groupName;
+                grp.Colour = System.Drawing.Color.Aquamarine;
+                grp.Border = GH_GroupBorder.Box;
+                doc.AddObject(grp, false);
+            }
+            else if (group.Count() == 1)
+            {
+                grp = group.First();
+            }
+            else return;
+
+            grp.AddObject(guid);
+            grp.ExpireCaches();
         }
     }
 }

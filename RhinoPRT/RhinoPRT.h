@@ -59,6 +59,10 @@ namespace RhinoPRT {
 
 		void setMaterialGeneration(bool emitMaterial);
 
+		bool getDefaultValueBoolean(const std::wstring key, bool* value);
+		bool getDefaultValueNumber(const std::wstring key, double* value);
+		bool getDefaultValueText(const std::wstring key, ON_wString* pText);
+
 	private:
 
 		std::vector<InitialShape> mShapes;
@@ -147,6 +151,11 @@ extern "C" {
 
 	RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate);
 
+	RHINOPRT_API bool GetDefaultValueBoolean(const wchar_t* key, bool* value);
+	
+	RHINOPRT_API bool GetDefaultValueNumber(const wchar_t* key, double* value);
+	
+	RHINOPRT_API bool GetDefaultValueText(const wchar_t* key, ON_wString* pText);
 }
 
 #endif RHINOPRT
