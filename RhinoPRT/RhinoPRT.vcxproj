@@ -191,7 +191,8 @@
     <PostBuildEvent>
       <Command>del $(OutDir)$(ProjectName).exp
 del $(OutDir)$(ProjectName).lib
-del $(OutDir)$(ProjectName).pdb</Command>
+del $(OutDir)$(ProjectName).pdb
+del $(SolutionDir)build\lib\codecs_rhino.lib</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_gh|x64'">
@@ -225,7 +226,8 @@ del $(OutDir)$(ProjectName).pdb</Command>
     <PostBuildEvent>
       <Command>del $(OutDir)$(ProjectName).exp
 del $(OutDir)$(ProjectName).lib
-del $(OutDir)$(ProjectName).pdb</Command>
+del $(OutDir)$(ProjectName).pdb
+del $(Solutiondir)build\lib\codecs_rhino.lib</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
