@@ -28,10 +28,10 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
 		return;
 	}
 	std::wstring esri_sdk_dir = dll_location.substr(0, id).append(L"lib");
-	const wchar_t* prt_path[1] = { esri_sdk_dir.c_str() };
+	std::vector<const wchar_t*> prt_path = { esri_sdk_dir.c_str() };
 	
 	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-	mPRTHandle.reset(prt::init(prt_path, 1, minimalLogLevel, &status));
+	mPRTHandle.reset(prt::init(prt_path.data(), prt_path.size(), minimalLogLevel, &status));
 	LOG_INF << prt::getStatusDescription(status);
 
 	alreadyInitialized = true;

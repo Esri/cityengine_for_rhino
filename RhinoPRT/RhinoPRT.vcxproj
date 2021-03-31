@@ -193,8 +193,7 @@
     <PostBuildEvent>
       <Command>del $(OutDir)$(ProjectName).exp
 del $(OutDir)$(ProjectName).lib
-del $(OutDir)$(ProjectName).pdb
-del $(SolutionDir)build\lib\codecs_rhino.lib</Command>
+del $(OutDir)$(ProjectName).pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_gh|x64'">
