@@ -21,6 +21,7 @@ mono_crash.*
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
+Build/
 
 x86/
 [Aa][Rr][Mm]/
@@ -350,6 +351,7 @@ MigrationBackup/
 
 esri_sdk
 esri_sdk/*
+esrisdk.zip
 
 codecs_rhino/x64/
 RhinoPRT/x64/

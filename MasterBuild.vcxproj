@@ -15,8 +15,7 @@
 
   <PropertyGroup>
     <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.3.6821/esri_ce_sdk-2.3.6821-win10-vc142-x86_64-rel-opt.zip</PRTUrl>
-    <ArchiveName>esrisdk.zip</ArchiveName>
-    <OutputDirectory>.\buid\</OutputDirectory>
+    <OutputDirectory>.\build\</OutputDirectory>
     <DownloadDir>$(SolutionDir)Downloads\</DownloadDir>
   </PropertyGroup>
 
@@ -34,7 +33,7 @@
 
   <Target Name="Build">
     <Message Importance="High" Text="Starting Build" />
-    <MSBuild Projects="codecs_rhino\codecs_rhino.vcxproj" Targets="Build" />
+    <MSBuild Projects="codecs_rhino\codecs_rhino.vcxproj" Targets="Build" Properties="Configuration=Release" />
     <MSBuild Projects="RhinoPRT\RhinoPRT.vcxproj" Targets="Build" Properties="Configuration=Release" />
     <MSBuild Projects="RhinoPRT\RhinoPRT.vcxproj" Targets="Build" Properties="Configuration=Release_gh" />
     <MSBuild Projects="GrasshopperPRT\GrasshopperPRT.csproj" Targets="Build" Properties="Configuration=Release_gh;Platform=AnyCPU"/>
@@ -43,14 +42,11 @@
 
   <Target Name="CopyDLLs" AfterTargets="Build">
     <ItemGroup>
-      <RhinoPRTFiles Include="x64\Release\RhinoPRT.rhp;x64\Release\GrasshopperPRT.gha;x64\Release\RhinoPRT.dll" />
-      <Codec Include="x64\Release\codecs_rhino.dll"/>
       <Sdk_Dlls Include=".\esri_sdk\bin\*.dll" />
-      <libDir Include="$(SolutionDir)esri_sdk\lib\" />
       <libs Include="$(SolutionDir)esri_sdk\lib\VueExport.dll;$(SolutionDir)esri_sdk\lib\com.esri.prt.adaptors.dll;$(SolutionDir)esri_sdk\lib\com.esri.prt.codecs.dll" />
     </ItemGroup>
     <Message Importance="High" Text="Copying dlls..." />
-    <!-- Copy SDK files to Release folder -->
+    <!-- Copy SDK files to build folder -->
     <Copy
       SourceFiles="@(Sdk_Dlls)"
       DestinationFolder=".\build\bin"
