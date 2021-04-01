@@ -112,9 +112,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\lib</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_gh|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\lib</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -168,7 +170,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
@@ -193,8 +195,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <PRTVersionFile Include="$(SolutionDir)esri_sdk\cmake\prtVersion.properties"/>
-    <VersionHeader Include="prtversion.h"/>
+    <PRTVersionFile Include="$(SolutionDir)esri_sdk\cmake\prtVersion.properties" />
+    <VersionHeader Include="prtversion.h" />
   </ItemGroup>
   <Target Name="ReadPRTVersion" BeforeTargets="ClCompile">
     <ReadLinesFromFile File="@(PRTVersionFile)">
@@ -202,16 +204,12 @@
     </ReadLinesFromFile>
     <PropertyGroup>
       <MyPRTVersions>
-        @(PRTVersions->Replace('=', ' ')->'#define %(FileName)')
+        @(PRTVersions-&gt;Replace('=', ' ')-&gt;'#define %(FileName)')
       </MyPRTVersions>
     </PropertyGroup>
-    <WriteLinesToFile
-      File="@(VersionHeader)"
-      Lines="$(MyPRTVersions)"
-      Overwrite="true"/>
-    <Message Importance="High" Text="Item read: $(MyPRTVersions)"/>
+    <WriteLinesToFile File="@(VersionHeader)" Lines="$(MyPRTVersions)" Overwrite="true" />
+    <Message Importance="High" Text="Item read: $(MyPRTVersions)" />
   </Target>
-
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -234,6 +232,12 @@
       <AdditionalLibraryDirectories>$(SolutionDir)esri_sdk\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>com.esri.prt.core.lib;glutess.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>del $(OutDir)$(ProjectName).exp
+del $(OutDir)$(ProjectName).iobj
+del $(OutDir)$(ProjectName).ipdb
+del $(OutDir)$(ProjectName).pdb</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_gh|x64'">
     <ClCompile>
