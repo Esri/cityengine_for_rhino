@@ -423,9 +423,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 		for (const auto& mesh : meshes)
 		{
-			numCoords += mesh->getVertexCoords().size();
-			numNormalCoords += mesh->getVertexNormalsCoords().size();
-			numFaceCounts += mesh->getFaceCount();
+			numCoords += static_cast<uint32_t>(mesh->getVertexCoords().size());
+			numNormalCoords += static_cast<uint32_t>(mesh->getVertexNormalsCoords().size());
+			numFaceCounts += static_cast<uint32_t>(mesh->getFaceCount());
 
 			const auto& vtxCnts = mesh->getFaceVertexCounts();
 			numIndices = std::accumulate(vtxCnts.begin(), vtxCnts.end(), numIndices);
@@ -485,7 +485,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 				if (numUVSets > 0)
 				{
-					for (auto uvSet = 0; uvSet < uvs.size(); uvSet++) {
+					for (uint32_t uvSet = 0; uvSet < uvs.size(); uvSet++) {
 						// append texture coordinates
 						const prtx::DoubleVector& currUVs = (uvSet < numUVSets) ? mesh->getUVCoords(uvSet) : EMPTY_UVS;
 						const auto& src = currUVs.empty() ? uvs0 : currUVs;
@@ -505,7 +505,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 #endif
 
 						// append uv vertex indices
-						for (uint32_t faceId = 0, faceCount = faceUVCounts.size(); faceId < faceCount; ++faceId) {
+						for (uint32_t faceId = 0, faceCount = static_cast<uint32_t>(faceUVCounts.size()); faceId < faceCount; ++faceId) {
 							const uint32_t* faceUVIdx0 = (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
 							const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVIndices(faceId, uvSet) : faceUVIdx0;
 							const uint32_t faceUVCnt = faceUVCounts[faceId];
@@ -520,7 +520,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 
 						}
 
-						uvIndexBases[uvSet] += src.size() / 2u;
+						uvIndexBases[uvSet] += static_cast<uint32_t>(src.size()) / 2u;
 					}
 				}
 				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys());
@@ -549,7 +549,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 			puvs.first.data(), puvs.second.data(),
 			puvCounts.first.data(), puvCounts.second.data(),
 			puvIndices.first.data(), puvIndices.second.data(),
-			uvs.size(),
+			static_cast<uint32_t>(uvs.size()),
 
 			faceRanges.data(), faceRanges.size(),
 			matAttrMap.empty() ? nullptr : matAttrMap.data(), material_count
