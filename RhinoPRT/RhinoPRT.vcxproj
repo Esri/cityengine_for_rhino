@@ -193,8 +193,9 @@
       </Inputs>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del $(OutDir)$(ProjectName).exp
+del $(OutDir)$(ProjectName).lib
+del $(OutDir)$(ProjectName).pdb</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_gh|x64'">
