@@ -19,7 +19,7 @@ RHINO_PLUG_IN_DECLARE
 
 // Rhino plug-in name
 // Provide a short, friendly name for this plug-in.
-RHINO_PLUG_IN_NAME(L"RhinoPRT");
+RHINO_PLUG_IN_NAME(L"Puma");
 
 // Rhino plug-in id
 // Provide a unique uuid for this plug-in.

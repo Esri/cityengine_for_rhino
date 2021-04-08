@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("GrasshopperPRT")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Alllows the use of CityEngine's procedural engine inside Grasshopper.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Esri")]
 [assembly: AssemblyProduct("GrasshopperPRT")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]

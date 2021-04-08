@@ -1,0 +1,14 @@
+---
+name: Puma
+version: 0.6.0.0
+authors:
+  - Loris Aiulfi
+  - Simon Haegler
+description: >
+  Puma allows the use of CityEngine's procedural generation engine inside of Rhino/Grasshopper.
+url: http://www.esri.com
+keywords:
+  - CityEngine
+  - architecture
+  - procedural
+  - guid:1B8E4CAD-7A8F-4F05-B0A2-3BE0EC98C800
