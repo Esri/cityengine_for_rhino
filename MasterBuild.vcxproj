@@ -49,7 +49,7 @@
     <!-- Copy SDK files to build folder -->
     <Copy
       SourceFiles="@(Sdk_Dlls)"
-      DestinationFolder=".\build\bin"
+      DestinationFolder=".\build"
     />
     <Copy
       SourceFiles="@(libs)"

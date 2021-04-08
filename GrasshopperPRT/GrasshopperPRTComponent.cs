@@ -9,8 +9,8 @@ using Rhino.Geometry;
 using System.Linq;
 using GrasshopperPRT.Properties;
 using System.Windows.Forms;
-using Grasshopper.Kernel.Parameters;
 using GH_IO.Serialization;
+using Grasshopper.Kernel.Parameters;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -37,10 +37,10 @@ namespace GrasshopperPRT
         string mCurrentRPK = "";
 
         /// <summary>
-        /// Each implementation of GH_Component must provide a public 
+        /// Each implementation of GH_Component must provide a public
         /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear, 
-        /// Subcategory the panel. If you use non-existing tab or panel names, 
+        /// Category represents the Tab in which the component will appear,
+        /// Subcategory the panel. If you use non-existing tab or panel names,
         /// new tabs/panels will automatically be created.
         /// </summary>
         public GrasshopperPRTComponent()
@@ -64,7 +64,7 @@ namespace GrasshopperPRT
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             // The default parameters are a rpk package and a set of geometries.
-            pManager.AddParameter(new Param_FilePath(), RPK_INPUT_NAME, "RPK", 
+            pManager.AddParameter(new Param_FilePath(), RPK_INPUT_NAME, "RPK",
                 "The path to a runtime package containing the rules to execute on the input geometry.",
                 GH_ParamAccess.item);
             pManager.AddGeometryParameter(GEOM_INPUT_NAME, "Shape",
@@ -84,17 +84,17 @@ namespace GrasshopperPRT
 
             pManager.AddGenericParameter("Materials", "M", "The cga materials for preview", GH_ParamAccess.tree);
             pManager.AddGenericParameter(REPORTS_OUTPUT_NAME, REPORTS_OUTPUT_NAME,
-                "The cga reports. Each branch of the datatree contains the reports for a single initial shape.", 
+                "The cga reports. Each branch of the datatree contains the reports for a single initial shape.",
                 GH_ParamAccess.tree);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
+        /// <param name="DA">The DA object can be used to retrieve data from input parameters and
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
-        { 
+        {
             // Get default inputs
 
             // RPK path is a single item.
@@ -169,7 +169,7 @@ namespace GrasshopperPRT
                 GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
                 DA.SetDataTree(1, materials);
             }
-            
+
             OutputReports(DA, generatedMeshes);
             DA.SetDataTree(0, generatedMeshes);
         }
@@ -192,7 +192,7 @@ namespace GrasshopperPRT
         private void OutputReports(IGH_DataAccess DA, GH_Structure<GH_Mesh> gh_meshes)
         {
             GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
-            
+
             int count = gh_meshes.DataCount;
             for(int meshID = 0; meshID < count; ++meshID)
             {
@@ -422,8 +422,8 @@ namespace GrasshopperPRT
         }
 
         /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
+        /// Each component must have a unique Guid to identify it.
+        /// It is vital this Guid doesn't change otherwise old ghx files
         /// that use the old ID will partially fail during loading.
         /// </summary>
         public override Guid ComponentGuid
