@@ -10,7 +10,7 @@ namespace GrasshopperPRT
         {
             get
             {
-                return "GrasshopperPRT";
+                return "Puma";
             }
         }
         public override Bitmap Icon

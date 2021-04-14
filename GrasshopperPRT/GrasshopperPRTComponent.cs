@@ -44,7 +44,7 @@ namespace GrasshopperPRT
         /// new tabs/panels will automatically be created.
         /// </summary>
         public GrasshopperPRTComponent()
-          : base("GrasshopperPRT", "GHPRT", "Version: " + PRTWrapper.GetVersion() + ". " +
+          : base("Puma", "Puma", "Version: " + PRTWrapper.GetVersion() + ". " +
               "Provide access to the CityEngine PRT engine in Grasshopper.",
               "Special", "Esri")
         {

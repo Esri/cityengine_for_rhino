@@ -1,16 +1,15 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GrasshopperPRT")]
-[assembly: AssemblyDescription("Alllows the use of CityEngine's procedural engine inside Grasshopper.")]
+[assembly: AssemblyTitle("Puma")]
+[assembly: AssemblyDescription("Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Esri")]
-[assembly: AssemblyProduct("GrasshopperPRT")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyProduct("Puma")]
+[assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
