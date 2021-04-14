@@ -56,6 +56,6 @@ with open(version_file, 'r') as file:
 
 version_str: str = f'v{v_major}.{v_minor}.{v_revision}.{v_build}'
 
-with zipfile.ZipFile(f'Package_output/RhinoPRT_{version_str}.rhi', 'w') as myZip:
+with zipfile.ZipFile(f'Package_output/Puma_{version_str}.rhi', 'w') as myZip:
     # Copy the folders bin and lib of Esri sdk
     copytree(build_dir, myZip)
