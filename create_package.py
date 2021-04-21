@@ -80,6 +80,10 @@ if package_type == 'both' or package_type == 'yak':
     shutil.copyfile(os.path.join(build_dir, 'puma-0.6.0-rh6_34-any.yak'),
                     os.path.join(build_dir, 'puma-0.6.0-rh7-any.yak'))
 
+    # move both yak to the package_output directory
+    shutil.move('puma-0.6.0-rh6_34-any.yak', os.path.join(package_dir, 'puma-0.6.0-rh6_34-any.yak'))
+    shutil.move('puma-0.6.0-rh7-any.yak', os.path.join(package_dir, 'puma-0.6.0-rh7-any.yak'))
+
     # cleaning
     os.remove('manifest.yml')
     os.chdir(curr_dir)

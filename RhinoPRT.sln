@@ -20,8 +20,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterBuild", "MasterBuild.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BF2FECF2-F945-462D-A543-86DBCE140D48}"
 	ProjectSection(SolutionItems) = preProject
-		CreateRHIPackage.py = CreateRHIPackage.py
-		CreateYAKPackage.bat = CreateYAKPackage.bat
+		create_package.py = create_package.py
 		manifest.yml = manifest.yml
 		README.md = README.md
 	EndProjectSection
