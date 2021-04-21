@@ -20,7 +20,7 @@ namespace GrasshopperPRT
         const string REPORTS_FILTERED = "Reports";
 
         /// <summary>
-        /// Initializes a new instance of the GrasshopperPRTReports class.
+        /// Initializes a new instance of the PumaCgaReports class.
         /// </summary>
         public GrasshopperPRTReports()
           : base("PumaCgaReports", "CGA Reports display",
