@@ -4,6 +4,7 @@ import re
 import shutil
 import sys
 
+
 # copy a directory and all its content into a given ZipFile.
 def copytree(src, dst: zipfile.ZipFile, arch_path: str = '', symlinks=False, ignore: list = []):
     for item in os.listdir(src):
@@ -76,13 +77,22 @@ if package_type == 'both' or package_type == 'yak':
     os.chdir(build_dir)
     os.system('cmd /c ""C:\Program Files\Rhino 7\System\Yak.exe" build"')
 
+    # Get the file created: could change depending on Rhino/GH versions.
+    yak_filename: str = ''
+    for file in os.listdir(build_dir):
+        if file.endswith('.yak'):
+            yak_filename = file
+
+    if len(yak_filename) == 0:
+        raise IOError('Error: the yak package could not be created.')
+
     # create rhino 7 yak package
-    shutil.copyfile(os.path.join(build_dir, f'puma-{v_major}.{v_minor}.{v_revision}-rh6_34-any.yak'),
+    shutil.copyfile(os.path.join(build_dir, yak_filename),
                     os.path.join(build_dir, f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak'))
 
     # move both yak to the package_output directory
-    shutil.move(f'puma-{v_major}.{v_minor}.{v_revision}-rh6_34-any.yak',
-                os.path.join(package_dir, f'puma-{v_major}.{v_minor}.{v_revision}-rh6_34-any.yak'))
+    shutil.move(yak_filename,
+                os.path.join(package_dir, yak_filename))
     shutil.move(f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak',
                 os.path.join(package_dir, f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak'))
 

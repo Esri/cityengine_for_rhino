@@ -20,9 +20,9 @@ To install and build the Plugins:
 After having built the plugins, they have to be installed in Rhino and Grasshopper respectively.
 
 8. Start Rhino. In the menu bar, go to _Tools -> Options -> Rhino Options -> Plug-ins_.
-9. Click on _install_ and select the **RhinoPRT.rhp** file located in _path-to-project-dir/x64/Release_.
+9. Click on _install_ and select the **RhinoPRT.rhp** file located in _path-to-project-dir/build/RhinoPRT.rhp_.
 10. To install the grasshopper plugin, run the commpand _GrasshopperDeveloperSettings_ in Rhino.
-11. In the window that opens, add the folder containing **GrasshopperPRT.gha**: _path-to-project-dir/x64/Release_gh_. Make sure the _Memory load _.GHA ...\* box is unticked.
+11. In the window that opens, add the folder containing **GrasshopperPRT.gha**: _path-to-project-dir/build/RhinoPRT.gha_. Make sure the _Memory load _.GHA ...\* box is unticked.
 12. Confirm, then close Rhino.
 
 #### Starting the plugins
