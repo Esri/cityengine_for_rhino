@@ -160,7 +160,7 @@ namespace GrasshopperPRT
             if(!PRTWrapper.AddMesh(meshes)) return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
-            fillAttributesFromNode(DA);
+            FillAttributesFromNode(DA, meshes.Count);
 
             var generatedMeshes = PRTWrapper.GenerateMesh();
 
@@ -294,80 +294,121 @@ namespace GrasshopperPRT
                 Params.RegisterInputParam(parameter);
         }
 
-        private void fillAttributesFromNode(IGH_DataAccess DA)
+        private void setAttributeOfShapes(IGH_DataAccess DA, int shapeCount, RuleAttribute attribute)
+        {
+            GH_Structure<IGH_Goo> valueTree;
+            if (!DA.GetDataTree<IGH_Goo>(attribute.mFullName, out valueTree)) return;
+            if (valueTree.IsEmpty) return;
+
+            int shapeId = 0;
+
+            if(attribute.mAttribType == AnnotationArgumentType.AAT_BOOL_ARRAY ||
+               attribute.mAttribType == AnnotationArgumentType.AAT_FLOAT_ARRAY ||
+               attribute.mAttribType == AnnotationArgumentType.AAT_STR_ARRAY)
+            {
+                // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
+                while(shapeCount > valueTree.Branches.Count)
+                {
+                    valueTree.Branches.Add(valueTree.Branches.Last());
+                }
+
+                foreach (List<IGH_Goo> branch in valueTree.Branches)
+                {
+                    SetRuleAttributeArray(shapeId, attribute, branch);  
+                    shapeId++;
+                }
+            }
+            else
+            {
+                foreach (IGH_Goo value in valueTree.AllData(false))
+                {
+                    if (value.IsValid)
+                    {
+                        SetRuleAttribute(shapeId, attribute, value);
+                    }
+                    shapeId++;
+                }
+            }
+        }
+
+        private void SetRuleAttributeArray(int shapeId, RuleAttribute attribute, List<IGH_Goo> values)
+        {
+            switch (attribute.mAttribType)
+            {
+                case AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                    {
+                        List<double> doubleList = values.Cast<double>().ToList();
+                        PRTWrapper.SetRuleAttributeDoubleArray(shapeId, attribute.mRuleFile, attribute.mFullName, doubleList);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_BOOL_ARRAY:
+                    {
+                        List<Boolean> boolList = values.Cast<bool>().ToList();
+                        PRTWrapper.SetRuleAttributeBoolArray(shapeId, attribute.mRuleFile, attribute.mFullName, boolList);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_STR_ARRAY:
+                    {
+                        List<string> stringList = values.Cast<string>().ToList();
+                        PRTWrapper.SetRuleAttributeStringArray(shapeId, attribute.mRuleFile, attribute.mFullName, stringList);
+                        return;
+                    }
+                default:
+                    return;
+            }
+        }
+
+        private void SetRuleAttribute(int shapeId, RuleAttribute attribute, IGH_Goo value) { 
+            switch (attribute.mAttribType)
+            {
+                case AnnotationArgumentType.AAT_FLOAT:
+                    {
+                        if (!value.CastTo<GH_Number>(out GH_Number number)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Number");
+                        PRTWrapper.SetRuleAttributeDouble(shapeId, attribute.mRuleFile, attribute.mFullName, number.Value);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_BOOL:
+                    {
+                        if (!value.CastTo<GH_Boolean>(out GH_Boolean boolean)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Boolean");
+                        PRTWrapper.SetRuleAttributeBoolean(shapeId, attribute.mRuleFile, attribute.mFullName, boolean.Value);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_INT:
+                    {
+                        if (!value.CastTo<GH_Integer>(out GH_Integer integer)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Integer"); 
+                        PRTWrapper.SetRuleAttributeInteger(shapeId, attribute.mRuleFile, attribute.mFullName, integer.Value);
+                        return;
+                    }
+                case AnnotationArgumentType.AAT_STR:
+                    {
+                        string text = null;
+                        if (attribute.mAnnotations.Any(x => x.IsColor()))
+                        {
+         
+                            if (!value.CastTo<GH_Colour>(out GH_Colour colour)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Colour");
+                            text = Utils.hexColor(colour);
+                        }
+                        else
+                        {
+                            if (!value.CastTo<GH_String>(out GH_String gH_String)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_String");
+                            text = gH_String.Value;
+                        }
+
+                        PRTWrapper.SetRuleAttributeString(shapeId, attribute.mRuleFile, attribute.mFullName, text);
+                        return;
+                    }
+                default:
+                    return;
+            }
+        }
+
+        private void FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
         {
             for (int idx = 0; idx < mRuleAttributes.Length; ++idx)
             {
                 RuleAttribute attrib = mRuleAttributes[idx];
-
-                switch (attrib.mAttribType)
-                {
-                    case AnnotationArgumentType.AAT_FLOAT:
-                        {
-                            GH_Number value = new GH_Number(0.0);
-                            if (!DA.GetData<GH_Number>(attrib.mFullName, ref value)) continue;
-                            PRTWrapper.SetRuleAttributeDouble(attrib.mRuleFile, attrib.mFullName, value.Value);
-                            break;
-                        }
-                    case AnnotationArgumentType.AAT_BOOL:
-                        {
-                            GH_Boolean boolean = new GH_Boolean();
-                            if (!DA.GetData<GH_Boolean>(attrib.mFullName, ref boolean)) continue;
-                            PRTWrapper.SetRuleAttributeBoolean(attrib.mRuleFile, attrib.mFullName, boolean.Value);
-                            break;
-                        }
-                    case AnnotationArgumentType.AAT_INT:
-                        {
-                            GH_Integer integer = null;
-                            if (!DA.GetData<GH_Integer>(attrib.mFullName, ref integer)) continue;
-                            PRTWrapper.SetRuleAttributeInteger(attrib.mRuleFile, attrib.mFullName, integer.Value);
-                            break;
-                        }
-                    case AnnotationArgumentType.AAT_STR:
-                        {
-                            string text = null;
-                            if (attrib.mAnnotations.Any(x => x.IsColor()))
-                            {
-                                GH_Colour color = null;
-                                if (!DA.GetData<GH_Colour>(attrib.mFullName, ref color)) continue;
-                                text = Utils.hexColor(color);
-                            }
-                            else
-                            {
-                                GH_String gH_String = null;
-                                if (!DA.GetData<GH_String>(attrib.mFullName, ref gH_String)) continue;
-                                text = gH_String.Value;
-                            }
-
-                            PRTWrapper.SetRuleAttributeString(attrib.mRuleFile, attrib.mFullName, text);
-                            break;
-                        }
-                    case AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                        {
-                            List<double> doubleList = new List<double>();
-                            if (!DA.GetDataList(attrib.mFullName, doubleList)) continue;
-                            PRTWrapper.SetRuleAttributeDoubleArray(attrib.mRuleFile, attrib.mFullName, doubleList);
-                            break;
-                        }
-                    case AnnotationArgumentType.AAT_BOOL_ARRAY:
-                        {
-                            List<Boolean> boolList = new List<Boolean>();
-                            if (!DA.GetDataList(attrib.mFullName, boolList)) continue;
-                            PRTWrapper.SetRuleAttributeBoolArray(attrib.mRuleFile, attrib.mFullName, boolList);
-                            break;
-                        }
-                    case AnnotationArgumentType.AAT_STR_ARRAY:
-                        {
-                            List<string> stringList = new List<string>();
-                            if (!DA.GetDataList(attrib.mFullName, stringList)) continue;
-                            PRTWrapper.SetRuleAttributeStringArray(attrib.mRuleFile, attrib.mFullName, stringList);
-                            break;
-                        }
-                    default:
-                        continue;
-                }
+                setAttributeOfShapes(DA, shapeCount, attrib);
             }
-
         }
 
         public bool CanInsertParameter(GH_ParameterSide side, int index)

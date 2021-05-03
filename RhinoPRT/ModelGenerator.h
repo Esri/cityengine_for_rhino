@@ -17,7 +17,7 @@ public:
 		std::vector<pcu::ShapeAttributes>& shapeAttributes,
 		const std::wstring& geometryEncoderName,
 		const pcu::EncoderOptions& geometryEncoderOptions,
-		pcu::AttributeMapBuilderPtr& aBuilder,
+		pcu::AttributeMapBuilderVector& aBuilders,
 		std::vector<GeneratedModel>& generated_models);
 
 	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,

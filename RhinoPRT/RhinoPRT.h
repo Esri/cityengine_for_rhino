@@ -40,15 +40,15 @@ namespace RhinoPRT {
 		bool GenerateGeometry();
 
 		template<typename T>
-		void fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count = 1);
+		void fillAttributeFromNode(const int shapeId, const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count = 1);
 
-		void setRuleAttributeValue(const RuleAttributeUPtr& rule, double value, size_t /*count*/);
-		void setRuleAttributeValue(const RuleAttributeUPtr& rule, int value, size_t /*count*/);
-		void setRuleAttributeValue(const RuleAttributeUPtr& rule, bool value, size_t /*count*/);
-		void setRuleAttributeValue(const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/);
-		void setRuleAttributeValue(const RuleAttributeUPtr& rule, const double* value, const size_t count);
-		void setRuleAttributeValue(const RuleAttributeUPtr& rule, bool* value, const size_t count);
-		void setRuleAttributeValue(const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/);
+		void setRuleAttributeValue(const int shapeId, const RuleAttributeUPtr& rule, double value, size_t /*count*/);
+		void setRuleAttributeValue(const int shapeId, const RuleAttributeUPtr& rule, int value, size_t /*count*/);
+		void setRuleAttributeValue(const int shapeId, const RuleAttributeUPtr& rule, bool value, size_t /*count*/);
+		void setRuleAttributeValue(const int shapeId, const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/);
+		void setRuleAttributeValue(const int shapeId, const RuleAttributeUPtr& rule, const double* value, const size_t count);
+		void setRuleAttributeValue(const int shapeId, const RuleAttributeUPtr& rule, bool* value, const size_t count);
+		void setRuleAttributeValue(const int shapeId, const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/);
 
 		const Reporting::GroupedReports& getReports() const { return mGroupedReports; }
 		Reporting::ReportsVector getReportsOfModel(int initialShapeID);
@@ -70,6 +70,7 @@ namespace RhinoPRT {
 		std::vector<pcu::ShapeAttributes> mAttributes;
 
 		pcu::AttributeMapBuilderPtr mAttrBuilder;
+		pcu::AttributeMapBuilderVector mAttrBuilders;
 
 		pcu::EncoderOptions options;
 
@@ -111,19 +112,19 @@ extern "C" {
 
 	RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname, prt::AnnotationArgumentType* type, ON_wString* pGroup);
 
-	RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value);
+	RHINOPRT_API void SetRuleAttributeDouble(const int shapeId, const wchar_t* rule, const wchar_t* fullName, double value);
 
-	RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value);
+	RHINOPRT_API void SetRuleAttributeBoolean(const int shapeId, const wchar_t* rule, const wchar_t* fullName, bool value);
 
-	RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value);
+	RHINOPRT_API void SetRuleAttributeInteger(const int shapeId, const wchar_t* rule, const wchar_t* fullName, int value);
 
-	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value);
+	RHINOPRT_API void SetRuleAttributeString(const int shapeId, const wchar_t* rule, const wchar_t* fullName, const wchar_t* value);
 
-	RHINOPRT_API void SetRuleAttributeDoubleArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray);
+	RHINOPRT_API void SetRuleAttributeDoubleArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray);
 	
-	RHINOPRT_API void SetRuleAttributeBoolArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray);
+	RHINOPRT_API void SetRuleAttributeBoolArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray);
 
-	RHINOPRT_API void SetRuleAttributeStringArray(const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray);
+	RHINOPRT_API void SetRuleAttributeStringArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray);
 
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray,
 		ON_SimpleArray<double>* pDoubleReports,

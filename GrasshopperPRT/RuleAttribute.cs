@@ -238,7 +238,7 @@ namespace GrasshopperPRT
 
         private GH_ParamAccess GetAccess()
         {
-            switch (this.mAttribType)
+            /*switch (this.mAttribType)
             {
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case AnnotationArgumentType.AAT_FLOAT_ARRAY:
@@ -246,7 +246,8 @@ namespace GrasshopperPRT
                     return GH_ParamAccess.list;
                 default:
                     return GH_ParamAccess.item;
-            }
+            }*/
+            return GH_ParamAccess.tree;
         }
 
         private string GetDescriptions()

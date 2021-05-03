@@ -167,7 +167,7 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 	std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	const std::wstring& geometryEncoderName,
 	const pcu::EncoderOptions& geometryEncoderOptions,
-	pcu::AttributeMapBuilderPtr& aBuilder,
+	pcu::AttributeMapBuilderVector& aBuilders,
 	std::vector<GeneratedModel>& generated_models)
 {
 	fillInitialShapeBuilder(initial_geom);
@@ -202,7 +202,7 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 		std::vector<const prt::InitialShape*> initialShapes(mInitialShapesBuilders.size());
 		std::vector<pcu::InitialShapePtr> initialShapePtrs(mInitialShapesBuilders.size());
 		std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(mInitialShapesBuilders.size());
-		setAndCreateInitialShape(aBuilder, shapeAttributes, initialShapes, initialShapePtrs, convertedShapeAttrVec);
+		setAndCreateInitialShape(aBuilders, shapeAttributes, initialShapes, initialShapePtrs, convertedShapeAttrVec);
 
 		if (!mEncoderBuilder)
 			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());

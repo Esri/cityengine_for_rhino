@@ -70,6 +70,12 @@ namespace RhinoPRT {
 
 		// compute the default values of rule attributes for each initial shape
 		mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
+
+		// Initialise the attribute map builders for each initial shape.
+		mAttrBuilders.resize(shapes.size());
+		for (auto& it : mAttrBuilders) {
+			it.reset(prt::AttributeMapBuilder::create());
+		}
 	}
 
 	void RhinoPRTAPI::ClearInitialShapes() {
@@ -78,11 +84,12 @@ namespace RhinoPRT {
 		mAttributes.clear();
 		mGroupedReports.clear();
 		mGeneratedModels.clear();
+		mAttrBuilders.clear();
 	}
 
 	bool RhinoPRTAPI::GenerateGeometry() {
 		mGeneratedModels.clear();
-		mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilder, mGeneratedModels);
+		mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilders, mGeneratedModels);
 		return mGeneratedModels.size() > 0;
 	}
 
@@ -92,7 +99,7 @@ namespace RhinoPRT {
 	}
 
 	template<typename T>
-	void RhinoPRTAPI::fillAttributeFromNode(const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count) {
+	void RhinoPRTAPI::fillAttributeFromNode(const int shapeId, const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count) {
 
 		auto& ruleAttributes = mModelGenerator->getRuleAttributes();
 
@@ -106,51 +113,51 @@ namespace RhinoPRT {
 
 			// If the attribute is found, register the value in the attribute map builder
 			//TODO: check for difference with default value, only add the attribute if it is the case.
-			setRuleAttributeValue(rule, value, count);
+			setRuleAttributeValue(shapeId, rule, value, count);
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttributeUPtr& rule, double value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, double value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_FLOAT) {
-			mAttrBuilder->setFloat(rule->mFullName.c_str(), value);
+			mAttrBuilders[attrId]->setFloat(rule->mFullName.c_str(), value);
 		}
 		else {
 			LOG_ERR << L"Trying to set a double value to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttributeUPtr& rule, int value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, int value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_INT) {
-			mAttrBuilder->setInt(rule->mFullName.c_str(), value);
+			mAttrBuilders[attrId]->setInt(rule->mFullName.c_str(), value);
 		}
 		else {
 			LOG_ERR << L"Trying to set an int value to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttributeUPtr& rule, bool value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, bool value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_BOOL) {
-			mAttrBuilder->setBool(rule->mFullName.c_str(), value);
+			mAttrBuilders[attrId]->setBool(rule->mFullName.c_str(), value);
 		}
 		else {
 			LOG_ERR << L"Trying to set a boolean value to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_STR) {
-			mAttrBuilder->setString(rule->mFullName.c_str(), value.c_str());
+			mAttrBuilders[attrId]->setString(rule->mFullName.c_str(), value.c_str());
 		}
 		else {
 			LOG_ERR << L"Trying to set a wstring to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttributeUPtr& rule, const double* value, const size_t count)
+	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, const double* value, const size_t count)
 	{
 		if (rule->mType == prt::AAT_FLOAT_ARRAY)
 		{
-			mAttrBuilder->setFloatArray(rule->mFullName.c_str(), value, count);
+			mAttrBuilders[attrId]->setFloatArray(rule->mFullName.c_str(), value, count);
 		}
 		else
 		{
@@ -158,11 +165,11 @@ namespace RhinoPRT {
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttributeUPtr& rule, bool* value, const size_t count)
+	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, bool* value, const size_t count)
 	{
 		if (rule->mType == prt::AAT_BOOL_ARRAY)
 		{
-			mAttrBuilder->setBoolArray(rule->mFullName.c_str(), value, count);
+			mAttrBuilders[attrId]->setBoolArray(rule->mFullName.c_str(), value, count);
 		}
 		else
 		{
@@ -170,11 +177,11 @@ namespace RhinoPRT {
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/)
+	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/)
 	{
 		if (rule->mType == prt::AAT_STR_ARRAY)
 		{
-			mAttrBuilder->setStringArray(rule->mFullName.c_str(), value.data(), value.size());
+			mAttrBuilders[attrId]->setStringArray(rule->mFullName.c_str(), value.data(), value.size());
 		}
 		else
 		{
@@ -341,41 +348,41 @@ extern "C" {
 		return true;
 	}
 
-	RHINOPRT_API void SetRuleAttributeDouble(const wchar_t* rule, const wchar_t* fullName, double value)
+	RHINOPRT_API void SetRuleAttributeDouble(const int shapeId, const wchar_t* rule, const wchar_t* fullName, double value)
 	{
 		if (!rule || !fullName) return;
-		RhinoPRT::get().fillAttributeFromNode<double>(rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<double>(shapeId, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeBoolean(const wchar_t* rule, const wchar_t* fullName, bool value)
+	RHINOPRT_API void SetRuleAttributeBoolean(const int shapeId, const wchar_t* rule, const wchar_t* fullName, bool value)
 	{
 		if (!rule || !fullName) return;
-		RhinoPRT::get().fillAttributeFromNode<bool>(rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<bool>(shapeId, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeInteger(const wchar_t* rule, const wchar_t* fullName, int value)
+	RHINOPRT_API void SetRuleAttributeInteger(const int shapeId, const wchar_t* rule, const wchar_t* fullName, int value)
 	{
 		if (!rule || !fullName) return;
-		RhinoPRT::get().fillAttributeFromNode<int>(rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<int>(shapeId, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeString(const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
+	RHINOPRT_API void SetRuleAttributeString(const int shapeId, const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
 	{
 		if (!rule || !fullName || !value) return;
-		RhinoPRT::get().fillAttributeFromNode<std::wstring>(rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<std::wstring>(shapeId, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeDoubleArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray)
+	RHINOPRT_API void SetRuleAttributeDoubleArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray)
 	{
 		if (!rule || !fullName || !pValueArray) return;
 
 		const double* valueArray = pValueArray->Array();
 		const size_t size = pValueArray->Count();
 		
-		RhinoPRT::get().fillAttributeFromNode(rule, fullName, valueArray, size);
+		RhinoPRT::get().fillAttributeFromNode(shapeId, rule, fullName, valueArray, size);
 	}
 
-	RHINOPRT_API void SetRuleAttributeBoolArray(const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray)
+	RHINOPRT_API void SetRuleAttributeBoolArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray)
 	{
 		if (!rule || !fullName || !pValueArray) return;
 
@@ -386,10 +393,10 @@ extern "C" {
 		std::unique_ptr<bool[]> boolArray(new bool[size]);
 		std::transform(valueArray, valueArray + size, boolArray.get(), static_cast_fct<bool, int>);
 
-		RhinoPRT::get().fillAttributeFromNode(rule, fullName, boolArray.get(), size);
+		RhinoPRT::get().fillAttributeFromNode(shapeId, rule, fullName, boolArray.get(), size);
 	}
 
-	RHINOPRT_API void SetRuleAttributeStringArray(const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray)
+	RHINOPRT_API void SetRuleAttributeStringArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray)
 	{
 		if (!rule || !fullName || !pValueArray) return;
 
@@ -400,7 +407,7 @@ extern "C" {
 		std::vector<const wchar_t*> strVector(size);
 		std::transform(valueArray, valueArray + size, strVector.begin(), to_wchar_array);
 
-		RhinoPRT::get().fillAttributeFromNode(rule, fullName, strVector, size);
+		RhinoPRT::get().fillAttributeFromNode(shapeId, rule, fullName, strVector, size);
 	}
 
 	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray, 

@@ -55,25 +55,25 @@ namespace GrasshopperPRT
         public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDouble(string rule, string fullName, double value);
+        public static extern void SetRuleAttributeDouble(int shapeId, string rule, string fullName, double value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolean(string rule, string fullName, bool value);
+        public static extern void SetRuleAttributeBoolean(int shapeId, string rule, string fullName, bool value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeInteger(string rule, string fullName, int value);
+        public static extern void SetRuleAttributeInteger(int shapeId, string rule, string fullName, int value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeString(string rule, string fullName, string value);
+        public static extern void SetRuleAttributeString(int shapeId, string rule, string fullName, string value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDoubleArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeDoubleArray(int shapeId, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeBoolArray(int shapeId, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeStringArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeStringArray(int shapeId, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
@@ -543,29 +543,29 @@ namespace GrasshopperPRT
             return null;
         }
 
-        public static void SetRuleAttributeDoubleArray(string rule, string fullName, List<double> doubleList)
+        public static void SetRuleAttributeDoubleArray(int shapeId, string rule, string fullName, List<double> doubleList)
         {
             if (doubleList.Count == 0) return;
 
             using (SimpleArrayDouble array = new SimpleArrayDouble(doubleList))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeDoubleArray(rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeDoubleArray(shapeId, rule, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeBoolArray(string rule, string fullName, List<Boolean> boolList)
+        public static void SetRuleAttributeBoolArray(int shapeId, string rule, string fullName, List<Boolean> boolList)
         {
             if (boolList.Count == 0) return;
 
             using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeBoolArray(rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeBoolArray(shapeId, rule, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeStringArray(string rule, string fullName, List<string> stringList)
+        public static void SetRuleAttributeStringArray(int shapeId, string rule, string fullName, List<string> stringList)
         {
             if (stringList.Count == 0) return;
 
@@ -574,7 +574,7 @@ namespace GrasshopperPRT
                 stringList.ForEach(x => array.Add(x));
 
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeStringArray(rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeStringArray(shapeId, rule, fullName, pArray);
             }
         }
     }
