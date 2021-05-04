@@ -20,12 +20,12 @@ namespace GrasshopperPRT
         const string REPORTS_FILTERED = "Reports";
 
         /// <summary>
-        /// Initializes a new instance of the MyComponent1 class.
+        /// Initializes a new instance of the PumaCgaReports class.
         /// </summary>
         public GrasshopperPRTReports()
-          : base("GrasshopperPRTReports", "CGA Reports display",
+          : base("PumaCgaReports", "CGA Reports display",
               "Version: " + PRTWrapper.GetVersion() + ". " + 
-              "Helper component to filter and preview the reports output from GrasshopperPRTComponent.",
+              "Helper component to filter and preview the reports output from the Puma component.",
               "Special", "Esri")
         {
         }

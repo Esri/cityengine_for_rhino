@@ -365,8 +365,9 @@ x64/Release/*
 x64/Release_gh/*
 build
 build/*
-Downloads/*
 esrisdk.zip
+Package_output/
+Package_output/*
 
 *.exp
 *.gha
