@@ -20,16 +20,9 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
 
 	// create the list of extension path dynamicaly using getDllLocation
 	std::wstring dll_location = pcu::getDllLocation();
-
-	// build root dir
-	auto id = dll_location.find(L"bin");
-	if (id == std::wstring::npos) {
-		LOG_ERR << L"Invalid build directory layout.";
-		return;
-	}
-	std::wstring esri_sdk_dir = dll_location.substr(0, id).append(L"lib");
+	std::wstring esri_sdk_dir = dll_location.append(L"lib");
 	std::vector<const wchar_t*> prt_path = { esri_sdk_dir.c_str() };
-	
+
 	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 	mPRTHandle.reset(prt::init(prt_path.data(), prt_path.size(), minimalLogLevel, &status));
 	LOG_INF << prt::getStatusDescription(status);

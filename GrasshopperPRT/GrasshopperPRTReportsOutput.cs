@@ -19,7 +19,7 @@ namespace GrasshopperPRT
         /// Initializes a new instance of the GrasshopperPRTReportsOutput class.
         /// </summary>
         public GrasshopperPRTReportsOutput()
-          : base("GrasshopperPRTReportsOutput", "Reports Outputs",
+          : base("PumaCgaReportsOutput", "Reports Outputs",
               "Version: " + PRTWrapper.GetVersion() + ". " +
               "Unpacks the report attributes objects",
               "Special", "Esri")
