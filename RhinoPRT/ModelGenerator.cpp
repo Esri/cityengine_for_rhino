@@ -276,33 +276,6 @@ void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aB
 	}
 }
 
-void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderPtr& aBuilder,
-	const std::vector<pcu::ShapeAttributes>& shapesAttr,
-	std::vector<const prt::InitialShape*>& initShapes,
-	std::vector<pcu::InitialShapePtr>& initShapesPtrs,
-	std::vector<pcu::AttributeMapPtr>& convertedShapeAttr) {
-
-	for (size_t i = 0; i < mInitialShapesBuilders.size(); ++i) {
-		pcu::ShapeAttributes shapeAttr = shapesAttr[0];
-		if (shapesAttr.size() > i) {
-			shapeAttr = shapesAttr[i];
-		}
-
-		// Set to default values
-		std::wstring ruleF = mRuleFile;
-		std::wstring startR = mStartRule;
-		int32_t randomS = mSeed;
-		std::wstring shapeN = mShapeName;
-		extractMainShapeAttributes(aBuilder, shapeAttr, ruleF, startR, randomS, shapeN, convertedShapeAttr[i]);
-
-		mInitialShapesBuilders[i]->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(), convertedShapeAttr[i].get(),
-			mResolveMap.get());
-
-		initShapesPtrs[i].reset(mInitialShapesBuilders[i]->createInitialShape());
-		initShapes[i] = initShapesPtrs[i].get();
-	}
-}
-
 void ModelGenerator::initializeEncoderData(const std::wstring & encName, const pcu::EncoderOptions & encOpt) {
 	mEncodersNames.clear();
 	mEncodersOptionsPtr.clear();
