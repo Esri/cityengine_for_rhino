@@ -11,6 +11,7 @@ using GrasshopperPRT.Properties;
 using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Parameters;
+using System.Drawing;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -294,36 +295,88 @@ namespace GrasshopperPRT
                 Params.RegisterInputParam(parameter);
         }
 
-        private void setAttributeOfShapes(IGH_DataAccess DA, int shapeCount, RuleAttribute attribute)
+        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, RuleAttribute attribute)
         {
-            GH_Structure<IGH_Goo> valueTree;
-            if (!DA.GetDataTree<IGH_Goo>(attribute.mFullName, out valueTree)) return;
-            if (valueTree.IsEmpty) return;
+            switch (attribute.mAttribType)
+            {
+                case AnnotationArgumentType.AAT_BOOL:
+                case AnnotationArgumentType.AAT_BOOL_ARRAY:
+                {
+                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Boolean> tree)) return;
+                    ExtractTreeValues(tree, attribute, shapeCount);
+                    break;
+                }
+                case AnnotationArgumentType.AAT_FLOAT:
+                case AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                case AnnotationArgumentType.AAT_INT:
+                {
+                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Number> tree)) return;
+                    ExtractTreeValues(tree, attribute, shapeCount);
+                    break;
+                }
+                case AnnotationArgumentType.AAT_STR:
+                case AnnotationArgumentType.AAT_STR_ARRAY:
+                    if (attribute.IsColor())
+                    {
+                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Colour> tree)) return;
+                        ExtractTreeValues(tree, attribute, shapeCount);
+                    }
+                    else
+                    {
+                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_String> tree)) return;
+                        ExtractTreeValues(tree, attribute, shapeCount);
+                    }
+                    break;
+                default:
+                {
+                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<IGH_Goo> tree)) return;
+                    ExtractTreeValues(tree, attribute, shapeCount);
+                    break;
+                }
+            }
+        }
+
+        private void ExtractTreeValues<T>(GH_Structure<T> tree, RuleAttribute attribute, int shapeCount) where T: IGH_Goo
+        {
+            if (tree.IsEmpty) return;
 
             int shapeId = 0;
 
-            if(attribute.mAttribType == AnnotationArgumentType.AAT_BOOL_ARRAY ||
+            if (attribute.mAttribType == AnnotationArgumentType.AAT_BOOL_ARRAY ||
                attribute.mAttribType == AnnotationArgumentType.AAT_FLOAT_ARRAY ||
                attribute.mAttribType == AnnotationArgumentType.AAT_STR_ARRAY)
             {
                 // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
-                while(shapeCount > valueTree.Branches.Count)
+                while (shapeCount > tree.Branches.Count)
                 {
-                    valueTree.Branches.Add(valueTree.Branches.Last());
+                    tree.Branches.Add(tree.Branches.Last());
                 }
 
-                foreach (List<IGH_Goo> branch in valueTree.Branches)
+                foreach (List<T> branch in tree.Branches)
                 {
-                    SetRuleAttributeArray(shapeId, attribute, branch);  
+                    if (shapeId >= shapeCount) return;
+
+                    SetRuleAttributeArray(shapeId, attribute, branch);
                     shapeId++;
                 }
             }
             else
             {
-                foreach (IGH_Goo value in valueTree.AllData(false))
+                // Transform the tree to a list
+                List<T> values = tree.ToList();
+
+                // Complete missing values with the last one.
+                while (shapeCount > values.Count)
+                {
+                    values.Add(values.Last());
+                }
+
+                foreach (T value in values)
                 {
                     if (value.IsValid)
                     {
+                        if (shapeId >= shapeCount) return;
+
                         SetRuleAttribute(shapeId, attribute, value);
                     }
                     shapeId++;
@@ -331,7 +384,7 @@ namespace GrasshopperPRT
             }
         }
 
-        private void SetRuleAttributeArray(int shapeId, RuleAttribute attribute, List<IGH_Goo> values)
+        private void SetRuleAttributeArray<T>(int shapeId, RuleAttribute attribute, List<T> values) where T:IGH_Goo
         {
             switch (attribute.mAttribType)
             {
@@ -358,40 +411,39 @@ namespace GrasshopperPRT
             }
         }
 
-        private void SetRuleAttribute(int shapeId, RuleAttribute attribute, IGH_Goo value) { 
+        private void SetRuleAttribute<T>(int shapeId, RuleAttribute attribute, T value) where T : IGH_Goo {
             switch (attribute.mAttribType)
             {
                 case AnnotationArgumentType.AAT_FLOAT:
                     {
-                        if (!value.CastTo<GH_Number>(out GH_Number number)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Number");
-                        PRTWrapper.SetRuleAttributeDouble(shapeId, attribute.mRuleFile, attribute.mFullName, number.Value);
+                        if (!value.CastTo(out double number)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Number");
+                        PRTWrapper.SetRuleAttributeDouble(shapeId, attribute.mRuleFile, attribute.mFullName, number);
                         return;
                     }
                 case AnnotationArgumentType.AAT_BOOL:
                     {
-                        if (!value.CastTo<GH_Boolean>(out GH_Boolean boolean)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Boolean");
-                        PRTWrapper.SetRuleAttributeBoolean(shapeId, attribute.mRuleFile, attribute.mFullName, boolean.Value);
+                        if (!value.CastTo(out bool boolean)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Boolean");
+                        PRTWrapper.SetRuleAttributeBoolean(shapeId, attribute.mRuleFile, attribute.mFullName, boolean);
                         return;
                     }
                 case AnnotationArgumentType.AAT_INT:
                     {
-                        if (!value.CastTo<GH_Integer>(out GH_Integer integer)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Integer"); 
-                        PRTWrapper.SetRuleAttributeInteger(shapeId, attribute.mRuleFile, attribute.mFullName, integer.Value);
+                        if (!value.CastTo(out int integer)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Integer"); 
+                        PRTWrapper.SetRuleAttributeInteger(shapeId, attribute.mRuleFile, attribute.mFullName, integer);
                         return;
                     }
                 case AnnotationArgumentType.AAT_STR:
                     {
                         string text = null;
-                        if (attribute.mAnnotations.Any(x => x.IsColor()))
+                        if (attribute.IsColor())
                         {
          
-                            if (!value.CastTo<GH_Colour>(out GH_Colour colour)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Colour");
-                            text = Utils.hexColor(colour);
+                            if (!value.CastTo(out Color color)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Colour");
+                            text = Utils.hexColor(color);
                         }
                         else
                         {
-                            if (!value.CastTo<GH_String>(out GH_String gH_String)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_String");
-                            text = gH_String.Value;
+                            if (!value.CastTo(out text)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_String");
                         }
 
                         PRTWrapper.SetRuleAttributeString(shapeId, attribute.mRuleFile, attribute.mFullName, text);
@@ -407,7 +459,7 @@ namespace GrasshopperPRT
             for (int idx = 0; idx < mRuleAttributes.Length; ++idx)
             {
                 RuleAttribute attrib = mRuleAttributes[idx];
-                setAttributeOfShapes(DA, shapeCount, attrib);
+                SetAttributeOfShapes(DA, shapeCount, attrib);
             }
         }
 

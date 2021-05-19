@@ -236,17 +236,13 @@ namespace GrasshopperPRT
             }
         }
 
+        public bool IsColor()
+        {
+            return mAnnotations.Any(x => x.IsColor());
+        }
+
         private GH_ParamAccess GetAccess()
         {
-            /*switch (this.mAttribType)
-            {
-                case AnnotationArgumentType.AAT_BOOL_ARRAY:
-                case AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                case AnnotationArgumentType.AAT_STR_ARRAY:
-                    return GH_ParamAccess.list;
-                default:
-                    return GH_ParamAccess.item;
-            }*/
             return GH_ParamAccess.tree;
         }
 
