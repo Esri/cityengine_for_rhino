@@ -77,7 +77,8 @@ namespace GrasshopperPRT
 
         public override string GetDescription()
         {
-            string concatenation = mEnumList.Aggregate<T, string>("", (accu, val) => accu.ToString() + " - " + val.ToString() + "\n");
+            string concatenation = mEnumList.Aggregate<T, string>("", 
+                (accu, val) => val == null ? accu : accu.ToString() + " - " + val.ToString() + "\n");
 
             return "Enumeration, allowed values are:\n" + concatenation;
         }
