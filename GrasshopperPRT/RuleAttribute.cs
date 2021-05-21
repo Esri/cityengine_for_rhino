@@ -89,7 +89,8 @@ namespace GrasshopperPRT
             vList.ListItems.Clear();
             foreach (var item in mEnumList)
             {
-                vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"",item.ToString())));
+                if(item != null)
+                    vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"",item.ToString())));
             }
 
             return vList;
