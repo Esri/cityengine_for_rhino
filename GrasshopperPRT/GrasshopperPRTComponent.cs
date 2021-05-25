@@ -416,19 +416,19 @@ namespace GrasshopperPRT
             {
                 case AnnotationArgumentType.AAT_FLOAT:
                     {
-                        if (!value.CastTo(out double number)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Number");
+                        if (!value.CastTo(out double number)) throw new Exception(Utils.GetCastErrorMessage(attribute, "double"));
                         PRTWrapper.SetRuleAttributeDouble(shapeId, attribute.mRuleFile, attribute.mFullName, number);
                         return;
                     }
                 case AnnotationArgumentType.AAT_BOOL:
                     {
-                        if (!value.CastTo(out bool boolean)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Boolean");
+                        if (!value.CastTo(out bool boolean)) throw new Exception(Utils.GetCastErrorMessage(attribute, "bool"));
                         PRTWrapper.SetRuleAttributeBoolean(shapeId, attribute.mRuleFile, attribute.mFullName, boolean);
                         return;
                     }
                 case AnnotationArgumentType.AAT_INT:
                     {
-                        if (!value.CastTo(out int integer)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Integer"); 
+                        if (!value.CastTo(out int integer)) throw new Exception(Utils.GetCastErrorMessage(attribute, "integer")); 
                         PRTWrapper.SetRuleAttributeInteger(shapeId, attribute.mRuleFile, attribute.mFullName, integer);
                         return;
                     }
@@ -438,12 +438,12 @@ namespace GrasshopperPRT
                         if (attribute.IsColor())
                         {
          
-                            if (!value.CastTo(out Color color)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_Colour");
+                            if (!value.CastTo(out Color color)) throw new Exception(Utils.GetCastErrorMessage(attribute, "Color"));
                             text = Utils.hexColor(color);
                         }
                         else
                         {
-                            if (!value.CastTo(out text)) throw new Exception("Could not cast attribute " + attribute.mFullName + " to GH_String");
+                            if (!value.CastTo(out text)) throw new Exception(Utils.GetCastErrorMessage(attribute, "string"));
                         }
 
                         PRTWrapper.SetRuleAttributeString(shapeId, attribute.mRuleFile, attribute.mFullName, text);

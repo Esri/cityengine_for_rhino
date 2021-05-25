@@ -98,5 +98,10 @@ namespace GrasshopperPRT
             grp.AddObject(guid);
             grp.ExpireCaches();
         }
+
+        public static string GetCastErrorMessage(RuleAttribute attribute, string castTarget)
+        {
+            return "Could not cast attribute " + attribute.mFullName + " to " + castTarget;
+        }
     }
 }
