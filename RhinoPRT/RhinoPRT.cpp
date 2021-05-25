@@ -99,7 +99,7 @@ namespace RhinoPRT {
 	}
 
 	template<typename T>
-	void RhinoPRTAPI::fillAttributeFromNode(const int shapeId, const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count) {
+	void RhinoPRTAPI::fillAttributeFromNode(const int initialShapeIndex, const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count) {
 
 		auto& ruleAttributes = mModelGenerator->getRuleAttributes();
 
@@ -113,51 +113,51 @@ namespace RhinoPRT {
 
 			// If the attribute is found, register the value in the attribute map builder
 			//TODO: check for difference with default value, only add the attribute if it is the case.
-			setRuleAttributeValue(shapeId, rule, value, count);
+			setRuleAttributeValue(initialShapeIndex, rule, value, count);
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, double value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, double value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_FLOAT) {
-			mAttrBuilders[attrId]->setFloat(rule->mFullName.c_str(), value);
+			mAttrBuilders[initialShapeIndex]->setFloat(rule->mFullName.c_str(), value);
 		}
 		else {
 			LOG_ERR << L"Trying to set a double value to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, int value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, int value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_INT) {
-			mAttrBuilders[attrId]->setInt(rule->mFullName.c_str(), value);
+			mAttrBuilders[initialShapeIndex]->setInt(rule->mFullName.c_str(), value);
 		}
 		else {
 			LOG_ERR << L"Trying to set an int value to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, bool value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, bool value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_BOOL) {
-			mAttrBuilders[attrId]->setBool(rule->mFullName.c_str(), value);
+			mAttrBuilders[initialShapeIndex]->setBool(rule->mFullName.c_str(), value);
 		}
 		else {
 			LOG_ERR << L"Trying to set a boolean value to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/) {
+	void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, std::wstring& value, size_t /*count*/) {
 		if (rule->mType == prt::AAT_STR) {
-			mAttrBuilders[attrId]->setString(rule->mFullName.c_str(), value.c_str());
+			mAttrBuilders[initialShapeIndex]->setString(rule->mFullName.c_str(), value.c_str());
 		}
 		else {
 			LOG_ERR << L"Trying to set a wstring to an attribute of type " << rule->mType << std::endl;
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, const double* value, const size_t count)
+	void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, const double* value, const size_t count)
 	{
 		if (rule->mType == prt::AAT_FLOAT_ARRAY)
 		{
-			mAttrBuilders[attrId]->setFloatArray(rule->mFullName.c_str(), value, count);
+			mAttrBuilders[initialShapeIndex]->setFloatArray(rule->mFullName.c_str(), value, count);
 		}
 		else
 		{
@@ -165,11 +165,11 @@ namespace RhinoPRT {
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, bool* value, const size_t count)
+	void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, bool* value, const size_t count)
 	{
 		if (rule->mType == prt::AAT_BOOL_ARRAY)
 		{
-			mAttrBuilders[attrId]->setBoolArray(rule->mFullName.c_str(), value, count);
+			mAttrBuilders[initialShapeIndex]->setBoolArray(rule->mFullName.c_str(), value, count);
 		}
 		else
 		{
@@ -177,11 +177,11 @@ namespace RhinoPRT {
 		}
 	}
 
-	void RhinoPRTAPI::setRuleAttributeValue(const int attrId, const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/)
+	void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, std::vector<const wchar_t *> value, const size_t /*count*/)
 	{
 		if (rule->mType == prt::AAT_STR_ARRAY)
 		{
-			mAttrBuilders[attrId]->setStringArray(rule->mFullName.c_str(), value.data(), value.size());
+			mAttrBuilders[initialShapeIndex]->setStringArray(rule->mFullName.c_str(), value.data(), value.size());
 		}
 		else
 		{
@@ -189,11 +189,11 @@ namespace RhinoPRT {
 		}
 	}
 
-	Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeID)
+	Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex)
 	{
 		// find the report with given shape id.
 		const auto found_reports = std::find_if(mGeneratedModels.begin(), mGeneratedModels.end(), 
-			[&initialShapeID](const GeneratedModel& model) { return model.getInitialShapeIndex() == initialShapeID; });
+			[&initialShapeIndex](const GeneratedModel& model) { return model.getInitialShapeIndex() == initialShapeIndex; });
 
 		if (found_reports != mGeneratedModels.end()) {
 			const auto& reports = found_reports->getReport();
@@ -288,25 +288,25 @@ extern "C" {
 		for (int id : ids) pMeshIDs->Append(id);
 	}
 
-	RHINOPRT_API int GetMeshPartCount(int initShapeId)
+	RHINOPRT_API int GetMeshPartCount(int initialShapeIndex)
 	{
 		const auto& models = RhinoPRT::get().getGenModels();
 
-		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeId](GeneratedModel m) { return m.getInitialShapeIndex() == initShapeId; });
+		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](GeneratedModel m) { return m.getInitialShapeIndex() == initialShapeIndex; });
 		if (modelIt == models.end())
 		{
-			LOG_ERR << L"No generated model with initial shape ID " << initShapeId << " was found. The generation of this model has probably failed.";
+			LOG_ERR << L"No generated model with initial shape ID " << initialShapeIndex << " was found. The generation of this model has probably failed.";
 			return 0;
 		}
 
 		return modelIt->getMeshPartCount();
 	}
 
-	RHINOPRT_API bool GetMeshBundle(int initShapeID, ON_SimpleArray<ON_Mesh*>* pMeshArray)
+	RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>* pMeshArray)
 	{
 		auto models = RhinoPRT::get().getGenModels();
 		
-		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initShapeID](GeneratedModel m) { return m.getInitialShapeIndex() == initShapeID; });
+		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](GeneratedModel m) { return m.getInitialShapeIndex() == initialShapeIndex; });
 
 		if (modelIt == models.end()) 
 		{
@@ -348,41 +348,41 @@ extern "C" {
 		return true;
 	}
 
-	RHINOPRT_API void SetRuleAttributeDouble(const int shapeId, const wchar_t* rule, const wchar_t* fullName, double value)
+	RHINOPRT_API void SetRuleAttributeDouble(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName, double value)
 	{
 		if (!rule || !fullName) return;
-		RhinoPRT::get().fillAttributeFromNode<double>(shapeId, rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<double>(initialShapeIndex, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeBoolean(const int shapeId, const wchar_t* rule, const wchar_t* fullName, bool value)
+	RHINOPRT_API void SetRuleAttributeBoolean(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName, bool value)
 	{
 		if (!rule || !fullName) return;
-		RhinoPRT::get().fillAttributeFromNode<bool>(shapeId, rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<bool>(initialShapeIndex, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeInteger(const int shapeId, const wchar_t* rule, const wchar_t* fullName, int value)
+	RHINOPRT_API void SetRuleAttributeInteger(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName, int value)
 	{
 		if (!rule || !fullName) return;
-		RhinoPRT::get().fillAttributeFromNode<int>(shapeId, rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<int>(initialShapeIndex, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeString(const int shapeId, const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
+	RHINOPRT_API void SetRuleAttributeString(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName, const wchar_t* value)
 	{
 		if (!rule || !fullName || !value) return;
-		RhinoPRT::get().fillAttributeFromNode<std::wstring>(shapeId, rule, fullName, value);
+		RhinoPRT::get().fillAttributeFromNode<std::wstring>(initialShapeIndex, rule, fullName, value);
 	}
 
-	RHINOPRT_API void SetRuleAttributeDoubleArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray)
+	RHINOPRT_API void SetRuleAttributeDoubleArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<double>* pValueArray)
 	{
 		if (!rule || !fullName || !pValueArray) return;
 
 		const double* valueArray = pValueArray->Array();
 		const size_t size = pValueArray->Count();
 		
-		RhinoPRT::get().fillAttributeFromNode(shapeId, rule, fullName, valueArray, size);
+		RhinoPRT::get().fillAttributeFromNode(initialShapeIndex, rule, fullName, valueArray, size);
 	}
 
-	RHINOPRT_API void SetRuleAttributeBoolArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray)
+	RHINOPRT_API void SetRuleAttributeBoolArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName, ON_SimpleArray<int>* pValueArray)
 	{
 		if (!rule || !fullName || !pValueArray) return;
 
@@ -393,10 +393,10 @@ extern "C" {
 		std::unique_ptr<bool[]> boolArray(new bool[size]);
 		std::transform(valueArray, valueArray + size, boolArray.get(), static_cast_fct<bool, int>);
 
-		RhinoPRT::get().fillAttributeFromNode(shapeId, rule, fullName, boolArray.get(), size);
+		RhinoPRT::get().fillAttributeFromNode(initialShapeIndex, rule, fullName, boolArray.get(), size);
 	}
 
-	RHINOPRT_API void SetRuleAttributeStringArray(const int shapeId, const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray)
+	RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName, ON_ClassArray<ON_wString>* pValueArray)
 	{
 		if (!rule || !fullName || !pValueArray) return;
 
@@ -407,15 +407,15 @@ extern "C" {
 		std::vector<const wchar_t*> strVector(size);
 		std::transform(valueArray, valueArray + size, strVector.begin(), to_wchar_array);
 
-		RhinoPRT::get().fillAttributeFromNode(shapeId, rule, fullName, strVector, size);
+		RhinoPRT::get().fillAttributeFromNode(initialShapeIndex, rule, fullName, strVector, size);
 	}
 
-	RHINOPRT_API void GetReports(int initialShapeId, ON_ClassArray<ON_wString>* pKeysArray, 
+	RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* pKeysArray,
 		ON_SimpleArray<double>* pDoubleReports, 
 		ON_SimpleArray<bool>* pBoolReports,
 		ON_ClassArray<ON_wString>* pStringReports)
 	{
-		auto reports = RhinoPRT::get().getReportsOfModel(initialShapeId);
+		auto reports = RhinoPRT::get().getReportsOfModel(initialShapeIndex);
 
 		/*
 		left.float	-> right.all OK
@@ -555,7 +555,7 @@ extern "C" {
 	}
 
 
-	RHINOPRT_API bool GetMaterial(int initialShapeId, int meshID, int* uvSet,
+	RHINOPRT_API bool GetMaterial(int initialShapeIndex, int meshID, int* uvSet,
 		ON_ClassArray<ON_wString>* pTexKeys,
 		ON_ClassArray<ON_wString>* pTexPaths,
 		ON_SimpleArray<int>* pDiffuseColor,
@@ -566,12 +566,12 @@ extern "C" {
 	{
 		auto& genModels = RhinoPRT::get().getGenModels();
 
-		if (initialShapeId >= genModels.size()) {
+		if (initialShapeIndex >= genModels.size()) {
 			LOG_ERR << L"Initial shape ID out of range";
 			return false;
 		}
 
-		auto& currModel = genModels[initialShapeId];
+		auto& currModel = genModels[initialShapeIndex];
 		auto& material = currModel.getMaterials();
 
 		if (meshID >= material.size()) 
