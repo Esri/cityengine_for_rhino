@@ -4,6 +4,15 @@ Puma is a plugin for [Rhino3D and Grasshopper](https://www.rhino3d.com). It prov
 
 Puma requires so-called rule packages (RPK) as input, which are authored in CityEngine. An RPK includes assets and a CGA rule file which encodes an architectural style. Comprehensive RPK examples are available below.
 
+## Quick Start
+
+1. Install Puma from the food4rhino market place.
+1. Start Rhino and open Grasshopper
+1. In Grasshopper go to the "Special" tab and find the "Esri" section, drag the Puma component into the sheet.
+1. Create a "File Path" component and use the "Select one existing file" context menu entry to locate an RPK file from the examples directory.
+1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
+1. Connect the "File Path" component to the "RPK" input of Puma and "Surface" to the "Shape" input. Now Puma will generate the model in the Rhino viewport.
+
 ## Installation
 
 To install and build the Plugins:
