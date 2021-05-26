@@ -167,7 +167,7 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 	std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	const std::wstring& geometryEncoderName,
 	const pcu::EncoderOptions& geometryEncoderOptions,
-	pcu::AttributeMapBuilderPtr& aBuilder,
+	pcu::AttributeMapBuilderVector& aBuilders,
 	std::vector<GeneratedModel>& generated_models)
 {
 	fillInitialShapeBuilder(initial_geom);
@@ -202,7 +202,7 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 		std::vector<const prt::InitialShape*> initialShapes(mInitialShapesBuilders.size());
 		std::vector<pcu::InitialShapePtr> initialShapePtrs(mInitialShapesBuilders.size());
 		std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(mInitialShapesBuilders.size());
-		setAndCreateInitialShape(aBuilder, shapeAttributes, initialShapes, initialShapePtrs, convertedShapeAttrVec);
+		setAndCreateInitialShape(aBuilders, shapeAttributes, initialShapes, initialShapePtrs, convertedShapeAttrVec);
 
 		if (!mEncoderBuilder)
 			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());
@@ -267,33 +267,6 @@ void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aB
 		int32_t randomS = mSeed;
 		std::wstring shapeN = mShapeName;
 		extractMainShapeAttributes(aBuilders[i], shapeAttr, ruleF, startR, randomS, shapeN, convertedShapeAttr[i]);
-
-		mInitialShapesBuilders[i]->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(), convertedShapeAttr[i].get(),
-			mResolveMap.get());
-
-		initShapesPtrs[i].reset(mInitialShapesBuilders[i]->createInitialShape());
-		initShapes[i] = initShapesPtrs[i].get();
-	}
-}
-
-void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderPtr& aBuilder,
-	const std::vector<pcu::ShapeAttributes>& shapesAttr,
-	std::vector<const prt::InitialShape*>& initShapes,
-	std::vector<pcu::InitialShapePtr>& initShapesPtrs,
-	std::vector<pcu::AttributeMapPtr>& convertedShapeAttr) {
-
-	for (size_t i = 0; i < mInitialShapesBuilders.size(); ++i) {
-		pcu::ShapeAttributes shapeAttr = shapesAttr[0];
-		if (shapesAttr.size() > i) {
-			shapeAttr = shapesAttr[i];
-		}
-
-		// Set to default values
-		std::wstring ruleF = mRuleFile;
-		std::wstring startR = mStartRule;
-		int32_t randomS = mSeed;
-		std::wstring shapeN = mShapeName;
-		extractMainShapeAttributes(aBuilder, shapeAttr, ruleF, startR, randomS, shapeN, convertedShapeAttr[i]);
 
 		mInitialShapesBuilders[i]->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(), convertedShapeAttr[i].get(),
 			mResolveMap.get());

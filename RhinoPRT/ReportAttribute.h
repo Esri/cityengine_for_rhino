@@ -34,7 +34,7 @@ namespace Reporting {
 	const std::vector<ReportAttribute> EMPTY_REPORTS;
 	const std::wstring EMPTY_REPORT_STRING(L"\0");
 
-	ReportAttribute getEmptyReport(int shapeID);
+	ReportAttribute getEmptyReport(int initialShapeIndex);
 
 	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
 	ReportsVector ToReportsVector(const ReportMap& reports);
@@ -42,7 +42,7 @@ namespace Reporting {
 	class GroupedReports {
 	public:
 
-		void add(const ReportAttribute& report, const int shapeID);
+		void add(const ReportAttribute& report, const int initialShapeIndex);
 		size_t getReportCount() const;
 		bool getReportKeys(ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<int>* pKeyTypeArray) const;
 		const std::vector<ReportAttribute>& getDoubleReports(std::wstring key) const;

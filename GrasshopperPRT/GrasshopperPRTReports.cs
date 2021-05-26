@@ -279,12 +279,12 @@ namespace GrasshopperPRT
             {
                 var report = (ReportAttribute)attr;
 
-                while (reports.Count <= report.ShapeID)
+                while (reports.Count <= report.InitialShapeIndex)
                 {
                     reports.Add(new Dictionary<string, ReportAttribute>());
                 }
 
-                reports[report.ShapeID].Add(report.getKey(), report);
+                reports[report.InitialShapeIndex].Add(report.getKey(), report);
             }
 
             return reports;

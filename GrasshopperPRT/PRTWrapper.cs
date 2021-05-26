@@ -40,13 +40,13 @@ namespace GrasshopperPRT
         public static extern bool Generate();
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetMeshBundle(int initShapeID, [In, Out]IntPtr pMeshArray);
+        public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out]IntPtr pMeshArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAllMeshIDs([In, Out]IntPtr pMeshIDs);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetMeshPartCount(int initShapeId);
+        public static extern int GetMeshPartCount(int initialShapeIndex);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetRuleAttributesCount();
@@ -55,25 +55,25 @@ namespace GrasshopperPRT
         public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDouble(string rule, string fullName, double value);
+        public static extern void SetRuleAttributeDouble(int initialShapeIndex, string rule, string fullName, double value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolean(string rule, string fullName, bool value);
+        public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string rule, string fullName, bool value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeInteger(string rule, string fullName, int value);
+        public static extern void SetRuleAttributeInteger(int initialShapeIndex, string rule, string fullName, int value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeString(string rule, string fullName, string value);
+        public static extern void SetRuleAttributeString(int initialShapeIndex, string rule, string fullName, string value);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDoubleArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeStringArray(string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
@@ -91,13 +91,13 @@ namespace GrasshopperPRT
         public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void GetReports(int initialShapeId, [In, Out] IntPtr pKeysArray,
+        public static extern void GetReports(int initialShapeIndex, [In, Out] IntPtr pKeysArray,
         [In, Out] IntPtr pDoubleReports,
         [In, Out] IntPtr pBoolReports,
         [In, Out] IntPtr pStringReports);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetMaterial(int initialShapeId, int shapeID, ref int pUvSet,
+        public static extern bool GetMaterial(int initialShapeIndex, int shapeID, ref int pUvSet,
                                                 [In, Out] IntPtr pTexKeys,
                                                 [In, Out] IntPtr pTexPaths,
                                                 [In, Out] IntPtr pDiffuseColor,
@@ -185,7 +185,7 @@ namespace GrasshopperPRT
             return mesh_struct;
         }
 
-        public static GH_Material GetMaterialOfPartMesh(int initialShapeId, int meshID)
+        public static GH_Material GetMaterialOfPartMesh(int initialShapeIndex, int meshID)
         {
             int uvSet = 0;
 
@@ -207,7 +207,7 @@ namespace GrasshopperPRT
             double opacity = 1;
             double shininess = 1;
 
-            bool status = PRTWrapper.GetMaterial(initialShapeId, meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray, ref opacity, ref shininess);
+            bool status = PRTWrapper.GetMaterial(initialShapeIndex, meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray, ref opacity, ref shininess);
             if (!status) return null;
 
             var texKeysArray = texKeys.ToArray();
@@ -294,15 +294,15 @@ namespace GrasshopperPRT
             return new GH_Material(renderMat);
         }
 
-        public static List<GH_Material> GetMaterialsOfMesh(int initShapeId)
+        public static List<GH_Material> GetMaterialsOfMesh(int initialShapeIndex)
         {
             List<GH_Material> materials = new List<GH_Material>();
 
-            int meshCount = GetMeshPartCount(initShapeId);
+            int meshCount = GetMeshPartCount(initialShapeIndex);
 
             for(int i = 0; i < meshCount; ++i)
             {
-                materials.Add(GetMaterialOfPartMesh(initShapeId, i));
+                materials.Add(GetMaterialOfPartMesh(initialShapeIndex, i));
             }
 
             return materials;
@@ -333,7 +333,7 @@ namespace GrasshopperPRT
             return material_struct;
         }
 
-        public static List<ReportAttribute> GetAllReports(int initialShapeId)
+        public static List<ReportAttribute> GetAllReports(int initialShapeIndex)
         {
             var keys = new ClassArrayString();
             var stringReports = new ClassArrayString();
@@ -345,7 +345,7 @@ namespace GrasshopperPRT
             var pDblReps = doubleReports.NonConstPointer();
             var pBoolReps = boolReports.NonConstPointer();
 
-            GetReports(initialShapeId, pKeys, pDblReps, pBoolReps, pStrReps);
+            GetReports(initialShapeIndex, pKeys, pDblReps, pBoolReps, pStrReps);
 
             var keysArray = keys.ToArray();
             var stringReportsArray = stringReports.ToArray();
@@ -368,17 +368,17 @@ namespace GrasshopperPRT
 
             for(int i = 0; i < doubleReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeId, keysArray[kId], keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
                 kId++;
             }
             for(int i = 0; i < boolReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeId, keysArray[kId], keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
                 kId++;    
             }
             for(int i = 0; i < stringReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeId, keysArray[kId], keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
                 kId++;
             }
 
@@ -543,29 +543,29 @@ namespace GrasshopperPRT
             return null;
         }
 
-        public static void SetRuleAttributeDoubleArray(string rule, string fullName, List<double> doubleList)
+        public static void SetRuleAttributeDoubleArray(int initialShapeIndex, string rule, string fullName, List<double> doubleList)
         {
             if (doubleList.Count == 0) return;
 
             using (SimpleArrayDouble array = new SimpleArrayDouble(doubleList))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeDoubleArray(rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeDoubleArray(initialShapeIndex, rule, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeBoolArray(string rule, string fullName, List<Boolean> boolList)
+        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string rule, string fullName, List<Boolean> boolList)
         {
             if (boolList.Count == 0) return;
 
             using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeBoolArray(rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, rule, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeStringArray(string rule, string fullName, List<string> stringList)
+        public static void SetRuleAttributeStringArray(int initialShapeIndex, string rule, string fullName, List<string> stringList)
         {
             if (stringList.Count == 0) return;
 
@@ -574,7 +574,7 @@ namespace GrasshopperPRT
                 stringList.ForEach(x => array.Add(x));
 
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeStringArray(rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeStringArray(initialShapeIndex, rule, fullName, pArray);
             }
         }
     }

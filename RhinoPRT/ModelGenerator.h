@@ -17,7 +17,7 @@ public:
 		std::vector<pcu::ShapeAttributes>& shapeAttributes,
 		const std::wstring& geometryEncoderName,
 		const pcu::EncoderOptions& geometryEncoderOptions,
-		pcu::AttributeMapBuilderPtr& aBuilder,
+		pcu::AttributeMapBuilderVector& aBuilders,
 		std::vector<GeneratedModel>& generated_models);
 
 	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
@@ -57,12 +57,6 @@ private:
 	std::wstring mShapeName = L"Lot";
 
 	bool mValid = true;
-
-	void setAndCreateInitialShape(pcu::AttributeMapBuilderPtr& aBuilder,
-		const std::vector<pcu::ShapeAttributes>& shapesAttr,
-		std::vector<const prt::InitialShape*>& initShapes,
-		std::vector<pcu::InitialShapePtr>& initShapesPtrs,
-		std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
 
 	void setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
 		const std::vector<pcu::ShapeAttributes>& shapesAttr,

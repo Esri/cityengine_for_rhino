@@ -36,23 +36,23 @@ namespace GrasshopperPRT
 
         public override string TypeDescription => "Contains a cga report {key : value} where key is the report name and value is either a double, a boolean or a string.";
 
-        public int ShapeID { get; }
+        public int InitialShapeIndex { get; }
         public string StringValue { get; set; } = "";
         public double DoubleValue { get; set; } = 0;
         public bool BoolValue { get; set; } = false;
 
-        public ReportAttribute(int shapeID, string key, ReportTypes type)
+        public ReportAttribute(int initialShapeIndex, string key, ReportTypes type)
            : base()
         {
-            this.ShapeID = shapeID;
+            this.InitialShapeIndex = initialShapeIndex;
             this.mKey = key;
             this.mType = type;
         }
 
-        public ReportAttribute(int shapeID, string key, string nickname, ReportTypes type)
+        public ReportAttribute(int initialShapeIndex, string key, string nickname, ReportTypes type)
             : base()
         {
-            this.ShapeID = shapeID;
+            this.InitialShapeIndex = initialShapeIndex;
             this.mKey = key;
             this.mType = type;
         }
@@ -75,23 +75,23 @@ namespace GrasshopperPRT
         public string getKey() { return mKey; }
         public ReportTypes getType() { return mType; }
 
-        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, string value)
+        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, string nickname, ReportTypes type, string value)
         {
-            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
+            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, nickname, type);
             report.StringValue = value;
             return report;
         }
 
-        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, double value)
+        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, string nickname, ReportTypes type, double value)
         {
-            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
+            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, nickname, type);
             report.DoubleValue = value;
             return report;
         }
 
-        public static ReportAttribute CreateReportAttribute(int shapeID, string name, string nickname, ReportTypes type, bool value)
+        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, string nickname, ReportTypes type, bool value)
         {
-            ReportAttribute report = new ReportAttribute(shapeID, name, nickname, type);
+            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, nickname, type);
             report.BoolValue = value;
             return report;
         }
@@ -103,7 +103,7 @@ namespace GrasshopperPRT
 
         public override string ToString()
         {
-            return "[ ShapeID: " + ShapeID + ", Key: " + mKey + ", Value: " + getFormatedValue() + " ]";
+            return "[ InitialShapeIndex: " + InitialShapeIndex + ", Key: " + mKey + ", Value: " + getFormatedValue() + " ]";
         }
 
         public string ToNiceString()

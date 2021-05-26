@@ -16,18 +16,18 @@ namespace {
 		}
 	}
 
-	void addToMap(Reporting::GroupedReportMap& reports, const Reporting::ReportAttribute& report, const int shapeID)
+	void addToMap(Reporting::GroupedReportMap& reports, const Reporting::ReportAttribute& report, const int initialShapeIndex)
 	{
 		auto it = reports.find(report.mReportName);
 		if (it == reports.end()) {
 			std::vector<Reporting::ReportAttribute> newVect;
-			syncReports(shapeID, newVect);
+			syncReports(initialShapeIndex, newVect);
 			newVect.push_back(report);
 
 			reports.insert(it, std::make_pair(report.mReportName, newVect));
 		}
 		else {
-			syncReports(shapeID, reports.at(report.mReportName));
+			syncReports(initialShapeIndex, reports.at(report.mReportName));
 			reports.at(report.mReportName).push_back(report);
 		}
 	}
@@ -36,10 +36,10 @@ namespace {
 
 namespace Reporting {
 
-	ReportAttribute getEmptyReport(int shapeID)
+	ReportAttribute getEmptyReport(int initialShapeIndex)
 	{
 		ReportAttribute report;
-		report.mInitialShapeIndex = shapeID;
+		report.mInitialShapeIndex = initialShapeIndex;
 		report.mReportName = L"Empty Report";
 		report.mType = prt::AttributeMap::PrimitiveType::PT_UNDEFINED;
 
@@ -98,16 +98,16 @@ namespace Reporting {
 		return rep;
 	}
 
-	void GroupedReports::add(const ReportAttribute& report, const int shapeID)
+	void GroupedReports::add(const ReportAttribute& report, const int initialShapeIndex)
 	{
 		if (report.mType == prt::AttributeMap::PrimitiveType::PT_BOOL) {
-			addToMap(mGroupedBoolReports, report, shapeID);
+			addToMap(mGroupedBoolReports, report, initialShapeIndex);
 		}
 		else if (report.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT) {
-			addToMap(mGroupedDoubleReports, report, shapeID);
+			addToMap(mGroupedDoubleReports, report, initialShapeIndex);
 		}
 		else if (report.mType == prt::AttributeMap::PrimitiveType::PT_STRING) {
-			addToMap(mGroupedStringReports, report, shapeID);
+			addToMap(mGroupedStringReports, report, initialShapeIndex);
 		}
 	}
 

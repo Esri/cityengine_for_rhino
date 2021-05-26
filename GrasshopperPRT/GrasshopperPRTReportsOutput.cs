@@ -62,7 +62,7 @@ namespace GrasshopperPRT
                 ReportAttribute report = (ReportAttribute)input;
 
                 DA.SetData(REPORT_KEY, report.getKey());
-                DA.SetData(REPORT_SHAPE_ID, report.ShapeID);
+                DA.SetData(REPORT_SHAPE_ID, report.InitialShapeIndex);
 
                 switch (report.getType())
                 {

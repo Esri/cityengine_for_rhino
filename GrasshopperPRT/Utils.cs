@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
+using System.Drawing;
 
 namespace GrasshopperPRT
 {
@@ -59,11 +60,11 @@ namespace GrasshopperPRT
         /// </summary>
         /// <param name="ghColor">the grasshopper color to convert</param>
         /// <returns>a hex color string</returns>
-        public static string hexColor(GH_Colour ghColor)
+        public static string hexColor(Color color)
         {
-            string hexStr = "#" + ghColor.Value.R.ToString("X2") +
-                ghColor.Value.G.ToString("X2") +
-                ghColor.Value.B.ToString("X2");
+            string hexStr = "#" + color.R.ToString("X2") +
+                color.G.ToString("X2") +
+                color.B.ToString("X2");
 
             return hexStr;
         }
@@ -96,6 +97,11 @@ namespace GrasshopperPRT
 
             grp.AddObject(guid);
             grp.ExpireCaches();
+        }
+
+        public static string GetCastErrorMessage(RuleAttribute attribute, string castTarget)
+        {
+            return "Could not cast attribute " + attribute.mFullName + " to " + castTarget;
         }
     }
 }
