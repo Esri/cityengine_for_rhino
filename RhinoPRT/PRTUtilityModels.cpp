@@ -38,8 +38,8 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 	for (int i = 0; i < mesh.VertexCount(); ++i) {
 		ON_3dPoint vertex = mesh.Vertex(i);
 		mVertices.push_back(vertex.x);
-		mVertices.push_back(vertex.y);
 		mVertices.push_back(vertex.z);
+		mVertices.push_back(vertex.y);
 	}
 
 	for (int i = 0; i < mesh.FaceCount(); ++i) {
@@ -69,7 +69,7 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 	// Duplicate vertices
 	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
 		auto index = modelPart.mIndices[v_id];
-		mesh.SetVertex(v_id, ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 1], modelPart.mVertices[index * 3 + 2]));
+		mesh.SetVertex(v_id, ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 2], modelPart.mVertices[index * 3 + 1]));
 		mesh.SetVertexNormal(v_id, ON_3dVector(modelPart.mNormals[index * 3], modelPart.mNormals[index * 3 + 1], modelPart.mNormals[index * 3 + 2]));
 	}
 	
