@@ -1,6 +1,8 @@
-# rhino-plugin-prototype
+# ![Puma Icon](doc/puma_icon_32px.png)  Puma - CityEngine Plugin for Rhino3D and Grasshopper
 
-This is a prototype of RhinoPRT. It enables the execution of CityEngine CGA rules within Rhino/Grasshopper.
+Puma is a plugin for [Rhino3D and Grasshopper](https://www.rhino3d.com). It provides a Rhino command and Grasshopper components which enable the execution of [CityEngine](https://www.esri.com/software/cityengine) ‘rules’ within a Rhino scene. Therefore, a Rhino artist or designer does not have to leave their familiar Rhino environment anymore to make use of CityEngine’s procedural modeling power. Complicated export-import steps are no longer needed, which also means that the procedural models do not need to be “baked” anymore. The building or street models stay procedural during the entire design or planning workflow. Consequently, the user can change any attributes of the building or street models easily by connecting them to other Grasshopper components.
+
+Puma requires so-called rule packages (RPK) as input, which are authored in CityEngine. An RPK includes assets and a CGA rule file which encodes an architectural style. Comprehensive RPK examples are available below.
 
 ## Installation
 
