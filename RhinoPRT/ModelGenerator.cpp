@@ -3,6 +3,7 @@
 #include "AttrEvalCallbacks.h"
 #include "Logger.h"
 
+#include <cassert>
 #include <filesystem>
 
 namespace {

@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.3.6821/esri_ce_sdk-2.3.6821-win10-vc142-x86_64-rel-opt.zip</PRTUrl>
+    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.4.7316/esri_ce_sdk-2.4.7316-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
     <OutputDirectory>.\build\</OutputDirectory>
     <DownloadDir>$(SolutionDir)Downloads\</DownloadDir>
   </PropertyGroup>
