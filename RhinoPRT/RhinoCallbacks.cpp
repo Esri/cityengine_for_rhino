@@ -2,12 +2,12 @@
 
 void Model::addMaterial(const Materials::MaterialAttribute& ma)
 {
-	mMaterials.insert_or_assign(ma.mMatId, std::move(ma));
+	mMaterials.insert_or_assign(ma.mMatId, ma);
 }
 
 void Model::addReport(const Reporting::ReportAttribute& ra)
 {
-	mReports.emplace(ra.mReportName, std::move(ra));
+	mReports.emplace(ra.mReportName, ra);
 }
 
 const std::vector<ModelPart>& Model::getModelParts() const { return mModelParts; }
