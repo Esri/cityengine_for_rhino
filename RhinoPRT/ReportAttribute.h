@@ -15,7 +15,7 @@ class Model;
 namespace Reporting {
 
 	struct ReportAttribute {
-		int mInitialShapeIndex;
+		size_t mInitialShapeIndex = 0;
 		std::wstring mReportName;
 		prt::AttributeMap::PrimitiveType mType;
 
@@ -34,9 +34,9 @@ namespace Reporting {
 	const std::vector<ReportAttribute> EMPTY_REPORTS;
 	const std::wstring EMPTY_REPORT_STRING(L"\0");
 
-	ReportAttribute getEmptyReport(int initialShapeIndex);
+	ReportAttribute getEmptyReport(size_t initialShapeIndex);
 
-	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
+	void extractReports(size_t initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
 	ReportsVector ToReportsVector(const ReportMap& reports);
 
 	class GroupedReports {

@@ -36,7 +36,7 @@ namespace {
 
 namespace Reporting {
 
-	ReportAttribute getEmptyReport(int initialShapeIndex)
+	ReportAttribute getEmptyReport(size_t initialShapeIndex)
 	{
 		ReportAttribute report;
 		report.mInitialShapeIndex = initialShapeIndex;
@@ -46,7 +46,7 @@ namespace Reporting {
 		return report;
 	}
 
-	void extractReports(int initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports)
+	void extractReports(size_t initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports)
 	{
 		size_t keyCount = 0;
 		auto keys = reports->getKeys(&keyCount);
