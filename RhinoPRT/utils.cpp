@@ -223,6 +223,10 @@ namespace pcu {
 		return toUTF8FromUTF16(utf16String);
 	}
 
+	void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee) {
+		rhinoString += appendee.c_str();
+	}
+
 	std::string percentEncode(const std::string& utf8String) {
 		return callAPI<char, char>(prt::StringUtils::percentEncode, utf8String);
 	}

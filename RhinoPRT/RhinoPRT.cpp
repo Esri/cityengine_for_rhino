@@ -237,8 +237,7 @@ extern "C" {
 
 	RHINOPRT_API void GetProductVersion(ON_wString* version_str)
 	{
-		std::string str(VER_FILE_VERSION_STR);
-		pcu::appendToRhinoString(*version_str, str);
+		*version_str = VER_FILE_VERSION_STR;
 	}
 
 	RHINOPRT_API bool InitializeRhinoPRT()

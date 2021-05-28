@@ -101,8 +101,10 @@ namespace pcu {
 	std::wstring toUTF16FromUTF8(const std::string& utf8String);
 	std::string toUTF8FromUTF16(const std::wstring& utf16String);
 	std::string toUTF8FromOSNarrow(const std::string& osString);
-	std::string percentEncode(const std::string& utf8String);
 
+	void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee);
+
+	std::string percentEncode(const std::string& utf8String);
 	std::string toFileURI(const std::string& osNarrowPath);
 	std::string toFileURI(const std::wstring& utf16Path);
 
@@ -116,11 +118,6 @@ namespace pcu {
 	std::wstring removePrefix(const std::wstring& attrName, wchar_t delim);
 	std::wstring removeImport(const std::wstring& attrName);
 	std::wstring removeStyle(const std::wstring& attrName);
-
-	template<typename C>
-	void appendToRhinoString(ON_wString& rhinoString, const std::basic_string<C>& appendee) {
-		rhinoString.Append(appendee.c_str(), static_cast<int>(appendee.size()));
-	}
 
 	/**
 	 * Resolve map helpers
