@@ -17,7 +17,7 @@ namespace Reporting {
 	struct ReportAttribute {
 		size_t mInitialShapeIndex = 0;
 		std::wstring mReportName;
-		prt::AttributeMap::PrimitiveType mType;
+		prt::AttributeMap::PrimitiveType mType = prt::AttributeMap::PT_UNDEFINED;
 
 		std::wstring mStringReport;
 		double mDoubleReport = 0;
