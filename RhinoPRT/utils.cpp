@@ -129,16 +129,21 @@ namespace pcu {
 	std::wstring getUUID()
 	{
 #ifdef _WIN32
+		RPC_STATUS status;
+		
 		UUID uid;
-		UuidCreate(&uid);
+		status = UuidCreate(&uid);
+		if (status != RPC_S_OK)
+			throw std::runtime_error("Failed to create UUID");
 
 		wchar_t* str;
-		auto status = UuidToStringW(&uid, (RPC_WSTR*)&str);
-		if(status == RPC_S_OK) return std::wstring(str);
-		else {
+		status = UuidToStringW(&uid, (RPC_WSTR*)&str);
+		if (status != RPC_S_OK) {
 			LOG_ERR << "Failed to create UUID";
 			throw std::runtime_error("Failed to create UUID");
 		}
+		
+		return std::wstring(str);
 #else
 #error Windows platform required
 #endif
