@@ -21,43 +21,43 @@ namespace {
 	}
 }
 
-prt::Status AttrEvalCallbacks::generateError(size_t isIndex, prt::Status status, const wchar_t * message)
+prt::Status AttrEvalCallbacks::generateError(size_t /*isIndex*/, prt::Status /*status*/, const wchar_t * /*message*/)
 {
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::assetError(size_t isIndex, prt::CGAErrorLevel level, const wchar_t * key, const wchar_t * uri, const wchar_t * message)
+prt::Status AttrEvalCallbacks::assetError(size_t /*isIndex*/, prt::CGAErrorLevel /*level*/, const wchar_t * /*key*/, const wchar_t * /*uri*/, const wchar_t * /*message*/)
 {
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::cgaError(size_t isIndex, int32_t shapeID, prt::CGAErrorLevel level, int32_t methodId, int32_t pc, const wchar_t * message)
+prt::Status AttrEvalCallbacks::cgaError(size_t /*isIndex*/, int32_t /*shapeID*/, prt::CGAErrorLevel /*level*/, int32_t /*methodId*/, int32_t /*pc*/, const wchar_t * message)
 {
 	LOG_ERR << message;
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t * txt)
+prt::Status AttrEvalCallbacks::cgaPrint(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t * /*txt*/)
 {
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::cgaReportBool(size_t isIndex, int32_t shapeID, const wchar_t * key, bool value)
+prt::Status AttrEvalCallbacks::cgaReportBool(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t * /*key*/, bool /*value*/)
 {
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::cgaReportFloat(size_t isIndex, int32_t shapeID, const wchar_t * key, double value)
+prt::Status AttrEvalCallbacks::cgaReportFloat(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t * /*key*/, double /*value*/)
 {
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::cgaReportString(size_t isIndex, int32_t shapeID, const wchar_t * key, const wchar_t * value)
+prt::Status AttrEvalCallbacks::cgaReportString(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t * /*key*/, const wchar_t * /*value*/)
 {
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::attrBool(size_t isIndex, int32_t shapeID, const wchar_t * key, bool value)
+prt::Status AttrEvalCallbacks::attrBool(size_t isIndex, int32_t /*shapeID*/, const wchar_t * key, bool value)
 {
 	if (DBG) LOG_DBG << "attrBool: isIndex = " << isIndex << ", key = " << key << " = " << value;
 	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
@@ -65,7 +65,7 @@ prt::Status AttrEvalCallbacks::attrBool(size_t isIndex, int32_t shapeID, const w
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::attrFloat(size_t isIndex, int32_t shapeID, const wchar_t * key, double value)
+prt::Status AttrEvalCallbacks::attrFloat(size_t isIndex, int32_t /*shapeID*/, const wchar_t * key, double value)
 {
 	if (DBG) LOG_DBG << "attrFloat: isIndex = " << isIndex << ", key = " << key << " = " << value;
 	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
@@ -73,7 +73,7 @@ prt::Status AttrEvalCallbacks::attrFloat(size_t isIndex, int32_t shapeID, const 
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::attrString(size_t isIndex, int32_t shapeID, const wchar_t * key, const wchar_t * value)
+prt::Status AttrEvalCallbacks::attrString(size_t isIndex, int32_t /*shapeID*/, const wchar_t * key, const wchar_t * value)
 {
 	if (DBG) LOG_DBG << "attrString: isIndex = " << isIndex << ", key = " << key << " = " << value;
 	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
@@ -81,7 +81,7 @@ prt::Status AttrEvalCallbacks::attrString(size_t isIndex, int32_t shapeID, const
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::attrBoolArray(size_t isIndex, int32_t shapeID, const wchar_t * key, const bool * ptr, size_t size, size_t nRows)
+prt::Status AttrEvalCallbacks::attrBoolArray(size_t isIndex, int32_t /*shapeID*/, const wchar_t * key, const bool * ptr, size_t size, size_t /*nRows*/)
 {
 	if (DBG) LOG_DBG << "attrBoolArray: isIndex = " << isIndex << ", key = " << key << " = " << *ptr << " size = " << size;
 	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
@@ -89,7 +89,7 @@ prt::Status AttrEvalCallbacks::attrBoolArray(size_t isIndex, int32_t shapeID, co
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::attrFloatArray(size_t isIndex, int32_t shapeID, const wchar_t * key, const double * ptr, size_t size, size_t nRows)
+prt::Status AttrEvalCallbacks::attrFloatArray(size_t isIndex, int32_t /*shapeID*/, const wchar_t * key, const double * ptr, size_t size, size_t /*nRows*/)
 {
 	if (DBG) LOG_DBG << "attrFloatArray: isIndex = " << isIndex << ", key = " << key << " = " << *ptr << " size = " << size;
 	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))
@@ -97,7 +97,7 @@ prt::Status AttrEvalCallbacks::attrFloatArray(size_t isIndex, int32_t shapeID, c
 	return prt::STATUS_OK;
 }
 
-prt::Status AttrEvalCallbacks::attrStringArray(size_t isIndex, int32_t shapeID, const wchar_t * key, const wchar_t * const * ptr, size_t size, size_t nRows)
+prt::Status AttrEvalCallbacks::attrStringArray(size_t isIndex, int32_t /*shapeID*/, const wchar_t * key, const wchar_t * const * ptr, size_t size, size_t /*nRows*/)
 {
 	if (DBG) LOG_DBG << "attrStringArray: isIndex = " << isIndex << ", key = " << key << " = " << *ptr << " size = " << size;
 	if (mRuleFileInfo && !isHiddenAttribute(mRuleFileInfo, key))

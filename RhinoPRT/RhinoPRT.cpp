@@ -99,7 +99,7 @@ namespace RhinoPRT {
 	}
 
 	template<typename T>
-	void RhinoPRTAPI::fillAttributeFromNode(const int initialShapeIndex, const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count) {
+	void RhinoPRTAPI::fillAttributeFromNode(const int initialShapeIndex, const std::wstring& /*ruleName*/, const std::wstring& attrFullName, T value, size_t count) {
 
 		auto& ruleAttributes = mModelGenerator->getRuleAttributes();
 
@@ -555,7 +555,7 @@ extern "C" {
 	}
 
 
-	RHINOPRT_API bool GetMaterial(int initialShapeIndex, int meshID, int* uvSet,
+	RHINOPRT_API bool GetMaterial(int initialShapeIndex, int meshID, int* /*uvSet*/,
 		ON_ClassArray<ON_wString>* pTexKeys,
 		ON_ClassArray<ON_wString>* pTexPaths,
 		ON_SimpleArray<int>* pDiffuseColor,

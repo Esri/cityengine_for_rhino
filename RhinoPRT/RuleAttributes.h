@@ -87,7 +87,7 @@ private:
 template<class T>
 class AnnotationEnum : public AnnotationBase {
 public:
-	AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::NOANNOT) {
+	AnnotationEnum(const prt::Annotation* /*an*/) : AnnotationBase(AttributeAnnotation::NOANNOT) {
 		LOG_WRN << L"Rule type incompatible with enum.";
 	}
 
@@ -101,12 +101,12 @@ private:
 
 class AnnotationFile : public AnnotationBase {
 public:
-	AnnotationFile(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::FILE) {}
+	AnnotationFile(const prt::Annotation* /*an*/) : AnnotationBase(AttributeAnnotation::FILE) {}
 };
 
 class AnnotationDir : public AnnotationBase {
 public:
-	AnnotationDir(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::DIR) {}
+	AnnotationDir(const prt::Annotation* /*an*/) : AnnotationBase(AttributeAnnotation::DIR) {}
 };
 
 using AnnotationUPtr = std::unique_ptr<AnnotationBase>;

@@ -94,7 +94,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 						 uint32_t const * const * uvCounts, size_t const * uvCountsSizes, 
 						 uint32_t const * const * uvIndices, size_t const * uvIndicesSizes, 
 						 uint32_t uvSets,
-						 const uint32_t* faceRanges, size_t faceRangesSize,
+						 const uint32_t* /*faceRanges*/, size_t /*faceRangesSize*/,
 						 const prt::AttributeMap ** materials, const size_t matCount)
 {
 	if (!addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount,
