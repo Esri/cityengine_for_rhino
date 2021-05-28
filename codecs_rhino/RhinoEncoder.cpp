@@ -362,7 +362,7 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	convertGeometry(initialShape, finalizedInstances, cb);
 
 	if (getOptions()->getBool(EO_EMIT_REPORTS)) {
-		auto reports = reportsCollector->getReports();
+		const prtx::ReportsPtr& reports = reportsCollector->getReports();
 
 		if (reports) {
 			auto reportMap = convertReportToAttributeMap(reports);
