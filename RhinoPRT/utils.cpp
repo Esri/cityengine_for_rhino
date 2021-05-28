@@ -304,4 +304,15 @@ namespace pcu {
 		return assetKey;
 	}
 
+	void PathRemover::operator()(std::filesystem::path const* p) {
+		if ((p != nullptr) && std::filesystem::exists(*p)) {
+			std::error_code errorCode;
+			std::filesystem::remove_all(*p, errorCode);
+			if (errorCode)
+				LOG_ERR << "Unable to remove path at " << *p << ", " << errorCode.message();
+			else
+				LOG_DBG << "Removed path at " << *p;
+			delete p;
+		}
+	}
 }

@@ -33,30 +33,9 @@ namespace {
 			return INVALID_TIMESTAMP;
 	}
 
-	struct PathRemover {
-		void operator()(std::filesystem::path const* p) {
-			if (p && std::filesystem::exists(*p)) {
-				std::filesystem::remove(*p);
-				LOG_DBG << "Removed file " << *p;
-				delete p;
-			}
-		}
-	};
-	using ScopedPath = std::unique_ptr<std::filesystem::path, PathRemover>;
-
 } // namespace
 
 namespace ResolveMap {
-
-	ResolveMapCache::~ResolveMapCache()
-	{
-		if (std::filesystem::remove_all(mUnpackPath) == -1) {
-			LOG_ERR << L"Error while removing the temp directory";
-		}
-		else {
-			LOG_INF << "Removed RPK unpack directory";
-		}
-	}
 
 	ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& rpk)
 	{
@@ -73,13 +52,11 @@ namespace ResolveMap {
 		auto it = mCache.find(cacheKey);
 		if (it != mCache.end())
 		{
-			const ResolveMapCacheEntry rmce = it->second;
+			const ResolveMapCacheEntry& rmce = it->second;
 			LOG_DBG << "rpk: cache timestamp: " << std::chrono::duration_cast<std::chrono::nanoseconds>(rmce.mTimeStamp.time_since_epoch()).count() << "ns";
 			if (rmce.mTimeStamp != timeStamp)
 			{
 				mCache.erase(it);
-				const auto cnt = std::filesystem::remove_all(rmce.mExtractionPath);
-				LOG_INF << "RPK change detected, forcing reload and clearing cache for " << rpk << " (removed " << cnt << " files)";
 				cs = CacheStatus::MISS;
 			}
 		}
@@ -91,13 +68,20 @@ namespace ResolveMap {
 			const std::string rpkURI = pcu::toFileURI(rpk);
 			const std::wstring wRpkURI = pcu::toUTF16FromUTF8(rpkURI);
 
+			const std::wstring unpackSubDirPrefix = [&rpk]() {
+				std::wstring s = rpk.stem().generic_wstring();// +L"_";
+				//static const std::wstring TEMP_DIR_CHARS = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
+				//pcu::replace_not_in_range(s, TEMP_DIR_CHARS, L'_');
+				return s;
+			}();
+
 			ResolveMapCacheEntry rmce;
 			rmce.mTimeStamp = timeStamp;
-			rmce.mExtractionPath = pcu::getUniqueTempDir(mUnpackPath, rpk.stem().generic_wstring() + L"_");
+			rmce.mExtractionPath.reset(new std::filesystem::path(mUnpackPath / unpackSubDirPrefix));
 
 			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 			LOG_DBG << "createResolveMap from " << rpkURI;
-			rmce.mResolveMap.reset(prt::createResolveMap(wRpkURI.c_str(), rmce.mExtractionPath.wstring().c_str(), &status), pcu::PRTDestroyer());
+			rmce.mResolveMap.reset(prt::createResolveMap(wRpkURI.c_str(), rmce.mExtractionPath->wstring().c_str(), &status), pcu::PRTDestroyer());
 			if (status != prt::STATUS_OK)
 				return LOOKUP_FAILURE;
 

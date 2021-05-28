@@ -17,7 +17,7 @@ namespace ResolveMap {
 		ResolveMapCache(ResolveMapCache&&) = delete;
 		ResolveMapCache& operator=(ResolveMapCache const&) = delete;
 		ResolveMapCache& operator=(ResolveMapCache&&) = delete;
-		~ResolveMapCache();
+		~ResolveMapCache() = default;
 
 		enum class CacheStatus { HIT, MISS, FAILURE };
 		using LookupResult = std::pair<pcu::ResolveMapSPtr, CacheStatus>;
@@ -27,12 +27,12 @@ namespace ResolveMap {
 		struct ResolveMapCacheEntry {
 			pcu::ResolveMapSPtr mResolveMap;
 			std::chrono::system_clock::time_point mTimeStamp;
-			std::filesystem::path mExtractionPath;
+			pcu::ScopedPath mExtractionPath;
 		};
 		using Cache = std::map<KeyType, ResolveMapCacheEntry>;
 		Cache mCache;
 
-		std::filesystem::path mUnpackPath;
+		const std::filesystem::path mUnpackPath;
 	};
 
 	using ResolveMapCacheUPtr = std::unique_ptr<ResolveMapCache>;

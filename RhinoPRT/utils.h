@@ -119,6 +119,12 @@ namespace pcu {
 	std::wstring removeImport(const std::wstring& attrName);
 	std::wstring removeStyle(const std::wstring& attrName);
 
+	template<typename C>
+	std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std::basic_string<C>& range, const C& replacement) {
+		std::replace_if(str.begin(), str.end(), [&range](C c) { return (range.find(c) == std::basic_string<C>::npos); }, replacement);
+		return str;
+	}
+
 	/**
 	 * Resolve map helpers
 	 */
@@ -127,5 +133,12 @@ namespace pcu {
 	std::wstring detectStartRule(const RuleFileInfoPtr& ruleFileInfo);
 
 	std::wstring toAssetKey(std::wstring key);
+
+	struct PathRemover {
+		void operator()(std::filesystem::path const* p);
+	};
+
+	using ScopedPath = std::unique_ptr<std::filesystem::path, PathRemover>;
+
 
 } // namespace pcu
