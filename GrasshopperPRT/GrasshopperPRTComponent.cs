@@ -22,7 +22,6 @@ namespace GrasshopperPRT
 
     public class GrasshopperPRTComponent : GH_Component, IGH_VariableParameterComponent
     {
-        const int DEFAULT_INPUT_PARAM_COUNT = 2;
         const string RPK_INPUT_NAME = "Path to RPK";
         const string GEOM_INPUT_NAME = "Initial Shapes";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
@@ -31,7 +30,7 @@ namespace GrasshopperPRT
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
-        List<IGH_Param> mParams;
+        private readonly List<IGH_Param> mParams;
 
         bool mDoGenerateMaterials;
 
@@ -100,8 +99,10 @@ namespace GrasshopperPRT
 
             // RPK path is a single item.
             string rpk_file = "";
-            if (!DA.GetData(RPK_INPUT_NAME, ref rpk_file)) { return; }
-            if (rpk_file.Length == 0) { return; }
+            if (!DA.GetData(RPK_INPUT_NAME, ref rpk_file))
+                return;
+            if (rpk_file.Length == 0)
+                return;
 
             // Once we have a rpk file, directly extract the rule attributes
             PRTWrapper.SetPackage(rpk_file);
@@ -136,8 +137,8 @@ namespace GrasshopperPRT
             PRTWrapper.ClearInitialShapes();
 
             // Get the initial shape inputs
-            GH_Structure<IGH_GeometricGoo> shapeTree = null;
-            if (!DA.GetDataTree<IGH_GeometricGoo>(GEOM_INPUT_NAME, out shapeTree)) { return; }
+            if (!DA.GetDataTree<IGH_GeometricGoo>(GEOM_INPUT_NAME, out GH_Structure<IGH_GeometricGoo> shapeTree))
+                return;
 
             // Transform each geometry to a mesh
             List<Mesh> meshes = new List<Mesh>();
@@ -145,7 +146,7 @@ namespace GrasshopperPRT
             int initShapeIdx = 0;
             foreach(IGH_GeometricGoo geom in shapeTree.AllData(true))
             {
-                Mesh mesh = convertToMesh(geom);
+                Mesh mesh = ConvertToMesh(geom);
 
                 if (mesh != null)
                 {
@@ -156,9 +157,11 @@ namespace GrasshopperPRT
             }
 
             // No compatible mesh was given
-            if (meshes.Count == 0) return;
+            if (meshes.Count == 0)
+                return;
 
-            if(!PRTWrapper.AddMesh(meshes)) return;
+            if(!PRTWrapper.AddMesh(meshes))
+                return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
             FillAttributesFromNode(DA, meshes.Count);
@@ -212,9 +215,8 @@ namespace GrasshopperPRT
         /// </summary>
         /// <param name="shape">An initial shape</param>
         /// <returns>The shape converted to a Mesh</returns>
-        private Mesh convertToMesh(IGH_GeometricGoo shape)
+        private Mesh ConvertToMesh(IGH_GeometricGoo shape)
         {
-            bool status = true;
             Mesh mesh = null;
 
             // Cast the shape to its actual Rhino.Geometry type.
@@ -238,7 +240,7 @@ namespace GrasshopperPRT
             else if (geoGoo is GH_Rectangle)
             {
                 Rectangle3d rect = Rectangle3d.Unset;
-                status = GH_Convert.ToRectangle3d(geoGoo as GH_Rectangle, ref rect, GH_Conversion.Both);
+                bool status = GH_Convert.ToRectangle3d(geoGoo as GH_Rectangle, ref rect, GH_Conversion.Both);
 
                 if (!status) return null;
 
@@ -434,7 +436,7 @@ namespace GrasshopperPRT
                     }
                 case AnnotationArgumentType.AAT_STR:
                     {
-                        string text = null;
+                        string text;
                         if (attribute.IsColor())
                         {
          
