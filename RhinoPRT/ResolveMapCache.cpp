@@ -9,7 +9,7 @@ namespace {
 
 	ResolveMap::ResolveMapCache::KeyType createCacheKey(const std::filesystem::path& rpk)
 	{
-		return rpk.wstring();
+		return rpk.generic_wstring();
 	}
 
 	template <typename TP>
@@ -73,11 +73,12 @@ namespace ResolveMap {
 		auto it = mCache.find(cacheKey);
 		if (it != mCache.end())
 		{
-			LOG_DBG << "rpk: cache timestamp: " << std::chrono::duration_cast<std::chrono::nanoseconds>(it->second.mTimeStamp.time_since_epoch()).count() << "ns";
-			if (it->second.mTimeStamp != timeStamp)
+			const ResolveMapCacheEntry rmce = it->second;
+			LOG_DBG << "rpk: cache timestamp: " << std::chrono::duration_cast<std::chrono::nanoseconds>(rmce.mTimeStamp.time_since_epoch()).count() << "ns";
+			if (rmce.mTimeStamp != timeStamp)
 			{
 				mCache.erase(it);
-				const auto cnt = std::filesystem::remove_all(getUniqueSubdir(it->second));
+				const auto cnt = std::filesystem::remove_all(rmce.mExtractionPath);
 				LOG_INF << "RPK change detected, forcing reload and clearing cache for " << rpk << " (removed " << cnt << " files)";
 				cs = CacheStatus::MISS;
 			}
@@ -92,11 +93,11 @@ namespace ResolveMap {
 
 			ResolveMapCacheEntry rmce;
 			rmce.mTimeStamp = timeStamp;
-			rmce.mUUID = pcu::getUUID();
+			rmce.mExtractionPath = pcu::getUniqueTempDir(mUnpackPath, rpk.stem().generic_wstring() + L"_");
 
 			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 			LOG_DBG << "createResolveMap from " << rpkURI;
-			rmce.mResolveMap.reset(prt::createResolveMap(converted_str, getUniqueSubdir(rmce).wstring().c_str(), &status), pcu::PRTDestroyer());
+			rmce.mResolveMap.reset(prt::createResolveMap(converted_str, rmce.mExtractionPath.wstring().c_str(), &status), pcu::PRTDestroyer());
 			if (status != prt::STATUS_OK)
 				return LOOKUP_FAILURE;
 
@@ -105,23 +106,6 @@ namespace ResolveMap {
 		}
 
 		return { it->second.mResolveMap, cs };
-	}
-
-	const std::filesystem::path ResolveMapCache::getUniqueSubdir(const ResolveMapCacheEntry& rmce)
-	{
-		std::filesystem::path path = mUnpackPath / rmce.mUUID;
-
-		if (!std::filesystem::exists(path))
-		{
-			bool status = std::filesystem::create_directory(path);
-			if (!status)
-			{
-				LOG_ERR << "Unable to create the extract directory: " << path << ". Fallback to default temp dir.";
-				return mUnpackPath;
-			}
-		}
-
-		return path;
 	}
 
 } // namepsace ResolveMap

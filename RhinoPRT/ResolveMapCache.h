@@ -27,14 +27,12 @@ namespace ResolveMap {
 		struct ResolveMapCacheEntry {
 			pcu::ResolveMapSPtr mResolveMap;
 			std::chrono::system_clock::time_point mTimeStamp;
-			std::wstring mUUID; // The unique subdirectory in which the rpk is extracted
+			std::filesystem::path mExtractionPath;
 		};
 		using Cache = std::map<KeyType, ResolveMapCacheEntry>;
 		Cache mCache;
 
 		std::filesystem::path mUnpackPath;
-
-		const std::filesystem::path getUniqueSubdir(const ResolveMapCacheEntry& rmce);
 	};
 
 	using ResolveMapCacheUPtr = std::unique_ptr<ResolveMapCache>;

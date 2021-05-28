@@ -14,6 +14,7 @@
 #include "prt/FileOutputCallbacks.h"
 #include "prt/LogHandler.h"
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -31,9 +32,9 @@ class RhinoCallbacks;
 namespace pcu {
 
 	std::wstring getDllLocation();
-	std::wstring getTempDir(const std::wstring& tmp_prefix);
+	std::filesystem::path getTempDir(const std::wstring& tmp_prefix);
 	std::wstring getUUID();
-	std::wstring getUniqueTempDir(const std::wstring& tmp_prefix);
+	std::filesystem::path getUniqueTempDir(const std::filesystem::path& tempDir, const std::wstring& basename);
 
 	template <typename C>
 	C getDirSeparator();

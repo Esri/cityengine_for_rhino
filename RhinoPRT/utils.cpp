@@ -89,41 +89,34 @@ namespace pcu {
 		return std::wstring(1, getDirSeparator<wchar_t>());
 	}
 
-	std::wstring getTempDir(const std::wstring& tmp_prefix)
+	std::filesystem::path getTempDir(const std::wstring& tmp_prefix)
 	{
-		auto path = std::filesystem::temp_directory_path();
+		const auto tempPath = std::filesystem::temp_directory_path();
 
-		auto prtTempPath = path.append(tmp_prefix);
+		auto prtTempPath = tempPath / tmp_prefix;
 		if (!std::filesystem::exists(prtTempPath)) {
 			if (!std::filesystem::create_directory(prtTempPath)) 
 			{
-				LOG_ERR << L"Could not create PRT temporary directory. Returning the default temp dir.";
-				return path.generic_wstring();
+				LOG_ERR << L"Could not create PRT temporary directory at " << prtTempPath.wstring() << L". Returning the default temp dir at " << tempPath.wstring();
+				return tempPath;
 			}
-			return prtTempPath.generic_wstring();
 		}
 
-		return path.generic_wstring();
+		return prtTempPath;
 	}
 
-	std::wstring getUniqueTempDir(const std::wstring& tmp_prefix)
+	std::filesystem::path getUniqueTempDir(const std::filesystem::path& tempDir, const std::wstring& basename)
 	{
-		std::wstring temp_dir = getTempDir(tmp_prefix);
-		std::filesystem::path path(temp_dir);
+		const std::wstring uuid = getUUID();
+		const auto uniqueTempDir = tempDir / (basename + uuid);
 
-		std::wstring uuid = getUUID();
-		if (uuid.size() == 0)
-			LOG_ERR << L"Could not create uuid.";
-		else
-			path = path.append(uuid);
-
-		if (!std::filesystem::create_directory(path))
+		if (!std::filesystem::create_directory(uniqueTempDir))
 		{
-			LOG_ERR << L"Could not create unique temporary directory, returning default temp dir.";
-			return temp_dir;
+			LOG_ERR << L"Could not create unique temporary directory at " << uniqueTempDir.wstring() << L", returning default temp dir.";
+			return tempDir;
 		}
 
-		return path.generic_wstring();
+		return uniqueTempDir;
 	}
 
 	std::wstring getUUID()
@@ -136,14 +129,14 @@ namespace pcu {
 		if (status != RPC_S_OK)
 			throw std::runtime_error("Failed to create UUID");
 
-		wchar_t* str;
+		wchar_t* str = nullptr;
 		status = UuidToStringW(&uid, (RPC_WSTR*)&str);
-		if (status != RPC_S_OK) {
-			LOG_ERR << "Failed to create UUID";
-			throw std::runtime_error("Failed to create UUID");
+		if (status == RPC_S_OK && str != nullptr && std::wcslen(str) > 0) {
+			return std::wstring(str);
 		}
-		
-		return std::wstring(str);
+
+		LOG_ERR << "Failed to create UUID";
+		throw std::runtime_error("Failed to create UUID");		
 #else
 #error Windows platform required
 #endif
