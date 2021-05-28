@@ -101,10 +101,11 @@ namespace pcu {
 	std::string toOSNarrowFromUTF16(const std::wstring& osWString);
 	std::wstring toUTF16FromOSNarrow(const std::string& osString);
 	std::wstring toUTF16FromUTF8(const std::string& utf8String);
+	std::string toUTF8FromUTF16(const std::wstring& utf16String);
 	std::string toUTF8FromOSNarrow(const std::string& osString);
 	std::string percentEncode(const std::string& utf8String);
-	URI toFileURI(const std::string& p);
-	URI toFileURI(const std::wstring& p);
+	URI toFileURI(const std::string& osNarrowPath);
+	URI toFileURI(const std::wstring& utf16Path);
 
 	std::wstring filename(const std::wstring& path);
 
