@@ -26,7 +26,7 @@ public:
 	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::filesystem::path& rpk);
 	void updateRuleFiles(const std::wstring& rulePkg);
 
-	RuleAttributes& getRuleAttributes() { return mRuleAttributes; }
+	const RuleAttributes& getRuleAttributes() const { return mRuleAttributes; }
 
 	std::wstring getRuleFile(); 
 	std::wstring getStartingRule(); 

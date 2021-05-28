@@ -91,8 +91,8 @@ public:
 		LOG_WRN << L"Rule type incompatible with enum.";
 	}
 
-	std::vector<T> getAnnotArguments() { return mEnums; }
-	bool isRestricted() { return mRestricted; }
+	std::vector<T> getAnnotArguments() const { return mEnums; }
+	bool isRestricted() const { return mRestricted; }
 
 private:
 	bool mRestricted;

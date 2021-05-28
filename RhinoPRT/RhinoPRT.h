@@ -32,7 +32,7 @@ namespace RhinoPRT {
 		void SetRPKPath(const std::wstring &rpk_path);
 
 		int GetRuleAttributeCount();
-		RuleAttributes& GetRuleAttributes();
+		const RuleAttributes& GetRuleAttributes() const;
 
 		void AddInitialShape(const std::vector<InitialShape>& shapes);
 		void ClearInitialShapes();

@@ -33,7 +33,7 @@ namespace RhinoPRT {
 		return static_cast<int>(mModelGenerator->getRuleAttributes().size());
 	}
 
-	RuleAttributes& RhinoPRTAPI::GetRuleAttributes() {
+	const RuleAttributes& RhinoPRTAPI::GetRuleAttributes() const {
 		return mModelGenerator->getRuleAttributes();
 	}
 
@@ -101,12 +101,12 @@ namespace RhinoPRT {
 	template<typename T>
 	void RhinoPRTAPI::fillAttributeFromNode(const int initialShapeIndex, const std::wstring& /*ruleName*/, const std::wstring& attrFullName, T value, size_t count) {
 
-		auto& ruleAttributes = mModelGenerator->getRuleAttributes();
+		const auto& ruleAttributes = mModelGenerator->getRuleAttributes();
 
-		const RuleAttributes::iterator it = std::find_if(ruleAttributes.begin(), ruleAttributes.end(), [&attrFullName](const auto& ra)
+		const RuleAttributes::const_iterator it = std::find_if(ruleAttributes.begin(), ruleAttributes.end(), [&attrFullName](const auto& ra)
 															{return ra->mFullName == attrFullName; });
 
-		if (it != ruleAttributes.end())
+		if (it != ruleAttributes.cend())
 		{
 			const RuleAttributeUPtr& rule = *it;
 			assert(!rule->mFullName.empty()); // Check if the rule was found
@@ -330,7 +330,7 @@ extern "C" {
 
 	RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname, prt::AnnotationArgumentType* type, ON_wString* pGroup)
 	{
-		RuleAttributes& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
+		const RuleAttributes& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 
 		if (attrIdx >= ruleAttributes.size()) return false;
 
@@ -459,7 +459,7 @@ extern "C" {
 		auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 		if (ruleIdx < ruleAttributes.size())
 		{
-			RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
+			const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
 			std::for_each(attrib->mAnnotations.begin(), attrib->mAnnotations.end(), [pAnnotTypeArray](const AnnotationUPtr& p) 
 				{ pAnnotTypeArray->Append(p->getType()); });
 		}
@@ -470,7 +470,7 @@ extern "C" {
 		auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 		if (ruleIdx < ruleAttributes.size())
 		{
-			RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
+			const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
 			if (enumIdx < attrib->mAnnotations.size())
 			{
 				const AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
@@ -487,19 +487,20 @@ extern "C" {
 
 	RHINOPRT_API bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, ON_SimpleArray<double>* pArray, bool* restricted)
 	{
-		auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
+		const auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 		if (ruleIdx < ruleAttributes.size())
 		{
-			RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
+			const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
 			if (enumIdx < attrib->mAnnotations.size())
 			{
-				AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
-				if (annot->getType() == AttributeAnnotation::ENUM && annot->getEnumType() == EnumAnnotationType::DOUBLE)
+				const AnnotationBase& annot = *attrib->mAnnotations[enumIdx];
+				if (annot.getType() == AttributeAnnotation::ENUM && annot.getEnumType() == EnumAnnotationType::DOUBLE)
 				{
-					*restricted = dynamic_cast<AnnotationEnum<double>*>(annot.get())->isRestricted();
-					auto& enumList = dynamic_cast<AnnotationEnum<double>*>(annot.get())->getAnnotArguments();
+					const AnnotationEnum<double>& annotEnum = static_cast<const AnnotationEnum<double>&>(annot);
+					for (const double& v : annotEnum.getAnnotArguments())
+						pArray->Append(v);
+					*restricted = annotEnum.isRestricted();
 
-					std::for_each(enumList.begin(), enumList.end(), [&pArray](double& v) {pArray->Append(v); });
 					return true;
 				}
 			}
@@ -513,7 +514,7 @@ extern "C" {
 		auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 		if (ruleIdx < ruleAttributes.size())
 		{
-			RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
+			const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
 			if (enumIdx < attrib->mAnnotations.size())
 			{
 				AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
@@ -536,7 +537,7 @@ extern "C" {
 		auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 		if (ruleIdx < ruleAttributes.size())
 		{
-			RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
+			const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
 			if (enumIdx < attrib->mAnnotations.size())
 			{
 				AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
