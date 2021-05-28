@@ -88,8 +88,8 @@ namespace ResolveMap {
 
 		if (cs == CacheStatus::MISS)
 		{
-			const auto rpkURI = pcu::toFileURI(rpk);
-			auto converted_str = pcu::toUTF16FromUTF8(rpkURI).c_str();
+			const std::string rpkURI = pcu::toFileURI(rpk);
+			const std::wstring wRpkURI = pcu::toUTF16FromUTF8(rpkURI);
 
 			ResolveMapCacheEntry rmce;
 			rmce.mTimeStamp = timeStamp;
@@ -97,7 +97,7 @@ namespace ResolveMap {
 
 			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 			LOG_DBG << "createResolveMap from " << rpkURI;
-			rmce.mResolveMap.reset(prt::createResolveMap(converted_str, rmce.mExtractionPath.wstring().c_str(), &status), pcu::PRTDestroyer());
+			rmce.mResolveMap.reset(prt::createResolveMap(wRpkURI.c_str(), rmce.mExtractionPath.wstring().c_str(), &status), pcu::PRTDestroyer());
 			if (status != prt::STATUS_OK)
 				return LOOKUP_FAILURE;
 
