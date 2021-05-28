@@ -1,7 +1,16 @@
 ﻿// RhinoPRTPlugIn.cpp : defines the initialization routines for the plug-in.
 //
 
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning (disable : 26451)
+#	pragma warning (disable : 26495)
+#endif
 #include "stdafx.h"
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
+
 #include "rhinoSdkPlugInDeclare.h"
 #include "RhinoPRTPlugIn.h"
 #include "Resource.h"
