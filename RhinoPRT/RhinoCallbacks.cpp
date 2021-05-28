@@ -73,8 +73,8 @@ void RhinoCallbacks::addUVCoordinates(const size_t initialShapeIndex,
 					const uint32_t uvIdx = psUVIndices[uvi];
 					const auto du = psUVS[uvIdx * 2 + 0];
 					const auto dv = psUVS[uvIdx * 2 + 1];
-					modelPart.mUVs.Append(ON_2fPoint(du, dv));
-					modelPart.mUVIndices.push_back(uvi);
+					modelPart.mUVs.Append(ON_2fPoint(static_cast<float>(du), static_cast<float>(dv)));
+					modelPart.mUVIndices.push_back(static_cast<uint32_t>(uvi));
 				}
 			}
 			else
