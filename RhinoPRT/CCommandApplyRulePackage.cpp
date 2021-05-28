@@ -96,8 +96,8 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 					int nb_meshes = brep->CreateMesh(ON_MeshParameters::QualityRenderMesh, brep_meshes);
 
 					mesh = new ON_Mesh();
-					for (int i = 0; i < nb_meshes; ++i) {
-						mesh->Append(*brep_meshes[i]);
+					for (int j = 0; j < nb_meshes; ++j) {
+						mesh->Append(*brep_meshes[j]);
 					}
 				}
 			}
