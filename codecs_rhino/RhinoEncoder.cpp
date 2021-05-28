@@ -64,7 +64,10 @@ namespace {
 #if ENC_DBG == 1
 		LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
 #endif
-		return t->getURI()->getPath();
+		if (t && t->isValid())
+			return t->getURI()->getPath();
+		else
+			return {};
 	}
 
 	// we blacklist all CGA-style material attribute keys, see prtx/Material.h
@@ -227,9 +230,13 @@ namespace {
 #endif
 				const auto& texArray = prtxAttr.getTextureArray(key);
 
-				prtx::WStringVector texPaths(texArray.size());
-				std::transform(texArray.begin(), texArray.end(), texPaths.begin(), getTexturePath);
-				std::remove_if(texPaths.begin(), texPaths.end(), [](const std::wstring& tex) {return tex.size() == 0; });
+				prtx::WStringVector texPaths;
+				texPaths.reserve(texArray.size());
+				for (const auto& tex : texArray) {
+					const std::wstring texPath = getTexturePath(tex);
+					if (!texPath.empty())
+						texPaths.push_back(texPath);
+				}
 
 				if (texPaths.size() > 0) {
 					std::vector<const wchar_t*> pTexPaths = toPtrVec(texPaths);
