@@ -91,11 +91,11 @@ namespace pcu {
 
 	std::wstring getTempDir(const std::wstring& tmp_prefix)
 	{
-		auto path = std::experimental::filesystem::temp_directory_path();
+		auto path = std::filesystem::temp_directory_path();
 
 		auto prtTempPath = path.append(tmp_prefix);
-		if (!std::experimental::filesystem::exists(prtTempPath)) {
-			if (!std::experimental::filesystem::create_directory(prtTempPath)) 
+		if (!std::filesystem::exists(prtTempPath)) {
+			if (!std::filesystem::create_directory(prtTempPath)) 
 			{
 				LOG_ERR << L"Could not create PRT temporary directory. Returning the default temp dir.";
 				return path.generic_wstring();
@@ -109,7 +109,7 @@ namespace pcu {
 	std::wstring getUniqueTempDir(const std::wstring& tmp_prefix)
 	{
 		std::wstring temp_dir = getTempDir(tmp_prefix);
-		std::experimental::filesystem::path path(temp_dir);
+		std::filesystem::path path(temp_dir);
 
 		std::wstring uuid = getUUID();
 		if (uuid.size() == 0)
@@ -117,7 +117,7 @@ namespace pcu {
 		else
 			path = path.append(uuid);
 
-		if (!std::experimental::filesystem::create_directory(path))
+		if (!std::filesystem::create_directory(path))
 		{
 			LOG_ERR << L"Could not create unique temporary directory, returning default temp dir.";
 			return temp_dir;

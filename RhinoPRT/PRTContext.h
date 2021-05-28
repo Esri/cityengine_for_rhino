@@ -18,7 +18,7 @@ struct PRTContext final {
 
 	~PRTContext();
 
-	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::experimental::filesystem::path& rpk);
+	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::filesystem::path& rpk);
 
 	bool isAlive() const {
 		return alreadyInitialized;

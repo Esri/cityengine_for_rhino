@@ -7,35 +7,42 @@ namespace {
 
 	const std::chrono::system_clock::time_point INVALID_TIMESTAMP;
 
-	ResolveMap::ResolveMapCache::KeyType createCacheKey(const std::experimental::filesystem::path& rpk)
+	ResolveMap::ResolveMapCache::KeyType createCacheKey(const std::filesystem::path& rpk)
 	{
 		return rpk.wstring();
 	}
 
-	std::chrono::system_clock::time_point getFileModificationTime(const std::experimental::filesystem::path& p)
+	template <typename TP>
+	std::time_t to_time_t(TP tp)
 	{
-		bool fileExists(std::experimental::filesystem::exists(p));
-		bool isRegularFIle(std::experimental::filesystem::is_regular_file(p));
+		auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now() + std::chrono::system_clock::now());
+		return std::chrono::system_clock::to_time_t(sctp);
+	}
+
+	std::chrono::system_clock::time_point getFileModificationTime(const std::filesystem::path& p)
+	{
+		bool fileExists(std::filesystem::exists(p));
+		bool isRegularFIle(std::filesystem::is_regular_file(p));
 
 		if (!p.empty() && fileExists && isRegularFIle)
 		{
-			const auto last_write = std::experimental::filesystem::last_write_time(p);
-			return std::chrono::system_clock::from_time_t(std::experimental::filesystem::file_time_type::clock::to_time_t(last_write));
+			const std::filesystem::file_time_type last_write = std::filesystem::last_write_time(p);
+			return std::chrono::system_clock::from_time_t(to_time_t(last_write));
 		}
 		else
 			return INVALID_TIMESTAMP;
 	}
 
 	struct PathRemover {
-		void operator()(std::experimental::filesystem::path const* p) {
-			if (p && std::experimental::filesystem::exists(*p)) {
-				std::experimental::filesystem::remove(*p);
+		void operator()(std::filesystem::path const* p) {
+			if (p && std::filesystem::exists(*p)) {
+				std::filesystem::remove(*p);
 				LOG_DBG << "Removed file " << *p;
 				delete p;
 			}
 		}
 	};
-	using ScopedPath = std::unique_ptr<std::experimental::filesystem::path, PathRemover>;
+	using ScopedPath = std::unique_ptr<std::filesystem::path, PathRemover>;
 
 } // namespace
 
@@ -43,7 +50,7 @@ namespace ResolveMap {
 
 	ResolveMapCache::~ResolveMapCache()
 	{
-		if (std::experimental::filesystem::remove_all(mUnpackPath) == -1) {
+		if (std::filesystem::remove_all(mUnpackPath) == -1) {
 			LOG_ERR << L"Error while removing the temp directory";
 		}
 		else {
@@ -51,7 +58,7 @@ namespace ResolveMap {
 		}
 	}
 
-	ResolveMapCache::LookupResult ResolveMapCache::get(const std::experimental::filesystem::path& rpk)
+	ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& rpk)
 	{
 		const auto cacheKey = createCacheKey(rpk);
 
@@ -70,7 +77,7 @@ namespace ResolveMap {
 			if (it->second.mTimeStamp != timeStamp)
 			{
 				mCache.erase(it);
-				const auto cnt = std::experimental::filesystem::remove_all(getUniqueSubdir(it->second));
+				const auto cnt = std::filesystem::remove_all(getUniqueSubdir(it->second));
 				LOG_INF << "RPK change detected, forcing reload and clearing cache for " << rpk << " (removed " << cnt << " files)";
 				cs = CacheStatus::MISS;
 			}
@@ -100,13 +107,13 @@ namespace ResolveMap {
 		return { it->second.mResolveMap, cs };
 	}
 
-	const std::experimental::filesystem::path ResolveMapCache::getUniqueSubdir(const ResolveMapCacheEntry& rmce)
+	const std::filesystem::path ResolveMapCache::getUniqueSubdir(const ResolveMapCacheEntry& rmce)
 	{
-		std::experimental::filesystem::path path = mUnpackPath / rmce.mUUID;
+		std::filesystem::path path = mUnpackPath / rmce.mUUID;
 
-		if (!std::experimental::filesystem::exists(path))
+		if (!std::filesystem::exists(path))
 		{
-			bool status = std::experimental::filesystem::create_directory(path);
+			bool status = std::filesystem::create_directory(path);
 			if (!status)
 			{
 				LOG_ERR << "Unable to create the extract directory: " << path << ". Fallback to default temp dir.";

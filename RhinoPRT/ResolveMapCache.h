@@ -12,7 +12,7 @@ namespace ResolveMap {
 	public:
 		using KeyType = std::wstring;
 
-		explicit ResolveMapCache(const std::experimental::filesystem::path& unpackPath) : mUnpackPath{ unpackPath } {}
+		explicit ResolveMapCache(const std::filesystem::path& unpackPath) : mUnpackPath{ unpackPath } {}
 		ResolveMapCache(const ResolveMapCache&) = delete;
 		ResolveMapCache(ResolveMapCache&&) = delete;
 		ResolveMapCache& operator=(ResolveMapCache const&) = delete;
@@ -21,7 +21,7 @@ namespace ResolveMap {
 
 		enum class CacheStatus { HIT, MISS, FAILURE };
 		using LookupResult = std::pair<pcu::ResolveMapSPtr, CacheStatus>;
-		LookupResult get(const std::experimental::filesystem::path& rpk);
+		LookupResult get(const std::filesystem::path& rpk);
 
 	private:
 		struct ResolveMapCacheEntry {
@@ -32,9 +32,9 @@ namespace ResolveMap {
 		using Cache = std::map<KeyType, ResolveMapCacheEntry>;
 		Cache mCache;
 
-		std::experimental::filesystem::path mUnpackPath;
+		std::filesystem::path mUnpackPath;
 
-		const std::experimental::filesystem::path getUniqueSubdir(const ResolveMapCacheEntry& rmce);
+		const std::filesystem::path getUniqueSubdir(const ResolveMapCacheEntry& rmce);
 	};
 
 	using ResolveMapCacheUPtr = std::unique_ptr<ResolveMapCache>;

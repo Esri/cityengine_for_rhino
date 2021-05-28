@@ -62,7 +62,7 @@ PRTContext::~PRTContext() {
 	mFileLogHandler = nullptr;
 }
 
-ResolveMap::ResolveMapCache::LookupResult PRTContext::getResolveMap(const std::experimental::filesystem::path& rpk)
+ResolveMap::ResolveMapCache::LookupResult PRTContext::getResolveMap(const std::filesystem::path& rpk)
 {
 	auto lookupResult = mResolveMapCache->get(rpk);
 	if (lookupResult.second == ResolveMap::ResolveMapCache::CacheStatus::MISS) {
