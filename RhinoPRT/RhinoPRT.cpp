@@ -30,7 +30,7 @@ namespace RhinoPRT {
 	}
 
 	int RhinoPRTAPI::GetRuleAttributeCount() {
-		return mModelGenerator->getRuleAttributes().size();
+		return static_cast<int>(mModelGenerator->getRuleAttributes().size());
 	}
 
 	RuleAttributes& RhinoPRTAPI::GetRuleAttributes() {
@@ -207,7 +207,7 @@ namespace RhinoPRT {
 	{
 		std::vector<int> ids;
 
-		std::for_each(mGeneratedModels.begin(), mGeneratedModels.end(), [&ids](const GeneratedModel& model) { ids.push_back(model.getInitialShapeIndex()); });
+		std::for_each(mGeneratedModels.begin(), mGeneratedModels.end(), [&ids](const GeneratedModel& model) { ids.push_back(static_cast<int>(model.getInitialShapeIndex())); });
 
 		return ids;
 	}
@@ -238,7 +238,7 @@ extern "C" {
 	RHINOPRT_API void GetProductVersion(ON_wString* version_str)
 	{
 		std::string str(VER_FILE_VERSION_STR);
-		version_str->Append(str.c_str(), str.size());
+		pcu::appendToRhinoString(*version_str, str);
 	}
 
 	RHINOPRT_API bool InitializeRhinoPRT()
@@ -284,7 +284,6 @@ extern "C" {
 	RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs)
 	{
 		auto ids = RhinoPRT::get().getModelIds();
-
 		for (int id : ids) pMeshIDs->Append(id);
 	}
 
@@ -336,10 +335,9 @@ extern "C" {
 		if (attrIdx >= ruleAttributes.size()) return false;
 
 		const RuleAttributeUPtr& ruleAttr = ruleAttributes[attrIdx];
-
-		pRule->Append(ruleAttr->mRuleFile.c_str(), ruleAttr->mRuleFile.size());
-		pName->Append(ruleAttr->mFullName.c_str(), ruleAttr->mFullName.size());
-		pNickname->Append(ruleAttr->mNickname.c_str(), ruleAttr->mNickname.size());
+		pcu::appendToRhinoString(*pRule, ruleAttr->mRuleFile);
+		pcu::appendToRhinoString(*pName, ruleAttr->mFullName);
+		pcu::appendToRhinoString(*pNickname, ruleAttr->mNickname);
 		*type = ruleAttr->mType;
 
 		if(ruleAttr->groups.size() > 0)

@@ -387,7 +387,7 @@ bool ModelGenerator::getDefaultValueText(const std::wstring key, ON_wString* pTe
 			std::wstring valueStr(am->getString(key.c_str(), &status));
 			if (status == prt::STATUS_OK)
 			{
-				pText->Append(valueStr.c_str(), valueStr.size());
+				pcu::appendToRhinoString(*pText, valueStr);
 				if (status == prt::STATUS_OK) return true;
 				else
 				{

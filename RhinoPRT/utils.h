@@ -108,6 +108,11 @@ namespace pcu {
 	std::wstring removeImport(const std::wstring& attrName);
 	std::wstring removeStyle(const std::wstring& attrName);
 
+	template<typename C>
+	void appendToRhinoString(ON_wString& rhinoString, const std::basic_string<C>& appendee) {
+		rhinoString.Append(appendee.c_str(), static_cast<int>(appendee.size()));
+	}
+
 	/**
 	 * Resolve map helpers
 	 */
