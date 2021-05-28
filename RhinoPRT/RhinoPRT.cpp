@@ -303,7 +303,7 @@ extern "C" {
 
 	RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>* pMeshArray)
 	{
-		auto models = RhinoPRT::get().getGenModels();
+		const auto& models = RhinoPRT::get().getGenModels();
 		
 		const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](GeneratedModel m) { return m.getInitialShapeIndex() == initialShapeIndex; });
 
