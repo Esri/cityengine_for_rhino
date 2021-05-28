@@ -227,13 +227,13 @@ namespace pcu {
 		return callAPI<char, char>(prt::StringUtils::percentEncode, utf8String);
 	}
 
-	URI toFileURI(const std::string& osNarrowPath) {
+	std::string toFileURI(const std::string& osNarrowPath) {
 		const std::string utf8Path = toUTF8FromOSNarrow(osNarrowPath);
 		const std::string u8PE = percentEncode(utf8Path);
 		return FILE_SCHEMA + u8PE;
 	}
 
-	URI toFileURI(const std::wstring& utf16Path) {
+	std::string toFileURI(const std::wstring& utf16Path) {
 		const std::string utf8Path = toUTF8FromUTF16(utf16Path);
 		const std::string u8PE = percentEncode(utf8Path);
 		return FILE_SCHEMA + u8PE;
