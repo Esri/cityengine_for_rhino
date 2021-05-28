@@ -220,7 +220,7 @@ namespace {
 #if ENC_DBG == 1
 					LOG_DBG << "[RHINOENCODER] Using getTexture with key: " << key << " : " << texPath;
 #endif
-					auto status = amb->setString(key.c_str(), texPath.c_str());
+					amb->setString(key.c_str(), texPath.c_str());
 				}
 				break;
 			}
@@ -240,7 +240,7 @@ namespace {
 
 				if (texPaths.size() > 0) {
 					std::vector<const wchar_t*> pTexPaths = toPtrVec(texPaths);
-					auto status = amb->setStringArray(key.c_str(), pTexPaths.data(), pTexPaths.size());
+					amb->setStringArray(key.c_str(), pTexPaths.data(), pTexPaths.size());
 				}
 				
 				break;
