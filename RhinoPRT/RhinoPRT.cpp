@@ -487,7 +487,7 @@ extern "C" {
 		return false;
 	}
 
-	RHINOPRT_API bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, ON_SimpleArray<double>* pArray)
+	RHINOPRT_API bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, ON_SimpleArray<double>* pArray, bool* restricted)
 	{
 		auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 		if (ruleIdx < ruleAttributes.size())
@@ -498,6 +498,7 @@ extern "C" {
 				AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
 				if (annot->getType() == AttributeAnnotation::ENUM && annot->getEnumType() == EnumAnnotationType::DOUBLE)
 				{
+					*restricted = dynamic_cast<AnnotationEnum<double>*>(annot.get())->isRestricted();
 					auto& enumList = dynamic_cast<AnnotationEnum<double>*>(annot.get())->getAnnotArguments();
 
 					std::for_each(enumList.begin(), enumList.end(), [&pArray](double& v) {pArray->Append(v); });
@@ -509,7 +510,7 @@ extern "C" {
 		return false;
 	}
 
-	RHINOPRT_API bool GetAnnotationEnumString(int ruleIdx, int enumIdx, ON_ClassArray<ON_wString>* pArray)
+	RHINOPRT_API bool GetAnnotationEnumString(int ruleIdx, int enumIdx, ON_ClassArray<ON_wString>* pArray, bool* restricted)
 	{
 		auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 		if (ruleIdx < ruleAttributes.size())
@@ -520,6 +521,7 @@ extern "C" {
 				AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
 				if (annot->getType() == AttributeAnnotation::ENUM && annot->getEnumType() == EnumAnnotationType::STRING)
 				{
+					*restricted = dynamic_cast<AnnotationEnum<std::wstring>*>(annot.get())->isRestricted();
 					std::vector<std::wstring> enumList = dynamic_cast<AnnotationEnum<std::wstring>*>(annot.get())->getAnnotArguments();
 
 					std::for_each(enumList.begin(), enumList.end(), [&pArray](std::wstring& v) {pArray->Append(ON_wString(v.c_str())); });

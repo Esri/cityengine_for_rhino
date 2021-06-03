@@ -82,10 +82,10 @@ namespace GrasshopperPRT
         public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref EnumAnnotationType type);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray);
+        public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetAnnotationEnumString(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray);
+        public static extern bool GetAnnotationEnumString(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
 
         [DllImport(dllName: "RhinoPRT.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
@@ -466,7 +466,7 @@ namespace GrasshopperPRT
                         {
                             case EnumAnnotationType.ENUM_BOOL:
                                 bool[] boolArray = { true, false };
-                                annots.Add(new AnnotationEnum<bool>(boolArray));
+                                annots.Add(new AnnotationEnum<bool>(boolArray, true));
                                 break;
                             case EnumAnnotationType.ENUM_DOUBLE:
                                 annots.Add(GetAnnotationEnumDouble(ruleIdx, enumIdx));
@@ -499,33 +499,34 @@ namespace GrasshopperPRT
         public static AnnotationEnum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
         {
             double[] enumArray = null;
-            using(var array = new SimpleArrayDouble())
+            bool restricted = true;
+            using (var array = new SimpleArrayDouble())
             {
                 var pArray = array.NonConstPointer();
-
-                bool status = GetAnnotationEnumDouble(ruleIdx, enumIdx, pArray);
+                
+                bool status = GetAnnotationEnumDouble(ruleIdx, enumIdx, pArray, ref restricted);
                 if (!status) return null;
 
                 enumArray = array.ToArray();
             }
 
-            return new AnnotationEnum<double>(enumArray);
+            return new AnnotationEnum<double>(enumArray, restricted);
         }
 
         public static AnnotationEnum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
         {
             string[] enumArray = null;
-            using(var array = new ClassArrayString())
+            bool restricted = true;
+            using (var array = new ClassArrayString())
             {
                 var pArray = array.NonConstPointer();
-
-                bool status = GetAnnotationEnumString(ruleIdx, enumIdx, pArray);
+                bool status = GetAnnotationEnumString(ruleIdx, enumIdx, pArray, ref restricted);
                 if (!status) return null;
 
                 enumArray = array.ToArray();
             }
 
-            return new AnnotationEnum<string>(enumArray);
+            return new AnnotationEnum<string>(enumArray, restricted);
         }
 
         public static AnnotationRange GetAnnotationRange(int ruleIdx, int enumIdx)

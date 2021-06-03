@@ -42,7 +42,9 @@ AnnotationEnum<bool>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase
 	mEnums.reserve(an->getNumArguments());
 
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
-		mEnums.emplace_back(an->getArgument(argIdx)->getBool());
+		const prt::AnnotationArgument* argument = an->getArgument(argIdx);
+		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0) mRestricted = argument->getBool();
+		else mEnums.emplace_back(an->getArgument(argIdx)->getBool());
 	}
 }
 
@@ -52,7 +54,9 @@ AnnotationEnum<std::wstring>::AnnotationEnum(const prt::Annotation* an) : Annota
 	mEnums.reserve(an->getNumArguments());
 
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
-		mEnums.emplace_back(an->getArgument(argIdx)->getStr());
+		const prt::AnnotationArgument* argument = an->getArgument(argIdx);
+		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0) mRestricted = argument->getBool();
+		else mEnums.emplace_back(an->getArgument(argIdx)->getStr());
 	}
 }
 
@@ -62,7 +66,9 @@ AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an) : AnnotationBa
 	mEnums.reserve(an->getNumArguments());
 
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
-		mEnums.emplace_back(an->getArgument(argIdx)->getFloat());
+		const prt::AnnotationArgument* argument = an->getArgument(argIdx);
+		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0) mRestricted = argument->getBool();
+		else mEnums.emplace_back(an->getArgument(argIdx)->getFloat());
 	}
 }
 

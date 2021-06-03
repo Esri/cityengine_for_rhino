@@ -20,7 +20,7 @@ namespace GrasshopperPRT
             this.mAnnotType = annot;
         }
 
-        public virtual string GetDescription() { return ""; }
+        public virtual string GetDescription(string ruleName) { return ""; }
 
         public virtual bool IsColor() { return false; }
 
@@ -41,7 +41,7 @@ namespace GrasshopperPRT
             mRestricted = restricted;
         }
 
-        public override string GetDescription()
+        public override string GetDescription(string ruleName)
         {
             return "Range: Min: " + mMin + " Max: " + mMax + ((mStepSize > 0)? " StepSize: " + mStepSize.ToString() : "") + (mRestricted? " Restricted" : "");
         }
@@ -70,14 +70,18 @@ namespace GrasshopperPRT
 
     public class AnnotationEnum<T>: Annotation
     {
-        public AnnotationEnum(T[] enumList): base(AttributeAnnotation.A_ENUM)
+        public AnnotationEnum(T[] enumList, bool restricted): base(AttributeAnnotation.A_ENUM)
         {
             mEnumList = enumList;
+            mRestricted = restricted;
         }
 
-        public override string GetDescription()
+        public override string GetDescription(string ruleName)
         {
-            string concatenation = mEnumList.Aggregate<T, string>("", (accu, val) => accu.ToString() + " - " + val.ToString() + "\n");
+            string concatenation = mEnumList.Aggregate<T, string>("",
+                (accu, val) => {
+                    return val == null ? accu : accu.ToString() + " - " + val.ToString() + "\n";
+                });
 
             return "Enumeration, allowed values are:\n" + concatenation;
         }
@@ -88,12 +92,14 @@ namespace GrasshopperPRT
             vList.ListItems.Clear();
             foreach (var item in mEnumList)
             {
-                vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"",item.ToString())));
+                if(item != null)
+                    vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"",item.ToString())));
             }
 
             return vList;
         }
 
+        private bool mRestricted;
         private T[] mEnumList;
     }
 
@@ -101,7 +107,7 @@ namespace GrasshopperPRT
     {
         public AnnotationColor(): base(AttributeAnnotation.A_COLOR) { }
 
-        public override string GetDescription()
+        public override string GetDescription(string ruleName)
         {
             return "This attribute accepts a color object.";
         }
@@ -113,7 +119,7 @@ namespace GrasshopperPRT
     {
         public AnnotationFile(): base(AttributeAnnotation.A_FILE) { }
 
-        public override string GetDescription()
+        public override string GetDescription(string ruleName)
         {
             return "This attribute accepts a file path.";
         }
@@ -128,7 +134,7 @@ namespace GrasshopperPRT
     {
         public AnnotationDir():  base(AttributeAnnotation.A_DIR) { }
 
-        public override string GetDescription()
+        public override string GetDescription(string ruleName)
         {
             return "This attribute accepts a folder path.";
         }
@@ -254,7 +260,7 @@ namespace GrasshopperPRT
                 description = "Group " + mGroup + "\n";
             }
 
-            return description + mAnnotations.Aggregate<Annotation, string>("", (left, right) => left + " " + right.GetDescription());
+            return description + mAnnotations.Aggregate<Annotation, string>("", (left, right) => left + " " + right.GetDescription(mFullName));
         }
     }
 }

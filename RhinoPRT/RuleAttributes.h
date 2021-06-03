@@ -92,8 +92,10 @@ public:
 	}
 
 	std::vector<T> getAnnotArguments() { return mEnums; }
+	bool isRestricted() { return mRestricted; }
 
 private:
+	bool mRestricted;
 	std::vector<T> mEnums;
 };
 
