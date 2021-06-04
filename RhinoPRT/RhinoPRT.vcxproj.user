@@ -8,11 +8,6 @@
     <LocalDebuggerCommand>$(RhinoExeDir)\Rhino.exe</LocalDebuggerCommand>
     <LocalDebuggerWorkingDirectory>$(RhinoExeDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_gh|x64'">
-    <LocalDebuggerCommand>$(TargetDir)$(TargetName)$(TargetExt)</LocalDebuggerCommand>
-    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-grasshopper|x64'">
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>

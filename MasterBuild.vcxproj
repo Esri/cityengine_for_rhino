@@ -35,8 +35,8 @@
     <Message Importance="High" Text="Starting Build" />
     <MSBuild Projects="codecs_rhino\codecs_rhino.vcxproj" Targets="Build" />
     <MSBuild Projects="RhinoPRT\RhinoPRT.vcxproj" Targets="Build" Properties="Configuration=Release" />
-    <MSBuild Projects="RhinoPRT\RhinoPRT.vcxproj" Targets="Build" Properties="Configuration=Release_gh" />
-    <MSBuild Projects="GrasshopperPRT\GrasshopperPRT.csproj" Targets="Build" Properties="Configuration=Release_gh;Platform=AnyCPU"/>
+    <MSBuild Projects="RhinoPRT\RhinoPRT.vcxproj" Targets="Build" Properties="Configuration=Release" />
+    <MSBuild Projects="GrasshopperPRT\GrasshopperPRT.csproj" Targets="Build" Properties="Configuration=Release;Platform=AnyCPU"/>
     <Message Importance="High" Text="Build finished" />
   </Target>
 
