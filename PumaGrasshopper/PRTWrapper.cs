@@ -15,88 +15,88 @@ using Rhino.Display;
 namespace GrasshopperPRT
 {
     /// <summary>
-    /// Encasulate RhinoPRT library.
+    /// Encapsulate PumaRhino library.
     /// </summary>
     class PRTWrapper
     {
         public static String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void GetProductVersion([In, Out]IntPtr version_Str);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetPackage(string rpk_path);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool AddInitialMesh([In]IntPtr pMesh);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool Generate();
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out]IntPtr pMeshArray);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAllMeshIDs([In, Out]IntPtr pMeshIDs);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetMeshPartCount(int initialShapeIndex);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetRuleAttributesCount();
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDouble(int initialShapeIndex, string rule, string fullName, double value);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string rule, string fullName, bool value);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeInteger(int initialShapeIndex, string rule, string fullName, int value);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeString(int initialShapeIndex, string rule, string fullName, string value);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref EnumAnnotationType type);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetAnnotationEnumString(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetReports(int initialShapeIndex, [In, Out] IntPtr pKeysArray,
         [In, Out] IntPtr pDoubleReports,
         [In, Out] IntPtr pBoolReports,
         [In, Out] IntPtr pStringReports);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetMaterial(int initialShapeIndex, int shapeID, ref int pUvSet,
                                                 [In, Out] IntPtr pTexKeys,
                                                 [In, Out] IntPtr pTexPaths,
@@ -106,16 +106,16 @@ namespace GrasshopperPRT
                                                 ref double opacity,
                                                 ref double shininess);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetMaterialGenerationOption(bool doGenerate);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueBoolean(string key, ref bool value);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueNumber(string key, ref double value);
 
-        [DllImport(dllName: "RhinoPRT.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueText(string key, [In, Out] IntPtr pText);
 
         public static bool AddMesh(List<Mesh> meshes)

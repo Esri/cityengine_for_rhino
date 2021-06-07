@@ -8,8 +8,8 @@
     <ProjectGuid>{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GrasshopperPRT</RootNamespace>
-    <AssemblyName>Puma</AssemblyName>
+    <RootNamespace>PumaGrasshopper</RootNamespace>
+    <AssemblyName>PumaGrasshopper</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using GrasshopperPRT.Properties;
+using PumaGrasshopper.Properties;
 using Rhino.Geometry;
 
 namespace GrasshopperPRT

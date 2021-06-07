@@ -7,7 +7,7 @@ using Grasshopper.Kernel.Data;
 
 using Rhino.Geometry;
 using System.Linq;
-using GrasshopperPRT.Properties;
+using PumaGrasshopper.Properties;
 using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Parameters;
