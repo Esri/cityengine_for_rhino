@@ -91,22 +91,6 @@
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
-    <ItemGroup>
-    <PRTVersionFile Include="$(SolutionDir)deps\ce_sdk\cmake\prtVersion.properties" />
-    <VersionHeader Include="prtversion.h" />
-  </ItemGroup>
-  <Target Name="ReadPRTVersion" BeforeTargets="ClCompile">
-    <ReadLinesFromFile File="@(PRTVersionFile)">
-      <Output TaskParameter="Lines" ItemName="PRTVersions" />
-    </ReadLinesFromFile>
-    <PropertyGroup>
-      <MyPRTVersions>
-        @(PRTVersions-&gt;Replace('=', ' ')-&gt;'#define %(FileName)')
-      </MyPRTVersions>
-    </PropertyGroup>
-    <WriteLinesToFile File="@(VersionHeader)" Lines="$(MyPRTVersions)" Overwrite="true" />
-    <Message Importance="High" Text="Item read: $(MyPRTVersions)" />
-  </Target>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -118,7 +102,7 @@
       <PreprocessorDefinitions>NDEBUG;CODECSRHINO_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)deps\ce_sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\ce_sdk\include;$(SolutionDir)deps\GeneratedHeaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -145,7 +129,6 @@
     <ClInclude Include="IRhinoCallbacks.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RhinoEncoder.h" />
-    <ClInclude Include="prtversion.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />

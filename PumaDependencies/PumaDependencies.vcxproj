@@ -26,6 +26,26 @@
     <Message Importance="High" Text="Finished download of '@(ce_sdk_archive)'" />
     <Unzip SourceFiles="@(ce_sdk_archive)" DestinationFolder="$(SolutionDir)deps\ce_sdk\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
   </Target>
+
+
+  <ItemGroup>
+    <PRTVersionFile Include="$(SolutionDir)deps\ce_sdk\cmake\prtVersion.properties" />
+    <PRTVersionHeader Include="$(SolutionDir)deps\GeneratedHeaders\PRTVersion.h" />
+  </ItemGroup>
+  <Target Name="ReadPRTVersion" AfterTargets="DownloadPRT" Condition="!Exists('$(SolutionDir)deps\GeneratedHeaders\PRTVersion.h')">
+    <ReadLinesFromFile File="@(PRTVersionFile)">
+      <Output TaskParameter="Lines" ItemName="PRTVersions" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <MyPRTVersions>
+        @(PRTVersions-&gt;Replace('=', ' ')-&gt;'#define %(FileName)')
+      </MyPRTVersions>
+    </PropertyGroup>
+    <WriteLinesToFile File="@(PRTVersionHeader)" Lines="$(MyPRTVersions)" Overwrite="true" />
+    <Message Importance="High" Text="Item read: $(MyPRTVersions)" />
+  </Target>
+
+
   <Target Name="Build">
     <Message Importance="High" Text="Starting Build" />
     <MSBuild Projects="$(SolutionDir)PumaCodecs\PumaCodecs.vcxproj" Targets="Build" />
