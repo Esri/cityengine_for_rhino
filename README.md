@@ -151,34 +151,38 @@ Please note, this command is only meant to provde a quick way for testing a RPK 
 1. Follow the instructions from the [Rhino documentation](https://developer.rhino3d.com/guides/grasshopper/installing-tools-windows/) to install the Grasshoper SDK.
 1. Checkout this Git repository.
 1. Open the Visual Studio solution.
-1. Build the `MasterBuild` project to download PRT and build the 3 other projects. _It is only necessary to do this step once._
-1. To build the Rhino Plugin, select the `Release` configuration with target platform `x64`.
-1. To build the Grasshopper Plugin, select the `Release_gh` configuration with target platform `x64`.
+1. Ensure the configuration is set to `Release` and `x64` (the only supported configuration).
+1. Build the solution. The result is stored in the `build` directory, foremost `PumaRhino.rhp` and `PumaGrasshopper.gha`.
 
 ### Installing locally built plugins
 
 After having built the plugins, they have to be installed in Rhino and Grasshopper respectively.
 
 1. Start Rhino. In the menu bar, go to _Tools -> Options -> Rhino Options -> Plug-ins_.
-1. Click on `install` and select the `RhinoPRT.rhp` file located in `path-to-project-dir/build/RhinoPRT.rhp`.
-1. To install the grasshopper plugin, run the commpand `GrasshopperDeveloperSettings` in Rhino.
-1. In the window that opens, add the folder containing `GrasshopperPRT.gha`: `path-to-project-dir/build/RhinoPRT.gha`. Make sure the `Memory load` box is unticked.
+1. Click on `install` and select the `PumaRhino.rhp` file located in `path-to-solution/build`.
+1. To install the Grasshopper plugin, run the commpand `GrasshopperDeveloperSettings` in Rhino.
+1. In the window that opens, add the folder `path-to-solution/build` containing `PumaGrasshopper.gha`. Make sure the `Memory load .gha assemblies...` box is unticked.
 1. Confirm, then restart Rhino.
 
 ### Create installation packages (rhi, yak)
 
 Once both plugins (rhp, gha) are built, it is possible to create a RHI (Rhino Installer) package and/or a YAK package using the `create_package.py` python script. A RHI package is simply a zip archive containing all files required to run a plugin. If Rhino is installed, the plugin can be installed by double-clicking the package. It will extract the files and Rhino/Grasshopper will load them when started. The YAK package is the archive that can be uploaded to the Rhino marketplace in order to publish the plug-in.
 
-1. Open a console, navigate to the project root and run the command `python create_package.py <option>`. Valid values for `<option>` are `both`, `rhi`, or `yak` to choose which package type to build.
-1. The resulting `rhi` and `yak` packages will be created in a folder named `package_output` located in the project root directory.
+1. Open a console, navigate to the Puma solution directory and run the command `python create_package.py <option>`. Valid values for `<option>` are `both` (default), `rhi`, or `yak` to choose which package type to build.
+1. The resulting `rhi` and `yak` packages will be created in a folder named `packages` located in the solution root directory.
 
 ### Install locally built packages
 
-1. In order for the plugin to be correctly loaded, it is needed to tick the "Ask to load disabled plug-ins" box located in Rhino's _Tools -> Options -> Plug-ins_.
 1. Close Rhino if it is open.
 1. Run the rhi package by double-clicking it.
 1. The package installer will open. Follow the instructions.
 1. The plugin will be loaded at the next start of Rhino/Grasshopper.
+
+Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box located in Rhino's _Tools -> Options -> Plug-ins_.
+
+### Debug the native code
+
+For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
 
 ## Licensing Information
 
