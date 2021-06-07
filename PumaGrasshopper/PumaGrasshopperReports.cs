@@ -6,9 +6,9 @@ using Grasshopper.Kernel.Types;
 using PumaGrasshopper.Properties;
 using Rhino.Geometry;
 
-namespace GrasshopperPRT
+namespace PumaGrasshopper
 {
-    public class GrasshopperPRTReports : GH_Component
+    public class PumaGrasshopperReports : GH_Component
     {
         const string MESH_INPUT = "Meshes";
         const string REPORTS_INPUT_NAME = "Reports";
@@ -22,7 +22,7 @@ namespace GrasshopperPRT
         /// <summary>
         /// Initializes a new instance of the PumaCgaReports class.
         /// </summary>
-        public GrasshopperPRTReports()
+        public PumaGrasshopperReports()
           : base("PumaCgaReports", "CGA Reports display",
               "Version: " + PRTWrapper.GetVersion() + ". " + 
               "Helper component to filter and preview the reports output from the Puma component.",

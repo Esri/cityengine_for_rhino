@@ -17,10 +17,10 @@ using System.Drawing;
 // add the output bin/ folder of this project to the list of loaded
 // folder in Grasshopper.
 // You can use the _GrasshopperDeveloperSettings Rhino command for that.
-namespace GrasshopperPRT
+namespace PumaGrasshopper
 {
 
-    public class GrasshopperPRTComponent : GH_Component, IGH_VariableParameterComponent
+    public class PumaGrasshopperComponent : GH_Component, IGH_VariableParameterComponent
     {
         const string RPK_INPUT_NAME = "Path to RPK";
         const string GEOM_INPUT_NAME = "Initial Shapes";
@@ -43,7 +43,7 @@ namespace GrasshopperPRT
         /// Subcategory the panel. If you use non-existing tab or panel names,
         /// new tabs/panels will automatically be created.
         /// </summary>
-        public GrasshopperPRTComponent()
+        public PumaGrasshopperComponent()
           : base("Puma", "Puma", "Version: " + PRTWrapper.GetVersion() + ". " +
               "Provide access to the CityEngine PRT engine in Grasshopper.",
               "Special", "Esri")

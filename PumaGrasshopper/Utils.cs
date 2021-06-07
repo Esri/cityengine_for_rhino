@@ -10,7 +10,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using System.Drawing;
 
-namespace GrasshopperPRT
+namespace PumaGrasshopper
 {
 
     class Utils

@@ -6,9 +6,9 @@ using Grasshopper.Kernel.Types;
 using PumaGrasshopper.Properties;
 using Rhino.Geometry;
 
-namespace GrasshopperPRT
+namespace PumaGrasshopper
 {
-    public class GrasshopperPRTReportsOutput : GH_Component
+    public class PumaGrasshopperReportsOutput : GH_Component
     {
         const string REPORT_INPUT = "Reports";
         const string REPORT_SHAPE_ID = "Shape ID";
@@ -18,7 +18,7 @@ namespace GrasshopperPRT
         /// <summary>
         /// Initializes a new instance of the GrasshopperPRTReportsOutput class.
         /// </summary>
-        public GrasshopperPRTReportsOutput()
+        public PumaGrasshopperReportsOutput()
           : base("PumaCgaReportsOutput", "Reports Outputs",
               "Version: " + PRTWrapper.GetVersion() + ". " +
               "Unpacks the report attributes objects",

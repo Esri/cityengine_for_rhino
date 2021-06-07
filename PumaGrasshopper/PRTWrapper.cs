@@ -12,7 +12,7 @@ using Rhino.DocObjects;
 using Rhino.Runtime.InteropWrappers;
 using Rhino.Display;
 
-namespace GrasshopperPRT
+namespace PumaGrasshopper
 {
     /// <summary>
     /// Encapsulate PumaRhino library.

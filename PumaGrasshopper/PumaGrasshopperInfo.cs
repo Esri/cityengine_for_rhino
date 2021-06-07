@@ -2,9 +2,9 @@
 using System.Drawing;
 using Grasshopper.Kernel;
 
-namespace GrasshopperPRT
+namespace PumaGrasshopper
 {
-    public class GrasshopperPRTInfo : GH_AssemblyInfo
+    public class PumaGrasshopperInfo : GH_AssemblyInfo
     {
         public override string Name
         {

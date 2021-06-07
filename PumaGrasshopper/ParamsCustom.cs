@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace GrasshopperPRT
+namespace PumaGrasshopper
 {
     public class BooleanRuleAttribute : Param_Boolean
     {

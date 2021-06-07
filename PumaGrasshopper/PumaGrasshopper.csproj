@@ -56,10 +56,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrasshopperPRTComponent.cs" />
-    <Compile Include="GrasshopperPRTInfo.cs" />
-    <Compile Include="GrasshopperPRTReports.cs" />
-    <Compile Include="GrasshopperPRTReportsOutput.cs" />
+    <Compile Include="PumaGrasshopperComponent.cs" />
+    <Compile Include="PumaGrasshopperInfo.cs" />
+    <Compile Include="PumaGrasshopperReports.cs" />
+    <Compile Include="PumaGrasshopperReportsOutput.cs" />
     <Compile Include="ParamsCustom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
