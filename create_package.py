@@ -3,22 +3,30 @@ import os
 import zipfile
 import re
 import shutil
+from pathlib import Path
+import subprocess
+
+PACKAGE_WHITELIST = ["PumaGrasshopper.gha", "PumaRhino.rhp", "com.esri.prt.core.dll", "glutess.dll",
+                     "lib/PumaCodecs.dll", "lib/com.esri.prt.adaptors.dll", "lib/com.esri.prt.codecs.dll"]
 
 
-# copy a directory and all its content into a given ZipFile.
-def copytree(src, dst: zipfile.ZipFile, arch_path: str = '', symlinks=False, ignore: list = []):
-    for item in os.listdir(src):
-        if ignore.count(item) == 0:
-            s = os.path.join(src, item)
-            new_s = os.path.join(arch_path, item)
-            if os.path.isdir(s):
-                copytree(s, dst, new_s, symlinks, ignore)
-            else:
-                dst.write(s, new_s)
+def copy_to_zip(src_path: Path, relative_file_paths: list, dst: zipfile.ZipFile):
+    for file_path in relative_file_paths:
+        src_file = Path(src_path, file_path)
+        dst.write(filename=src_file, arcname=file_path)
 
 
-def parse_version_file(version_file: str) -> (int, int, int, int):
-    # Parse file "version.h" to get major, minor, revision, build numbers
+def copy_to_dir(src_path: Path, relative_file_paths: list, dst_path: Path):
+    for rel_path in relative_file_paths:
+        src_abs_path = Path(src_path, rel_path)
+        if src_abs_path.is_file():
+            dst_abs_path = Path(dst_path, rel_path)
+            dst_abs_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src_abs_path, dst_abs_path)
+
+
+# Parse file "version.h" to get major, minor, revision, build numbers
+def parse_version_file(version_file: Path) -> (int, int, int, int):
     pattern = re.compile(r'^#define (?P<version>\w+)\s+(?P<number>\d+)$')
 
     v_major = 0
@@ -45,56 +53,51 @@ def parse_version_file(version_file: str) -> (int, int, int, int):
     return v_major, v_minor, v_revision, v_build
 
 
-def clean_package_dir(package_dir: str):
-    if os.path.exists(package_dir):
-        shutil.rmtree(package_dir)
-    os.mkdir(package_dir)
+def clean_package_output(package_path: Path):
+    if package_path.exists():
+        shutil.rmtree(package_path)
+    package_path.mkdir()
 
 
 def build_rhi_package(build_dir: str, package_dir: str, v_major, v_minor, v_revision, v_build):
     version_str: str = f'v{v_major}.{v_minor}.{v_revision}.{v_build}'
+    rhi_path = Path(package_dir, f'Puma_{version_str}.rhi')
+    with zipfile.ZipFile(rhi_path, 'w') as myZip:
+        copy_to_zip(Path(build_dir), PACKAGE_WHITELIST, myZip)
 
-    with zipfile.ZipFile(os.path.join(package_dir, f'Puma_{version_str}.rhi'), 'w') as myZip:
-        # Copy the folders bin and lib of Esri sdk
-        copytree(build_dir, myZip)
 
+def build_yak_package(build_dir: str, package_dir: str, v_major, v_minor, v_revision):
+    build_path = Path(build_dir)
+    yak_temp_path = Path(package_dir, "yak_temp")
+    copy_to_dir(build_path, PACKAGE_WHITELIST, yak_temp_path)
+    copy_to_dir(build_path.parent, ['manifest.yml'], yak_temp_path)
 
-def build_yak_package(build_dir: str, curr_dir: str, package_dir: str, v_major, v_minor, v_revision):
-    # yak package creation
-    shutil.copyfile(os.path.join(curr_dir, 'manifest.yml'), os.path.join(build_dir, 'manifest.yml'))
-    os.chdir(build_dir)
-    os.system('cmd /c ""C:\Program Files\Rhino 7\System\Yak.exe" build"')
+    subprocess.run(["C:\\Program Files\\Rhino 7\\System\\Yak.exe", "build"], shell=True, check=True, cwd=yak_temp_path)
 
     # Get the file created: could change depending on Rhino/GH versions.
-    yak_filename: str = ''
-    for file in os.listdir(build_dir):
-        if file.endswith('.yak'):
-            yak_filename = file
-
-    if len(yak_filename) == 0:
+    yak_paths = list(yak_temp_path.glob("puma-*.yak"))
+    if len(yak_paths) != 1:
         raise IOError('Error: the yak package could not be created.')
+    yak_path = yak_paths[0]
 
     # create rhino 7 yak package
-    shutil.copyfile(os.path.join(build_dir, yak_filename),
-                    os.path.join(build_dir, f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak'))
+    yak_rh7_path = Path(yak_temp_path, f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak')
+    shutil.copyfile(yak_path, yak_rh7_path)
 
     # move both yak to the package_output directory
-    shutil.move(yak_filename,
-                os.path.join(package_dir, yak_filename))
-    shutil.move(f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak',
-                os.path.join(package_dir, f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak'))
+    package_path = Path(package_dir)
+    shutil.move(yak_path, Path(package_path, yak_path.name))
+    shutil.move(yak_rh7_path, Path(package_path, yak_rh7_path.name))
 
-    # cleaning
-    os.remove('manifest.yml')
-    os.chdir(curr_dir)
+    shutil.rmtree(yak_temp_path)
 
 
-def build(build_mode: str, build_dir: str, package_dir: str, current_dir: str, v_major, v_minor, v_revision, v_build):
+def build(build_mode: str, build_dir: Path, package_dir: Path, v_major, v_minor, v_revision, v_build):
     if build_mode == 'both' or build_mode == 'rhi':
         build_rhi_package(build_dir, package_dir, v_major, v_minor, v_revision, v_build)
 
     if build_mode == 'both' or build_mode == 'yak':
-        build_yak_package(build_dir, current_dir, package_dir, v_major, v_minor, v_revision)
+        build_yak_package(build_dir, package_dir, v_major, v_minor, v_revision)
 
 
 def parse_args():
@@ -106,14 +109,17 @@ def parse_args():
 
 
 def main():
-    curr_dir: str = os.getcwd()
-    build_dir: str = os.path.join(curr_dir, 'build')
-    package_dir: str = os.path.join(curr_dir, 'Package_output')
     args = parse_args()
-    clean_package_dir(package_dir)
-    version_file: str = os.path.join(curr_dir, "RhinoPRT", "version.h")
+
+    root_path = Path(__file__).parent
+    build_path = Path(root_path, 'build')
+    package_path = Path(root_path, 'packages')
+    clean_package_output(package_path)
+
+    version_file = Path(root_path, "PumaRhino", "version.h")
     (v_major, v_minor, v_revision, v_build) = parse_version_file(version_file)
-    build(args.build_module, build_dir, package_dir, curr_dir, v_major, v_minor, v_revision, v_build)
+
+    build(args.build_module, build_path, package_path, v_major, v_minor, v_revision, v_build)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ authors:
   - Simon Haegler
 description: >
   Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.
-url: http://www.esri.com
+url: https://esri.github.io/cityengine/puma
 keywords:
   - CityEngine
   - architecture
