@@ -1,0 +1,2 @@
+#define RHINOPRT_API __declspec(dllexport)
+#define RHINOPRT_API __declspec(dllimport)
