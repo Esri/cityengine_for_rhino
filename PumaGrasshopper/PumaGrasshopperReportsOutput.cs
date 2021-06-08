@@ -16,7 +16,7 @@ namespace PumaGrasshopper
         const string REPORT_VALUE = "Report Value";
 
         /// <summary>
-        /// Initializes a new instance of the GrasshopperPRTReportsOutput class.
+        /// Initializes a new instance of the PumaGrasshopperReportsOutput class.
         /// </summary>
         public PumaGrasshopperReportsOutput()
           : base("PumaCgaReportsOutput", "Reports Outputs",
