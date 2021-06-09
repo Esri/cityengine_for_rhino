@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{3834552A-23FC-4584-850C-D823CA9F4227}</ProjectGuid>
+    <RootNamespace>MasterBuild</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <ProjectName>PumaDependencies</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.4.7316/esri_ce_sdk-2.4.7316-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
+    <OutputDirectory>$(SolutionDir)build\</OutputDirectory>
+    <DependencyDir>$(SolutionDir)deps\</DependencyDir>
+  </PropertyGroup>
+  <Target Name="DownloadPRT" BeforeTargets="Build" Condition="!Exists('$(SolutionDir)deps\ce_sdk')">
+    <Message Importance="High" Text="Preparing CityEngine SDK" />
+    <DownLoadFile SourceUrl="$(PRTUrl)" DestinationFolder="$(DependencyDir)" SkipUnchangedFiles="true">
+      <Output TaskParameter="DownloadedFile" ItemName="ce_sdk_archive" />
+    </DownLoadFile>
+    <Message Importance="High" Text="Finished download of '@(ce_sdk_archive)'" />
+    <Unzip SourceFiles="@(ce_sdk_archive)" DestinationFolder="$(SolutionDir)deps\ce_sdk\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+  </Target>
+
+
+  <ItemGroup>
+    <PRTVersionFile Include="$(SolutionDir)deps\ce_sdk\cmake\prtVersion.properties" />
+    <PRTVersionHeader Include="$(SolutionDir)deps\GeneratedHeaders\PRTVersion.h" />
+  </ItemGroup>
+  <Target Name="ReadPRTVersion" AfterTargets="DownloadPRT" Condition="!Exists('$(SolutionDir)deps\GeneratedHeaders\PRTVersion.h')">
+    <ReadLinesFromFile File="@(PRTVersionFile)">
+      <Output TaskParameter="Lines" ItemName="PRTVersions" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <MyPRTVersions>
+        @(PRTVersions-&gt;Replace('=', ' ')-&gt;'#define %(FileName)')
+      </MyPRTVersions>
+    </PropertyGroup>
+    <WriteLinesToFile File="@(PRTVersionHeader)" Lines="$(MyPRTVersions)" Overwrite="true" />
+    <Message Importance="High" Text="Item read: $(MyPRTVersions)" />
+  </Target>
+
+
+  <Target Name="Build">
+    <Message Importance="High" Text="Starting Build" />
+    <MSBuild Projects="$(SolutionDir)PumaCodecs\PumaCodecs.vcxproj" Targets="Build" />
+    <MSBuild Projects="$(SolutionDir)PumaRhino\PumaRhino.vcxproj" Targets="Build" />
+    <MSBuild Projects="$(SolutionDir)PumaGrasshopper\PumaGrasshopper.csproj" Targets="Build" Properties="Configuration=Release;Platform=AnyCPU" />
+    <Message Importance="High" Text="Build finished" />
+  </Target>
+  <Target Name="CopyPRT" AfterTargets="Build">
+    <ItemGroup>
+      <PRT_CORE_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\bin\*.dll" />
+      <PRT_EXTENSION_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.adaptors.dll;$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.codecs.dll" />
+    </ItemGroup>
+    <Message Importance="High" Text="Copying dlls..." />
+    <Copy SourceFiles="@(PRT_CORE_LIBRARIES)" DestinationFolder="$(OutputDirectory)" />
+    <Copy SourceFiles="@(PRT_EXTENSION_LIBRARIES)" DestinationFolder="$(OutputDirectory)lib" />
+  </Target>
+  <Target Name="Clean">
+    <RemoveDir Directories="$(OutputDirectory);$(DependencyDir)">
+      <Output TaskParameter="RemovedDirectories" ItemName="DeletedDirs" />
+    </RemoveDir>
+    <Message Importance="High" Text="Deleted folders: '@(DeletedDirs)'" />
+  </Target>
+  <Target Name="Rebuild">
+    <CallTarget Targets="Clean;Build" />
+  </Target>
+</Project>

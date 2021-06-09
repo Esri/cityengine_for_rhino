@@ -7,8 +7,8 @@
 *.rsuser
 *.suo
 *.user
-!*.vcxproj.user
-!*.csproj.user
+*.vcxproj.user
+*.csproj.user
 *.userosscache
 *.sln.docstates
 
@@ -376,3 +376,6 @@ Package_output/*
 
 Downloads/
 Downloads/*
+/deps
+
+.vscode
