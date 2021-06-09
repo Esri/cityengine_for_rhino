@@ -31,8 +31,8 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 		}
 	}
 
-	mVertices.reserve(mesh.VertexCount() * 3);
-	mIndices.reserve(mesh.FaceCount() * 4);
+	mVertices.reserve(static_cast<size_t>(mesh.VertexCount() * 3));
+	mIndices.reserve(static_cast<size_t>(mesh.FaceCount() * 4));
 	mFaceCounts.reserve(mesh.FaceCount());
 
 	for (int i = 0; i < mesh.VertexCount(); ++i) {
@@ -61,7 +61,7 @@ GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model
 
 const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const 
 {
-	ON_Mesh mesh(modelPart.mUVCounts.size(), modelPart.mIndices.size(), true, true);
+	ON_Mesh mesh(static_cast<int>(modelPart.mUVCounts.size()), static_cast<int>(modelPart.mIndices.size()), true, true);
 
 	// Set the initial shape id.
 	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
@@ -69,8 +69,8 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 	// Duplicate vertices
 	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
 		auto index = modelPart.mIndices[v_id];
-		mesh.SetVertex(v_id, ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 2], modelPart.mVertices[index * 3 + 1]));
-		mesh.SetVertexNormal(v_id, ON_3dVector(modelPart.mNormals[index * 3], modelPart.mNormals[index * 3 + 2], modelPart.mNormals[index * 3 + 1]));
+		mesh.SetVertex(static_cast<int>(v_id), ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 2], modelPart.mVertices[index * 3 + 1]));
+		mesh.SetVertexNormal(static_cast<int>(v_id), ON_3dVector(modelPart.mNormals[index * 3], modelPart.mNormals[index * 3 + 2], modelPart.mNormals[index * 3 + 1]));
 	}
 	
 	int faceid(0);
@@ -93,7 +93,7 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 		}
 	}
 	
-	for (size_t i = 0; i < modelPart.mUVs.Count(); ++i) {
+	for (int i = 0; i < modelPart.mUVs.Count(); ++i) {
 		mesh.SetTextureCoord(i, modelPart.mUVs[i].x, modelPart.mUVs[i].y);
 	}
 
