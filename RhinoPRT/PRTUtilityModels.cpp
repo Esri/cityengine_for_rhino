@@ -70,19 +70,19 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const
 	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
 		auto index = modelPart.mIndices[v_id];
 		mesh.SetVertex(v_id, ON_3dPoint(modelPart.mVertices[index * 3], modelPart.mVertices[index * 3 + 2], modelPart.mVertices[index * 3 + 1]));
-		mesh.SetVertexNormal(v_id, ON_3dVector(modelPart.mNormals[index * 3], modelPart.mNormals[index * 3 + 1], modelPart.mNormals[index * 3 + 2]));
+		mesh.SetVertexNormal(v_id, ON_3dVector(modelPart.mNormals[index * 3], modelPart.mNormals[index * 3 + 2], modelPart.mNormals[index * 3 + 1]));
 	}
 	
 	int faceid(0);
 	int currindex(0);
 	for (int face : modelPart.mFaces) {
 		if (face == 3) {
-			mesh.SetTriangle(faceid, currindex, currindex + 1, currindex + 2);
+			mesh.SetTriangle(faceid, currindex + 2, currindex + 1, currindex);
 			currindex += face;
 			faceid++;
 		}
 		else if (face == 4) {
-			mesh.SetQuad(faceid, currindex, currindex + 1, currindex + 2, currindex + 3);
+			mesh.SetQuad(faceid, currindex + 3, currindex + 2, currindex + 1, currindex);
 			currindex += face;
 			faceid++;
 		}
