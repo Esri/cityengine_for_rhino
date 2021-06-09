@@ -1,16 +1,14 @@
 #pragma once
 
-// Wrapper for PRT classes
-
-#include "utils.h"
 #include "ResolveMapCache.h"
+#include "utils.h"
 
-#include "prt/LogLevel.h"
 #include "prt/ContentType.h"
+#include "prt/LogLevel.h"
 
 /**
-* Helper struct to manage PRT lifetime
-*/
+ * Helper struct to manage PRT lifetime
+ */
 struct PRTContext final {
 	static std::unique_ptr<PRTContext>& get();
 

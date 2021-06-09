@@ -5,8 +5,8 @@
 //
 #ifdef _MSC_VER
 #	pragma warning(push)
-#	pragma warning (disable : 26451)
-#	pragma warning (disable : 26495)
+#	pragma warning(disable : 26451)
+#	pragma warning(disable : 26495)
 #endif
 #include "stdafx.h"
 #ifdef _MSC_VER
@@ -20,51 +20,51 @@ bool getRpkPath(std::wstring& rpk) {
 	std::wstring ext = L".rpk";
 	std::wstring filename = L"default";
 	std::wstring default_ext = L"RPK (*.rpk) | *.rpk";
-	CFileDialog fd(true, (LPCWSTR)ext.c_str(), (LPCWSTR)filename.c_str(), OFN_FILEMUSTEXIST, (LPCWSTR)default_ext.c_str());
+	CFileDialog fd(true, (LPCWSTR)ext.c_str(), (LPCWSTR)filename.c_str(), OFN_FILEMUSTEXIST,
+	               (LPCWSTR)default_ext.c_str());
 	auto result = fd.DoModal();
-	if (!result) return false;
+	if (!result)
+		return false;
 	rpk.assign(fd.GetPathName());
 	return true;
 }
 
 #pragma region ApplyRulePackage command
 
-
-class CCommandApplyRulePackage : public CRhinoCommand
-{
+class CCommandApplyRulePackage : public CRhinoCommand {
 public:
-	CCommandApplyRulePackage() : CRhinoCommand(false, false, &RhinoPRTPlugIn(), false) {};
-	UUID CommandUUID() override
-	{
+	CCommandApplyRulePackage() : CRhinoCommand(false, false, &RhinoPRTPlugIn(), false){};
+	UUID CommandUUID() override {
 		// {B960EDCA-8D50-4293-8CD6-FE5F8843C975}
-		static const GUID ApplyRulePackageCommand_UUID =
-		{ 0xB960EDCA, 0x8D50, 0x4293, { 0x8C, 0xD6, 0xFE, 0x5F, 0x88, 0x43, 0xC9, 0x75 } };
+		static const GUID ApplyRulePackageCommand_UUID = {
+		        0xB960EDCA, 0x8D50, 0x4293, {0x8C, 0xD6, 0xFE, 0x5F, 0x88, 0x43, 0xC9, 0x75}};
 		return ApplyRulePackageCommand_UUID;
 	}
-	const wchar_t* EnglishCommandName() override { return L"ApplyRulePackage"; }
+	const wchar_t* EnglishCommandName() override {
+		return L"ApplyRulePackage";
+	}
 	CRhinoCommand::result RunCommand(const CRhinoCommandContext& context) override;
 };
 
 // The one and only CCommandExtrudeShape object
 static class CCommandApplyRulePackage theApplyRulePackageCommand;
 
-CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandContext& context)
-{
+CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandContext& context) {
 	std::wstring rpk;
-	if (!getRpkPath(rpk)) return cancel;
+	if (!getRpkPath(rpk))
+		return cancel;
 
 	// Select starting shapes
 	ON_SimpleArray<const ON_Mesh*> mesh_array;
 
 	CRhinoGetObject go;
 	go.SetCommandPrompt(L"Select 1 or more starting shapes");
-	go.SetGeometryFilter(CRhinoGetObject::surface_object | CRhinoGetObject::mesh_object | 
-						 CRhinoGetObject::closed_polysrf | CRhinoGetObject::GEOMETRY_TYPE_FILTER::extrusion_object);
-	
+	go.SetGeometryFilter(CRhinoGetObject::surface_object | CRhinoGetObject::mesh_object |
+	                     CRhinoGetObject::closed_polysrf | CRhinoGetObject::GEOMETRY_TYPE_FILTER::extrusion_object);
+
 	// Get selected objects and convert them to ON_Mesh.
 	CRhinoGet::result res = go.GetObjects(1, 0);
-	if(res == CRhinoGet::object)
-	{
+	if (res == CRhinoGet::object) {
 		int count = go.ObjectCount();
 		for (int i = 0; i < count; ++i) {
 			ON_Mesh* mesh = nullptr;
@@ -87,9 +87,8 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 					mesh = extr->CreateMesh(ON_MeshParameters::QualityRenderMesh);
 				}
 			}
-			else if (geom_type == CRhinoObject::GEOMETRY_TYPE::polysrf_object)
-			{
-				 
+			else if (geom_type == CRhinoObject::GEOMETRY_TYPE::polysrf_object) {
+
 				const ON_Brep* brep = obj_ref.Brep();
 				if (brep) {
 					ON_SimpleArray<ON_Mesh*> brep_meshes;
@@ -101,7 +100,7 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 					}
 				}
 			}
-			else if(geom_type == CRhinoObject::GEOMETRY_TYPE::mesh_object) {
+			else if (geom_type == CRhinoObject::GEOMETRY_TYPE::mesh_object) {
 				mesh = new ON_Mesh();
 				mesh->Append(*obj_ref.Mesh());
 			}
@@ -109,34 +108,33 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 				LOG_ERR << L"Incompatible initial shape." << std::endl;
 			}
 
-			if (mesh)
-			{
+			if (mesh) {
 				mesh->SetUserString(L"InitShapeIdx", std::to_wstring(i).c_str());
 				mesh_array.Append(mesh);
 			}
 		}
 	}
-	else return cancel;
+	else
+		return cancel;
 
-	if (mesh_array.Count() == 0) 
-	{ 
+	if (mesh_array.Count() == 0) {
 		LOG_ERR << L"No compatible initial shape was given, aborting...";
-		return failure; 
+		return failure;
 	}
 
 	SetPackage(rpk.c_str());
-	
+
 	ClearInitialShapes();
 
-	if(!AddInitialMesh(&mesh_array))
-	{
+	if (!AddInitialMesh(&mesh_array)) {
 		LOG_ERR << L"Failed to add initial shapes, aborting command.";
 		return failure;
 	}
 
 	// PRT Generation
 	bool status = RhinoPRT::get().GenerateGeometry();
-	if (!status) return CRhinoCommand::failure;
+	if (!status)
+		return CRhinoCommand::failure;
 
 	const auto& generated_models = RhinoPRT::get().getGenModels();
 
@@ -144,11 +142,12 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 	for (auto& model : generated_models) {
 		const auto& meshBundle = model.getMeshesFromGenModel();
 
-		std::for_each(meshBundle.begin(), meshBundle.end(), [&context](const ON_Mesh& mesh) { context.m_doc.AddMeshObject(mesh); });
+		std::for_each(meshBundle.begin(), meshBundle.end(),
+		              [&context](const ON_Mesh& mesh) { context.m_doc.AddMeshObject(mesh); });
 	}
 
 	context.m_doc.Redraw();
-	
+
 	return CRhinoCommand::success;
 }
 

@@ -6,11 +6,11 @@
 
 namespace {
 
-	std::wstring getNiceName(const std::wstring& attrName) {
-		return pcu::removeImport(pcu::removeStyle(attrName));
-	}
-
+std::wstring getNiceName(const std::wstring& attrName) {
+	return pcu::removeImport(pcu::removeStyle(attrName));
 }
+
+} // namespace
 
 AnnotationRange::AnnotationRange(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::RANGE), mStepSize(0) {
 
@@ -32,43 +32,51 @@ AnnotationRange::AnnotationRange(const prt::Annotation* an) : AnnotationBase(Att
 	}
 }
 
-RangeAttributes AnnotationRange::getAnnotArguments() const { return { mMin, mMax, mStepSize, mRestricted }; }
+RangeAttributes AnnotationRange::getAnnotArguments() const {
+	return {mMin, mMax, mStepSize, mRestricted};
+}
 
 /// Specific implementations of enum annotation constructors
 
-template<>
-AnnotationEnum<bool>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::BOOL)
-{
+template <>
+AnnotationEnum<bool>::AnnotationEnum(const prt::Annotation* an)
+    : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::BOOL) {
 	mEnums.reserve(an->getNumArguments());
 
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
 		const prt::AnnotationArgument* argument = an->getArgument(argIdx);
-		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0) mRestricted = argument->getBool();
-		else mEnums.emplace_back(an->getArgument(argIdx)->getBool());
+		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0)
+			mRestricted = argument->getBool();
+		else
+			mEnums.emplace_back(an->getArgument(argIdx)->getBool());
 	}
 }
 
-template<>
-AnnotationEnum<std::wstring>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::STRING)
-{
+template <>
+AnnotationEnum<std::wstring>::AnnotationEnum(const prt::Annotation* an)
+    : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::STRING) {
 	mEnums.reserve(an->getNumArguments());
 
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
 		const prt::AnnotationArgument* argument = an->getArgument(argIdx);
-		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0) mRestricted = argument->getBool();
-		else mEnums.emplace_back(an->getArgument(argIdx)->getStr());
+		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0)
+			mRestricted = argument->getBool();
+		else
+			mEnums.emplace_back(an->getArgument(argIdx)->getStr());
 	}
 }
 
-template<>
-AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::DOUBLE)
-{
+template <>
+AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an)
+    : AnnotationBase(AttributeAnnotation::ENUM, EnumAnnotationType::DOUBLE) {
 	mEnums.reserve(an->getNumArguments());
 
 	for (int argIdx = 0; argIdx < an->getNumArguments(); ++argIdx) {
 		const prt::AnnotationArgument* argument = an->getArgument(argIdx);
-		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0) mRestricted = argument->getBool();
-		else mEnums.emplace_back(an->getArgument(argIdx)->getFloat());
+		if (std::wcscmp(argument->getKey(), RESTRICTED_KEY) == 0)
+			mRestricted = argument->getBool();
+		else
+			mEnums.emplace_back(an->getArgument(argIdx)->getFloat());
 	}
 }
 
@@ -76,28 +84,32 @@ AnnotationEnum<double>::AnnotationEnum(const prt::Annotation* an) : AnnotationBa
 
 bool annotCompatibleWithType(AttributeAnnotation annot, prt::AnnotationArgumentType type) {
 	switch (type) {
-	case prt::AnnotationArgumentType::AAT_BOOL:
-		return annot == AttributeAnnotation::ENUM;
-	case prt::AnnotationArgumentType::AAT_INT:
-	case prt::AnnotationArgumentType::AAT_FLOAT:
-		return annot == AttributeAnnotation::ENUM || annot == AttributeAnnotation::RANGE;
-	case prt::AnnotationArgumentType::AAT_STR:
-		return annot != AttributeAnnotation::RANGE;
-	default:
-		return false;
+		case prt::AnnotationArgumentType::AAT_BOOL:
+			return annot == AttributeAnnotation::ENUM;
+		case prt::AnnotationArgumentType::AAT_INT:
+		case prt::AnnotationArgumentType::AAT_FLOAT:
+			return annot == AttributeAnnotation::ENUM || annot == AttributeAnnotation::RANGE;
+		case prt::AnnotationArgumentType::AAT_STR:
+			return annot != AttributeAnnotation::RANGE;
+		default:
+			return false;
 	}
 }
 
-void addAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType, std::vector<AnnotationUPtr>& annotVector)
-{
+void addAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, prt::AnnotationArgumentType attrType,
+                         std::vector<AnnotationUPtr>& annotVector) {
 	if (!std::wcscmp(annotName, ANNOT_COLOR) && annotCompatibleWithType(AttributeAnnotation::COLOR, attrType)) {
 		annotVector.emplace_back(new AnnotationBase(AttributeAnnotation::COLOR));
 	}
 	else if (!std::wcscmp(annotName, ANNOT_ENUM)) {
-		if(attrType == prt::AAT_BOOL) annotVector.emplace_back(new AnnotationEnum<bool>(an));
-		if (attrType == prt::AAT_FLOAT) annotVector.emplace_back(new AnnotationEnum<double>(an));
-		if (attrType == prt::AAT_STR) annotVector.emplace_back(new AnnotationEnum<std::wstring>(an));
-		if (attrType == prt::AAT_INT) annotVector.emplace_back(new AnnotationEnum<int>(an));
+		if (attrType == prt::AAT_BOOL)
+			annotVector.emplace_back(new AnnotationEnum<bool>(an));
+		if (attrType == prt::AAT_FLOAT)
+			annotVector.emplace_back(new AnnotationEnum<double>(an));
+		if (attrType == prt::AAT_STR)
+			annotVector.emplace_back(new AnnotationEnum<std::wstring>(an));
+		if (attrType == prt::AAT_INT)
+			annotVector.emplace_back(new AnnotationEnum<int>(an));
 		annotVector.emplace_back(new AnnotationBase(AttributeAnnotation::NOANNOT));
 	}
 	else if (!std::wcscmp(annotName, ANNOT_RANGE) && annotCompatibleWithType(AttributeAnnotation::RANGE, attrType)) {
@@ -106,7 +118,7 @@ void addAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, pr
 	else if (!std::wcscmp(annotName, ANNOT_DIR) && annotCompatibleWithType(AttributeAnnotation::DIR, attrType)) {
 		annotVector.emplace_back(new AnnotationBase(AttributeAnnotation::DIR));
 	}
-	else if(!std::wcscmp(annotName, ANNOT_FILE) && annotCompatibleWithType(AttributeAnnotation::FILE, attrType)) {
+	else if (!std::wcscmp(annotName, ANNOT_FILE) && annotCompatibleWithType(AttributeAnnotation::FILE, attrType)) {
 		annotVector.emplace_back(new AnnotationFile(an));
 	}
 	else {
@@ -114,20 +126,21 @@ void addAnnotationObject(const wchar_t* annotName, const prt::Annotation* an, pr
 	}
 }
 
-void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo& ruleFileInfo, RuleAttributes& ra)
-{
+void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo& ruleFileInfo, RuleAttributes& ra) {
 	std::wstring mainCgaRuleName = pcu::filename(ruleFile);
 	size_t idxExtension = mainCgaRuleName.find(L".cgb");
 	if (idxExtension != std::wstring::npos)
 		mainCgaRuleName = mainCgaRuleName.substr(0, idxExtension);
-	
+
 	for (size_t i = 0; i < ruleFileInfo.getNumAttributes(); ++i) {
 		const prt::RuleFileInfo::Entry* attr = ruleFileInfo.getAttribute(i);
 
-		if (attr->getNumParameters() != 0) continue;
+		if (attr->getNumParameters() != 0)
+			continue;
 
 		// Skip attributes that are not default style.
-		if (!pcu::isDefaultStyle(attr->getName())) continue;
+		if (!pcu::isDefaultStyle(attr->getName()))
+			continue;
 
 		RuleAttributeUPtr ruleAttr{new RuleAttribute()};
 		ruleAttr->mFullName = attr->getName();
@@ -156,7 +169,7 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 						ruleAttr->groups.push_back(an->getArgument(argIdx)->getStr());
 					}
 					else if (argIdx == an->getNumArguments() - 1 &&
-						an->getArgument(argIdx)->getType() == prt::AAT_FLOAT) {
+					         an->getArgument(argIdx)->getType() == prt::AAT_FLOAT) {
 						ruleAttr->groupOrder = static_cast<int>(an->getArgument(argIdx)->getFloat());
 					}
 				}
@@ -166,22 +179,24 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 			}
 		}
 
-		if (hidden) continue;
+		if (hidden)
+			continue;
 
 		ra.emplace_back(std::move(ruleAttr));
-		if (DBG) LOG_DBG << ruleAttr;
+		if (DBG)
+			LOG_DBG << ruleAttr;
 	}
 
 	// Group and order attributes.
 	// Set a global order:
 	// - First sort by group / group order
 	// - Then by order in group
-	std::sort(ra.begin(), ra.end(), [](const RuleAttributeUPtr& left, const RuleAttributeUPtr& right){
+	std::sort(ra.begin(), ra.end(), [](const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
 		if (left->groups.size() == 0) {
-			if (right->groups.size() == 0)
-			{
+			if (right->groups.size() == 0) {
 				// No groups for both attributes: sort by order if they are set, else sort by string compare.
-				if(left->order != right->order) return left->order < right->order;
+				if (left->order != right->order)
+					return left->order < right->order;
 				return left->mNickname.compare(right->mNickname) < 0;
 			}
 			else {
@@ -194,15 +209,16 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 
 		// support only first level groups for now.
 		int group_cmpr = left->groups.front().compare(right->groups.front());
-		if (group_cmpr == 0) 
-		{
+		if (group_cmpr == 0) {
 			// same group, sort by order if set.
-			if (left->order != right->order) return left->order < right->order;
+			if (left->order != right->order)
+				return left->order < right->order;
 			return left->mNickname.compare(right->mNickname) < 0;
 		}
 		else {
 			// different group, sort by groupOrder if they are set, else use string compare.
-			if (left->groupOrder != right->groupOrder) return left->groupOrder < right->groupOrder;
+			if (left->groupOrder != right->groupOrder)
+				return left->groupOrder < right->groupOrder;
 			return left->groups.front().compare(right->groups.front()) < 0;
 		}
 	});
