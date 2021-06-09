@@ -104,8 +104,6 @@ namespace PumaGrasshopper
                     {
                         ((GH_NumberSlider)param).SetSliderValue((decimal)value);
                     }
-
-                    //TODO implement method for arrays
                 }
             }
             else
@@ -235,8 +233,6 @@ namespace PumaGrasshopper
             // find default string value
             StringWrapper value = new StringWrapper();
             var pValue = value.NonConstPointer;
-
-            // TODO: String of a hexadecimal color does not get converted correctly -> No default value for colors yet.
 
             var doc = OnPingDocument();
             doc.AddObject(param, false);
