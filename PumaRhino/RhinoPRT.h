@@ -39,9 +39,6 @@ namespace RhinoPRT {
 
 		bool GenerateGeometry();
 
-		template<typename T>
-		void fillAttributeFromNode(const int initialShapeIndex, const std::wstring& ruleName, const std::wstring& attrFullName, T value, size_t count = 1);
-
 		void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, double value, size_t /*count*/);
 		void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, int value, size_t /*count*/);
 		void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, bool value, size_t /*count*/);
