@@ -54,8 +54,6 @@
 #include <afxcmn.h>                              // MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
-// TODO: include additional commonly used header files here
-
 #if defined(_M_X64) && defined(WIN32) && defined(WIN64)
 //  The afxwin.h includes afx.h, which includes afxver_.h, 
 //  which unconditionally defines WIN32  This is a bug.
@@ -71,8 +69,6 @@
 
 // Rhino Render Development Kit (RDK) classes
 #include "RhRdkHeaders.h" 
-
-// TODO: include additional Rhino-related header files here
 
 #if defined(RHINO_DEBUG_PLUGIN)
 // Now that all the system headers are read, we can
