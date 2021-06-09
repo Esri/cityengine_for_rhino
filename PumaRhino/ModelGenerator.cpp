@@ -218,26 +218,21 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 
 		getRawEncoderDataPointers(encoders, encodersOptions);
 
-		if (mEncodersNames[0] == ENCODER_ID_RHINO) {
-			pcu::RhinoCallbacksPtr roc{ std::make_unique<RhinoCallbacks>(mInitialShapesBuilders.size()) };
+		pcu::RhinoCallbacksPtr roc{ std::make_unique<RhinoCallbacks>(mInitialShapesBuilders.size()) };
 
-			// GENERATE!
-			const prt::Status genStat =
-				prt::generate(initialShapes.data(), initialShapes.size(), nullptr, encoders.data(), encoders.size(),
-					encodersOptions.data(), roc.get(), PRTContext::get()->mPRTCache.get(), nullptr);
+		// GENERATE!
+		const prt::Status genStat =
+			prt::generate(initialShapes.data(), initialShapes.size(), nullptr, encoders.data(), encoders.size(),
+				encodersOptions.data(), roc.get(), PRTContext::get()->mPRTCache.get(), nullptr);
 
-			if (genStat != prt::STATUS_OK) {
-				LOG_ERR << "prt::generate() failed with status: '" << prt::getStatusDescription(genStat) << "' ("
-					<< genStat << ")";
-				return;
-			}
-
-			for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
-				generated_models.emplace_back(idx, roc->getModel(idx));
-			}
+		if (genStat != prt::STATUS_OK) {
+			LOG_ERR << "prt::generate() failed with status: '" << prt::getStatusDescription(genStat) << "' ("
+				<< genStat << ")";
+			return;
 		}
-		else {
-			//TODO
+
+		for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
+			generated_models.emplace_back(idx, roc->getModel(idx));
 		}
 	}
 	catch (const std::exception& e) {
@@ -289,16 +284,13 @@ void ModelGenerator::initializeEncoderData(const std::wstring & encName, const p
 }
 
 void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc, std::vector<const prt::AttributeMap*>& allEncOpt) {
-	if (mEncodersNames[0] == ENCODER_ID_RHINO) {
-		allEnc.clear();
-		allEncOpt.clear();
+	allEnc.clear();
+	for (const std::wstring& encID: mEncodersNames)
+		allEnc.push_back(encID.c_str());
 
-		allEnc.push_back(mEncodersNames[0].c_str());
-		allEncOpt.push_back(mEncodersOptionsPtr[0].get());
-	}
-	else {
-		// TODO: implement for other encoders
-	}
+	allEncOpt.clear();
+	for (const auto& encOpts: mEncodersOptionsPtr)
+		allEncOpt.push_back(encOpts.get());
 }
 
 void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr, std::wstring & ruleFile, std::wstring & startRule,
