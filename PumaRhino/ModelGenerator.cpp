@@ -279,8 +279,6 @@ void ModelGenerator::initializeEncoderData(const std::wstring & encName, const p
 	mEncodersNames.push_back(encName);
 	const pcu::AttributeMapPtr encOptions{ pcu::createAttributeMapForEncoder(encOpt, *mEncoderBuilder) };
 	mEncodersOptionsPtr.push_back(createValidatedOptions(encName.c_str(), encOptions));
-
-	// TODO: initialise print and error encoder data
 }
 
 void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc, std::vector<const prt::AttributeMap*>& allEncOpt) {
