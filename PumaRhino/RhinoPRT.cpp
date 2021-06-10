@@ -26,7 +26,6 @@ void fillAttributeFromNode(RhinoPRT::RhinoPRTAPI& prtApi, const int initialShape
 		assert(!rule->mFullName.empty()); // Check if the rule was found
 
 		// If the attribute is found, register the value in the attribute map builder
-		// TODO: check for difference with default value, only add the attribute if it is the case.
 		prtApi.setRuleAttributeValue(initialShapeIndex, rule, value, count);
 	}
 }
