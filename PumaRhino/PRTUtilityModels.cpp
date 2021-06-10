@@ -61,7 +61,7 @@ GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model
 
 const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const 
 {
-	ON_Mesh mesh(static_cast<int>(modelPart.mUVCounts.size()), static_cast<int>(modelPart.mIndices.size()), true, true);
+	ON_Mesh mesh(static_cast<int>(modelPart.mFaces.size()), static_cast<int>(modelPart.mIndices.size()), true, true);
 
 	// Set the initial shape id.
 	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
