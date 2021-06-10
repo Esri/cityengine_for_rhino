@@ -183,8 +183,6 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 			continue;
 
 		ra.emplace_back(std::move(ruleAttr));
-		if (DBG)
-			LOG_DBG << ruleAttr;
 	}
 
 	// Group and order attributes.

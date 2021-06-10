@@ -21,8 +21,6 @@ struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error
 #pragma comment(lib, "ole32.lib") // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was
                                   // unexpected here" when using /permissive-
 
-constexpr auto DBG = true;
-
 constexpr const wchar_t* ANNOT_RANGE = L"@Range";
 constexpr const wchar_t* ANNOT_ENUM = L"@Enum";
 constexpr const wchar_t* ANNOT_HIDDEN = L"@Hidden";
