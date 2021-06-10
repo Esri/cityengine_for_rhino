@@ -42,7 +42,6 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
 
 	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 	mPRTHandle.reset(prt::init(prtExtensionPaths.data(), prtExtensionPaths.size(), minimalLogLevel, &status));
-	LOG_INF << prt::getStatusDescription(status);
 
 	alreadyInitialized = true;
 
