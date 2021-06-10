@@ -16,6 +16,19 @@
 #include <sstream>
 #include <string>
 
+namespace {
+
+void checkLastError(const std::string& exceptionPrefix) {
+	const DWORD lastError = GetLastError();
+	if (lastError != ERROR_SUCCESS) {
+		char msg[255];
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, 0, lastError, 0, msg, 255, 0);
+		throw std::runtime_error(exceptionPrefix + msg);
+	}
+}
+
+} // namespace
+
 namespace pcu {
 
 ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring startRl, const std::wstring shapeN,
@@ -27,17 +40,12 @@ std::wstring getDllLocation() {
 	HMODULE hModule = 0;
 	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
 	                  (LPCWSTR)getDllLocation, &hModule);
+	checkLastError("Failed to get plugin library handle: ");
 
 	char dllPath[_MAX_PATH];
 	const DWORD dllPathLen = GetModuleFileNameA(
-	        hModule, dllPath, _MAX_PATH); // dllPathLen does not include the terminating null character
-	const DWORD dllPathError = GetLastError();
-	if (dllPathError != ERROR_SUCCESS) {
-		char msg[255];
-		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, 0, dllPathError, 0, msg, 255, 0);
-		const std::string excMsg = std::string("Failed to get plugin location: ").append(msg);
-		throw std::runtime_error(excMsg);
-	}
+	        hModule, dllPath, _MAX_PATH);
+	checkLastError("Failed to get plugin file system location: ");
 
 	char drive[8];
 	char dir[_MAX_PATH];
