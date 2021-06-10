@@ -5,6 +5,8 @@
 
 namespace {
 
+constexpr bool DBG_TIME = false;
+
 const std::chrono::system_clock::time_point INVALID_TIMESTAMP;
 
 ResolveMap::ResolveMapCache::KeyType createCacheKey(const std::filesystem::path& rpk) {
@@ -38,8 +40,9 @@ ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& 
 	const auto cacheKey = createCacheKey(rpk);
 
 	const auto timeStamp = getFileModificationTime(rpk);
-	LOG_DBG << "rpk: current timestamp: "
-	        << std::chrono::duration_cast<std::chrono::nanoseconds>(timeStamp.time_since_epoch()).count() << "ns";
+	if constexpr (DBG_TIME)
+		LOG_DBG << "rpk: current timestamp: "
+		        << std::chrono::duration_cast<std::chrono::nanoseconds>(timeStamp.time_since_epoch()).count() << "ns";
 
 	// verify timestamp
 	if (timeStamp == INVALID_TIMESTAMP)
@@ -49,9 +52,10 @@ ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& 
 	auto it = mCache.find(cacheKey);
 	if (it != mCache.end()) {
 		const ResolveMapCacheEntry& rmce = it->second;
-		LOG_DBG << "rpk: cache timestamp: "
-		        << std::chrono::duration_cast<std::chrono::nanoseconds>(rmce.mTimeStamp.time_since_epoch()).count()
-		        << "ns";
+		if constexpr (DBG_TIME)
+			LOG_DBG << "rpk: cache timestamp: "
+			        << std::chrono::duration_cast<std::chrono::nanoseconds>(rmce.mTimeStamp.time_since_epoch()).count()
+			        << "ns";
 		if (rmce.mTimeStamp != timeStamp) {
 			mCache.erase(it);
 			cs = CacheStatus::MISS;
@@ -84,7 +88,7 @@ ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& 
 			return LOOKUP_FAILURE;
 
 		it = mCache.emplace(cacheKey, std::move(rmce)).first;
-		LOG_INF << "Unpacked RPK " << rpk << " to " << mUnpackPath;
+		LOG_DBG << "Unpacked RPK " << rpk << " to " << mUnpackPath;
 	}
 
 	return {it->second.mResolveMap, cs};
