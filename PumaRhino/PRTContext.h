@@ -19,8 +19,8 @@ public:
 	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::filesystem::path& rpk);
 	bool isAlive() const;
 
-	prt::ConsoleLogHandler* mLogHandler;
-	prt::FileLogHandler* mFileLogHandler;
+	pcu::ConsoleLogHandlerPtr mLogHandler;
+	pcu::FileLogHandlerPtr mFileLogHandler;
 	pcu::ObjectPtr mPRTHandle;
 	pcu::CachePtr mPRTCache;
 	ResolveMap::ResolveMapCacheUPtr mResolveMapCache;

@@ -32,8 +32,8 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
                                                   getLogFilePath().wstring().c_str())),
       mPRTCache{prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT)},
       mResolveMapCache{new ResolveMap::ResolveMapCache(getGlobalTempDir())} {
-	prt::addLogHandler(mLogHandler);
-	prt::addLogHandler(mFileLogHandler);
+	prt::addLogHandler(mLogHandler.get());
+	prt::addLogHandler(mFileLogHandler.get());
 
 	// create the list of extension path dynamicaly using getDllLocation
 	const std::filesystem::path pumaPath = pcu::getDllLocation();
@@ -64,17 +64,10 @@ PRTContext::~PRTContext() {
 	mPRTHandle.reset();
 	LOG_INF << "Shutdown PRT";
 
-	prt::removeLogHandler(mFileLogHandler);
-	prt::removeLogHandler(mLogHandler);
-	if (mLogHandler) {
-		mLogHandler->destroy();
-	}
-	mLogHandler = nullptr;
-
-	if (mFileLogHandler) {
-		mFileLogHandler->destroy();
-	}
-	mFileLogHandler = nullptr;
+	prt::removeLogHandler(mFileLogHandler.get());
+	prt::removeLogHandler(mLogHandler.get());
+	mFileLogHandler.reset();
+	mLogHandler.reset();
 }
 
 ResolveMap::ResolveMapCache::LookupResult PRTContext::getResolveMap(const std::filesystem::path& rpk) {
