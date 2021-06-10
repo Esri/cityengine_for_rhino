@@ -13,7 +13,7 @@ class PRTContext final {
 public:
 	static std::unique_ptr<PRTContext>& get();
 
-	explicit PRTContext(prt::LogLevel minimalLogLevel = prt::LogLevel::LOG_DEBUG);
+	explicit PRTContext(prt::LogLevel minimalLogLevel);
 	~PRTContext();
 
 	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::filesystem::path& rpk);

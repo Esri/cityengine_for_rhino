@@ -6,6 +6,9 @@
 #include <memory>
 
 namespace {
+
+constexpr prt::LogLevel PRT_MINIMAL_LOG_LEVEL = prt::LogLevel::LOG_WARNING;
+
 const std::wstring PUMA_TEMP_DIR_NAME(L"puma");
 
 // Returns a per-session unique temp dir for RPK extraction and log file
@@ -19,10 +22,11 @@ const std::filesystem::path& getLogFilePath() {
 	static const std::filesystem::path logFilePath = getGlobalTempDir() / "puma.log";
 	return logFilePath;
 }
+
 } // namespace
 
 std::unique_ptr<PRTContext>& PRTContext::get() {
-	static std::unique_ptr<PRTContext> prtCtx = std::make_unique<PRTContext>();
+	static std::unique_ptr<PRTContext> prtCtx = std::make_unique<PRTContext>(PRT_MINIMAL_LOG_LEVEL);
 	return prtCtx;
 }
 
