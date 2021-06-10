@@ -24,19 +24,23 @@ ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring st
 
 // location of RhinoPRT shared library
 std::wstring getDllLocation() {
-	char dllPath[_MAX_PATH];
-	char drive[8];
-	char dir[_MAX_PATH];
 	HMODULE hModule = 0;
-
 	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
 	                  (LPCWSTR)getDllLocation, &hModule);
-	const DWORD res = ::GetModuleFileNameA(hModule, dllPath, _MAX_PATH);
-	if (res == 0) {
-		// TODO DWORD e = ::GetLastError();
-		throw std::runtime_error("failed to get plugin location");
+
+	char dllPath[_MAX_PATH];
+	const DWORD dllPathLen = GetModuleFileNameA(
+	        hModule, dllPath, _MAX_PATH); // dllPathLen does not include the terminating null character
+	const DWORD dllPathError = GetLastError();
+	if (dllPathError != ERROR_SUCCESS) {
+		char msg[255];
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, 0, dllPathError, 0, msg, 255, 0);
+		const std::string excMsg = std::string("Failed to get plugin location: ").append(msg);
+		throw std::runtime_error(excMsg);
 	}
 
+	char drive[8];
+	char dir[_MAX_PATH];
 	_splitpath_s(dllPath, drive, 8, dir, _MAX_PATH, 0, 0, 0, 0);
 	std::wstring rootPath = pcu::toUTF16FromOSNarrow(drive);
 	rootPath.append(pcu::toUTF16FromOSNarrow(dir));
