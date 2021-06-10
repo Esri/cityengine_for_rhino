@@ -17,8 +17,7 @@
  * limitations under the License.
  */
 
-#ifndef RHINOPRT
-#define RHINOPRT
+#pragma once
 
 #include "PRTContext.h"
 #include "version.h"
@@ -187,5 +186,3 @@ RHINOPRT_API bool GetDefaultValueNumber(const wchar_t* key, double* value);
 
 RHINOPRT_API bool GetDefaultValueText(const wchar_t* key, ON_wString* pText);
 }
-
-#endif RHINOPRT
