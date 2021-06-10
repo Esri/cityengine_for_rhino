@@ -1,5 +1,11 @@
 #include "RhinoCallbacks.h"
 
+namespace {
+
+constexpr bool DBG = false;
+
+} // namespace
+
 void Model::addMaterial(const Materials::MaterialAttribute& ma) {
 	mMaterials.insert_or_assign(ma.mMatId, ma);
 }
@@ -52,10 +58,9 @@ void RhinoCallbacks::addUVCoordinates(const size_t initialShapeIndex, double con
 
 		if (psUVSSize > 0 && psUVIndicesSize > 0 && psUVCountsSize > 0) {
 			if (uvSet == 0) {
-#ifdef DEBUG
-				LOG_DBG << " -- uvset " << uvSet << ": psUVCountsSize = " << psUVCountsSize
-				        << ", psUVIndicesSize = " << psUVIndicesSize;
-#endif
+				if constexpr (DBG)
+					LOG_DBG << " -- uvset " << uvSet << ": psUVCountsSize = " << psUVCountsSize
+					        << ", psUVIndicesSize = " << psUVIndicesSize;
 
 				double const* const psUVS = uvs[uvSet];
 				uint32_t const* const psUVCounts = uvCounts[uvSet];
@@ -97,9 +102,8 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 	Model& currentModel = mModels[initialShapeIndex];
 
 	// -- convert materials into material attributes
-#ifdef DEBUG
-	LOG_DBG << "got " << matCount << " materials";
-#endif
+	if constexpr (DBG)
+		LOG_DBG << "got " << matCount << " materials";
 	if (matCount > 0 && materials) {
 		if (matCount > 1) {
 			LOG_ERR << L"Multiple material for a single mesh part is not supported by Rhino. Taking only the first "
@@ -114,9 +118,8 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 }
 
 void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) {
-#ifdef DEBUG
-	LOG_DBG << "In RhinoCallback::addReport";
-#endif
+	if constexpr (DBG)
+		LOG_DBG << "In RhinoCallback::addReport";
 
 	if (!reports) {
 		LOG_WRN << "Trying to add null report, ignoring.";
@@ -132,7 +135,6 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUt
 
 	Reporting::extractReports(initialShapeIndex, model, reports);
 
-#ifdef DEBUG
-	LOG_DBG << "End of RhinoCallback::addReport";
-#endif
+	if constexpr (DBG)
+		LOG_DBG << "End of RhinoCallback::addReport";
 }

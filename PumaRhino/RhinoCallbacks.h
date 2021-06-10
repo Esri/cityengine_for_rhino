@@ -15,8 +15,6 @@
 #include <unordered_map>
 #include <vector>
 
-#define DEBUG
-
 struct ModelPart {
 	std::vector<double> mVertices;
 	prtx::DoubleVector mNormals;
