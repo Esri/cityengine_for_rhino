@@ -32,7 +32,7 @@ class RhinoCallbacks;
 
 namespace pcu {
 
-std::wstring getDllLocation();
+std::filesystem::path getDllLocation();
 std::filesystem::path getTempDir(const std::wstring& tmp_prefix);
 std::wstring getUUID();
 std::filesystem::path getUniqueTempDir(const std::filesystem::path& tempDir, const std::wstring& basename);

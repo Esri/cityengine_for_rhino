@@ -10,9 +10,8 @@
 #include <Windows.h>
 #include <conio.h>
 
-#include <filesystem>
-
 #include <cwchar>
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -36,27 +35,18 @@ ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring st
     : ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(sd) {}
 
 // location of RhinoPRT shared library
-std::wstring getDllLocation() {
+std::filesystem::path getDllLocation() {
 	HMODULE hModule = 0;
 	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
 	                  (LPCWSTR)getDllLocation, &hModule);
 	checkLastError("Failed to get plugin library handle: ");
 
-	char dllPath[_MAX_PATH];
-	GetModuleFileNameA(hModule, dllPath, _MAX_PATH);
+	char libraryPathStr[_MAX_PATH];
+	GetModuleFileNameA(hModule, libraryPathStr, _MAX_PATH);
 	checkLastError("Failed to get plugin file system location: ");
 
-	char drive[8];
-	char dir[_MAX_PATH];
-	_splitpath_s(dllPath, drive, 8, dir, _MAX_PATH, 0, 0, 0, 0);
-	std::wstring rootPath = pcu::toUTF16FromOSNarrow(drive);
-	rootPath.append(pcu::toUTF16FromOSNarrow(dir));
-
-	// ensure path separator at end
-	if (*rootPath.rbegin() != pcu::getDirSeparator<wchar_t>())
-		rootPath.append(1, pcu::getDirSeparator<wchar_t>());
-
-	return rootPath;
+	const std::filesystem::path libraryPath(libraryPathStr);
+	return libraryPath.parent_path();
 }
 
 template <>
