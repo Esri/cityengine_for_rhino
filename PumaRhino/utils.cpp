@@ -43,8 +43,7 @@ std::wstring getDllLocation() {
 	checkLastError("Failed to get plugin library handle: ");
 
 	char dllPath[_MAX_PATH];
-	const DWORD dllPathLen = GetModuleFileNameA(
-	        hModule, dllPath, _MAX_PATH);
+	GetModuleFileNameA(hModule, dllPath, _MAX_PATH);
 	checkLastError("Failed to get plugin file system location: ");
 
 	char drive[8];
