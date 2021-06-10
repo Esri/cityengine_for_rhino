@@ -58,15 +58,15 @@ namespace RhinoPRT {
 		std::wstring rulef = mModelGenerator->getRuleFile();
 		std::wstring ruleN = mModelGenerator->getStartingRule();
 		std::wstring shapeN = mModelGenerator->getDefaultShapeName();
-		int seed = 555; // TODO: compute seed?
 
 		mShapes.reserve(shapes.size());
 		mAttributes.reserve(shapes.size());
 
 		mShapes.insert(mShapes.end(), shapes.begin(), shapes.end());
 
-		auto shapeAttr = pcu::ShapeAttributes(rulef, ruleN, shapeN, seed);
-		mAttributes.resize(shapes.size(), shapeAttr);
+		for (const auto& it : mShapes) {
+			mAttributes.push_back(pcu::ShapeAttributes(rulef, ruleN, shapeN, it.getSeed()));
+		}
 
 		// compute the default values of rule attributes for each initial shape
 		mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
@@ -256,14 +256,14 @@ extern "C" {
 		RhinoPRT::get().SetRPKPath(rpk_path);
 	}
 
-	inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh)
+	inline RHINOPRT_API bool AddInitialMeshAndSeed(ON_SimpleArray<const ON_Mesh*>* pMesh, ON_SimpleArray<int>* pSeeds)
 	{
-		if (pMesh == nullptr) return false;
+		if (pMesh == nullptr || (pSeeds != nullptr && pSeeds->Count() != pMesh->Count())) return false;
 
 		std::vector<InitialShape> initShapes;
 		initShapes.reserve(pMesh->Count());
 		for (int i = 0; i < pMesh->Count(); ++i) {
-			initShapes.emplace_back(**pMesh->At(i));
+			initShapes.emplace_back(**pMesh->At(i), pSeeds == nullptr ? 0 : *pSeeds->At(i));
 		}
 
 		RhinoPRT::get().AddInitialShape(initShapes);

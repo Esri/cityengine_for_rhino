@@ -31,7 +31,7 @@ namespace PumaGrasshopper
         public static extern void SetPackage(string rpk_path);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool AddInitialMesh([In]IntPtr pMesh);
+        public static extern bool AddInitialMeshAndSeed([In]IntPtr pMesh, [In]IntPtr pSeeds);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
@@ -118,11 +118,12 @@ namespace PumaGrasshopper
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueText(string key, [In, Out] IntPtr pText);
 
-        public static bool AddMesh(List<Mesh> meshes)
+        public static bool AddMeshAndSeed(List<Mesh> meshes, List<int> seeds)
         {
             bool status;
 
             using (var arr = new SimpleArrayMeshPointer())
+            using (var seedsArray = new SimpleArrayInt(seeds))
             {
                 foreach (var mesh in meshes)
                 {
@@ -130,7 +131,8 @@ namespace PumaGrasshopper
                 }
 
                 var ptr_array = arr.ConstPointer();
-                status = AddInitialMesh(ptr_array);
+                var ptr_seeds = seedsArray.ConstPointer();
+                status = AddInitialMeshAndSeed(ptr_array, ptr_seeds);
             }
 
             return status;

@@ -96,7 +96,7 @@ extern "C" {
 
 	RHINOPRT_API void SetPackage(const wchar_t* rpk_path);
 
-	RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh);
+	RHINOPRT_API bool AddInitialMeshAndSeed(ON_SimpleArray<const ON_Mesh*>* pMesh, ON_SimpleArray<int>* pSeeds = nullptr);
 
 	RHINOPRT_API void ClearInitialShapes();
 

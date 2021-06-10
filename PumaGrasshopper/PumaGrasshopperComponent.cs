@@ -24,6 +24,7 @@ namespace PumaGrasshopper
     {
         const string RPK_INPUT_NAME = "Path to RPK";
         const string GEOM_INPUT_NAME = "Initial Shapes";
+        const string SEED_INPUT_NAME = "Random Seed";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
         const string REPORTS_OUTPUT_NAME = "Reports";
         const string RPK_PATH_SERIALIZE = "RPK_PATH";
@@ -70,6 +71,9 @@ namespace PumaGrasshopper
             pManager.AddGeometryParameter(GEOM_INPUT_NAME, "Shape",
                 "The initial geometry on which to execute the rules.",
                 GH_ParamAccess.tree);
+            pManager.AddIntegerParameter(SEED_INPUT_NAME, "Seed", 
+                "A number that will be used to seed the PRT random number generator.", 
+                GH_ParamAccess.tree, 0);
         }
 
         /// <summary>
@@ -160,7 +164,28 @@ namespace PumaGrasshopper
             if (meshes.Count == 0)
                 return;
 
-            if(!PRTWrapper.AddMesh(meshes))
+            // Get the random seed numbers
+            List<int> seeds = new List<int>(initShapeIdx);
+            if(DA.GetDataTree(SEED_INPUT_NAME, out GH_Structure<GH_Integer> seedTree))
+            {
+                foreach (GH_Integer seed in seedTree.AllData(true))
+                {
+                    seeds.Add(seed.Value);
+                }
+
+                // make sure it is the same size than the meshes list.
+                if(seeds.Count > meshes.Count)
+                {
+                    int diff = seeds.Count - meshes.Count;
+                    seeds.RemoveRange(seeds.Count - diff, diff);
+                }
+                while(seeds.Count < meshes.Count)
+                {
+                    seeds.Add(seeds.Last());
+                }
+            }
+
+            if(!PRTWrapper.AddMeshAndSeed(meshes, seeds))
                 return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.

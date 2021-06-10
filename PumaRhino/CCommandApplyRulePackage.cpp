@@ -128,7 +128,7 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 	
 	ClearInitialShapes();
 
-	if(!AddInitialMesh(&mesh_array))
+	if(!AddInitialMeshAndSeed(&mesh_array))
 	{
 		LOG_ERR << L"Failed to add initial shapes, aborting command.";
 		return failure;
