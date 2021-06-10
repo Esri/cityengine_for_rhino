@@ -9,7 +9,7 @@ ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* at
 	const double* color = attrMap->getFloatArray(key, &count);
 
 	if (count != 3) {
-		LOG_ERR << L"Attribute " << key << ": array has not size 3.";
+		LOG_ERR << L"Attribute " << key << ": array does not have size = 3.";
 		return ON_Color::White;
 	}
 
