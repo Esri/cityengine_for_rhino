@@ -7,12 +7,8 @@
 
 #include <rpc.h>
 
-#ifdef _WIN32
-#	include <Windows.h>
-#	include <conio.h>
-#else
-#	include <dlfcn.h>
-#endif
+#include <Windows.h>
+#include <conio.h>
 
 #include <filesystem>
 
@@ -28,7 +24,6 @@ ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring st
 
 // location of RhinoPRT shared library
 std::wstring getDllLocation() {
-#ifdef _WIN32
 	char dllPath[_MAX_PATH];
 	char drive[8];
 	char dir[_MAX_PATH];
@@ -45,12 +40,6 @@ std::wstring getDllLocation() {
 	_splitpath_s(dllPath, drive, 8, dir, _MAX_PATH, 0, 0, 0, 0);
 	std::wstring rootPath = pcu::toUTF16FromOSNarrow(drive);
 	rootPath.append(pcu::toUTF16FromOSNarrow(dir));
-#else
-	Dl_info dl_info;
-	dladdr((const void*)getPluginRoot, &dl_info);
-	const std::string tmp(dl_info.dli_fname);
-	std::wstring rootPath = pcu::toUTF16FromOSNarrow(tmp.substr(0, tmp.find_last_of(pcu::getDirSeparator<char>())));
-#endif
 
 	// ensure path separator at end
 	if (*rootPath.rbegin() != pcu::getDirSeparator<wchar_t>())
@@ -61,21 +50,13 @@ std::wstring getDllLocation() {
 
 template <>
 char getDirSeparator() {
-#ifdef _WIN32
 	static const char SEPARATOR = '\\';
-#else
-	static const char SEPARATOR = '/';
-#endif
 	return SEPARATOR;
 }
 
 template <>
 wchar_t getDirSeparator() {
-#ifdef _WIN32
 	static const wchar_t SEPARATOR = L'\\';
-#else
-	static const wchar_t SEPARATOR = L'/';
-#endif
 	return SEPARATOR;
 }
 
@@ -118,7 +99,6 @@ std::filesystem::path getUniqueTempDir(const std::filesystem::path& tempDir, con
 }
 
 std::wstring getUUID() {
-#ifdef _WIN32
 	RPC_STATUS status;
 
 	UUID uid;
@@ -134,16 +114,9 @@ std::wstring getUUID() {
 
 	LOG_ERR << "Failed to create UUID";
 	throw std::runtime_error("Failed to create UUID");
-#else
-#	error Windows platform required
-#endif
 }
 
-#ifdef _WIN32
 const std::string FILE_SCHEMA = "file:/";
-#else
-const std::string FILE_SCHEMA = "file:";
-#endif
 
 /**
  * Helper function to add the ShapeAttributes infos to an existing prt::AttributeMap.
