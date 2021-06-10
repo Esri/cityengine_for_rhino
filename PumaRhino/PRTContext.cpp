@@ -43,13 +43,10 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
 	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 	mPRTHandle.reset(prt::init(prtExtensionPaths.data(), prtExtensionPaths.size(), minimalLogLevel, &status));
 
-	alreadyInitialized = true;
-
 	if (status == prt::STATUS_ALREADY_INITIALIZED) {
 		mPRTHandle.reset();
 	}
 	else if (!mPRTHandle || status != prt::STATUS_OK) {
-		alreadyInitialized = false;
 		mPRTHandle.reset();
 	}
 
@@ -87,4 +84,8 @@ ResolveMap::ResolveMapCache::LookupResult PRTContext::getResolveMap(const std::f
 	}
 
 	return lookupResult;
+}
+
+bool PRTContext::isAlive() const {
+	return !!mPRTHandle;
 }
