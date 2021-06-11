@@ -85,13 +85,13 @@ BEGIN
     BEGIN
         BLOCK "00000409"
         BEGIN
-            VALUE "CompanyName", "My Company Name"
-            VALUE "FileDescription", "RhinoPRT"
+            VALUE "CompanyName", "Esri Online LLC"
+            VALUE "FileDescription", "Puma"
             VALUE "FileVersion", VER_FILE_VERSION_STR
-            VALUE "InternalName", "RhinoPRT.rhp"
-            VALUE "LegalCopyright", "Copyright © 2020, ESRI"
-            VALUE "OriginalFilename", "RhinoPRT.rhp"
-            VALUE "ProductName", "RhinoPRT"
+            VALUE "InternalName", "PumaRhino.rhp"
+            VALUE "LegalCopyright", "Copyright © 2021"
+            VALUE "OriginalFilename", "PumaRhino.rhp"
+            VALUE "ProductName", "Puma"
             VALUE "ProductVersion", VER_PRODUCT_VERSION_STR
         END
     END

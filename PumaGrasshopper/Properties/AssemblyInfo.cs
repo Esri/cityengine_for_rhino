@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Puma")]
 [assembly: AssemblyDescription("Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Esri")]
+[assembly: AssemblyCompany("Esri Online LLC")]
 [assembly: AssemblyProduct("Puma")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
