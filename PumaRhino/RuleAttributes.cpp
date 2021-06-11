@@ -120,6 +120,15 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 	size_t idxExtension = mainCgaRuleName.find(L".cgb");
 	if (idxExtension != std::wstring::npos)
 		mainCgaRuleName = mainCgaRuleName.substr(0, idxExtension);
+
+	// The seed is handled as a static rule attribute
+	RuleAttributeUPtr seedAttribute{ new RuleAttribute() };
+	seedAttribute->mRuleFile = mainCgaRuleName;
+	seedAttribute->mFullName = SEED_KEY;
+	seedAttribute->mNickname = L"Seed";
+	seedAttribute->mType = prt::AAT_INT;
+	seedAttribute->order = ORDER_FIRST;
+	ra.emplace_back(std::move(seedAttribute));
 	
 	for (size_t i = 0; i < ruleFileInfo.getNumAttributes(); ++i) {
 		const prt::RuleFileInfo::Entry* attr = ruleFileInfo.getAttribute(i);

@@ -24,10 +24,11 @@ namespace PumaGrasshopper
     {
         const string RPK_INPUT_NAME = "Path to RPK";
         const string GEOM_INPUT_NAME = "Initial Shapes";
-        const string SEED_INPUT_NAME = "Random Seed";
         const string GEOM_OUTPUT_NAME = "Generated Shapes";
         const string REPORTS_OUTPUT_NAME = "Reports";
         const string RPK_PATH_SERIALIZE = "RPK_PATH";
+        const string SEED_INPUT_NAME = "Seed";
+        const string SEED_KEY = "seed";
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -71,7 +72,7 @@ namespace PumaGrasshopper
             pManager.AddGeometryParameter(GEOM_INPUT_NAME, "Shape",
                 "The initial geometry on which to execute the rules.",
                 GH_ParamAccess.tree);
-            pManager.AddIntegerParameter(SEED_INPUT_NAME, "Seed", 
+            pManager.AddIntegerParameter(SEED_KEY, SEED_INPUT_NAME, 
                 "A number that will be used to seed the PRT random number generator.", 
                 GH_ParamAccess.tree, 0);
         }
@@ -130,7 +131,8 @@ namespace PumaGrasshopper
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
                 foreach (RuleAttribute attrib in mRuleAttributes)
                 {
-                    CreateInputParameter(attrib);
+                    if(attrib.mFullName != SEED_KEY)
+                        CreateInputParameter(attrib);
                 }
 
                 Params.OnParametersChanged();
@@ -164,28 +166,7 @@ namespace PumaGrasshopper
             if (meshes.Count == 0)
                 return;
 
-            // Get the random seed numbers
-            List<int> seeds = new List<int>(initShapeIdx);
-            if(DA.GetDataTree(SEED_INPUT_NAME, out GH_Structure<GH_Integer> seedTree))
-            {
-                foreach (GH_Integer seed in seedTree.AllData(true))
-                {
-                    seeds.Add(seed.Value);
-                }
-
-                // make sure it is the same size than the meshes list.
-                if(seeds.Count > meshes.Count)
-                {
-                    int diff = seeds.Count - meshes.Count;
-                    seeds.RemoveRange(seeds.Count - diff, diff);
-                }
-                while(seeds.Count < meshes.Count)
-                {
-                    seeds.Add(seeds.Last());
-                }
-            }
-
-            if(!PRTWrapper.AddMeshAndSeed(meshes, seeds))
+            if(!PRTWrapper.AddMesh(meshes))
                 return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
@@ -326,6 +307,12 @@ namespace PumaGrasshopper
         {
             switch (attribute.mAttribType)
             {
+                case AnnotationArgumentType.AAT_INT:
+                {
+                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Integer> tree)) return;
+                    ExtractTreeValues(tree, attribute, shapeCount);
+                    break;
+                }
                 case AnnotationArgumentType.AAT_BOOL:
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
                 {
@@ -335,7 +322,6 @@ namespace PumaGrasshopper
                 }
                 case AnnotationArgumentType.AAT_FLOAT:
                 case AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                case AnnotationArgumentType.AAT_INT:
                 {
                     if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Number> tree)) return;
                     ExtractTreeValues(tree, attribute, shapeCount);

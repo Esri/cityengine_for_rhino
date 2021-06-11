@@ -63,10 +63,7 @@ namespace RhinoPRT {
 		mAttributes.reserve(shapes.size());
 
 		mShapes.insert(mShapes.end(), shapes.begin(), shapes.end());
-
-		for (const auto& it : mShapes) {
-			mAttributes.push_back(pcu::ShapeAttributes(rulef, ruleN, shapeN, it.getSeed()));
-		}
+		mAttributes.resize(mShapes.size(), pcu::ShapeAttributes(rulef, ruleN, shapeN));
 
 		// compute the default values of rule attributes for each initial shape
 		mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
@@ -256,14 +253,14 @@ extern "C" {
 		RhinoPRT::get().SetRPKPath(rpk_path);
 	}
 
-	inline RHINOPRT_API bool AddInitialMeshAndSeed(ON_SimpleArray<const ON_Mesh*>* pMesh, ON_SimpleArray<int>* pSeeds)
+	inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh)
 	{
-		if (pMesh == nullptr || (pSeeds != nullptr && pSeeds->Count() != pMesh->Count())) return false;
+		if (pMesh == nullptr) return false;
 
 		std::vector<InitialShape> initShapes;
 		initShapes.reserve(pMesh->Count());
 		for (int i = 0; i < pMesh->Count(); ++i) {
-			initShapes.emplace_back(**pMesh->At(i), pSeeds == nullptr ? 0 : *pSeeds->At(i));
+			initShapes.emplace_back(**pMesh->At(i));
 		}
 
 		RhinoPRT::get().AddInitialShape(initShapes);

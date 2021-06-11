@@ -6,7 +6,7 @@
 #include <numeric>
 
 
-InitialShape::InitialShape(const ON_Mesh& mesh, const int seed = 0): mSeed(seed) {
+InitialShape::InitialShape(const ON_Mesh& mesh) {
 	ON_wString shapeIdxStr;
 	if (!mesh.GetUserString(INIT_SHAPE_ID_KEY.c_str(), shapeIdxStr))
 	{

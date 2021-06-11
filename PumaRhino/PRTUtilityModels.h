@@ -17,7 +17,7 @@ using MeshBundle = std::vector<ON_Mesh>;
 class InitialShape {
 public:
 	InitialShape() = default;
-	InitialShape(const ON_Mesh& mesh, const int seed);
+	InitialShape(const ON_Mesh& mesh);
 	~InitialShape() {}
 
 	const int getID() const {
@@ -48,14 +48,9 @@ public:
 		return mFaceCounts.size();
 	}
 
-	const int getSeed() const {
-		return mSeed;
-	}
-
 protected:
 
 	int mID;
-	int mSeed;
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
 	std::vector<uint32_t> mFaceCounts;
