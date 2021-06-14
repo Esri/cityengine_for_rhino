@@ -80,7 +80,6 @@ public:
 private:
 	ON_wString m_plugin_version;
 
-	// TODO: Add additional class information here
 };
 
 // Return a reference to the one and only CRhinoPRTPlugIn object
