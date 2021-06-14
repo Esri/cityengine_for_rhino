@@ -10,7 +10,7 @@ namespace PumaGrasshopper
         {
             get
             {
-                return "Puma";
+                return "Puma Component Library " + PRTWrapper.GetVersion();
             }
         }
         public override Bitmap Icon
@@ -26,8 +26,7 @@ namespace PumaGrasshopper
             get
             {
                 //Return a short string describing the purpose of this GHA library.
-                return "Version: " + PRTWrapper.GetVersion() + ". " +
-                       "Provide access to the CityEngine PRT engine in Grasshopper.";
+                return "Puma provides a collection of components to run CityEngine CGA rules within Grasshopper.";
             }
         }
         public override Guid Id
@@ -43,7 +42,7 @@ namespace PumaGrasshopper
             get
             {
                 //Return a string identifying you or your company.
-                return "Esri";
+                return "Esri Online LLC";
             }
         }
         public override string AuthorContact
@@ -51,8 +50,11 @@ namespace PumaGrasshopper
             get
             {
                 //Return a string representing your preferred contact details.
-                return "laiulfi@esri.com";
+                return "cityengine-info@esri.com";
             }
         }
+
+        public const string MainCategory = "Esri";
+        public const string PumaSubCategory = "Puma";
     }
 }
