@@ -1,19 +1,38 @@
-﻿// RhinoPRTPlugIn.cpp : defines the initialization routines for the plug-in.
+﻿/**
+ * Puma - CityEngine Plugin for Rhinoceros
+ *
+ * See https://esri.github.io/cityengine/puma for documentation.
+ *
+ * Copyright (c) 2021 Esri R&D Center Zurich
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ // RhinoPRTPlugIn.cpp : defines the initialization routines for the plug-in.
 //
 
 #ifdef _MSC_VER
 #	pragma warning(push)
-#	pragma warning (disable : 26451)
-#	pragma warning (disable : 26495)
+#	pragma warning(disable : 26451)
+#	pragma warning(disable : 26495)
 #endif
 #include "stdafx.h"
 #ifdef _MSC_VER
 #	pragma warning(pop)
 #endif
 
-#include "rhinoSdkPlugInDeclare.h"
-#include "RhinoPRTPlugIn.h"
 #include "Resource.h"
+#include "RhinoPRTPlugIn.h"
+#include "rhinoSdkPlugInDeclare.h"
 #include "version.h"
 
 // The plug-in object must be constructed before any plug-in classes derived
@@ -40,7 +59,8 @@ RHINO_PLUG_IN_VERSION(VER_PRODUCT_VERSION_STR);
 
 // Rhino plug-in description
 // Provide a description of this plug-in.
-RHINO_PLUG_IN_DESCRIPTION(L"Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.");
+RHINO_PLUG_IN_DESCRIPTION(L"Puma enables the use of CityEngine CGA rules for the generation of procedural buildings "
+                          L"within Rhino and Grasshopper.");
 
 // Rhino plug-in icon resource id
 // Provide an icon resource this plug-in.
@@ -68,14 +88,12 @@ static class CRhinoPRTPlugIn thePlugIn;
 /////////////////////////////////////////////////////////////////////////////
 // CRhinoPRTPlugIn definition
 
-CRhinoPRTPlugIn& RhinoPRTPlugIn()
-{
+CRhinoPRTPlugIn& RhinoPRTPlugIn() {
 	// Return a reference to the one and only CRhinoPRTPlugIn object
 	return thePlugIn;
 }
 
-CRhinoPRTPlugIn::CRhinoPRTPlugIn()
-{
+CRhinoPRTPlugIn::CRhinoPRTPlugIn() {
 	// Description:
 	//   CRhinoPRTPlugIn constructor. The constructor is called when the
 	//   plug-in is loaded and "thePlugIn" is constructed. Once the plug-in
@@ -90,8 +108,7 @@ CRhinoPRTPlugIn::CRhinoPRTPlugIn()
 /////////////////////////////////////////////////////////////////////////////
 // Required overrides
 
-const wchar_t* CRhinoPRTPlugIn::PlugInName() const
-{
+const wchar_t* CRhinoPRTPlugIn::PlugInName() const {
 	// Description:
 	//   Plug-in name display string.  This name is displayed by Rhino when
 	//   loading the plug-in, in the plug-in help menu, and in the Rhino
@@ -101,8 +118,7 @@ const wchar_t* CRhinoPRTPlugIn::PlugInName() const
 	return RhinoPlugInName();
 }
 
-const wchar_t* CRhinoPRTPlugIn::PlugInVersion() const
-{
+const wchar_t* CRhinoPRTPlugIn::PlugInVersion() const {
 	// Description:
 	//   Plug-in version display string. This name is displayed by Rhino
 	//   when loading the plug-in and in the Rhino interface for managing
@@ -112,8 +128,7 @@ const wchar_t* CRhinoPRTPlugIn::PlugInVersion() const
 	return m_plugin_version;
 }
 
-GUID CRhinoPRTPlugIn::PlugInID() const
-{
+GUID CRhinoPRTPlugIn::PlugInID() const {
 	// Description:
 	//   Plug-in unique identifier. The identifier is used by Rhino to
 	//   manage the plug-ins.
@@ -126,8 +141,7 @@ GUID CRhinoPRTPlugIn::PlugInID() const
 /////////////////////////////////////////////////////////////////////////////
 // Additional overrides
 
-BOOL CRhinoPRTPlugIn::OnLoadPlugIn()
-{
+BOOL CRhinoPRTPlugIn::OnLoadPlugIn() {
 	// Description:
 	//   Called after the plug-in is loaded and the constructor has been
 	//   run. This is a good place to perform any significant initialization,
@@ -141,12 +155,11 @@ BOOL CRhinoPRTPlugIn::OnLoadPlugIn()
 	//    document.  If you need to do any document initialization/synchronization then
 	//    override this function and do it here.  It is not necessary to call
 	//    CPlugIn::OnLoadPlugIn() from your derived class.
-	
+
 	return InitializeRhinoPRT();
 }
 
-void CRhinoPRTPlugIn::OnUnloadPlugIn()
-{
+void CRhinoPRTPlugIn::OnUnloadPlugIn() {
 	// Description:
 	//    Called one time when plug-in is about to be unloaded. By this time,
 	//    Rhino's mainframe window has been destroyed, and some of the SDK
