@@ -20,7 +20,7 @@ using System.Drawing;
 namespace PumaGrasshopper
 {
 
-    public class PumaGrasshopperComponent : GH_Component, IGH_VariableParameterComponent
+    public class ComponentPuma : GH_Component, IGH_VariableParameterComponent
     {
         const string COMPONENT_NAME = "Puma";
         const string COMPONENT_NICK_NAME = "Puma";
@@ -57,10 +57,10 @@ namespace PumaGrasshopper
         /// Subcategory the panel. If you use non-existing tab or panel names,
         /// new tabs/panels will automatically be created.
         /// </summary>
-        public PumaGrasshopperComponent()
+        public ComponentPuma()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Puma runs CityEngine CGA rules on input shapes and returns the generated models. (Version " + PRTWrapper.GetVersion() + ")",
-              PumaGrasshopperInfo.MainCategory, PumaGrasshopperInfo.PumaSubCategory)
+              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             // Initialize PRT engine
             bool status = PRTWrapper.InitializeRhinoPRT();

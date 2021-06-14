@@ -8,7 +8,7 @@ using Rhino.Geometry;
 
 namespace PumaGrasshopper
 {
-    public class PumaGrasshopperReports : GH_Component
+    public class ComponentReportsDisplay : GH_Component
     {
         const string COMPONENT_NAME = "PumaReportsDisplay";
         const string COMPONENT_NICK_NAME = "Puma Reports Display";
@@ -25,10 +25,10 @@ namespace PumaGrasshopper
         /// <summary>
         /// Initializes a new instance of the PumaCgaReports class.
         /// </summary>
-        public PumaGrasshopperReports()
+        public ComponentReportsDisplay()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Filters and prepares Puma CGA reports for display in the viewport. (Version " + PRTWrapper.GetVersion() + ")",
-              PumaGrasshopperInfo.MainCategory, PumaGrasshopperInfo.PumaSubCategory)
+              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
         }
 

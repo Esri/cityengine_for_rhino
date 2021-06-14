@@ -5,7 +5,7 @@ using System;
 
 namespace PumaGrasshopper
 {
-    public class PumaGrasshopperReportsOutput : GH_Component
+    public class ComponentReportsUnpacker : GH_Component
     {
         const string COMPONENT_NAME = "PumaReportsUnpacker";
         const string COMPONENT_NICK_NAME = "Puma Reports Unpacker";
@@ -18,10 +18,10 @@ namespace PumaGrasshopper
         /// <summary>
         /// Initializes a new instance of the PumaGrasshopperReportsOutput class.
         /// </summary>
-        public PumaGrasshopperReportsOutput()
+        public ComponentReportsUnpacker()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Unpacks Puma CGA reports into report names and values per input shape. (Version " + PRTWrapper.GetVersion() + ")",
-              PumaGrasshopperInfo.MainCategory, PumaGrasshopperInfo.PumaSubCategory)
+              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
         }
 

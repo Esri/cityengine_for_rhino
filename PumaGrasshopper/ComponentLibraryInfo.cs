@@ -4,7 +4,7 @@ using Grasshopper.Kernel;
 
 namespace PumaGrasshopper
 {
-    public class PumaGrasshopperInfo : GH_AssemblyInfo
+    public class ComponentLibraryInfo : GH_AssemblyInfo
     {
         public override string Name
         {
