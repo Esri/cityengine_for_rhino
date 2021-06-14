@@ -52,6 +52,8 @@ constexpr const wchar_t* ANNOT_GROUP = L"@Group";
 constexpr int ORDER_FIRST = std::numeric_limits<int>::lowest();
 constexpr int ORDER_NONE = std::numeric_limits<int>::infinity();
 
+constexpr const wchar_t* SEED_KEY = L"seed";
+
 /// Range Annotation Keys
 constexpr const wchar_t* MIN_KEY = L"min";
 constexpr const wchar_t* MAX_KEY = L"max";

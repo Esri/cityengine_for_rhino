@@ -49,9 +49,8 @@ void checkLastError(const std::string& exceptionPrefix) {
 
 namespace pcu {
 
-ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring startRl, const std::wstring shapeN,
-                                 int sd)
-    : ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(sd) {}
+ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring startRl, const std::wstring shapeN)
+    : ruleFile(rulef), startRule(startRl), shapeName(shapeN) {}
 
 // location of RhinoPRT shared library
 std::filesystem::path getDllLocation() {
@@ -145,8 +144,6 @@ AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::At
 	bld.setString(L"ruleFile", attrs.ruleFile.c_str());
 	bld.setString(L"startRule", attrs.startRule.c_str());
 	bld.setString(L"shapeName", attrs.shapeName.c_str());
-	bld.setInt(L"seed", attrs.seed);
-
 	return AttributeMapPtr{bld.createAttributeMap()};
 }
 

@@ -315,8 +315,8 @@ void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBu
 		if (convertShapeAttr->hasKey(L"startRule") &&
 		    convertShapeAttr->getType(L"startRule") == prt::AttributeMap::PT_STRING)
 			startRule = convertShapeAttr->getString(L"startRule");
-		if (convertShapeAttr->hasKey(L"seed") && convertShapeAttr->getType(L"seed") == prt::AttributeMap::PT_INT)
-			seed = convertShapeAttr->getInt(L"seed");
+		if (convertShapeAttr->hasKey(SEED_KEY) && convertShapeAttr->getType(SEED_KEY) == prt::AttributeMap::PT_INT)
+			seed = convertShapeAttr->getInt(SEED_KEY);
 		if (convertShapeAttr->hasKey(L"shapeName") &&
 		    convertShapeAttr->getType(L"shapeName") == prt::AttributeMap::PT_STRING)
 			shapeName = convertShapeAttr->getString(L"shapeName");
