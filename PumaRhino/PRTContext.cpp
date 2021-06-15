@@ -30,8 +30,6 @@ constexpr prt::LogLevel PRT_MINIMAL_LOG_LEVEL = prt::LogLevel::LOG_WARNING;
 
 const std::wstring PUMA_TEMP_DIR_NAME(L"puma");
 
-// Returns a per-session unique temp dir for RPK extraction and log file
-// Ensures separation of multiple Rhino sessions with Puma
 const std::filesystem::path& getGlobalTempDir() {
 	static const std::filesystem::path globalTempDir = std::filesystem::temp_directory_path() / PUMA_TEMP_DIR_NAME;
 	return globalTempDir;
