@@ -31,6 +31,8 @@
 class PRTContext final {
 public:
 	static std::unique_ptr<PRTContext>& get();
+	static const std::filesystem::path& getGlobalTempDir();
+	static const std::filesystem::path& getLogFilePath();
 
 	explicit PRTContext(prt::LogLevel minimalLogLevel);
 	~PRTContext();

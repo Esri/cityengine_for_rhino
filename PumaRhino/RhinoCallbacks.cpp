@@ -18,6 +18,11 @@
  */
 
 #include "RhinoCallbacks.h"
+#include "PRTContext.h"
+
+#include <fstream>
+#include <ostream>
+#include <wchar.h>
 
 namespace {
 
@@ -156,4 +161,34 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUt
 
 	if constexpr (DBG)
 		LOG_DBG << "End of RhinoCallback::addReport";
+}
+
+void RhinoCallbacks::addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
+                              size_t& resultSize) {
+	static const std::filesystem::path assetsParentPath = []() {
+		const std::filesystem::path p = PRTContext::getGlobalTempDir() / "generated_assets";
+		std::filesystem::create_directories(p);
+		return p;
+	}();
+
+	if (name == nullptr || std::wcslen(name) == 0)
+		return;
+
+	const std::filesystem::path assetPath = assetsParentPath / name;
+
+	std::ofstream stream(assetPath, std::ofstream::binary | std::ofstream::trunc);
+	if (!stream)
+		return;
+	stream.write(reinterpret_cast<const char*>(buffer), size);
+	if (!stream)
+		return;
+	stream.close();
+
+	const std::wstring pathStr = assetPath.wstring();
+
+	if (resultSize > 0) {
+		wcsncpy_s(result, resultSize, pathStr.c_str(), resultSize);
+		result[resultSize - 1] = 0x0;
+	}
+	resultSize = pathStr.length() + 1;
 }

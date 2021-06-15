@@ -30,21 +30,21 @@ constexpr prt::LogLevel PRT_MINIMAL_LOG_LEVEL = prt::LogLevel::LOG_WARNING;
 
 const std::wstring PUMA_TEMP_DIR_NAME(L"puma");
 
-const std::filesystem::path& getGlobalTempDir() {
-	static const std::filesystem::path globalTempDir = std::filesystem::temp_directory_path() / PUMA_TEMP_DIR_NAME;
-	return globalTempDir;
-}
-
-const std::filesystem::path& getLogFilePath() {
-	static const std::filesystem::path logFilePath = getGlobalTempDir() / "puma.log";
-	return logFilePath;
-}
-
 } // namespace
 
 std::unique_ptr<PRTContext>& PRTContext::get() {
 	static std::unique_ptr<PRTContext> prtCtx = std::make_unique<PRTContext>(PRT_MINIMAL_LOG_LEVEL);
 	return prtCtx;
+}
+
+const std::filesystem::path& PRTContext::getGlobalTempDir() {
+	static const std::filesystem::path globalTempDir = std::filesystem::temp_directory_path() / PUMA_TEMP_DIR_NAME;
+	return globalTempDir;
+}
+
+const std::filesystem::path& PRTContext::getLogFilePath() {
+	static const std::filesystem::path logFilePath = getGlobalTempDir() / "puma.log";
+	return logFilePath;
 }
 
 PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
