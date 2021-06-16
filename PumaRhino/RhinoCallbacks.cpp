@@ -171,24 +171,32 @@ void RhinoCallbacks::addAsset(const wchar_t* name, const uint8_t* buffer, size_t
 		return p;
 	}();
 
-	if (name == nullptr || std::wcslen(name) == 0)
+	if (name == nullptr || std::wcslen(name) == 0) {
+		resultSize = 0;
 		return;
+	}
 
 	const std::filesystem::path assetPath = assetsParentPath / name;
-
-	std::ofstream stream(assetPath, std::ofstream::binary | std::ofstream::trunc);
-	if (!stream)
-		return;
-	stream.write(reinterpret_cast<const char*>(buffer), size);
-	if (!stream)
-		return;
-	stream.close();
-
 	const std::wstring pathStr = assetPath.wstring();
 
-	if (resultSize > 0) {
-		wcsncpy_s(result, resultSize, pathStr.c_str(), resultSize);
-		result[resultSize - 1] = 0x0;
+	if (resultSize <= pathStr.size()) {  // also check for null-terminator
+		resultSize = pathStr.size() + 1; // ask for space for null-terminator
+		return;
 	}
+
+	std::ofstream stream(assetPath, std::ofstream::binary | std::ofstream::trunc);
+	if (!stream) {
+		resultSize = 0;
+		return;
+	}
+	stream.write(reinterpret_cast<const char*>(buffer), size);
+	if (!stream) {
+		resultSize = 0;
+		return;
+	}
+	stream.close();
+
+	wcsncpy_s(result, resultSize, pathStr.c_str(), resultSize);
+	result[resultSize - 1] = 0x0;
 	resultSize = pathStr.length() + 1;
 }
