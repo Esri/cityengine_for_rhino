@@ -17,31 +17,30 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using PumaGrasshopper.Properties;
-using Rhino.Geometry;
+using System;
 
 namespace PumaGrasshopper
 {
-    public class PumaGrasshopperReportsOutput : GH_Component
+    public class ComponentReportsUnpacker : GH_Component
     {
-        const string REPORT_INPUT = "Reports";
-        const string REPORT_SHAPE_ID = "Shape ID";
-        const string REPORT_KEY = "Report Name";
-        const string REPORT_VALUE = "Report Value";
+        const string COMPONENT_NAME = "PumaReportsUnpacker";
+        const string COMPONENT_NICK_NAME = "Puma Reports Unpacker";
+        
+        const string REPORT_INPUT_NAME = "Reports";
+        const string REPORT_SHAPE_ID_NAME = "Shape IDs";
+        const string REPORT_KEY_NAME = "Report Names";
+        const string REPORT_VALUE_NAME = "Report Values";
 
         /// <summary>
         /// Initializes a new instance of the PumaGrasshopperReportsOutput class.
         /// </summary>
-        public PumaGrasshopperReportsOutput()
-          : base("PumaCgaReportsOutput", "Reports Outputs",
-              "Version: " + PRTWrapper.GetVersion() + ". " +
-              "Unpacks the report attributes objects",
-              "Special", "Esri")
+        public ComponentReportsUnpacker()
+          : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
+              "Unpacks Puma CGA reports into report names and values per input shape. (Version " + PRTWrapper.GetVersion() + ")",
+              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
         }
 
@@ -50,7 +49,9 @@ namespace PumaGrasshopper
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter(REPORT_INPUT, REPORT_INPUT, "The report attributes to process.", GH_ParamAccess.item);
+            pManager.AddGenericParameter(REPORT_INPUT_NAME, REPORT_INPUT_NAME,
+                "The Puma CGA reports to unpack.",
+                GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -58,9 +59,15 @@ namespace PumaGrasshopper
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter(REPORT_KEY, REPORT_KEY, "The report name", GH_ParamAccess.item);
-            pManager.AddNumberParameter(REPORT_SHAPE_ID, REPORT_SHAPE_ID, "The initial shape id of this report.", GH_ParamAccess.item);
-            pManager.AddGenericParameter(REPORT_VALUE, REPORT_VALUE, "The value associated with this report.", GH_ParamAccess.item);
+            pManager.AddNumberParameter(REPORT_SHAPE_ID_NAME, REPORT_SHAPE_ID_NAME,
+                "The input shape IDs.",
+                GH_ParamAccess.item);
+            pManager.AddTextParameter(REPORT_KEY_NAME, REPORT_KEY_NAME,
+                "The report names per input shape.",
+                GH_ParamAccess.item);
+            pManager.AddGenericParameter(REPORT_VALUE_NAME, REPORT_VALUE_NAME,
+                "The report values per input shape.",
+                GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -71,7 +78,7 @@ namespace PumaGrasshopper
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             IGH_Goo input = null;
-            if(!DA.GetData(REPORT_INPUT, ref input))
+            if(!DA.GetData(REPORT_INPUT_NAME, ref input))
             {
                 return;
             }
@@ -80,23 +87,23 @@ namespace PumaGrasshopper
             {
                 ReportAttribute report = (ReportAttribute)input;
 
-                DA.SetData(REPORT_KEY, report.getKey());
-                DA.SetData(REPORT_SHAPE_ID, report.InitialShapeIndex);
+                DA.SetData(REPORT_KEY_NAME, report.getKey());
+                DA.SetData(REPORT_SHAPE_ID_NAME, report.InitialShapeIndex);
 
                 switch (report.getType())
                 {
                     case ReportTypes.PT_FLOAT:
-                        DA.SetData(REPORT_VALUE, report.DoubleValue);
+                        DA.SetData(REPORT_VALUE_NAME, report.DoubleValue);
                         break;
                     case ReportTypes.PT_BOOL:
-                        DA.SetData(REPORT_VALUE, report.BoolValue);
+                        DA.SetData(REPORT_VALUE_NAME, report.BoolValue);
                         break;
                     case ReportTypes.PT_STRING:
-                        DA.SetData(REPORT_VALUE, report.StringValue);
+                        DA.SetData(REPORT_VALUE_NAME, report.StringValue);
                         break;
                     default:
                         // Unsupported report type.
-                        DA.SetData(REPORT_VALUE, "UNSUPPORTED REPORT TYPE");
+                        DA.SetData(REPORT_VALUE_NAME, "UNSUPPORTED REPORT TYPE");
                         break;
                 }
             }

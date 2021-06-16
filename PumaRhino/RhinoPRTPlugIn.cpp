@@ -68,19 +68,14 @@ RHINO_PLUG_IN_DESCRIPTION(L"Puma enables the use of CityEngine CGA rules for the
 RHINO_PLUG_IN_ICON_RESOURCE_ID(IDI_ICON);
 
 // Rhino plug-in developer declarations
-// TODO: fill in the following developer declarations with
-// your company information. Note, all of these declarations
-// must be present or your plug-in will not load.
-//
-// When completed, delete the following #error directive.
-RHINO_PLUG_IN_DEVELOPER_ORGANIZATION(L"Esri");
-RHINO_PLUG_IN_DEVELOPER_ADDRESS(L"Förrlibuckstrasse 110\r\n 8005 Zürich");
-RHINO_PLUG_IN_DEVELOPER_COUNTRY(L"Switzerland");
-RHINO_PLUG_IN_DEVELOPER_PHONE(L"123.456.7890");
-RHINO_PLUG_IN_DEVELOPER_FAX(L"123.456.7891");
-RHINO_PLUG_IN_DEVELOPER_EMAIL(L"laiulfi@esri.com");
-RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"http://www.esri.com");
-RHINO_PLUG_IN_UPDATE_URL(L"http://www.mycompany.com/support");
+RHINO_PLUG_IN_DEVELOPER_ORGANIZATION(L"Esri Online LLC");
+RHINO_PLUG_IN_DEVELOPER_ADDRESS(L"380 New York St, Redlands, CA 92373");
+RHINO_PLUG_IN_DEVELOPER_COUNTRY(L"United States");
+RHINO_PLUG_IN_DEVELOPER_PHONE(L"+1 909 793 2853");
+RHINO_PLUG_IN_DEVELOPER_FAX(L"");
+RHINO_PLUG_IN_DEVELOPER_EMAIL(L"cityengine-info@esri.com");
+RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"https://esri.github.io/cityengine/puma");
+RHINO_PLUG_IN_UPDATE_URL(L"https://github.com/esri/puma/releases");
 
 // The one and only CRhinoPRTPlugIn object
 static class CRhinoPRTPlugIn thePlugIn;
@@ -101,7 +96,6 @@ CRhinoPRTPlugIn::CRhinoPRTPlugIn() {
 	//   constructor should be simple and solid. Do anything that might fail in
 	//   CRhinoPRTPlugIn::OnLoadPlugIn().
 
-	// TODO: Add construction code here
 	m_plugin_version = RhinoPlugInVersion();
 }
 
@@ -114,7 +108,6 @@ const wchar_t* CRhinoPRTPlugIn::PlugInName() const {
 	//   loading the plug-in, in the plug-in help menu, and in the Rhino
 	//   interface for managing plug-ins.
 
-	// TODO: Return a short, friendly name for the plug-in.
 	return RhinoPlugInName();
 }
 
@@ -124,7 +117,6 @@ const wchar_t* CRhinoPRTPlugIn::PlugInVersion() const {
 	//   when loading the plug-in and in the Rhino interface for managing
 	//   plug-ins.
 
-	// TODO: Return the version number of the plug-in.
 	return m_plugin_version;
 }
 
@@ -133,8 +125,6 @@ GUID CRhinoPRTPlugIn::PlugInID() const {
 	//   Plug-in unique identifier. The identifier is used by Rhino to
 	//   manage the plug-ins.
 
-	// TODO: Return a unique identifier for the plug-in.
-	// {1B8E4CAD-7A8F-4F05-B0A2-3BE0EC98C800}
 	return ON_UuidFromString(RhinoPlugInId());
 }
 

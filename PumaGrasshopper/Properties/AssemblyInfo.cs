@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Puma")]
 [assembly: AssemblyDescription("Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Esri")]
+[assembly: AssemblyCompany("Esri Online LLC")]
 [assembly: AssemblyProduct("Puma")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.1.*")]
-[assembly: AssemblyFileVersion("0.1.0")]
+[assembly: AssemblyVersion("0.9.0")]
+[assembly: AssemblyFileVersion("0.9.0")]
