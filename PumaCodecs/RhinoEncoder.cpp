@@ -86,10 +86,12 @@ std::pair<std::vector<const T*>, std::vector<size_t>> toPtrVec(const std::vector
 
 template <typename C, typename FUNC, typename OBJ, typename... ARGS>
 std::basic_string<C> callAPI(FUNC f, OBJ& obj, ARGS&&... args) {
-	std::vector<C> buffer(4096, 0x0);
+	std::vector<C> buffer(1024, 0x0);
 	size_t size = buffer.size();
 	std::invoke(f, obj, args..., buffer.data(), size);
-	if (size > buffer.size()) {
+	if (size == 0)
+		return {}; // error case
+	else if (size > buffer.size()) {
 		buffer.resize(size);
 		std::invoke(f, obj, args..., buffer.data(), size);
 	}
