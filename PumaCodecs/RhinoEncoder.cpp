@@ -1,10 +1,29 @@
+/**
+ * Puma - CityEngine Plugin for Rhinoceros
+ *
+ * See https://esri.github.io/cityengine/puma for documentation.
+ *
+ * Copyright (c) 2021 Esri R&D Center Zurich
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "RhinoEncoder.h"
 
 #include "Logger.h"
 
 #include "prtx/EncoderInfoBuilder.h"
-#include "prtx/GenerateContext.h"
 #include "prtx/Exception.h"
+#include "prtx/GenerateContext.h"
 #include "prtx/Geometry.h"
 #include "prtx/Mesh.h"
 #include "prtx/ReportsCollector.h"
@@ -12,10 +31,10 @@
 #include "prtx/ShapeIterator.h"
 #include "prtx/prtx.h"
 
-#include <iostream>
-#include <fstream>
-#include <numeric>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <numeric>
 #include <set>
 
 #include <assert.h>
@@ -24,158 +43,155 @@
 
 namespace {
 
-	const wchar_t* EO_BASE_NAME = L"baseName";
-	const wchar_t* EO_ERROR_FALLBACK = L"errorFallback";
-	const std::wstring ENCFILE_EXT = L".txt";
-	const wchar_t* EO_EMIT_REPORTS = L"emitReport";
-	const wchar_t* EO_EMIT_GEOMETRY = L"emitGeometry";
-	const wchar_t* EO_EMIT_MATERIALS = L"emitMaterials";
+const wchar_t* EO_BASE_NAME = L"baseName";
+const wchar_t* EO_ERROR_FALLBACK = L"errorFallback";
+const std::wstring ENCFILE_EXT = L".txt";
+const wchar_t* EO_EMIT_REPORTS = L"emitReport";
+const wchar_t* EO_EMIT_GEOMETRY = L"emitGeometry";
+const wchar_t* EO_EMIT_MATERIALS = L"emitMaterials";
 
-	const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
-		prtx::EncodePreparator::PreparationFlags()
-		.instancing(false)
-		.triangulate(true)
-		.mergeVertices(false)
-		.cleanupUVs(true)
-		.cleanupVertexNormals(true)
-		.processVertexNormals(prtx::VertexNormalProcessor::SET_MISSING_TO_FACE_NORMALS)
-		.indexSharing(prtx::EncodePreparator::PreparationFlags::INDICES_SAME_FOR_ALL_VERTEX_ATTRIBUTES)
-		.mergeByMaterial(true);
+const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
+        prtx::EncodePreparator::PreparationFlags()
+                .instancing(false)
+                .triangulate(true)
+                .mergeVertices(false)
+                .cleanupUVs(true)
+                .cleanupVertexNormals(true)
+                .processVertexNormals(prtx::VertexNormalProcessor::SET_MISSING_TO_FACE_NORMALS)
+                .indexSharing(prtx::EncodePreparator::PreparationFlags::INDICES_SAME_FOR_ALL_VERTEX_ATTRIBUTES)
+                .mergeByMaterial(true);
 
-	std::vector<const wchar_t*> toPtrVec(const prtx::WStringVector& wsv) {
-		std::vector<const wchar_t*> pw(wsv.size());
-		for (size_t i = 0; i < wsv.size(); i++)
-			pw[i] = wsv[i].c_str();
-		return pw;
+std::vector<const wchar_t*> toPtrVec(const prtx::WStringVector& wsv) {
+	std::vector<const wchar_t*> pw(wsv.size());
+	for (size_t i = 0; i < wsv.size(); i++)
+		pw[i] = wsv[i].c_str();
+	return pw;
+}
+
+template <typename T>
+std::pair<std::vector<const T*>, std::vector<size_t>> toPtrVec(const std::vector<std::vector<T>>& v) {
+	std::vector<const T*> pv(v.size());
+	std::vector<size_t> ps(v.size());
+	for (size_t i = 0; i < v.size(); i++) {
+		pv[i] = v[i].data();
+		ps[i] = v[i].size();
 	}
+	return std::make_pair(pv, ps);
+}
 
-	template<typename T>
-	std::pair<std::vector<const T*>, std::vector<size_t>> toPtrVec(const std::vector<std::vector<T>>& v) {
-		std::vector<const T*> pv(v.size());
-		std::vector<size_t> ps(v.size());
-		for (size_t i = 0; i < v.size(); i++) {
-			pv[i] = v[i].data();
-			ps[i] = v[i].size();
-		}
-		return std::make_pair(pv, ps);
-	}
-
-	std::wstring getTexturePath(const prtx::TexturePtr& t) {
+std::wstring getTexturePath(const prtx::TexturePtr& t) {
 #if ENC_DBG == 1
-		LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
+	LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
 #endif
-		if (t && t->isValid())
-			return t->getURI()->getPath();
-		else
-			return {};
-	}
+	if (t && t->isValid())
+		return t->getURI()->getPath();
+	else
+		return {};
+}
 
-	// we blacklist all CGA-style material attribute keys, see prtx/Material.h
-	const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
-		L"ambient.b",
-		L"ambient.g",
-		L"ambient.r",
-		L"bumpmap.rw",
-		L"bumpmap.su",
-		L"bumpmap.sv",
-		L"bumpmap.tu",
-		L"bumpmap.tv",
-		L"color.a",
-		L"color.b",
-		L"color.g",
-		L"color.r",
-		L"color.rgb",
-		L"colormap.rw",
-		L"colormap.su",
-		L"colormap.sv",
-		L"colormap.tu",
-		L"colormap.tv",
-		L"dirtmap.rw",
-		L"dirtmap.su",
-		L"dirtmap.sv",
-		L"dirtmap.tu",
-		L"dirtmap.tv",
-		L"normalmap.rw",
-		L"normalmap.su",
-		L"normalmap.sv",
-		L"normalmap.tu",
-		L"normalmap.tv",
-		L"opacitymap.rw",
-		L"opacitymap.su",
-		L"opacitymap.sv",
-		L"opacitymap.tu",
-		L"opacitymap.tv",
-		L"specular.b",
-		L"specular.g",
-		L"specular.r",
-		L"specularmap.rw",
-		L"specularmap.su",
-		L"specularmap.sv",
-		L"specularmap.tu",
-		L"specularmap.tv",
-		L"bumpmap",
-		L"colormap",
-		L"dirtmap",
-		L"normalmap",
-		L"opacitymap",
-		L"specularmap"
+// we blacklist all CGA-style material attribute keys, see prtx/Material.h
+const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
+        L"ambient.b",
+        L"ambient.g",
+        L"ambient.r",
+        L"bumpmap.rw",
+        L"bumpmap.su",
+        L"bumpmap.sv",
+        L"bumpmap.tu",
+        L"bumpmap.tv",
+        L"color.a",
+        L"color.b",
+        L"color.g",
+        L"color.r",
+        L"color.rgb",
+        L"colormap.rw",
+        L"colormap.su",
+        L"colormap.sv",
+        L"colormap.tu",
+        L"colormap.tv",
+        L"dirtmap.rw",
+        L"dirtmap.su",
+        L"dirtmap.sv",
+        L"dirtmap.tu",
+        L"dirtmap.tv",
+        L"normalmap.rw",
+        L"normalmap.su",
+        L"normalmap.sv",
+        L"normalmap.tu",
+        L"normalmap.tv",
+        L"opacitymap.rw",
+        L"opacitymap.su",
+        L"opacitymap.sv",
+        L"opacitymap.tu",
+        L"opacitymap.tv",
+        L"specular.b",
+        L"specular.g",
+        L"specular.r",
+        L"specularmap.rw",
+        L"specularmap.su",
+        L"specularmap.sv",
+        L"specularmap.tu",
+        L"specularmap.tv",
+        L"bumpmap",
+        L"colormap",
+        L"dirtmap",
+        L"normalmap",
+        L"opacitymap",
+        L"specularmap"
 
-	//#if PRT_VERSION_MAJOR > 1
-		// also blacklist CGA-style PBR attrs from CE 2019.0, PRT 2.x
-		//,
-		L"opacitymap.mode",
-		L"emissive.b",
-		L"emissive.g",
-		L"emissive.r",
-		L"emissivemap.rw",
-		L"emissivemap.su",
-		L"emissivemap.sv",
-		L"emissivemap.tu",
-		L"emissivemap.tv",
-		L"metallicmap.rw",
-		L"metallicmap.su",
-		L"metallicmap.sv",
-		L"metallicmap.tu",
-		L"metallicmap.tv",
-		L"occlusionmap.rw",
-		L"occlusionmap.su",
-		L"occlusionmap.sv",
-		L"occlusionmap.tu",
-		L"occlusionmap.tv",
-		L"roughnessmap.rw",
-		L"roughnessmap.su",
-		L"roughnessmap.sv",
-		L"roughnessmap.tu",
-		L"roughnessmap.tv",
-		L"emissivemap",
-		L"metallicmap",
-		L"occlusionmap",
-		L"roughnessmap"
-	//#endif
-	};
+        //#if PRT_VERSION_MAJOR > 1
+        // also blacklist CGA-style PBR attrs from CE 2019.0, PRT 2.x
+        //,
+        L"opacitymap.mode",
+        L"emissive.b",
+        L"emissive.g",
+        L"emissive.r",
+        L"emissivemap.rw",
+        L"emissivemap.su",
+        L"emissivemap.sv",
+        L"emissivemap.tu",
+        L"emissivemap.tv",
+        L"metallicmap.rw",
+        L"metallicmap.su",
+        L"metallicmap.sv",
+        L"metallicmap.tu",
+        L"metallicmap.tv",
+        L"occlusionmap.rw",
+        L"occlusionmap.su",
+        L"occlusionmap.sv",
+        L"occlusionmap.tu",
+        L"occlusionmap.tv",
+        L"roughnessmap.rw",
+        L"roughnessmap.su",
+        L"roughnessmap.sv",
+        L"roughnessmap.tu",
+        L"roughnessmap.tv",
+        L"emissivemap",
+        L"metallicmap",
+        L"occlusionmap",
+        L"roughnessmap"
+        //#endif
+};
 
-	void convertMaterialToAttributeMap(
-				prtx::PRTUtils::AttributeMapBuilderPtr amb,
-				const prtx::Material& prtxAttr, 
-				const prtx::WStringVector& keys)
-	{
+void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, const prtx::Material& prtxAttr,
+                                   const prtx::WStringVector& keys) {
 #if ENC_DBG == 1
-		LOG_DBG << L"[RHINOENCODER] Converting material " << prtxAttr.name();
+	LOG_DBG << L"[RHINOENCODER] Converting material " << prtxAttr.name();
 #endif
 
-		for (const auto& key : keys) {
-			if (MATERIAL_ATTRIBUTE_BLACKLIST.count(key) > 0)
-				continue;
+	for (const auto& key : keys) {
+		if (MATERIAL_ATTRIBUTE_BLACKLIST.count(key) > 0)
+			continue;
 
 #if ENC_DBG == 1
-			LOG_DBG << L"   key: " << key;
+		LOG_DBG << L"   key: " << key;
 #endif
 
-			switch (prtxAttr.getType(key)) {
+		switch (prtxAttr.getType(key)) {
 			case prt::Attributable::PT_BOOL:
 				amb->setBool(key.c_str(), prtxAttr.getBool(key) == prtx::PRTX_TRUE);
 				break;
-			case prt::Attributable::PT_FLOAT: 
+			case prt::Attributable::PT_FLOAT:
 				amb->setFloat(key.c_str(), prtxAttr.getFloat(key));
 				break;
 			case prt::Attributable::PT_INT:
@@ -215,8 +231,7 @@ namespace {
 
 				const auto& tex = prtxAttr.getTexture(key);
 				const std::wstring texPath = getTexturePath(tex);
-				if (texPath.length() > 0)
-				{
+				if (texPath.length() > 0) {
 #if ENC_DBG == 1
 					LOG_DBG << "[RHINOENCODER] Using getTexture with key: " << key << " : " << texPath;
 #endif
@@ -242,7 +257,7 @@ namespace {
 					std::vector<const wchar_t*> pTexPaths = toPtrVec(texPaths);
 					amb->setStringArray(key.c_str(), pTexPaths.data(), pTexPaths.size());
 				}
-				
+
 				break;
 			}
 			default:
@@ -250,67 +265,66 @@ namespace {
 				LOG_DBG << L"[RHINOENCODER] Ignored attribute " << key;
 #endif
 				continue;
-			}
 		}
 	}
+}
 
-	const prtx::PRTUtils::AttributeMapPtr convertReportToAttributeMap(const prtx::ReportsPtr& r)
-	{
-		prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
+const prtx::PRTUtils::AttributeMapPtr convertReportToAttributeMap(const prtx::ReportsPtr& r) {
+	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
-		for (const auto& b : r->mBools)
-			amb->setBool(b.first->c_str(), b.second);
-		for (const auto& f : r->mFloats)
-			amb->setFloat(f.first->c_str(), f.second);
-		for (const auto& s : r->mStrings)
-			amb->setString(s.first->c_str(), s.second->c_str());
+	for (const auto& b : r->mBools)
+		amb->setBool(b.first->c_str(), b.second);
+	for (const auto& f : r->mFloats)
+		amb->setFloat(f.first->c_str(), f.second);
+	for (const auto& s : r->mStrings)
+		amb->setString(s.first->c_str(), s.second->c_str());
 
-		return prtx::PRTUtils::AttributeMapPtr{ amb->createAttributeMap() };
-	}
+	return prtx::PRTUtils::AttributeMapPtr{amb->createAttributeMap()};
+}
 
-	struct TextureUVMapping {
-		std::wstring key;
-		uint8_t      index;
-		int8_t       uvSet;
+struct TextureUVMapping {
+	std::wstring key;
+	uint8_t index;
+	int8_t uvSet;
+};
+
+const std::vector<TextureUVMapping> TEXTURE_UV_MAPPINGS = []() -> std::vector<TextureUVMapping> {
+	return {
+	        // shader key   | idx | uv set  | CGA key
+	        {L"diffuseMap", 0, 0},  // colormap
+	        {L"bumpMap", 0, 1},     // bumpmap
+	        {L"diffuseMap", 1, 2},  // dirtmap
+	        {L"specularMap", 0, 3}, // specularmap
+	        {L"opacityMap", 0, 4},  // opacitymap
+	        {L"normalMap", 0, 5}    // normalmap
+	        /*
+	    #if PRT_VERSION_MAJOR > 1
+	            ,
+	            { L"emissiveMap",  0,    6 },  // emissivemap
+	            { L"occlusionMap", 0,    7 },  // occlusionmap
+	            { L"roughnessMap", 0,    8 },  // roughnessmap
+	            { L"metallicMap",  0,    9 }   // metallicmap
+	    #endif*/
+
 	};
+}();
 
-	const std::vector<TextureUVMapping> TEXTURE_UV_MAPPINGS = []() -> std::vector<TextureUVMapping> {
-		return {
-			// shader key   | idx | uv set  | CGA key
-			{ L"diffuseMap",   0,    0 },  // colormap
-			{ L"bumpMap",      0,    1 },  // bumpmap
-			{ L"diffuseMap",   1,    2 },  // dirtmap
-			{ L"specularMap",  0,    3 },  // specularmap
-			{ L"opacityMap",   0,    4 },  // opacitymap
-			{ L"normalMap",    0,    5 }   // normalmap
-		/*
-	#if PRT_VERSION_MAJOR > 1
-			,
-			{ L"emissiveMap",  0,    6 },  // emissivemap
-			{ L"occlusionMap", 0,    7 },  // occlusionmap
-			{ L"roughnessMap", 0,    8 },  // roughnessmap
-			{ L"metallicMap",  0,    9 }   // metallicmap
-	#endif*/
-
-		};
-	}();
-
-	// return the highest required uv set (where a valid texture is present)
-	uint32_t scanValidTextures(const prtx::MaterialPtr& mat) {
-		int8_t highestUVSet = -1;
-		for (const auto& t : TEXTURE_UV_MAPPINGS) {
-			const auto& ta = mat->getTextureArray(t.key);
-			if (ta.size() > t.index && ta[t.index]->isValid())
-				highestUVSet = std::max(highestUVSet, t.uvSet);
-		}
-		if (highestUVSet < 0)
-			return 0;
-		else
-			return highestUVSet + 1;
+// return the highest required uv set (where a valid texture is present)
+uint32_t scanValidTextures(const prtx::MaterialPtr& mat) {
+	int8_t highestUVSet = -1;
+	for (const auto& t : TEXTURE_UV_MAPPINGS) {
+		const auto& ta = mat->getTextureArray(t.key);
+		if (ta.size() > t.index && ta[t.index]->isValid())
+			highestUVSet = std::max(highestUVSet, t.uvSet);
 	}
+	if (highestUVSet < 0)
+		return 0;
+	else
+		return highestUVSet + 1;
+}
 
-	const prtx::DoubleVector EMPTY_UVS;
-	const prtx::IndexVector EMPTY_IDX;
+const prtx::DoubleVector EMPTY_UVS;
+const prtx::IndexVector EMPTY_IDX;
 } // namespace
 
 const std::wstring RhinoEncoder::ID = L"com.esri.rhinoprt.RhinoEncoder";
@@ -332,8 +346,9 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 		throw prtx::StatusException(prt::STATUS_ILLEGAL_CALLBACK_OBJECT);
 
 	// Initialization of report accumulator and strategy
-	prtx::ReportsAccumulatorPtr reportsAccumulator{ prtx::SummarizingReportsAccumulator::create() };
-	prtx::ReportingStrategyPtr reportsCollector{ prtx::AllShapesReportingStrategy::create(context, initialShapeIndex, reportsAccumulator) };
+	prtx::ReportsAccumulatorPtr reportsAccumulator{prtx::SummarizingReportsAccumulator::create()};
+	prtx::ReportingStrategyPtr reportsCollector{
+	        prtx::AllShapesReportingStrategy::create(context, initialShapeIndex, reportsAccumulator)};
 
 #if ENC_DBG == 1
 	LOG_DBG << L"Starting leaf iteration";
@@ -348,7 +363,7 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	}
 	catch (std::exception& e) {
 		LOG_ERR << e.what();
-			
+
 		mEncodePreparator->add(context.getCache(), initialShape, initialShapeIndex);
 	}
 	catch (...) {
@@ -373,11 +388,9 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 }
 
 void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
-								   const prtx::EncodePreparator::InstanceVector& instances,
-								   IRhinoCallbacks* cb) 
-{
+                                   const prtx::EncodePreparator::InstanceVector& instances, IRhinoCallbacks* cb) {
 	bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
-	
+
 	uint32_t vertexIndexBase = 0;
 	uint32_t maxNumUVSets = 0;
 	std::vector<uint32_t> uvIndexBases(maxNumUVSets, 0u);
@@ -407,7 +420,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		size_t mesh_count = meshes.size();
 
 #if ENC_DBG == 1
-		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": " << material_count << ", meshes: " << mesh_count << std::endl;
+		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": "
+		        << material_count << ", meshes: " << mesh_count << std::endl;
 #endif
 
 		vertexIndexBase = 0;
@@ -428,8 +442,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		uint32_t numFaceCounts = 0;
 		uint32_t numIndices = 0;
 
-		for (const auto& mesh : meshes)
-		{
+		for (const auto& mesh : meshes) {
 			numCoords += static_cast<uint32_t>(mesh->getVertexCoords().size());
 			numNormalCoords += static_cast<uint32_t>(mesh->getVertexNormalsCoords().size());
 			numFaceCounts += static_cast<uint32_t>(mesh->getFaceCount());
@@ -458,8 +471,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				const uint32_t vtxCnt = mesh->getFaceVertexCount(fi);
 				faceCounts.push_back(vtxCnt);
 
-				for (uint32_t vi = 0; vi < vtxCnt; vi++)
-				{
+				for (uint32_t vi = 0; vi < vtxCnt; vi++) {
 					faceIndices.push_back(vtxIdx[vi] + vertexIndexBase);
 				}
 			}
@@ -473,36 +485,36 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 				const uint32_t requiredUVSetsByMaterial = scanValidTextures(mat);
 				maxNumUVSets = std::max(maxNumUVSets, std::max(mesh->getUVSetsCount(), requiredUVSetsByMaterial));
 
-				if (mesh->getUVSetsCount() > 0 && (bool)requiredUVSetsByMaterial)
-				{ 
+				if (mesh->getUVSetsCount() > 0 && (bool)requiredUVSetsByMaterial) {
 					uvIndexBases.resize(maxNumUVSets, 0u);
 					uvs.resize(maxNumUVSets);
 					uvCounts.resize(maxNumUVSets);
 					uvIndices.resize(maxNumUVSets);
 				}
 
-				// copy first uv set data. 
+				// copy first uv set data.
 				const uint32_t numUVSets = mesh->getUVSetsCount();
 				const prtx::DoubleVector& uvs0 = (numUVSets > 0) ? mesh->getUVCoords(0) : EMPTY_UVS;
-				const prtx::IndexVector faceUVCounts0 = (numUVSets > 0) ? mesh->getFaceUVCounts(0) : prtx::IndexVector(mesh->getFaceCount(), 0);
-				
-#if ENC_DBG == 1 
+				const prtx::IndexVector faceUVCounts0 =
+				        (numUVSets > 0) ? mesh->getFaceUVCounts(0) : prtx::IndexVector(mesh->getFaceCount(), 0);
+
+#if ENC_DBG == 1
 				LOG_DBG << "-- mesh: numUVSets = " << numUVSets;
 #endif
 
-				if (numUVSets > 0)
-				{
+				if (numUVSets > 0) {
 					for (uint32_t uvSet = 0; uvSet < uvs.size(); uvSet++) {
 						// append texture coordinates
 						const prtx::DoubleVector& currUVs = (uvSet < numUVSets) ? mesh->getUVCoords(uvSet) : EMPTY_UVS;
 						const auto& src = currUVs.empty() ? uvs0 : currUVs;
 
-						//insert the curent uvs into the corresponding position in the vector of uvs
+						// insert the curent uvs into the corresponding position in the vector of uvs
 						auto& tgt = uvs[uvSet];
 						tgt.insert(tgt.end(), src.begin(), src.end());
 
 						// append uv face counts
-						const prtx::IndexVector& faceUVCounts = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVCounts(uvSet) : faceUVCounts0;
+						const prtx::IndexVector& faceUVCounts =
+						        (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVCounts(uvSet) : faceUVCounts0;
 						assert(faceUVCounts.size() == mesh->getFaceCount());
 						auto& tgtCounts = uvCounts[uvSet];
 						tgtCounts.insert(tgtCounts.end(), faceUVCounts.begin(), faceUVCounts.end());
@@ -512,19 +524,23 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 #endif
 
 						// append uv vertex indices
-						for (uint32_t faceId = 0, faceCount = static_cast<uint32_t>(faceUVCounts.size()); faceId < faceCount; ++faceId) {
-							const uint32_t* faceUVIdx0 = (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
-							const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty()) ? mesh->getFaceUVIndices(faceId, uvSet) : faceUVIdx0;
+						for (uint32_t faceId = 0, faceCount = static_cast<uint32_t>(faceUVCounts.size());
+						     faceId < faceCount; ++faceId) {
+							const uint32_t* faceUVIdx0 =
+							        (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
+							const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty())
+							                                    ? mesh->getFaceUVIndices(faceId, uvSet)
+							                                    : faceUVIdx0;
 							const uint32_t faceUVCnt = faceUVCounts[faceId];
 
 #if ENC_DBG == 1
-							LOG_DBG << "      faceId " << faceId << ": faceUVCnt = " << faceUVCnt << ", faceVtxCnt = " << mesh->getFaceVertexCount(faceId);
+							LOG_DBG << "      faceId " << faceId << ": faceUVCnt = " << faceUVCnt
+							        << ", faceVtxCnt = " << mesh->getFaceVertexCount(faceId);
 #endif
 
 							for (uint32_t vrtxId = 0; vrtxId < faceUVCnt; ++vrtxId) {
 								uvIndices[uvSet].push_back(uvIndexBases[uvSet] + faceUVIdx[vrtxId]);
 							}
-
 						}
 
 						uvIndexBases[uvSet] += static_cast<uint32_t>(src.size()) / 2u;
@@ -548,19 +564,14 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		assert(uvs.size() == puvCounts.first.size());
 		assert(uvs.size() == puvCounts.second.size());
 
-		cb->add(instance.getInitialShapeIndex(), instanceIndex, 
-			vertexCoords.data(), vertexCoords.size(),
-			normals.data(), normals.size(),
-			faceIndices.data(), faceIndices.size(), faceCounts.data(), faceCounts.size(),
+		cb->add(instance.getInitialShapeIndex(), instanceIndex, vertexCoords.data(), vertexCoords.size(),
+		        normals.data(), normals.size(), faceIndices.data(), faceIndices.size(), faceCounts.data(),
+		        faceCounts.size(),
 
-			puvs.first.data(), puvs.second.data(),
-			puvCounts.first.data(), puvCounts.second.data(),
-			puvIndices.first.data(), puvIndices.second.data(),
-			static_cast<uint32_t>(uvs.size()),
+		        puvs.first.data(), puvs.second.data(), puvCounts.first.data(), puvCounts.second.data(),
+		        puvIndices.first.data(), puvIndices.second.data(), static_cast<uint32_t>(uvs.size()),
 
-			faceRanges.data(), faceRanges.size(),
-			matAttrMap.empty() ? nullptr : matAttrMap.data(), material_count
-		);
+		        faceRanges.data(), faceRanges.size(), matAttrMap.empty() ? nullptr : matAttrMap.data(), material_count);
 
 		instanceIndex++;
 	}
@@ -571,7 +582,6 @@ void RhinoEncoder::finish(prtx::GenerateContext& context) {
 	LOG_DBG << "In finish  function...";
 #endif
 }
-
 
 RhinoEncoderFactory* RhinoEncoderFactory::createInstance() {
 	prtx::EncoderInfoBuilder encoderInfoBuilder;

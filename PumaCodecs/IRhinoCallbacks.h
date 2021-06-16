@@ -1,3 +1,22 @@
+/**
+ * Puma - CityEngine Plugin for Rhinoceros
+ *
+ * See https://esri.github.io/cityengine/puma for documentation.
+ *
+ * Copyright (c) 2021 Esri R&D Center Zurich
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #pragma once
 
 #include "prt/Callbacks.h"
@@ -7,23 +26,19 @@ class IRhinoCallbacks : public prt::Callbacks {
 public:
 	virtual ~IRhinoCallbacks() override = default;
 
-	///<summary>
-	///Adds a geometry and corresponding materials.
+	///< summary>
+	/// Adds a geometry and corresponding materials.
 	///</summary>
-	///<param name='faceRanges'>The range of the reports</param>
-	///<param name='faceRangeSize'>The number of ranges</param>
-	///<param name='reports'>An array of reports</param>
-	virtual void add(const size_t initialShapeIndex, const size_t instanceIndex,
-		const double* vertexCoords, const size_t vertexCoordsCount,
-		const double* normals, const size_t normalsCount,
-		const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
-		const size_t faceCountsCount,
-		double const* const* uvs, size_t const* uvsSizes,
-		uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
-		uint32_t const* const* uvIndices, size_t const* uvIndicesSizes,
-		uint32_t uvSets,
-		const uint32_t* faceRanges, size_t faceRangesSize,
-		const prt::AttributeMap** materials, size_t matCount) = 0;
+	///< param name='faceRanges'>The range of the reports</param>
+	///< param name='faceRangeSize'>The number of ranges</param>
+	///< param name='reports'>An array of reports</param>
+	virtual void add(const size_t initialShapeIndex, const size_t instanceIndex, const double* vertexCoords,
+	                 const size_t vertexCoordsCount, const double* normals, const size_t normalsCount,
+	                 const uint32_t* faceIndices, const size_t faceIndicesCount, const uint32_t* faceCounts,
+	                 const size_t faceCountsCount, double const* const* uvs, size_t const* uvsSizes,
+	                 uint32_t const* const* uvCounts, size_t const* uvCountsSizes, uint32_t const* const* uvIndices,
+	                 size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* faceRanges, size_t faceRangesSize,
+	                 const prt::AttributeMap** materials, size_t matCount) = 0;
 
 	virtual void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) = 0;
 };
