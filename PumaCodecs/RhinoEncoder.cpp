@@ -331,7 +331,7 @@ const std::wstring RhinoEncoder::ID = L"com.esri.rhinoprt.RhinoEncoder";
 const std::wstring RhinoEncoder::NAME = L"Rhino Geometry and Report Encoder";
 const std::wstring RhinoEncoder::DESCRIPTION = L"Encodes geometry and CGA report for Rhino.";
 
-void RhinoEncoder::init(prtx::GenerateContext& context) {
+void RhinoEncoder::init(prtx::GenerateContext&) {
 	prtx::NamePreparator::NamespacePtr nsMaterials = mNamePreparator.newNamespace();
 	prtx::NamePreparator::NamespacePtr nsMeshes = mNamePreparator.newNamespace();
 	mEncodePreparator = prtx::EncodePreparator::create(true, mNamePreparator, nsMeshes, nsMaterials);
@@ -387,8 +387,8 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	}
 }
 
-void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
-                                   const prtx::EncodePreparator::InstanceVector& instances, IRhinoCallbacks* cb) {
+void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::EncodePreparator::InstanceVector& instances,
+                                   IRhinoCallbacks* cb) {
 	bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
 
 	uint32_t vertexIndexBase = 0;
@@ -417,9 +417,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		const prtx::MaterialPtrVector& materials = instance.getMaterials();
 
 		size_t material_count = materials.size();
-		size_t mesh_count = meshes.size();
 
 #if ENC_DBG == 1
+		size_t mesh_count = meshes.size();
 		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": "
 		        << material_count << ", meshes: " << mesh_count << std::endl;
 #endif
@@ -524,8 +524,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 #endif
 
 						// append uv vertex indices
-						for (uint32_t faceId = 0, faceCount = static_cast<uint32_t>(faceUVCounts.size());
-						     faceId < faceCount; ++faceId) {
+						for (uint32_t faceId = 0; faceId < static_cast<uint32_t>(faceUVCounts.size()); ++faceId) {
 							const uint32_t* faceUVIdx0 =
 							        (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
 							const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty())
@@ -577,7 +576,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 	}
 }
 
-void RhinoEncoder::finish(prtx::GenerateContext& context) {
+void RhinoEncoder::finish(prtx::GenerateContext&) {
 #if ENC_DBG == 1
 	LOG_DBG << "In finish  function...";
 #endif
