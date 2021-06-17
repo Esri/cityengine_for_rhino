@@ -32,7 +32,7 @@
 class ModelGenerator {
 public:
 	void generateModel(const std::vector<InitialShape>& initial_geom,
-	                   std::vector<pcu::ShapeAttributes>& shapeAttributes, const std::wstring& geometryEncoderName,
+	                   std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	                   const pcu::EncoderOptions& geometryEncoderOptions, pcu::AttributeMapBuilderVector& aBuilders,
 	                   std::vector<GeneratedModel>& generated_models);
 
@@ -86,7 +86,7 @@ private:
 	                              std::vector<pcu::InitialShapePtr>& initShapesPtrs,
 	                              std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
 
-	void initializeEncoderData(const std::wstring& encName, const pcu::EncoderOptions& encOpt);
+	void initializeEncoderData(const pcu::EncoderOptions& encOpt);
 
 	void fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom);
 

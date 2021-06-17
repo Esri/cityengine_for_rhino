@@ -26,6 +26,11 @@
 #include <filesystem>
 
 namespace {
+
+constexpr const wchar_t* ENCODER_ID_RHINO     = L"com.esri.rhinoprt.RhinoEncoder";
+constexpr const wchar_t* ENCODER_ID_CGA_ERROR = L"com.esri.prt.core.CGAErrorEncoder";
+constexpr const wchar_t* ENCODER_ID_CGA_PRINT = L"com.esri.prt.core.CGAPrintEncoder";
+
 constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
 constexpr const wchar_t* ENCODER_ID_CGA_EVALATTR = L"com.esri.prt.core.AttributeEvalEncoder";
 
@@ -178,7 +183,6 @@ void ModelGenerator::fillInitialShapeBuilder(const std::vector<InitialShape>& in
 
 void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
                                    std::vector<pcu::ShapeAttributes>& shapeAttributes,
-                                   const std::wstring& geometryEncoderName,
                                    const pcu::EncoderOptions& geometryEncoderOptions,
                                    pcu::AttributeMapBuilderVector& aBuilders,
                                    std::vector<GeneratedModel>& generated_models) {
@@ -219,8 +223,7 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 		if (!mEncoderBuilder)
 			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());
 
-		if (!geometryEncoderName.empty())
-			initializeEncoderData(geometryEncoderName, geometryEncoderOptions);
+		initializeEncoderData(geometryEncoderOptions);
 
 		std::vector<const wchar_t*> encoders;
 		encoders.reserve(3);
@@ -282,13 +285,13 @@ void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aB
 	}
 }
 
-void ModelGenerator::initializeEncoderData(const std::wstring& encName, const pcu::EncoderOptions& encOpt) {
+void ModelGenerator::initializeEncoderData(const pcu::EncoderOptions& encOpt) {
 	mEncodersNames.clear();
 	mEncodersOptionsPtr.clear();
 
-	mEncodersNames.push_back(encName);
+	mEncodersNames.push_back(ENCODER_ID_RHINO);
 	const pcu::AttributeMapPtr encOptions{pcu::createAttributeMapForEncoder(encOpt, *mEncoderBuilder)};
-	mEncodersOptionsPtr.push_back(createValidatedOptions(encName.c_str(), encOptions));
+	mEncodersOptionsPtr.push_back(createValidatedOptions(ENCODER_ID_RHINO, encOptions));
 }
 
 void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,

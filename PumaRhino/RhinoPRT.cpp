@@ -129,7 +129,7 @@ void RhinoPRTAPI::ClearInitialShapes() {
 
 bool RhinoPRTAPI::GenerateGeometry() {
 	mGeneratedModels.clear();
-	mModelGenerator->generateModel(mShapes, mAttributes, ENCODER_ID_RHINO, options, mAttrBuilders, mGeneratedModels);
+	mModelGenerator->generateModel(mShapes, mAttributes, options, mAttrBuilders, mGeneratedModels);
 	return mGeneratedModels.size() > 0;
 }
 
