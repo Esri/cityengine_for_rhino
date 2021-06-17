@@ -98,12 +98,12 @@ std::basic_string<C> callAPI(FUNC f, OBJ& obj, ARGS&&... args) {
 	return {buffer.data()};
 }
 
-std::wstring getTexturePath(const prtx::TexturePtr& t, IRhinoCallbacks* cb) {
+std::wstring getTexturePath(const prtx::TexturePtr& texture, IRhinoCallbacks* callbacks) {
 #if ENC_DBG == 1
 	LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
 #endif
-	if (t && t->isValid()) {
-		const prtx::URIPtr& uri = t->getURI();
+	if (texture && texture->isValid()) {
+		const prtx::URIPtr& uri = texture->getURI();
 		if (uri->isFilePath()) {
 			return uri->getPath(); // textures from the local file system can be directly passed to rhino
 		}
@@ -114,12 +114,12 @@ std::wstring getTexturePath(const prtx::TexturePtr& t, IRhinoCallbacks* cb) {
 				prtx::AsciiFileNamePreparator namePrep;
 				const prtx::NamePreparator::NamespacePtr& namePrepNamespace = namePrep.newNamespace();
 				const std::wstring validatedFilename =
-				        TextureEncoder::encode(t, moc.get(), namePrep, namePrepNamespace, {});
+				        TextureEncoder::encode(texture, moc.get(), namePrep, namePrepNamespace, {});
 
 				if (moc->getNumBlocks() == 1) {
 					size_t bufferSize = 0;
 					const uint8_t* buffer = moc->getBlock(0, &bufferSize);
-					const std::wstring assetPath = callAPI<wchar_t>(&IRhinoCallbacks::addAsset, *cb,
+					const std::wstring assetPath = callAPI<wchar_t>(&IRhinoCallbacks::addAsset, *callbacks,
 					                                                validatedFilename.c_str(), buffer, bufferSize);
 					if (!assetPath.empty())
 						return assetPath;
