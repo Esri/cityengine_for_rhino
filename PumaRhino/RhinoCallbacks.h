@@ -97,7 +97,11 @@ public:
 	         uint32_t const* const* uvCounts, size_t const* uvCountsSizes, uint32_t const* const* uvIndices,
 	         size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* faceRanges, size_t faceRangesSize,
 	         const prt::AttributeMap** materials, size_t matCount) override;
+
 	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
+
+	void addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
+	                      size_t& resultSize) override;
 
 	size_t getInitialShapeCount() const {
 		return mModels.size();

@@ -20,6 +20,7 @@
 #include "RhinoEncoder.h"
 
 #include "Logger.h"
+#include "TextureEncoder.h"
 
 #include "prtx/EncoderInfoBuilder.h"
 #include "prtx/Exception.h"
@@ -30,6 +31,8 @@
 #include "prtx/Shape.h"
 #include "prtx/ShapeIterator.h"
 #include "prtx/prtx.h"
+
+#include "prt/MemoryOutputCallbacks.h"
 
 #include <algorithm>
 #include <fstream>
@@ -42,6 +45,8 @@
 #define ENC_DBG 0
 
 namespace {
+
+using MemoryOutputCallbacksUPtr = std::unique_ptr<prt::MemoryOutputCallbacks, prtx::PRTUtils::ObjectDestroyer>;
 
 const wchar_t* EO_BASE_NAME = L"baseName";
 const wchar_t* EO_ERROR_FALLBACK = L"errorFallback";
@@ -79,14 +84,56 @@ std::pair<std::vector<const T*>, std::vector<size_t>> toPtrVec(const std::vector
 	return std::make_pair(pv, ps);
 }
 
-std::wstring getTexturePath(const prtx::TexturePtr& t) {
+template <typename C, typename FUNC, typename OBJ, typename... ARGS>
+std::basic_string<C> callAPI(FUNC f, OBJ& obj, ARGS&&... args) {
+	std::vector<C> buffer(1024, 0x0);
+	size_t size = buffer.size();
+	std::invoke(f, obj, args..., buffer.data(), size);
+	if (size == 0)
+		return {}; // error case
+	else if (size > buffer.size()) {
+		buffer.resize(size);
+		std::invoke(f, obj, args..., buffer.data(), size);
+	}
+	return {buffer.data()};
+}
+
+std::wstring getTexturePath(const prtx::TexturePtr& texture, IRhinoCallbacks* callbacks) {
 #if ENC_DBG == 1
 	LOG_DBG << "Texture PATH: " << t->getURI()->getPath();
 #endif
-	if (t && t->isValid())
-		return t->getURI()->getPath();
-	else
-		return {};
+	if (texture && texture->isValid()) {
+		const prtx::URIPtr& uri = texture->getURI();
+		if (uri->isFilePath()) {
+			return uri->getPath(); // textures from the local file system can be directly passed to rhino
+		}
+		else { // all other textures (builtin or embedded) need to be extracted and potentially re-encoded
+			try {
+				MemoryOutputCallbacksUPtr moc(prt::MemoryOutputCallbacks::create());
+
+				prtx::AsciiFileNamePreparator namePrep;
+				const prtx::NamePreparator::NamespacePtr& namePrepNamespace = namePrep.newNamespace();
+				const std::wstring validatedFilename =
+				        TextureEncoder::encode(texture, moc.get(), namePrep, namePrepNamespace, {});
+
+				if (moc->getNumBlocks() == 1) {
+					size_t bufferSize = 0;
+					const uint8_t* buffer = moc->getBlock(0, &bufferSize);
+					const std::wstring assetPath = callAPI<wchar_t>(&IRhinoCallbacks::addAsset, *callbacks,
+					                                                validatedFilename.c_str(), buffer, bufferSize);
+					if (!assetPath.empty())
+						return assetPath;
+					else
+						log_warn("Received invalid asset path while trying to write asset with URI: %1%") %
+						        uri->string();
+				}
+			}
+			catch (std::exception& e) {
+				log_warn("Failed to encode or write texture at %1% to the local filesystem: %2%") % uri->wstring() % e.what();
+			}
+		}
+	}
+	return {};
 }
 
 // we blacklist all CGA-style material attribute keys, see prtx/Material.h
@@ -174,7 +221,7 @@ const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
 };
 
 void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, const prtx::Material& prtxAttr,
-                                   const prtx::WStringVector& keys) {
+                                   const prtx::WStringVector& keys, IRhinoCallbacks* cb) {
 #if ENC_DBG == 1
 	LOG_DBG << L"[RHINOENCODER] Converting material " << prtxAttr.name();
 #endif
@@ -230,7 +277,7 @@ void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, c
 			case prtx::Material::PT_TEXTURE: {
 
 				const auto& tex = prtxAttr.getTexture(key);
-				const std::wstring texPath = getTexturePath(tex);
+				const std::wstring texPath = getTexturePath(tex, cb);
 				if (texPath.length() > 0) {
 #if ENC_DBG == 1
 					LOG_DBG << "[RHINOENCODER] Using getTexture with key: " << key << " : " << texPath;
@@ -248,7 +295,7 @@ void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, c
 				prtx::WStringVector texPaths;
 				texPaths.reserve(texArray.size());
 				for (const auto& tex : texArray) {
-					const std::wstring texPath = getTexturePath(tex);
+					const std::wstring texPath = getTexturePath(tex, cb);
 					if (!texPath.empty())
 						texPaths.push_back(texPath);
 				}
@@ -289,6 +336,7 @@ struct TextureUVMapping {
 };
 
 const std::vector<TextureUVMapping> TEXTURE_UV_MAPPINGS = []() -> std::vector<TextureUVMapping> {
+	// clang-format off
 	return {
 	        // shader key   | idx | uv set  | CGA key
 	        {L"diffuseMap", 0, 0},  // colormap
@@ -307,6 +355,7 @@ const std::vector<TextureUVMapping> TEXTURE_UV_MAPPINGS = []() -> std::vector<Te
 	    #endif*/
 
 	};
+	// clang-format on
 }();
 
 // return the highest required uv set (where a valid texture is present)
@@ -331,7 +380,7 @@ const std::wstring RhinoEncoder::ID = L"com.esri.rhinoprt.RhinoEncoder";
 const std::wstring RhinoEncoder::NAME = L"Rhino Geometry and Report Encoder";
 const std::wstring RhinoEncoder::DESCRIPTION = L"Encodes geometry and CGA report for Rhino.";
 
-void RhinoEncoder::init(prtx::GenerateContext& context) {
+void RhinoEncoder::init(prtx::GenerateContext&) {
 	prtx::NamePreparator::NamespacePtr nsMaterials = mNamePreparator.newNamespace();
 	prtx::NamePreparator::NamespacePtr nsMeshes = mNamePreparator.newNamespace();
 	mEncodePreparator = prtx::EncodePreparator::create(true, mNamePreparator, nsMeshes, nsMaterials);
@@ -387,8 +436,8 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	}
 }
 
-void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
-                                   const prtx::EncodePreparator::InstanceVector& instances, IRhinoCallbacks* cb) {
+void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::EncodePreparator::InstanceVector& instances,
+                                   IRhinoCallbacks* cb) {
 	bool emitMaterials = getOptions()->getBool(EO_EMIT_MATERIALS);
 
 	uint32_t vertexIndexBase = 0;
@@ -417,9 +466,9 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 		const prtx::MaterialPtrVector& materials = instance.getMaterials();
 
 		size_t material_count = materials.size();
-		size_t mesh_count = meshes.size();
 
 #if ENC_DBG == 1
+		size_t mesh_count = meshes.size();
 		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": "
 		        << material_count << ", meshes: " << mesh_count << std::endl;
 #endif
@@ -524,8 +573,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 #endif
 
 						// append uv vertex indices
-						for (uint32_t faceId = 0, faceCount = static_cast<uint32_t>(faceUVCounts.size());
-						     faceId < faceCount; ++faceId) {
+						for (uint32_t faceId = 0; faceId < static_cast<uint32_t>(faceUVCounts.size()); ++faceId) {
 							const uint32_t* faceUVIdx0 =
 							        (numUVSets > 0) ? mesh->getFaceUVIndices(faceId, 0) : EMPTY_IDX.data();
 							const uint32_t* faceUVIdx = (uvSet < numUVSets && !currUVs.empty())
@@ -546,7 +594,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 						uvIndexBases[uvSet] += static_cast<uint32_t>(src.size()) / 2u;
 					}
 				}
-				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys());
+				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys(), cb);
 				matAttrMap.push_back(amb->createAttributeMapAndReset());
 			}
 		}
@@ -577,7 +625,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape& initialShape,
 	}
 }
 
-void RhinoEncoder::finish(prtx::GenerateContext& context) {
+void RhinoEncoder::finish(prtx::GenerateContext&) {
 #if ENC_DBG == 1
 	LOG_DBG << "In finish  function...";
 #endif

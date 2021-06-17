@@ -41,4 +41,13 @@ public:
 	                 const prt::AttributeMap** materials, size_t matCount) = 0;
 
 	virtual void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) = 0;
+
+	/**
+	 * Writes an asset (e.g. in-memory texture) to an implementation-defined path. Assets with same name will overwrite
+	 * each other.
+	 * @returns file system path of the asset with name as filename. Assumed to be valid for the whole process
+	 * life-time.
+	 */
+	virtual void addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
+	                      size_t& resultSize) = 0;
 };
