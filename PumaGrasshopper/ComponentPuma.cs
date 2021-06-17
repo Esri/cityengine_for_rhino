@@ -46,9 +46,13 @@ namespace PumaGrasshopper
 
         const string RPK_INPUT_NAME = "Path to Rule Package";
         const string RPK_INPUT_NICK_NAME = "RPK";
+        const string RPK_PATH_SERIALIZE = "RPK_PATH";
 
         const string GEOM_INPUT_NAME = "Input Shapes";
         const string GEOM_INPUT_NICK_NAME = "Shapes";
+
+        const string SEED_INPUT_NAME = "Seed";
+        const string SEED_KEY = "seed";
 
         const string GEOM_OUTPUT_NAME = "Generated Models";
         const string GEOM_OUTPUT_NICK_NAME = "Models";
@@ -59,9 +63,8 @@ namespace PumaGrasshopper
         const string REPORTS_OUTPUT_NAME = "CGA Reports";
         const string REPORTS_OUTPUT_NICK_NAME = "Reports";
 
-        const string RPK_PATH_SERIALIZE = "RPK_PATH";
-        const string SEED_INPUT_NAME = "Seed";
-        const string SEED_KEY = "seed";
+        const string CGA_PRINT_OUTPUT_NAME = "CGA Print Output";
+        const string CGA_PRINT_OUTPUT_NICK_NAME = "Print";
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -123,6 +126,9 @@ namespace PumaGrasshopper
             pManager.AddGenericParameter(REPORTS_OUTPUT_NAME, REPORTS_OUTPUT_NICK_NAME,
                 "CGA report values per input shape.",
                 GH_ParamAccess.tree);
+            pManager.AddTextParameter(CGA_PRINT_OUTPUT_NAME, CGA_PRINT_OUTPUT_NICK_NAME,
+                "CGA print output.",
+                GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -217,6 +223,8 @@ namespace PumaGrasshopper
                 OutputReports(DA, generatedMeshes);
                 DA.SetDataTree(0, generatedMeshes);
             }
+
+            OutputCGAPrint(DA);
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -249,6 +257,12 @@ namespace PumaGrasshopper
             }
 
             DA.SetDataTree(2, outputTree);
+        }
+
+        private void OutputCGAPrint(IGH_DataAccess dataAccess)
+        {
+            List<String> cgaPrintOutput = PRTWrapper.GetCGAPrintOutput(0);
+            dataAccess.SetDataList(3, cgaPrintOutput);
         }
 
         /// <summary>
