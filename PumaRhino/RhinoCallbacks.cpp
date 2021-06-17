@@ -57,7 +57,7 @@ bool RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double* v
 	if (vertexCoords == nullptr || normals == nullptr || faceIndices == nullptr || faceCounts == nullptr)
 		return false;
 
-	Model& currentModel = mModels[initialShapeIndex];
+	Model& currentModel = *mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.addModelPart();
 
 	modelPart.mVertices.assign(vertexCoords, vertexCoords + vertexCoordsCount);
@@ -71,7 +71,7 @@ bool RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double* v
 void RhinoCallbacks::addUVCoordinates(const size_t initialShapeIndex, double const* const* uvs, size_t const* uvsSizes,
                                       uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
                                       uint32_t const* const* uvIndices, size_t const* uvIndicesSizes, uint32_t uvSets) {
-	Model& currentModel = mModels[initialShapeIndex];
+	Model& currentModel = *mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.getCurrentModelPart();
 
 	// Add texture coordinates
@@ -118,12 +118,16 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
                          uint32_t const* const* uvCounts, size_t const* uvCountsSizes, uint32_t const* const* uvIndices,
                          size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* /*faceRanges*/,
                          size_t /*faceRangesSize*/, const prt::AttributeMap** materials, const size_t matCount) {
+
+	if (!mModels[initialShapeIndex])
+		mModels[initialShapeIndex] = std::make_shared<Model>();
+
+	Model& currentModel = *mModels[initialShapeIndex];
+	
 	if (!addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount, normals, normalsCount, faceIndices,
 	                 faceIndicesCount, faceCounts, faceCountsCount))
 		return;
 	addUVCoordinates(initialShapeIndex, uvs, uvsSizes, uvCounts, uvCountsSizes, uvIndices, uvIndicesSizes, uvSets);
-
-	Model& currentModel = mModels[initialShapeIndex];
 
 	// -- convert materials into material attributes
 	if constexpr (DBG)
@@ -136,7 +140,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 		}
 
 		const prt::AttributeMap* attrMap = materials[0];
-		auto ma = Materials::extractMaterials(initialShapeIndex, instanceIndex, attrMap);
+		auto ma = Materials::extractMaterials(instanceIndex, attrMap);
 		currentModel.addMaterial(ma);
 	}
 }
@@ -155,7 +159,10 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUt
 		return;
 	}
 
-	Model& model = mModels[initialShapeIndex];
+	if (!mModels[initialShapeIndex])
+		return;
+
+	Model& model = *mModels[initialShapeIndex];
 
 	Reporting::extractReports(initialShapeIndex, model, reports);
 

@@ -27,7 +27,7 @@
 
 namespace {
 
-constexpr const wchar_t* ENCODER_ID_RHINO     = L"com.esri.rhinoprt.RhinoEncoder";
+constexpr const wchar_t* ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
 constexpr const wchar_t* ENCODER_ID_CGA_ERROR = L"com.esri.prt.core.CGAErrorEncoder";
 constexpr const wchar_t* ENCODER_ID_CGA_PRINT = L"com.esri.prt.core.CGAPrintEncoder";
 
@@ -184,39 +184,38 @@ void ModelGenerator::fillInitialShapeBuilder(const std::vector<InitialShape>& in
 	}
 }
 
-void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
-                                   std::vector<pcu::ShapeAttributes>& shapeAttributes,
-                                   const pcu::EncoderOptions& geometryEncoderOptions,
-                                   pcu::AttributeMapBuilderVector& aBuilders,
-                                   std::vector<GeneratedModel>& generated_models) {
+std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
+                                                             std::vector<pcu::ShapeAttributes>& shapeAttributes,
+                                                             const pcu::EncoderOptions& geometryEncoderOptions,
+                                                             pcu::AttributeMapBuilderVector& aBuilders) {
 	fillInitialShapeBuilder(initial_geom);
 
 	if (!mValid) {
 		LOG_ERR << "invalid ModelGenerator instance.";
-		return;
+		return {};
 	}
 
 	if ((shapeAttributes.size() != 1) && (shapeAttributes.size() < mInitialShapesBuilders.size())) {
 		LOG_ERR << "not enough shape attributes dictionaries defined.";
-		return;
+		return {};
 	}
 	else if (shapeAttributes.size() > mInitialShapesBuilders.size()) {
 		LOG_WRN << "number of shape attributes dictionaries defined greater than number of initial shapes given."
 		        << std::endl;
 	}
 
-	generated_models.reserve(mInitialShapesBuilders.size());
+	if (!mRulePkg.empty()) {
+		LOG_INF << "using rule package " << mRulePkg << std::endl;
+
+		if (!mResolveMap || mRuleFile.empty() || !mRuleFileInfo) {
+			LOG_ERR << "Rule package not processed correcty." << std::endl;
+			return {};
+		}
+	}
+
+	std::vector<GeneratedModelPtr> generated_models(mInitialShapesBuilders.size());
 
 	try {
-
-		if (!mRulePkg.empty()) {
-			LOG_INF << "using rule package " << mRulePkg << std::endl;
-
-			if (!mResolveMap || mRuleFile.empty() || !mRuleFileInfo) {
-				LOG_ERR << "Rule package not processed correcty." << std::endl;
-				return;
-			}
-		}
 
 		std::vector<const prt::InitialShape*> initialShapes(mInitialShapesBuilders.size());
 		std::vector<pcu::InitialShapePtr> initialShapePtrs(mInitialShapesBuilders.size());
@@ -245,21 +244,23 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 		if (genStat != prt::STATUS_OK) {
 			LOG_ERR << "prt::generate() failed with status: '" << prt::getStatusDescription(genStat) << "' (" << genStat
 			        << ")";
-			return;
+			return {};
 		}
 
 		for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
-			generated_models.emplace_back(idx, roc->getModel(idx));
+			const ModelPtr& m = roc->getModel(idx);
+			if (m)
+				generated_models[idx] = std::make_shared<GeneratedModel>(m);
 		}
 	}
 	catch (const std::exception& e) {
 		LOG_ERR << "caught exception: " << e.what();
-		return;
 	}
 	catch (...) {
 		LOG_ERR << "caught unknown exception.";
-		return;
 	}
+
+	return generated_models;
 }
 
 void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,

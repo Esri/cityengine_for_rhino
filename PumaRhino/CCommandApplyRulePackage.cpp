@@ -158,8 +158,11 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 	const auto& generated_models = RhinoPRT::get().getGenModels();
 
 	// Add the objects to the Rhino scene.
-	for (auto& model : generated_models) {
-		const auto& meshBundle = model.getMeshesFromGenModel();
+	for (size_t initialShapeIndex = 0; initialShapeIndex < generated_models.size(); initialShapeIndex++) {
+		if (!generated_models[initialShapeIndex])
+			continue;
+
+		const auto& meshBundle = generated_models[initialShapeIndex]->getMeshesFromGenModel(initialShapeIndex);
 
 		std::for_each(meshBundle.begin(), meshBundle.end(),
 		              [&context](const ON_Mesh& mesh) { context.m_doc.AddMeshObject(mesh); });

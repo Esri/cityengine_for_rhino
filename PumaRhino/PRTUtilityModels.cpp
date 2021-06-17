@@ -72,14 +72,13 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 	}
 }
 
-GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model)
-    : mInitialShapeIndex(initialShapeIdx), mModel(model) {}
+GeneratedModel::GeneratedModel(const ModelPtr& model) : mModel(model) {}
 
-const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const {
+ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) const {
 	ON_Mesh mesh(static_cast<int>(modelPart.mFaces.size()), static_cast<int>(modelPart.mIndices.size()), true, true);
 
 	// Set the initial shape id.
-	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
+	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), idKey.c_str());
 
 	// Duplicate vertices
 	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
@@ -129,12 +128,14 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const {
 	return mesh;
 }
 
-const MeshBundle GeneratedModel::getMeshesFromGenModel() const {
-	const auto& modelParts = mModel.getModelParts();
+const MeshBundle GeneratedModel::getMeshesFromGenModel(size_t initialShapeIndex) const {
+	const auto& modelParts = mModel->getModelParts();
+
+	const std::wstring idKey = std::to_wstring(initialShapeIndex);
 
 	MeshBundle mesh;
 	mesh.reserve(modelParts.size());
 	std::transform(modelParts.begin(), modelParts.end(), std::back_inserter(mesh),
-	               [this](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part); });
+	               [this, &idKey](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part, idKey); });
 	return mesh;
 }

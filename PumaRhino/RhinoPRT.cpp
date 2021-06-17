@@ -127,13 +127,13 @@ void RhinoPRTAPI::ClearInitialShapes() {
 	mAttrBuilders.clear();
 }
 
-bool RhinoPRTAPI::GenerateGeometry() {
-	mGeneratedModels.clear();
-	mModelGenerator->generateModel(mShapes, mAttributes, options, mAttrBuilders, mGeneratedModels);
-	return mGeneratedModels.size() > 0;
+size_t RhinoPRTAPI::GenerateGeometry() {
+	mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, options, mAttrBuilders);
+	assert(mGeneratedModels.size() == mShapes.size());
+	return mShapes.size();
 }
 
-const std::vector<GeneratedModel>& RhinoPRTAPI::getGenModels() const {
+const std::vector<GeneratedModelPtr>& RhinoPRTAPI::getGenModels() const {
 	return mGeneratedModels;
 }
 
@@ -208,28 +208,11 @@ void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleA
 }
 
 Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex) {
-	// find the report with given shape id.
-	const auto found_reports = std::find_if(mGeneratedModels.begin(), mGeneratedModels.end(),
-	                                        [&initialShapeIndex](const GeneratedModel& model) {
-		                                        return model.getInitialShapeIndex() == initialShapeIndex;
-	                                        });
+	if (!mGeneratedModels[initialShapeIndex])
+		return Reporting::EMPTY_REPORTS;
 
-	if (found_reports != mGeneratedModels.end()) {
-		const auto& reports = found_reports->getReport();
-		return Reporting::ToReportsVector(reports);
-	}
-
-	return Reporting::EMPTY_REPORTS;
-}
-
-std::vector<int> RhinoPRTAPI::getModelIds() {
-	std::vector<int> ids;
-
-	std::for_each(mGeneratedModels.begin(), mGeneratedModels.end(), [&ids](const GeneratedModel& model) {
-		ids.push_back(static_cast<int>(model.getInitialShapeIndex()));
-	});
-
-	return ids;
+	const auto& reports = mGeneratedModels[initialShapeIndex]->getReport();
+	return Reporting::ToReportsVector(reports);
 }
 
 void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {
@@ -287,48 +270,27 @@ RHINOPRT_API void ClearInitialShapes() {
 	RhinoPRT::get().ClearInitialShapes();
 }
 
-inline RHINOPRT_API bool Generate() {
+inline RHINOPRT_API size_t Generate() {
 	return RhinoPRT::get().GenerateGeometry();
-}
-
-RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs) {
-	auto ids = RhinoPRT::get().getModelIds();
-	for (int id : ids)
-		pMeshIDs->Append(id);
 }
 
 RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 	const auto& models = RhinoPRT::get().getGenModels();
 
-	const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](const GeneratedModel& m) {
-		return m.getInitialShapeIndex() == initialShapeIndex;
-	});
-	if (modelIt == models.end()) {
-		LOG_ERR << L"No generated model with initial shape ID " << initialShapeIndex
-		        << " was found. The generation of this model has probably failed.";
+	if (!models[initialShapeIndex])
 		return 0;
-	}
 
-	return modelIt->getMeshPartCount();
+	return models[initialShapeIndex]->getMeshPartCount();
 }
 
 RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>* pMeshArray) {
 	const auto& models = RhinoPRT::get().getGenModels();
 
-	const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](const GeneratedModel& m) {
-		return m.getInitialShapeIndex() == initialShapeIndex;
-	});
-
-	if (modelIt == models.end()) {
-		LOG_ERR << L"No generated model with the given initial shape ID was found. The generation of this model has "
-		           L"probably failed.";
+	if (!models[initialShapeIndex])
 		return false;
-	}
 
-	const auto meshBundle = (*modelIt).getMeshesFromGenModel();
-
+	const auto meshBundle = models[initialShapeIndex]->getMeshesFromGenModel(initialShapeIndex);
 	for (const auto& meshPart : meshBundle) {
-
 		pMeshArray->Append(new ON_Mesh(meshPart));
 	}
 
@@ -478,17 +440,14 @@ RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* p
 }
 
 RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
-	const std::vector<GeneratedModel>& generatedModels = RhinoPRT::get().getGenModels();
-	const auto& modelIt =
-	        std::find_if(generatedModels.begin(), generatedModels.end(), [&initialShapeIndex](const GeneratedModel& m) {
-		        return m.getInitialShapeIndex() == initialShapeIndex;
-	        });
+	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
 
-	if (modelIt != generatedModels.end()) {
-		const std::vector<std::wstring>& printOutput = modelIt->getPrintOutput();
-		for (const std::wstring& item : printOutput)
-			pPrintOutput->Append(ON_wString(item.c_str()));
-	}
+	if (!models[initialShapeIndex])
+		return;
+
+	const std::vector<std::wstring>& printOutput = models[initialShapeIndex]->getPrintOutput();
+	for (const std::wstring& item : printOutput)
+		pPrintOutput->Append(ON_wString(item.c_str()));
 }
 
 RHINOPRT_API void GetAnnotationTypes(int ruleIdx, ON_SimpleArray<AttributeAnnotation>* pAnnotTypeArray) {
@@ -582,21 +541,24 @@ RHINOPRT_API bool GetMaterial(int initialShapeIndex, int meshID, int* /*uvSet*/,
                               ON_ClassArray<ON_wString>* pTexPaths, ON_SimpleArray<int>* pDiffuseColor,
                               ON_SimpleArray<int>* pAmbientColor, ON_SimpleArray<int>* pSpecularColor, double* opacity,
                               double* shininess) {
-	auto& genModels = RhinoPRT::get().getGenModels();
+	const auto& genModels = RhinoPRT::get().getGenModels();
 
 	if (initialShapeIndex >= genModels.size()) {
 		LOG_ERR << L"Initial shape ID out of range";
 		return false;
 	}
 
-	auto& currModel = genModels[initialShapeIndex];
-	auto& material = currModel.getMaterials();
+	if (!genModels[initialShapeIndex])
+		return false;
+
+	const GeneratedModelPtr& currModel = genModels[initialShapeIndex];
+	const Materials::MaterialsMap& material = currModel->getMaterials();
 
 	if (meshID >= material.size()) {
 		LOG_ERR << L"Mesh ID is out of range";
 		return false;
 	}
-	auto& mat = material.at(meshID);
+	const Materials::MaterialAttribute& mat = material.at(meshID);
 
 	for (auto& texture : mat.mTexturePaths) {
 

@@ -56,7 +56,7 @@ public:
 	void AddInitialShape(const std::vector<InitialShape>& shapes);
 	void ClearInitialShapes();
 
-	bool GenerateGeometry();
+	size_t GenerateGeometry();
 
 	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, double value,
 	                           size_t /*count*/);
@@ -77,9 +77,7 @@ public:
 	}
 	Reporting::ReportsVector getReportsOfModel(int initialShapeIndex);
 
-	const std::vector<GeneratedModel>& getGenModels() const;
-
-	std::vector<int> getModelIds();
+	const std::vector<GeneratedModelPtr>& getGenModels() const;
 
 	void setMaterialGeneration(bool emitMaterial);
 
@@ -98,7 +96,7 @@ private:
 	pcu::EncoderOptions options;
 
 	std::unique_ptr<ModelGenerator> mModelGenerator;
-	std::vector<GeneratedModel> mGeneratedModels;
+	std::vector<GeneratedModelPtr> mGeneratedModels;
 
 	Reporting::GroupedReports mGroupedReports;
 };
@@ -123,11 +121,9 @@ RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh);
 
 RHINOPRT_API void ClearInitialShapes();
 
-RHINOPRT_API bool Generate();
+RHINOPRT_API size_t Generate();
 
 RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>* pMeshArray);
-
-RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs);
 
 RHINOPRT_API int GetMeshPartCount(int initialShapeIndex);
 

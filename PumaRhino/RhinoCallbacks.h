@@ -77,9 +77,11 @@ private:
 	std::vector<std::wstring> mPrintOutput;
 };
 
+using ModelPtr = std::shared_ptr<Model>;
+
 class RhinoCallbacks : public IRhinoCallbacks {
 private:
-	std::vector<Model> mModels;
+	std::vector<ModelPtr> mModels;
 
 public:
 	RhinoCallbacks(const size_t initialShapeCount) {
@@ -114,7 +116,7 @@ public:
 		return mModels.size();
 	}
 
-	const Model& getModel(const size_t initialShapeIdx) const {
+	const ModelPtr& getModel(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
@@ -125,14 +127,20 @@ public:
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
-		return mModels[initialShapeIdx].getReports();
+		if (!mModels[initialShapeIdx])
+			return {};
+
+		return mModels[initialShapeIdx]->getReports();
 	}
 
 	const Materials::MaterialsMap getMaterial(const size_t initialShapeIdx) const {
 		if (initialShapeIdx >= mModels.size())
 			throw std::out_of_range("initial shape index is out of range.");
 
-		return mModels[initialShapeIdx].getMaterials();
+		if (!mModels[initialShapeIdx])
+			return {};
+
+		return mModels[initialShapeIdx]->getMaterials();
 	}
 
 	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) {
@@ -155,8 +163,12 @@ public:
 	}
 
 	prt::Status cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t* txt) {
+		if (!mModels[isIndex])
+			return {};
+
 		if (txt != nullptr)
-			mModels[isIndex].addPrintOutput(txt);
+			mModels[isIndex]->addPrintOutput(txt);
+
 		LOG_INF << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
 		return prt::STATUS_OK;
 	}

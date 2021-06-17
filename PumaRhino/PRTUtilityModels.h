@@ -79,38 +79,34 @@ protected:
  */
 class GeneratedModel final {
 public:
-	GeneratedModel(const size_t& initialShapeIdx, const Model& model);
+	GeneratedModel(const ModelPtr& model);
 
 	GeneratedModel() = default;
 	~GeneratedModel() = default;
 
-	const MeshBundle getMeshesFromGenModel() const;
+	const MeshBundle getMeshesFromGenModel(size_t initialShapeIndex) const;
 
 	int getMeshPartCount() const {
-		return static_cast<int>(mModel.getModelParts().size());
-	}
-
-	size_t getInitialShapeIndex() const {
-		return mInitialShapeIndex;
+		return static_cast<int>(mModel->getModelParts().size());
 	}
 
 	const Reporting::ReportMap& getReport() const {
-		return mModel.getReports();
+		return mModel->getReports();
 	}
 
 	const Materials::MaterialsMap& getMaterials() const {
-		return mModel.getMaterials();
+		return mModel->getMaterials();
 	}
 
 	const std::vector<std::wstring>& getPrintOutput() const {
-		return mModel.getPrintOutput();
+		return mModel->getPrintOutput();
 	}
 
 private:
-	size_t mInitialShapeIndex = 0;
-
-	Model mModel;
+	ModelPtr mModel;
 
 	/// Creates an ON_Mesh and setup its uv coordinates, for a given ModelPart.
-	const ON_Mesh toON_Mesh(const ModelPart& modelPart) const;
+	ON_Mesh toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) const;
 };
+
+using GeneratedModelPtr = std::shared_ptr<GeneratedModel>;

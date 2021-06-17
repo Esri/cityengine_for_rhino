@@ -31,10 +31,10 @@
  */
 class ModelGenerator {
 public:
-	void generateModel(const std::vector<InitialShape>& initial_geom,
-	                   std::vector<pcu::ShapeAttributes>& shapeAttributes,
-	                   const pcu::EncoderOptions& geometryEncoderOptions, pcu::AttributeMapBuilderVector& aBuilders,
-	                   std::vector<GeneratedModel>& generated_models);
+	std::vector<GeneratedModelPtr> generateModel(const std::vector<InitialShape>& initial_geom,
+	                                          std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	                                          const pcu::EncoderOptions& geometryEncoderOptions,
+	                                          pcu::AttributeMapBuilderVector& aBuilders);
 
 	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);

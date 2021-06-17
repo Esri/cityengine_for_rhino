@@ -56,13 +56,10 @@ namespace PumaGrasshopper
         public static extern void ClearInitialShapes();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Generate();
+        public static extern int Generate();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out]IntPtr pMeshArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void GetAllMeshIDs([In, Out]IntPtr pMeshIDs);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetMeshPartCount(int initialShapeIndex);
@@ -158,49 +155,54 @@ namespace PumaGrasshopper
             return status;
         }
 
-        public static GH_Structure<GH_Mesh> GenerateMesh()
+        public static List<Mesh[]> GenerateMesh()
         {
-            bool status = Generate();
-            if (!status) return null;
+            int shapeCount = Generate();
+            if (shapeCount == 0)
+                return null;
 
-            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
-            // thus a conversion is necessary when adding Meshes.
-            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
-
-            // retrieve the meshBundle for each initial shape id
-            int[] mesh_ids = null;
-            using(var idsArray = new SimpleArrayInt())
-            {
-                var pIdsArray = idsArray.NonConstPointer();
-                GetAllMeshIDs(pIdsArray);
-                mesh_ids = idsArray.ToArray();
-            }
-
-            foreach(int id in mesh_ids)
+            var generatedMeshes = new List<Mesh[]>();
+            for (int id = 0; id < shapeCount; id++)
             {
                 using(var arr = new SimpleArrayMeshPointer())
                 {
                     var ptr_array = arr.NonConstPointer();
 
-                    status = GetMeshBundle(id, ptr_array);
-
-                    if(status)
+                    bool status = GetMeshBundle(id, ptr_array);
+                    if (status)
                     {
                         var meshBundle = arr.ToNonConstArray();
+                        generatedMeshes.Add(meshBundle);
+                    }
+                    else
+                        generatedMeshes.Add(null);
+                }
+            }
 
-                        foreach(var mesh in meshBundle)
-                        {
-                            // Directly convert to to GH_Mesh and add it to the GH_Structure at the branch corresponding to the mesh id
-                            GH_Mesh gh_mesh = null;
-                            status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+            return generatedMeshes;
+        }
 
-                            if (status)
-                            {
-                                GH_Path path = new GH_Path(id);
-                                mesh_struct.Append(gh_mesh, path);
-                            }
-                        }
-                    }                    
+        public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
+        {
+            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
+            // thus a conversion is necessary when adding Meshes.
+            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
+
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            {
+                if (generatedMeshes[shapeId] == null)
+                    continue;
+
+                GH_Path path = new GH_Path(shapeId);
+                var meshBundle = generatedMeshes[shapeId];
+                foreach (var mesh in meshBundle)
+                {
+                    GH_Mesh gh_mesh = null;
+                    var status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+                    if (status)
+                    {
+                        mesh_struct.Append(gh_mesh, path);
+                    }
                 }
             }
 
@@ -330,25 +332,16 @@ namespace PumaGrasshopper
             return materials;
         }
 
-        public static GH_Structure<GH_Material> GetAllMaterialIds(int meshCount)
+        public static GH_Structure<GH_Material> GetAllMaterialIds(List<Mesh[]> generatedMeshes)
         {
-            int[] initShapeIds = null;
-            using(var meshIdsArray = new SimpleArrayInt())
-            {
-                var pMeshIDArray = meshIdsArray.NonConstPointer();
-
-                GetAllMeshIDs(pMeshIDArray);
-                initShapeIds = meshIdsArray.ToArray();
-            }
-
             GH_Structure<GH_Material> material_struct = new GH_Structure<GH_Material>();
 
-            foreach(int initShapeId in initShapeIds)
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
             {
-                var mats = GetMaterialsOfMesh(initShapeId);
-
-                GH_Path path = new GH_Path(initShapeId);
-
+                if (generatedMeshes[shapeId] == null)
+                    continue;
+                var mats = GetMaterialsOfMesh(shapeId);
+                GH_Path path = new GH_Path(shapeId);
                 material_struct.AppendRange(mats, path);
             }
 

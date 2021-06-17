@@ -107,8 +107,8 @@ namespace PumaGrasshopper
             pManager.AddGeometryParameter(GEOM_INPUT_NAME, GEOM_INPUT_NICK_NAME,
                 "Input shapes on which to execute the rules.",
                 GH_ParamAccess.tree);
-            pManager.AddIntegerParameter(SEED_KEY, SEED_INPUT_NAME, 
-                "A number that will be used to seed the PRT random number generator.", 
+            pManager.AddIntegerParameter(SEED_KEY, SEED_INPUT_NAME,
+                "A number that will be used to seed the PRT random number generator.",
                 GH_ParamAccess.tree, 0);
         }
 
@@ -214,14 +214,16 @@ namespace PumaGrasshopper
 
             if (mDoGenerateMaterials && generatedMeshes != null)
             {
-                GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
+                GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes);
                 DA.SetDataTree(1, materials);
             }
 
             if (generatedMeshes != null)
             {
+                var meshStructure = PRTWrapper.CreateMeshStructure(generatedMeshes);
+                DA.SetDataTree(0, meshStructure);
+
                 OutputReports(DA, generatedMeshes);
-                DA.SetDataTree(0, generatedMeshes);
             }
 
             OutputCGAPrint(DA);
@@ -242,17 +244,16 @@ namespace PumaGrasshopper
             ExpireSolution(true);
         }
 
-        private void OutputReports(IGH_DataAccess DA, GH_Structure<GH_Mesh> gh_meshes)
+        private void OutputReports(IGH_DataAccess DA, List<Mesh[]> generatedMeshes)
         {
             GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
 
-            int count = gh_meshes.DataCount;
-            for(int meshID = 0; meshID < count; ++meshID)
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
             {
-                var reports = PRTWrapper.GetAllReports(meshID);
+                var reports = PRTWrapper.GetAllReports(shapeId);
 
                 // The new branch
-                GH_Path path = new GH_Path(meshID);
+                GH_Path path = new GH_Path(shapeId);
                 reports.ForEach(x => outputTree.Append(x, path));
             }
 
@@ -357,25 +358,25 @@ namespace PumaGrasshopper
             switch (attribute.mAttribType)
             {
                 case AnnotationArgumentType.AAT_INT:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Integer> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
+                    {
+                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Integer> tree)) return;
+                        ExtractTreeValues(tree, attribute, shapeCount);
+                        break;
+                    }
                 case AnnotationArgumentType.AAT_BOOL:
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Boolean> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
+                    {
+                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Boolean> tree)) return;
+                        ExtractTreeValues(tree, attribute, shapeCount);
+                        break;
+                    }
                 case AnnotationArgumentType.AAT_FLOAT:
                 case AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Number> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
+                    {
+                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Number> tree)) return;
+                        ExtractTreeValues(tree, attribute, shapeCount);
+                        break;
+                    }
                 case AnnotationArgumentType.AAT_STR:
                 case AnnotationArgumentType.AAT_STR_ARRAY:
                     if (attribute.IsColor())
@@ -390,11 +391,11 @@ namespace PumaGrasshopper
                     }
                     break;
                 default:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<IGH_Goo> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
+                    {
+                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<IGH_Goo> tree)) return;
+                        ExtractTreeValues(tree, attribute, shapeCount);
+                        break;
+                    }
             }
         }
 
@@ -490,7 +491,7 @@ namespace PumaGrasshopper
                     }
                 case AnnotationArgumentType.AAT_INT:
                     {
-                        if (!value.CastTo(out int integer)) throw new Exception(Utils.GetCastErrorMessage(attribute, "integer")); 
+                        if (!value.CastTo(out int integer)) throw new Exception(Utils.GetCastErrorMessage(attribute, "integer"));
                         PRTWrapper.SetRuleAttributeInteger(shapeId, attribute.mRuleFile, attribute.mFullName, integer);
                         return;
                     }
@@ -499,7 +500,7 @@ namespace PumaGrasshopper
                         string text;
                         if (attribute.IsColor())
                         {
-         
+
                             if (!value.CastTo(out Color color)) throw new Exception(Utils.GetCastErrorMessage(attribute, "Color"));
                             text = Utils.hexColor(color);
                         }
