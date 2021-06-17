@@ -133,7 +133,7 @@ bool RhinoPRTAPI::GenerateGeometry() {
 	return mGeneratedModels.size() > 0;
 }
 
-std::vector<GeneratedModel>& RhinoPRTAPI::getGenModels() {
+const std::vector<GeneratedModel>& RhinoPRTAPI::getGenModels() const {
 	return mGeneratedModels;
 }
 
@@ -300,7 +300,7 @@ RHINOPRT_API void GetAllMeshIDs(ON_SimpleArray<int>* pMeshIDs) {
 RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 	const auto& models = RhinoPRT::get().getGenModels();
 
-	const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](GeneratedModel m) {
+	const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](const GeneratedModel& m) {
 		return m.getInitialShapeIndex() == initialShapeIndex;
 	});
 	if (modelIt == models.end()) {
@@ -315,7 +315,7 @@ RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>* pMeshArray) {
 	const auto& models = RhinoPRT::get().getGenModels();
 
-	const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](GeneratedModel m) {
+	const auto& modelIt = std::find_if(models.begin(), models.end(), [&initialShapeIndex](const GeneratedModel& m) {
 		return m.getInitialShapeIndex() == initialShapeIndex;
 	});
 
@@ -474,6 +474,20 @@ RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* p
 				// REMOVE LAST KEY
 				pKeysArray->Remove(pKeysArray->Count() - 1);
 		}
+	}
+}
+
+RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
+	const std::vector<GeneratedModel>& generatedModels = RhinoPRT::get().getGenModels();
+	const auto& modelIt =
+	        std::find_if(generatedModels.begin(), generatedModels.end(), [&initialShapeIndex](const GeneratedModel& m) {
+		        return m.getInitialShapeIndex() == initialShapeIndex;
+	        });
+
+	if (modelIt != generatedModels.end()) {
+		const std::vector<std::wstring>& printOutput = modelIt->getPrintOutput();
+		for (const std::wstring& item : printOutput)
+			pPrintOutput->Append(ON_wString(item.c_str()));
 	}
 }
 

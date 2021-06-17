@@ -77,7 +77,7 @@ public:
 	}
 	Reporting::ReportsVector getReportsOfModel(int initialShapeIndex);
 
-	std::vector<GeneratedModel>& getGenModels();
+	const std::vector<GeneratedModel>& getGenModels() const;
 
 	std::vector<int> getModelIds();
 
@@ -160,6 +160,8 @@ RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const
 RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* pKeysArray,
                              ON_SimpleArray<double>* pDoubleReports, ON_SimpleArray<bool>* pBoolReports,
                              ON_ClassArray<ON_wString>* pStringReports);
+
+RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput);
 
 RHINOPRT_API void GetAnnotationTypes(int ruleIdx, ON_SimpleArray<AttributeAnnotation>* pAnnotTypeArray);
 

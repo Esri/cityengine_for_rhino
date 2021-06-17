@@ -59,15 +59,22 @@ public:
 
 	void addMaterial(const Materials::MaterialAttribute& ma);
 	void addReport(const Reporting::ReportAttribute& ra);
+	void addPrintOutput(const std::wstring& message) {
+		mPrintOutput.push_back(message);
+	}
 
 	const std::vector<ModelPart>& getModelParts() const;
 	const Reporting::ReportMap& getReports() const;
 	const Materials::MaterialsMap& getMaterials() const;
+	const std::vector<std::wstring>& getPrintOutput() const {
+		return mPrintOutput;
+	}
 
 private:
 	std::vector<ModelPart> mModelParts;
 	Reporting::ReportMap mReports;
 	Materials::MaterialsMap mMaterials;
+	std::vector<std::wstring> mPrintOutput;
 };
 
 class RhinoCallbacks : public IRhinoCallbacks {
@@ -148,6 +155,8 @@ public:
 	}
 
 	prt::Status cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t* txt) {
+		if (txt != nullptr)
+			mModels[isIndex].addPrintOutput(txt);
 		LOG_INF << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
 		return prt::STATUS_OK;
 	}

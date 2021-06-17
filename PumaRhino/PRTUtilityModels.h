@@ -102,6 +102,10 @@ public:
 		return mModel.getMaterials();
 	}
 
+	const std::vector<std::wstring>& getPrintOutput() const {
+		return mModel.getPrintOutput();
+	}
+
 private:
 	size_t mInitialShapeIndex = 0;
 
