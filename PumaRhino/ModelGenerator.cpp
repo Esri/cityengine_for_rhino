@@ -31,6 +31,9 @@ constexpr const wchar_t* ENCODER_ID_RHINO     = L"com.esri.rhinoprt.RhinoEncoder
 constexpr const wchar_t* ENCODER_ID_CGA_ERROR = L"com.esri.prt.core.CGAErrorEncoder";
 constexpr const wchar_t* ENCODER_ID_CGA_PRINT = L"com.esri.prt.core.CGAPrintEncoder";
 
+constexpr const wchar_t* FILE_CGA_ERROR = L"CGAErrors.txt";
+constexpr const wchar_t* FILE_CGA_PRINT = L"CGAPrint.txt";
+
 constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
 constexpr const wchar_t* ENCODER_ID_CGA_EVALATTR = L"com.esri.prt.core.AttributeEvalEncoder";
 
@@ -289,9 +292,21 @@ void ModelGenerator::initializeEncoderData(const pcu::EncoderOptions& encOpt) {
 	mEncodersNames.clear();
 	mEncodersOptionsPtr.clear();
 
-	mEncodersNames.push_back(ENCODER_ID_RHINO);
+	mEncodersNames.emplace_back(ENCODER_ID_RHINO);
 	const pcu::AttributeMapPtr encOptions{pcu::createAttributeMapForEncoder(encOpt, *mEncoderBuilder)};
-	mEncodersOptionsPtr.push_back(createValidatedOptions(ENCODER_ID_RHINO, encOptions));
+	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_RHINO, encOptions));
+
+	pcu::AttributeMapBuilderPtr optionsBuilder(prt::AttributeMapBuilder::create());
+
+	mEncodersNames.emplace_back(ENCODER_ID_CGA_ERROR);
+	optionsBuilder->setString(L"name", FILE_CGA_ERROR);
+	const pcu::AttributeMapPtr errOptions(optionsBuilder->createAttributeMapAndReset());
+	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_CGA_ERROR, errOptions));
+
+	mEncodersNames.emplace_back(ENCODER_ID_CGA_PRINT);
+	optionsBuilder->setString(L"name", FILE_CGA_PRINT);
+	const pcu::AttributeMapPtr printOptions(optionsBuilder->createAttributeMapAndReset());
+	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions));
 }
 
 void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,
