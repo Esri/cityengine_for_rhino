@@ -55,7 +55,7 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 		ON_3dPoint vertex = mesh.Vertex(i);
 		mVertices.push_back(vertex.x);
 		mVertices.push_back(vertex.z);
-		mVertices.push_back(vertex.y);
+		mVertices.push_back(-vertex.y);
 	}
 
 	for (int i = 0; i < mesh.FaceCount(); ++i) {
