@@ -162,9 +162,6 @@ std::wstring encode(const prtx::TexturePtr& texture, prt::SimpleOutputCallbacks*
 	const std::wstring uniqueName = namePreparator.legalizedAndUniquified(
 	        texNameWithExtension.substr(1), prtx::NamePreparator::ENTITY_FILE, namespaceFilenames);
 
-	if (!texture || !texture->isValid())
-		throw prtx::StatusException(prt::STATUS_ILLEGAL_VALUE);
-
 	prtx::PRTUtils::AttributeMapUPtr encOpts =
 	        getEncOpts(textureEncoderID, uniqueName, prt::SimpleOutputCallbacks::OpenMode::OPENMODE_ALWAYS);
 	prtx::EncoderPtr texEnc = prtx::ExtensionManager::instance().createEncoder(textureEncoderID, encOpts.get(), soh);
