@@ -212,8 +212,11 @@ namespace PumaGrasshopper
                 DA.SetDataTree(1, materials);
             }
 
-            OutputReports(DA, generatedMeshes);
-            DA.SetDataTree(0, generatedMeshes);
+            if (generatedMeshes != null)
+            {
+                OutputReports(DA, generatedMeshes);
+                DA.SetDataTree(0, generatedMeshes);
+            }
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
