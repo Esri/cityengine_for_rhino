@@ -277,21 +277,18 @@ namespace PumaGrasshopper
 
             var generatedMeshes = PRTWrapper.GenerateMesh();
 
-            if (mDoGenerateMaterials && generatedMeshes != null)
+            var meshStructure = PRTWrapper.CreateMeshStructure(generatedMeshes);
+            DA.SetDataTree((int)OutputParams.MODELS, meshStructure);
+
+            if (mDoGenerateMaterials)
             {
                 GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes);
                 DA.SetDataTree((int)OutputParams.MATERIALS, materials);
             }
 
-            if (generatedMeshes != null)
-            {
-                var meshStructure = PRTWrapper.CreateMeshStructure(generatedMeshes);
-                DA.SetDataTree((int)OutputParams.MODELS, meshStructure);
-
-                OutputReports(DA, generatedMeshes);
-                OutputCGAPrint(DA, generatedMeshes);
-                OutputCGAErrors(DA, generatedMeshes);
-            }
+            OutputReports(DA, generatedMeshes);
+            OutputCGAPrint(DA, generatedMeshes);
+            OutputCGAErrors(DA, generatedMeshes);
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -316,10 +313,11 @@ namespace PumaGrasshopper
             for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
             {
                 var reports = PRTWrapper.GetAllReports(shapeId);
-
-                // The new branch
-                GH_Path path = new GH_Path(shapeId);
-                reports.ForEach(x => outputTree.Append(x, path));
+                if (reports.Count > 0)
+                {
+                    GH_Path path = new GH_Path(shapeId);
+                    reports.ForEach(x => outputTree.Append(x, path));
+                }
             }
 
             DA.SetDataTree((int)OutputParams.REPORTS, outputTree);
@@ -332,8 +330,11 @@ namespace PumaGrasshopper
             for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
             {
                 List<String> printOutput = PRTWrapper.GetCGAPrintOutput(shapeId);
-                var shapePath = new GH_Path(shapeId);
-                printOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
+                if (printOutput.Count > 0)
+                {
+                    var shapePath = new GH_Path(shapeId);
+                    printOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
+                }
             }
 
             dataAccess.SetDataTree((int)OutputParams.PRINTS, outputTree);
@@ -346,8 +347,11 @@ namespace PumaGrasshopper
             for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
             {
                 List<String> errorOutput = PRTWrapper.GetCGAErrorOutput(shapeId);
-                var shapePath = new GH_Path(shapeId);
-                errorOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
+                if (errorOutput.Count > 0)
+                {
+                    var shapePath = new GH_Path(shapeId);
+                    errorOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
+                }
             }
 
             dataAccess.SetDataTree((int)OutputParams.ERRORS, outputTree);

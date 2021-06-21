@@ -119,10 +119,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
                          size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* /*faceRanges*/,
                          size_t /*faceRangesSize*/, const prt::AttributeMap** materials, const size_t matCount) {
 
-	if (!mModels[initialShapeIndex])
-		mModels[initialShapeIndex] = std::make_shared<Model>();
-
-	Model& currentModel = *mModels[initialShapeIndex];
+	Model& currentModel = getOrCreateModel(initialShapeIndex);
 	
 	if (!addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount, normals, normalsCount, faceIndices,
 	                 faceIndicesCount, faceCounts, faceCountsCount))

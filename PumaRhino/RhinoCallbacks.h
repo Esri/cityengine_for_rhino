@@ -159,8 +159,7 @@ public:
 
 	prt::Status assetError(size_t isIndex, prt::CGAErrorLevel level, const wchar_t* key, const wchar_t* uri,
 	                       const wchar_t* message) {
-		if (!mModels[isIndex])
-			return {};
+		Model& model = getOrCreateModel(isIndex);
 
 		if (message != nullptr) {
 			auto msg = std::wstring(L"Asset Error: ").append(message);
@@ -168,7 +167,7 @@ public:
 				msg.append(L"; CGA key = '").append(key).append(L"'");
 			if (uri != nullptr)
 				msg.append(L"; CGA URI = '").append(uri).append(L"'");
-			mModels[isIndex]->addErrorOutput(msg);
+			model.addErrorOutput(msg);
 		}
 
 		LOG_ERR << L"ASSET ERROR:" << isIndex << " " << level << " " << key << " " << uri << " " << message
@@ -178,12 +177,11 @@ public:
 
 	prt::Status cgaError(size_t isIndex, int32_t shapeID, prt::CGAErrorLevel level, int32_t methodId, int32_t pc,
 	                     const wchar_t* message) {
-		if (!mModels[isIndex])
-			return {};
+		Model& model = getOrCreateModel(isIndex);
 
 		if (message != nullptr) {
 			auto msg = std::wstring(L"CGA Error: ").append(message);
-			mModels[isIndex]->addErrorOutput(msg);
+			model.addErrorOutput(msg);
 		}
 
 		LOG_ERR << L"CGA ERROR:" << isIndex << " " << shapeID << " " << level << " " << methodId << " " << pc << " "
@@ -192,11 +190,10 @@ public:
 	}
 
 	prt::Status cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t* txt) {
-		if (!mModels[isIndex])
-			return {};
+		Model& model = getOrCreateModel(isIndex);
 
 		if (txt != nullptr)
-			mModels[isIndex]->addPrintOutput(txt);
+			model.addPrintOutput(txt);
 
 		LOG_INF << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
 		return prt::STATUS_OK;
@@ -255,5 +252,12 @@ public:
 	prt::Status attrStringArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
 	                            const wchar_t* const* /*ptr*/, size_t /*size*/, size_t) {
 		return prt::STATUS_OK;
+	}
+
+	private:
+		Model& getOrCreateModel(size_t initialShapeIndex) {
+		    if (!mModels[initialShapeIndex])
+			    mModels[initialShapeIndex] = std::make_shared<Model>();
+		    return *mModels[initialShapeIndex];
 	}
 };
