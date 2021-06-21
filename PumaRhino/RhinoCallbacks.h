@@ -62,7 +62,10 @@ public:
 	void addReport(const Reporting::ReportAttribute& ra);
 	void addPrintOutput(const std::wstring_view& message) {
 		assert(message.length() > 0); // we expect at least the newline character added by PRT
-		mPrintOutput.emplace_back(message.substr(0, message.length()-1)); // let's trim the newline away
+		mPrintOutput.emplace_back(message.substr(0, message.length() - 1)); // let's trim the newline away
+	}
+	void addErrorOutput(const std::wstring_view& error) {
+		mErrorOutput.emplace_back(error);
 	}
 
 	const std::vector<ModelPart>& getModelParts() const;
@@ -71,12 +74,16 @@ public:
 	const std::vector<std::wstring>& getPrintOutput() const {
 		return mPrintOutput;
 	}
+	const std::vector<std::wstring>& getErrorOutput() const {
+		return mErrorOutput;
+	}
 
 private:
 	std::vector<ModelPart> mModelParts;
 	Reporting::ReportMap mReports;
 	Materials::MaterialsMap mMaterials;
 	std::vector<std::wstring> mPrintOutput;
+	std::vector<std::wstring> mErrorOutput;
 };
 
 using ModelPtr = std::shared_ptr<Model>;
@@ -152,6 +159,18 @@ public:
 
 	prt::Status assetError(size_t isIndex, prt::CGAErrorLevel level, const wchar_t* key, const wchar_t* uri,
 	                       const wchar_t* message) {
+		if (!mModels[isIndex])
+			return {};
+
+		if (message != nullptr) {
+			auto msg = std::wstring(L"Asset Error: ").append(message);
+			if (key != nullptr)
+				msg.append(L"; CGA key = '").append(key).append(L"'");
+			if (uri != nullptr)
+				msg.append(L"; CGA URI = '").append(uri).append(L"'");
+			mModels[isIndex]->addErrorOutput(msg);
+		}
+
 		LOG_ERR << L"ASSET ERROR:" << isIndex << " " << level << " " << key << " " << uri << " " << message
 		        << std::endl;
 		return prt::STATUS_OK;
@@ -159,6 +178,14 @@ public:
 
 	prt::Status cgaError(size_t isIndex, int32_t shapeID, prt::CGAErrorLevel level, int32_t methodId, int32_t pc,
 	                     const wchar_t* message) {
+		if (!mModels[isIndex])
+			return {};
+
+		if (message != nullptr) {
+			auto msg = std::wstring(L"CGA Error: ").append(message);
+			mModels[isIndex]->addErrorOutput(msg);
+		}
+
 		LOG_ERR << L"CGA ERROR:" << isIndex << " " << shapeID << " " << level << " " << methodId << " " << pc << " "
 		        << message << std::endl;
 		return prt::STATUS_OK;

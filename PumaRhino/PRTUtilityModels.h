@@ -102,6 +102,10 @@ public:
 		return mModel->getPrintOutput();
 	}
 
+	const std::vector<std::wstring>& getErrorOutput() const {
+		return mModel->getErrorOutput();
+	}
+
 private:
 	ModelPtr mModel;
 

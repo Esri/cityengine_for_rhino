@@ -450,6 +450,17 @@ RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wStr
 		pPrintOutput->Append(ON_wString(item.c_str()));
 }
 
+RHINOPRT_API void GetCGAErrorOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pErrorOutput) {
+	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
+
+	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
+		return;
+
+	const std::vector<std::wstring>& errorOutput = models[initialShapeIndex]->getErrorOutput();
+	for (const std::wstring& item : errorOutput)
+		pErrorOutput->Append(ON_wString(item.c_str()));
+}
+
 RHINOPRT_API void GetAnnotationTypes(int ruleIdx, ON_SimpleArray<AttributeAnnotation>* pAnnotTypeArray) {
 	auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 	if (ruleIdx < ruleAttributes.size()) {
