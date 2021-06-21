@@ -246,10 +246,6 @@ std::wstring removePrefix(const std::wstring& attrName, wchar_t delim) {
 	return attrName.substr(sepPos + 1);
 }
 
-std::wstring removeImport(const std::wstring& attrName) {
-	return removePrefix(attrName, IMPORT_DELIMITER);
-}
-
 std::wstring removeStyle(const std::wstring& attrName) {
 	return removePrefix(attrName, STYLE_DELIMITER);
 }

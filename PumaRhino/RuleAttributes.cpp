@@ -26,7 +26,7 @@
 namespace {
 
 std::wstring getNiceName(const std::wstring& attrName) {
-	return pcu::removeImport(pcu::removeStyle(attrName));
+	return pcu::removeStyle(attrName);
 }
 
 } // namespace

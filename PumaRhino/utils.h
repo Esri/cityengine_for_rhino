@@ -129,12 +129,10 @@ std::string toFileURI(const std::wstring& utf16Path);
 std::wstring filename(const std::wstring& path);
 
 constexpr const wchar_t STYLE_DELIMITER = L'$';
-constexpr const wchar_t IMPORT_DELIMITER = L'.';
 constexpr const wchar_t* DEFAULT_STYLE_PREFIX = L"Default$";
 
 bool isDefaultStyle(const std::wstring& attrName);
 std::wstring removePrefix(const std::wstring& attrName, wchar_t delim);
-std::wstring removeImport(const std::wstring& attrName);
 std::wstring removeStyle(const std::wstring& attrName);
 
 template <typename C>
