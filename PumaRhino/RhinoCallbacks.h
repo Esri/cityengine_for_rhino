@@ -89,24 +89,12 @@ private:
 using ModelPtr = std::shared_ptr<Model>;
 
 class RhinoCallbacks : public IRhinoCallbacks {
-private:
-	std::vector<ModelPtr> mModels;
-
 public:
-	RhinoCallbacks(const size_t initialShapeCount) {
-		mModels.resize(initialShapeCount);
-	}
-
+	RhinoCallbacks() = delete;
+	explicit RhinoCallbacks(const size_t initialShapeCount);
 	virtual ~RhinoCallbacks() = default;
 
-	// Inherited via IRhinoCallbacks
-	bool addGeometry(const size_t initialShapeIndex, const double* vertexCoords, const size_t vertexCoordsCount,
-	                 const double* normals, const size_t normalsCount, const uint32_t* faceIndices,
-	                 const size_t faceIndicesCount, const uint32_t* faceCounts, const size_t faceCountsCount);
-
-	void addUVCoordinates(const size_t initialShapeIndex, double const* const* uvs, size_t const* uvsSizes,
-	                      uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
-	                      uint32_t const* const* uvIndices, size_t const* uvIndicesSizes, uint32_t uvSets);
+	// functions from IRhinoCallbacks
 
 	void add(const size_t initialShapeIndex, const size_t instanceIndex, const double* vertexCoords,
 	         const size_t vertexCoordsCount, const double* normals, const size_t normalsCount,
@@ -121,143 +109,59 @@ public:
 	void addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
 	              size_t& resultSize) override;
 
-	size_t getInitialShapeCount() const {
-		return mModels.size();
-	}
+	// local helper functions
 
-	const ModelPtr& getModel(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
+	const ModelPtr& getModel(const size_t initialShapeIdx) const;
+	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const;
+	const Materials::MaterialsMap getMaterial(const size_t initialShapeIdx) const;
 
-		return mModels[initialShapeIdx];
-	}
+	// functions from prt::Callbacks
 
-	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-
-		if (!mModels[initialShapeIdx])
-			return {};
-
-		return mModels[initialShapeIdx]->getReports();
-	}
-
-	const Materials::MaterialsMap getMaterial(const size_t initialShapeIdx) const {
-		if (initialShapeIdx >= mModels.size())
-			throw std::out_of_range("initial shape index is out of range.");
-
-		if (!mModels[initialShapeIdx])
-			return {};
-
-		return mModels[initialShapeIdx]->getMaterials();
-	}
-
-	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) {
-		LOG_ERR << L"GENERATE ERROR:" << isIndex << " " << status << " " << message;
-		return prt::STATUS_OK;
-	}
+	prt::Status generateError(size_t isIndex, prt::Status status, const wchar_t* message) override;
 
 	prt::Status assetError(size_t isIndex, prt::CGAErrorLevel level, const wchar_t* key, const wchar_t* uri,
-	                       const wchar_t* message) {
-		Model& model = getOrCreateModel(isIndex);
-
-		if (message != nullptr) {
-			auto msg = std::wstring(L"Asset Error: ").append(message);
-			if (key != nullptr)
-				msg.append(L"; CGA key = '").append(key).append(L"'");
-			if (uri != nullptr)
-				msg.append(L"; CGA URI = '").append(uri).append(L"'");
-			model.addErrorOutput(msg);
-		}
-
-		LOG_ERR << L"ASSET ERROR:" << isIndex << " " << level << " " << key << " " << uri << " " << message
-		        << std::endl;
-		return prt::STATUS_OK;
-	}
+	                       const wchar_t* message) override;
 
 	prt::Status cgaError(size_t isIndex, int32_t shapeID, prt::CGAErrorLevel level, int32_t methodId, int32_t pc,
-	                     const wchar_t* message) {
-		Model& model = getOrCreateModel(isIndex);
+	                     const wchar_t* message) override;
 
-		if (message != nullptr) {
-			auto msg = std::wstring(L"CGA Error: ").append(message);
-			model.addErrorOutput(msg);
-		}
+	prt::Status cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t* txt) override;
 
-		LOG_ERR << L"CGA ERROR:" << isIndex << " " << shapeID << " " << level << " " << methodId << " " << pc << " "
-		        << message << std::endl;
-		return prt::STATUS_OK;
-	}
+	prt::Status cgaReportBool(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, bool /*value*/) override;
 
-	prt::Status cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t* txt) {
-		Model& model = getOrCreateModel(isIndex);
-
-		if (txt != nullptr)
-			model.addPrintOutput(txt);
-
-		LOG_INF << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
-		return prt::STATUS_OK;
-	}
-
-	prt::Status cgaReportBool(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, bool /*value*/) {
-		return prt::STATUS_OK;
-	}
-
-	prt::Status cgaReportFloat(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, double /*value*/) {
-		return prt::STATUS_OK;
-	}
+	prt::Status cgaReportFloat(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+	                           double /*value*/) override;
 
 	prt::Status cgaReportString(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
-	                            const wchar_t* /*value*/) {
-		return prt::STATUS_OK;
-	}
+	                            const wchar_t* /*value*/) override;
 
-	prt::Status attrBool(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, bool /*value*/) {
-		return prt::STATUS_OK;
-	}
+	prt::Status attrBool(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, bool /*value*/) override;
 
-	prt::Status attrFloat(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, double /*value*/) {
-		return prt::STATUS_OK;
-	}
+	prt::Status attrFloat(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, double /*value*/) override;
 
-	prt::Status attrString(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, const wchar_t* /*value*/) {
-		return prt::STATUS_OK;
-	}
+	prt::Status attrString(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+	                       const wchar_t* /*value*/) override;
 
 	prt::Status attrBoolArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, const bool* /*ptr*/,
-	                          size_t /*size*/) {
-		return prt::STATUS_OK;
-	}
+	                          size_t /*size*/, size_t nRows) override;
 
 	prt::Status attrFloatArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, const double* /*ptr*/,
-	                           size_t /*size*/) {
-		return prt::STATUS_OK;
-	}
+	                           size_t /*size*/, size_t nRows) override;
 
 	prt::Status attrStringArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
-	                            const wchar_t* const* /*ptr*/, size_t /*size*/) {
-		return prt::STATUS_OK;
-	}
+	                            const wchar_t* const* /*ptr*/, size_t /*size*/, size_t nRows) override;
 
-	prt::Status attrBoolArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, const bool* /*ptr*/,
-	                          size_t /*size*/, size_t) {
-		return prt::STATUS_OK;
-	}
+private:
+	Model& getOrCreateModel(size_t initialShapeIndex);
 
-	prt::Status attrFloatArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, const double* /*ptr*/,
-	                           size_t /*size*/, size_t) {
-		return prt::STATUS_OK;
-	}
+	bool addGeometry(const size_t initialShapeIndex, const double* vertexCoords, const size_t vertexCoordsCount,
+	                 const double* normals, const size_t normalsCount, const uint32_t* faceIndices,
+	                 const size_t faceIndicesCount, const uint32_t* faceCounts, const size_t faceCountsCount);
 
-	prt::Status attrStringArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
-	                            const wchar_t* const* /*ptr*/, size_t /*size*/, size_t) {
-		return prt::STATUS_OK;
-	}
+	void addUVCoordinates(const size_t initialShapeIndex, double const* const* uvs, size_t const* uvsSizes,
+	                      uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
+	                      uint32_t const* const* uvIndices, size_t const* uvIndicesSizes, uint32_t uvSets);
 
-	private:
-		Model& getOrCreateModel(size_t initialShapeIndex) {
-		    if (!mModels[initialShapeIndex])
-			    mModels[initialShapeIndex] = std::make_shared<Model>();
-		    return *mModels[initialShapeIndex];
-	}
+private:
+	std::vector<ModelPtr> mModels;
 };
