@@ -64,7 +64,7 @@ namespace PumaGrasshopper
         const string REPORTS_OUTPUT_NICK_NAME = "Reports";
 
         const string CGA_PRINT_OUTPUT_NAME = "CGA Print Output";
-        const string CGA_PRINT_OUTPUT_NICK_NAME = "Print";
+        const string CGA_PRINT_OUTPUT_NICK_NAME = "Prints";
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -126,9 +126,9 @@ namespace PumaGrasshopper
             pManager.AddGenericParameter(REPORTS_OUTPUT_NAME, REPORTS_OUTPUT_NICK_NAME,
                 "CGA report values per input shape.",
                 GH_ParamAccess.tree);
-            pManager.AddTextParameter(CGA_PRINT_OUTPUT_NAME, CGA_PRINT_OUTPUT_NICK_NAME,
-                "CGA print output.",
-                GH_ParamAccess.list);
+            pManager.AddGenericParameter(CGA_PRINT_OUTPUT_NAME, CGA_PRINT_OUTPUT_NICK_NAME,
+                "CGA print output per input shape.",
+                GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -224,9 +224,8 @@ namespace PumaGrasshopper
                 DA.SetDataTree(0, meshStructure);
 
                 OutputReports(DA, generatedMeshes);
+                OutputCGAPrint(DA, generatedMeshes);
             }
-
-            OutputCGAPrint(DA);
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -260,10 +259,18 @@ namespace PumaGrasshopper
             DA.SetDataTree(2, outputTree);
         }
 
-        private void OutputCGAPrint(IGH_DataAccess dataAccess)
+        private void OutputCGAPrint(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
         {
-            List<String> cgaPrintOutput = PRTWrapper.GetCGAPrintOutput(0);
-            dataAccess.SetDataList(3, cgaPrintOutput);
+            var outputTree = new GH_Structure<GH_String>();
+
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            {
+                List<String> printOutput = PRTWrapper.GetCGAPrintOutput(shapeId);
+                var shapePath = new GH_Path(shapeId);
+                printOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
+            }
+
+            dataAccess.SetDataTree(3, outputTree);
         }
 
         /// <summary>
