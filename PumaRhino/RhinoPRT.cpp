@@ -208,7 +208,7 @@ void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleA
 }
 
 Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex) {
-	if (!mGeneratedModels[initialShapeIndex])
+	if ((mGeneratedModels.size() <= initialShapeIndex) || !mGeneratedModels[initialShapeIndex])
 		return Reporting::EMPTY_REPORTS;
 
 	const auto& reports = mGeneratedModels[initialShapeIndex]->getReport();
@@ -286,7 +286,7 @@ RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>* pMeshArray) {
 	const auto& models = RhinoPRT::get().getGenModels();
 
-	if (!models[initialShapeIndex])
+	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
 		return false;
 
 	const auto meshBundle = models[initialShapeIndex]->getMeshesFromGenModel(initialShapeIndex);
@@ -442,7 +442,7 @@ RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* p
 RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
 	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
 
-	if (!models[initialShapeIndex])
+	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
 		return;
 
 	const std::vector<std::wstring>& printOutput = models[initialShapeIndex]->getPrintOutput();
