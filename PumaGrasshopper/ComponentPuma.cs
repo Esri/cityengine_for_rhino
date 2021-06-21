@@ -46,28 +46,82 @@ namespace PumaGrasshopper
 
         const string RPK_INPUT_NAME = "Path to Rule Package";
         const string RPK_INPUT_NICK_NAME = "RPK";
+        const string RPK_INPUT_DESC = "Path to a CityEngine rule package (RPK).";
         const string RPK_PATH_SERIALIZE = "RPK_PATH";
 
         const string GEOM_INPUT_NAME = "Input Shapes";
         const string GEOM_INPUT_NICK_NAME = "Shapes";
+        const string GEOM_INPUT_DESC = "Input shapes on which to execute the rules.";
 
         const string SEED_INPUT_NAME = "Seed";
         const string SEED_KEY = "seed";
+        const string SEED_INPUT_DESC = "A number that will be used to seed the PRT random number generator.";
 
         const string GEOM_OUTPUT_NAME = "Generated Models";
         const string GEOM_OUTPUT_NICK_NAME = "Models";
+        const string GEOM_OUTPUT_DESC = "Generated model geometry per input shape.";
 
         const string MATERIAL_OUTPUT_NAME = "Materials";
         const string MATERIAL_OUTPUT_NICK_NAME = "Materials";
+        const string MATERIAL_OUTPUT_DESC = "Material attributes per input shape.";
 
         const string REPORTS_OUTPUT_NAME = "CGA Reports";
         const string REPORTS_OUTPUT_NICK_NAME = "Reports";
+        const string REPORTS_OUTPUT_DESC = "CGA report values per input shape.";
 
         const string CGA_PRINT_OUTPUT_NAME = "CGA Print Output";
         const string CGA_PRINT_OUTPUT_NICK_NAME = "Prints";
+        const string CGA_PRINT_OUTPUT_DESC = "CGA print output per input shape.";
 
         const string CGA_ERROR_OUTPUT_NAME = "CGA and Asset Errors";
         const string CGA_ERROR_OUTPUT_NICK_NAME = "Errors";
+        const string CGA_ERROR_OUTPUT_DESC = "CGA and asset errors encountered per input shape.";
+
+        enum ParamType
+        {
+            GEOMETRY,
+            FILEPATH,
+            INTEGER,
+            GENERIC
+        }
+
+        struct ParameterDescriptor
+        {
+            public ParamType type;
+            public string name;
+            public string nickName;
+            public string desc;
+        }
+
+        enum InputParams
+        {
+            RPK,
+            SHAPES,
+            SEEDS
+        }
+
+        static readonly ParameterDescriptor[] INPUT_PARAM_DESC = new ParameterDescriptor[]{
+            new ParameterDescriptor{ type = ParamType.FILEPATH, name = RPK_INPUT_NAME, nickName = RPK_INPUT_NICK_NAME, desc = RPK_INPUT_DESC },
+            new ParameterDescriptor{ type = ParamType.GEOMETRY, name = GEOM_INPUT_NAME, nickName = GEOM_INPUT_NICK_NAME, desc = GEOM_INPUT_DESC },
+            new ParameterDescriptor{ type = ParamType.INTEGER, name = SEED_KEY, nickName = SEED_INPUT_NAME, desc = SEED_INPUT_DESC },
+        };
+
+        enum OutputParams
+        {
+            MODELS,
+            MATERIALS,
+            REPORTS,
+            PRINTS,
+            ERRORS
+        }
+
+        static readonly ParameterDescriptor[] OUTPUT_PARAM_DESC = new ParameterDescriptor[]{
+            new ParameterDescriptor{ type = ParamType.GEOMETRY, name = GEOM_OUTPUT_NAME, nickName = GEOM_OUTPUT_NICK_NAME, desc = GEOM_OUTPUT_DESC },
+            new ParameterDescriptor{ type = ParamType.GENERIC, name = MATERIAL_OUTPUT_NAME, nickName = MATERIAL_OUTPUT_NICK_NAME, desc = MATERIAL_OUTPUT_DESC },
+            new ParameterDescriptor{ type = ParamType.GENERIC, name = REPORTS_OUTPUT_NAME, nickName = REPORTS_OUTPUT_NICK_NAME, desc = REPORTS_OUTPUT_DESC },
+            new ParameterDescriptor{ type = ParamType.GENERIC, name = CGA_PRINT_OUTPUT_NAME, nickName = CGA_PRINT_OUTPUT_NICK_NAME, desc = CGA_PRINT_OUTPUT_DESC },
+            new ParameterDescriptor{ type = ParamType.GENERIC, name = CGA_ERROR_OUTPUT_NAME, nickName = CGA_ERROR_OUTPUT_NICK_NAME, desc = CGA_ERROR_OUTPUT_DESC },
+        };
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
@@ -104,15 +158,22 @@ namespace PumaGrasshopper
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddParameter(new Param_FilePath(), RPK_INPUT_NAME, RPK_INPUT_NICK_NAME,
-                "Path to a CityEngine rule package (RPK).",
-                GH_ParamAccess.item);
-            pManager.AddGeometryParameter(GEOM_INPUT_NAME, GEOM_INPUT_NICK_NAME,
-                "Input shapes on which to execute the rules.",
-                GH_ParamAccess.tree);
-            pManager.AddIntegerParameter(SEED_KEY, SEED_INPUT_NAME,
-                "A number that will be used to seed the PRT random number generator.",
-                GH_ParamAccess.tree, 0);
+            foreach (var param in Enum.GetValues(typeof(InputParams)).Cast<InputParams>())
+            {
+                var desc = INPUT_PARAM_DESC[(int)param];
+;               switch (desc.type)
+                {
+                    case ParamType.GEOMETRY:
+                        pManager.AddGeometryParameter(desc.name, desc.nickName, desc.desc, GH_ParamAccess.tree);
+                        break;
+                    case ParamType.FILEPATH:
+                        pManager.AddParameter(new Param_FilePath(), desc.name, desc.nickName, desc.desc, GH_ParamAccess.item);
+                        break;
+                    case ParamType.INTEGER:
+                        pManager.AddIntegerParameter(desc.name, desc.nickName, desc.desc, GH_ParamAccess.tree, 0);
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -120,21 +181,19 @@ namespace PumaGrasshopper
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGeometryParameter(GEOM_OUTPUT_NAME, GEOM_OUTPUT_NICK_NAME,
-                "Generated model geometry per input shape.",
-                GH_ParamAccess.tree);
-            pManager.AddGenericParameter(MATERIAL_OUTPUT_NAME, MATERIAL_OUTPUT_NICK_NAME,
-                "Material attributes per input shape.",
-                GH_ParamAccess.tree);
-            pManager.AddGenericParameter(REPORTS_OUTPUT_NAME, REPORTS_OUTPUT_NICK_NAME,
-                "CGA report values per input shape.",
-                GH_ParamAccess.tree);
-            pManager.AddGenericParameter(CGA_PRINT_OUTPUT_NAME, CGA_PRINT_OUTPUT_NICK_NAME,
-                "CGA print output per input shape.",
-                GH_ParamAccess.tree);
-            pManager.AddGenericParameter(CGA_ERROR_OUTPUT_NAME, CGA_ERROR_OUTPUT_NICK_NAME,
-                "CGA and Asset errors encountered per input shape.",
-                GH_ParamAccess.tree);
+            foreach (var param in Enum.GetValues(typeof(OutputParams)).Cast<OutputParams>())
+            {
+                var desc = OUTPUT_PARAM_DESC[(int)param];
+                switch (desc.type)
+                {
+                    case ParamType.GEOMETRY:
+                        pManager.AddGeometryParameter(desc.name, desc.nickName, desc.desc, GH_ParamAccess.tree);
+                        break;
+                    case ParamType.GENERIC:
+                        pManager.AddGenericParameter(desc.name, desc.nickName, desc.desc, GH_ParamAccess.tree);
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -162,9 +221,9 @@ namespace PumaGrasshopper
                 mCurrentRPK = rpk_file;
 
                 //if rule attributes input parameters are already existing, remove them.
-                if(mRuleAttributes.Length > 0)
+                if (mRuleAttributes.Length > 0)
                 {
-                    foreach(var param in mParams)
+                    foreach (var param in mParams)
                     {
                         Params.UnregisterInputParameter(param);
                     }
@@ -175,7 +234,7 @@ namespace PumaGrasshopper
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
                 foreach (RuleAttribute attrib in mRuleAttributes)
                 {
-                    if(attrib.mFullName != SEED_KEY)
+                    if (attrib.mFullName != SEED_KEY)
                         CreateInputParameter(attrib);
                 }
 
@@ -194,7 +253,7 @@ namespace PumaGrasshopper
             List<Mesh> meshes = new List<Mesh>();
 
             int initShapeIdx = 0;
-            foreach(IGH_GeometricGoo geom in shapeTree.AllData(true))
+            foreach (IGH_GeometricGoo geom in shapeTree.AllData(true))
             {
                 Mesh mesh = ConvertToMesh(geom);
 
@@ -210,7 +269,7 @@ namespace PumaGrasshopper
             if (meshes.Count == 0)
                 return;
 
-            if(!PRTWrapper.AddMesh(meshes))
+            if (!PRTWrapper.AddMesh(meshes))
                 return;
 
             // Get all node input corresponding to the list of mRuleAttributes registered.
@@ -221,13 +280,13 @@ namespace PumaGrasshopper
             if (mDoGenerateMaterials && generatedMeshes != null)
             {
                 GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes);
-                DA.SetDataTree(1, materials);
+                DA.SetDataTree((int)OutputParams.MATERIALS, materials);
             }
 
             if (generatedMeshes != null)
             {
                 var meshStructure = PRTWrapper.CreateMeshStructure(generatedMeshes);
-                DA.SetDataTree(0, meshStructure);
+                DA.SetDataTree((int)OutputParams.MODELS, meshStructure);
 
                 OutputReports(DA, generatedMeshes);
                 OutputCGAPrint(DA, generatedMeshes);
@@ -263,7 +322,7 @@ namespace PumaGrasshopper
                 reports.ForEach(x => outputTree.Append(x, path));
             }
 
-            DA.SetDataTree(2, outputTree);
+            DA.SetDataTree((int)OutputParams.REPORTS, outputTree);
         }
 
         private void OutputCGAPrint(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
@@ -277,7 +336,7 @@ namespace PumaGrasshopper
                 printOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
             }
 
-            dataAccess.SetDataTree(3, outputTree);
+            dataAccess.SetDataTree((int)OutputParams.PRINTS, outputTree);
         }
 
         private void OutputCGAErrors(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
@@ -291,7 +350,7 @@ namespace PumaGrasshopper
                 errorOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
             }
 
-            dataAccess.SetDataTree(4, outputTree);
+            dataAccess.SetDataTree((int)OutputParams.ERRORS, outputTree);
         }
 
         /// <summary>
@@ -306,16 +365,16 @@ namespace PumaGrasshopper
             // Cast the shape to its actual Rhino.Geometry type.
             IGH_GeometricGoo geoGoo = shape; // copy
 
-            if(geoGoo is GH_Mesh)
+            if (geoGoo is GH_Mesh)
             {
                 GH_Mesh m = geoGoo as GH_Mesh;
-                if(!GH_Convert.ToMesh(m, ref mesh, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToMesh(m, ref mesh, GH_Conversion.Both)) return null;
             }
             else if (geoGoo is GH_Brep)
             {
                 GH_Brep brep = geoGoo as GH_Brep;
                 Brep brepShape = null;
-                if(!GH_Convert.ToBrep(brep, ref brepShape, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToBrep(brep, ref brepShape, GH_Conversion.Both)) return null;
 
                 mesh = new Mesh();
                 mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.DefaultAnalysisMesh));
@@ -333,14 +392,14 @@ namespace PumaGrasshopper
             else if (geoGoo is GH_Surface)
             {
                 Surface surf = null;
-                if(!GH_Convert.ToSurface(geoGoo as GH_Surface, ref surf, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToSurface(geoGoo as GH_Surface, ref surf, GH_Conversion.Both)) return null;
                 mesh = Mesh.CreateFromSurface(surf, MeshingParameters.QualityRenderMesh);
             }
             else if (geoGoo is GH_Box)
             {
-                if(!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
             }
-            else if(geoGoo is GH_Plane)
+            else if (geoGoo is GH_Plane)
             {
                 if (!GH_Convert.ToMesh(geoGoo as GH_Plane, ref mesh, GH_Conversion.Both)) return null;
             }
@@ -369,7 +428,7 @@ namespace PumaGrasshopper
             if (index != -1)
             {
                 //If the existing parameter is connected to a remote source, the wire connection need to be ported.
-                for(int i = 0; i < Params.Input[index].SourceCount; ++i)
+                for (int i = 0; i < Params.Input[index].SourceCount; ++i)
                 {
                     parameter.AddSource(Params.Input[index].Sources[i]);
                 }
@@ -427,7 +486,7 @@ namespace PumaGrasshopper
             }
         }
 
-        private void ExtractTreeValues<T>(GH_Structure<T> tree, RuleAttribute attribute, int shapeCount) where T: IGH_Goo
+        private void ExtractTreeValues<T>(GH_Structure<T> tree, RuleAttribute attribute, int shapeCount) where T : IGH_Goo
         {
             if (tree.IsEmpty) return;
 
@@ -475,7 +534,7 @@ namespace PumaGrasshopper
             }
         }
 
-        private void SetRuleAttributeArray<T>(int shapeId, RuleAttribute attribute, List<T> values) where T:IGH_Goo
+        private void SetRuleAttributeArray<T>(int shapeId, RuleAttribute attribute, List<T> values) where T : IGH_Goo
         {
             switch (attribute.mAttribType)
             {
@@ -502,7 +561,8 @@ namespace PumaGrasshopper
             }
         }
 
-        private void SetRuleAttribute<T>(int shapeId, RuleAttribute attribute, T value) where T : IGH_Goo {
+        private void SetRuleAttribute<T>(int shapeId, RuleAttribute attribute, T value) where T : IGH_Goo
+        {
             switch (attribute.mAttribType)
             {
                 case AnnotationArgumentType.AAT_FLOAT:
@@ -587,7 +647,7 @@ namespace PumaGrasshopper
 
         public override bool Read(GH_IReader reader)
         {
-            if(reader.ChunkExists(RPK_PATH_SERIALIZE))
+            if (reader.ChunkExists(RPK_PATH_SERIALIZE))
                 mCurrentRPK = reader.GetString(RPK_PATH_SERIALIZE);
             return base.Read(reader);
         }
