@@ -30,6 +30,7 @@
 #include "ReportAttribute.h"
 #include "utils.h"
 
+#include <cassert>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
@@ -59,8 +60,9 @@ public:
 
 	void addMaterial(const Materials::MaterialAttribute& ma);
 	void addReport(const Reporting::ReportAttribute& ra);
-	void addPrintOutput(const std::wstring& message) {
-		mPrintOutput.push_back(message);
+	void addPrintOutput(const std::wstring_view& message) {
+		assert(message.length() > 0); // we expect at least the newline character added by PRT
+		mPrintOutput.emplace_back(message.substr(0, message.length()-1)); // let's trim the newline away
 	}
 
 	const std::vector<ModelPart>& getModelParts() const;
@@ -110,7 +112,7 @@ public:
 	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
 
 	void addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
-	                      size_t& resultSize) override;
+	              size_t& resultSize) override;
 
 	size_t getInitialShapeCount() const {
 		return mModels.size();
