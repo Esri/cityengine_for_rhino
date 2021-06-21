@@ -28,6 +28,8 @@ namespace {
 
 constexpr bool DBG = false;
 
+const Reporting::ReportMap EMPTY_REPORT_MAP;
+
 } // namespace
 
 void Model::addMaterial(const Materials::MaterialAttribute& ma) {
@@ -221,19 +223,9 @@ const Reporting::ReportMap& RhinoCallbacks::getReport(const size_t initialShapeI
 		throw std::out_of_range("initial shape index is out of range.");
 
 	if (!mModels[initialShapeIdx])
-		return {};
+		return EMPTY_REPORT_MAP;
 
 	return mModels[initialShapeIdx]->getReports();
-}
-
-const Materials::MaterialsMap RhinoCallbacks::getMaterial(const size_t initialShapeIdx) const {
-	if (initialShapeIdx >= mModels.size())
-		throw std::out_of_range("initial shape index is out of range.");
-
-	if (!mModels[initialShapeIdx])
-		return {};
-
-	return mModels[initialShapeIdx]->getMaterials();
 }
 
 prt::Status RhinoCallbacks::generateError(size_t isIndex, prt::Status status, const wchar_t* message) {

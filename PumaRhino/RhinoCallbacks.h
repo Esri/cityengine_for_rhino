@@ -113,7 +113,6 @@ public:
 
 	const ModelPtr& getModel(const size_t initialShapeIdx) const;
 	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const;
-	const Materials::MaterialsMap getMaterial(const size_t initialShapeIdx) const;
 
 	// functions from prt::Callbacks
 
