@@ -276,16 +276,8 @@ namespace PumaGrasshopper
             FillAttributesFromNode(DA, meshes.Count);
 
             var generatedMeshes = PRTWrapper.GenerateMesh();
-
-            var meshStructure = PRTWrapper.CreateMeshStructure(generatedMeshes);
-            DA.SetDataTree((int)OutputParams.MODELS, meshStructure);
-
-            if (mDoGenerateMaterials)
-            {
-                GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes);
-                DA.SetDataTree((int)OutputParams.MATERIALS, materials);
-            }
-
+            OutputGeometry(DA, generatedMeshes);
+            OutputMaterials(DA, generatedMeshes);
             OutputReports(DA, generatedMeshes);
             OutputCGAPrint(DA, generatedMeshes);
             OutputCGAErrors(DA, generatedMeshes);
@@ -306,7 +298,22 @@ namespace PumaGrasshopper
             ExpireSolution(true);
         }
 
-        private void OutputReports(IGH_DataAccess DA, List<Mesh[]> generatedMeshes)
+        private void OutputGeometry(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
+        {
+            var meshStructure = PRTWrapper.CreateMeshStructure(generatedMeshes);
+            dataAccess.SetDataTree((int)OutputParams.MODELS, meshStructure);
+        }
+
+        private void OutputMaterials(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
+        {
+            if (!mDoGenerateMaterials)
+                return;
+
+            GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes);
+            dataAccess.SetDataTree((int)OutputParams.MATERIALS, materials);
+        }
+
+        private void OutputReports(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
         {
             GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
 
@@ -320,7 +327,7 @@ namespace PumaGrasshopper
                 }
             }
 
-            DA.SetDataTree((int)OutputParams.REPORTS, outputTree);
+            dataAccess.SetDataTree((int)OutputParams.REPORTS, outputTree);
         }
 
         private void OutputCGAPrint(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
