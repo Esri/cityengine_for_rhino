@@ -116,6 +116,9 @@ namespace PumaGrasshopper
         public static extern void GetCGAPrintOutput(int initialShapeIndex, [In, Out] IntPtr pPrintOutput);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetCGAErrorOutput(int initialShapeIndex, [In, Out] IntPtr pErrorOutput);
+
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetMaterial(int initialShapeIndex, int shapeID, ref int pUvSet,
                                                 [In, Out] IntPtr pTexKeys,
                                                 [In, Out] IntPtr pTexPaths,
@@ -411,6 +414,19 @@ namespace PumaGrasshopper
             printOutput.Dispose();
 
             return new List<String>(printOutputArray);
+        }
+
+        public static List<String> GetCGAErrorOutput(int initialShapeIndex)
+        {
+            var errorOutput = new ClassArrayString();
+            var pErrorOutput = errorOutput.NonConstPointer();
+
+            GetCGAErrorOutput(initialShapeIndex, pErrorOutput);
+
+            var errorOutputArray = errorOutput.ToArray();
+            errorOutput.Dispose();
+
+            return new List<String>(errorOutputArray);
         }
 
         public static RuleAttribute[] GetRuleAttributes()

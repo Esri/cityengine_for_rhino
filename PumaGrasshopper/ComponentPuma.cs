@@ -66,6 +66,9 @@ namespace PumaGrasshopper
         const string CGA_PRINT_OUTPUT_NAME = "CGA Print Output";
         const string CGA_PRINT_OUTPUT_NICK_NAME = "Prints";
 
+        const string CGA_ERROR_OUTPUT_NAME = "CGA and Asset Errors";
+        const string CGA_ERROR_OUTPUT_NICK_NAME = "Errors";
+
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
         private readonly List<IGH_Param> mParams;
@@ -128,6 +131,9 @@ namespace PumaGrasshopper
                 GH_ParamAccess.tree);
             pManager.AddGenericParameter(CGA_PRINT_OUTPUT_NAME, CGA_PRINT_OUTPUT_NICK_NAME,
                 "CGA print output per input shape.",
+                GH_ParamAccess.tree);
+            pManager.AddGenericParameter(CGA_ERROR_OUTPUT_NAME, CGA_ERROR_OUTPUT_NICK_NAME,
+                "CGA and Asset errors encountered per input shape.",
                 GH_ParamAccess.tree);
         }
 
@@ -225,6 +231,7 @@ namespace PumaGrasshopper
 
                 OutputReports(DA, generatedMeshes);
                 OutputCGAPrint(DA, generatedMeshes);
+                OutputCGAErrors(DA, generatedMeshes);
             }
         }
 
@@ -271,6 +278,20 @@ namespace PumaGrasshopper
             }
 
             dataAccess.SetDataTree(3, outputTree);
+        }
+
+        private void OutputCGAErrors(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
+        {
+            var outputTree = new GH_Structure<GH_String>();
+
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            {
+                List<String> errorOutput = PRTWrapper.GetCGAErrorOutput(shapeId);
+                var shapePath = new GH_Path(shapeId);
+                errorOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
+            }
+
+            dataAccess.SetDataTree(4, outputTree);
         }
 
         /// <summary>
