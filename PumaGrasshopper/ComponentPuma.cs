@@ -438,19 +438,19 @@ namespace PumaGrasshopper
             {
                 case AnnotationArgumentType.AAT_FLOAT_ARRAY:
                     {
-                        List<double> doubleList = values.Cast<double>().ToList();
+                        List<double> doubleList = values.ConvertAll((x) => { x.CastTo<double>(out double d); return d; });
                         PRTWrapper.SetRuleAttributeDoubleArray(shapeId, attribute.mRuleFile, attribute.mFullName, doubleList);
                         return;
                     }
                 case AnnotationArgumentType.AAT_BOOL_ARRAY:
                     {
-                        List<Boolean> boolList = values.Cast<bool>().ToList();
+                        List<bool> boolList = values.ConvertAll((x) => { x.CastTo<bool>(out bool b); return b; });
                         PRTWrapper.SetRuleAttributeBoolArray(shapeId, attribute.mRuleFile, attribute.mFullName, boolList);
                         return;
                     }
                 case AnnotationArgumentType.AAT_STR_ARRAY:
                     {
-                        List<string> stringList = values.Cast<string>().ToList();
+                        List<string> stringList = values.ConvertAll((x) => { x.CastTo<string>(out string s); return s; });
                         PRTWrapper.SetRuleAttributeStringArray(shapeId, attribute.mRuleFile, attribute.mFullName, stringList);
                         return;
                     }
