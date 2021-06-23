@@ -513,12 +513,12 @@ namespace PumaGrasshopper
 
         public bool CanInsertParameter(GH_ParameterSide side, int index)
         {
-            return false;
+            return (side == GH_ParameterSide.Input);
         }
 
         public bool CanRemoveParameter(GH_ParameterSide side, int index)
         {
-            return false;
+            return (side == GH_ParameterSide.Input);
         }
 
         public IGH_Param CreateParameter(GH_ParameterSide side, int index)
