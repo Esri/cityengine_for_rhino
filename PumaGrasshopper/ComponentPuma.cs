@@ -123,57 +123,22 @@ namespace PumaGrasshopper
                 GH_ParamAccess.tree);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and
-        /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            // Get default inputs
-
-            // RPK path is a single item.
-            string rpk_file = "";
-            if (!DA.GetData(RPK_INPUT_NAME, ref rpk_file))
-                return;
-            if (rpk_file.Length == 0)
+            String potentiallyNewRulePackage = GetRulePackage(DA);
+            if (potentiallyNewRulePackage.Length == 0)
                 return;
 
-            // Once we have a rpk file, directly extract the rule attributes
-            PRTWrapper.SetPackage(rpk_file);
+            CheckAndUpdateRulePackage(potentiallyNewRulePackage);
 
-            // Update the rule attributes only if the rpk is changed.
-            if (mCurrentRPK != rpk_file)
-            {
-                mCurrentRPK = rpk_file;
-
-                RemoveAttributeInputParameters();
-
-                mRuleAttributes = PRTWrapper.GetRuleAttributes();
-                foreach (RuleAttribute attrib in mRuleAttributes)
-                {
-                    if(attrib.mFullName != SEED_KEY)
-                        CreateAttributeInputParameter(attrib);
-                }
-
-                Params.OnParametersChanged();
-                ExpireSolution(true);
-                return;
-            }
-
-            PRTWrapper.ClearInitialShapes();
-
-            // Get the initial shape inputs
             List<Mesh> inputMeshes = CreateInputMeshes(DA);
-
-            // No compatible mesh was given
             if (inputMeshes == null || inputMeshes.Count == 0)
                 return;
 
-            if(!PRTWrapper.AddMesh(inputMeshes))
+            PRTWrapper.ClearInitialShapes();
+            if (!PRTWrapper.AddMesh(inputMeshes))
                 return;
 
-            // Get all node input corresponding to the list of mRuleAttributes registered.
             FillAttributesFromNode(DA, inputMeshes.Count);
 
             var outputMeshes = PRTWrapper.GenerateMesh();
@@ -189,6 +154,37 @@ namespace PumaGrasshopper
                 OutputReports(DA, outputMeshes);
                 DA.SetDataTree(0, outputMeshes);
             }
+        }
+
+        private String GetRulePackage(IGH_DataAccess dataAccess)
+        {
+            string rpk_file = "";
+            if (!dataAccess.GetData(RPK_INPUT_NAME, ref rpk_file))
+                return "";
+            return rpk_file;
+        }
+
+        private void CheckAndUpdateRulePackage(String potentiallyNewRulePackage)
+        {
+            if (mCurrentRPK != potentiallyNewRulePackage)
+            {
+                mCurrentRPK = potentiallyNewRulePackage;
+
+                RemoveAttributeInputParameters();
+
+                PRTWrapper.SetPackage(mCurrentRPK);
+                mRuleAttributes = PRTWrapper.GetRuleAttributes();
+                foreach (RuleAttribute attrib in mRuleAttributes)
+                {
+                    if (attrib.mFullName != SEED_KEY)
+                        CreateAttributeInputParameter(attrib);
+                }
+
+                Params.OnParametersChanged();
+                ExpireSolution(true);
+            }
+            else
+                PRTWrapper.SetPackage(mCurrentRPK);
         }
 
         private List<Mesh> CreateInputMeshes(IGH_DataAccess dataAccess)
