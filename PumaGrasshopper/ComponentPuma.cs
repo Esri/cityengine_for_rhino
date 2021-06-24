@@ -318,7 +318,7 @@ namespace PumaGrasshopper
         /// <param name="attrib">A rule attribute to add as input</param>
         private void CreateInputParameter(RuleAttribute attrib)
         {
-            var parameter = attrib.GetInputParameter();
+            var parameter = attrib.CreateInputParameter();
 
             // Check if the param already exists and replace it to avoid adding duplicates.
             int index = Params.IndexOfInputParam(parameter.Name);

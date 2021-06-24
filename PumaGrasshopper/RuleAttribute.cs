@@ -184,7 +184,7 @@ namespace PumaGrasshopper
             this.mGroup = group;
         }
 
-        public IGH_Param GetInputParameter()
+        public IGH_Param CreateInputParameter()
         {
 
             switch (this.mAttribType)
