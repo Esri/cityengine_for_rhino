@@ -147,17 +147,13 @@ namespace PumaGrasshopper
             {
                 mCurrentRPK = rpk_file;
 
-                //if rule attributes input parameters are already existing, remove them.
-                if(mRuleAttributes.Length > 0)
+                var doc = OnPingDocument();
+                for (int i = 3; i < Params.Input.Count; i++) 
                 {
-                    var doc = OnPingDocument();
-                    for (int i = 3; i < Params.Input.Count; i++) 
-                    {
-                        var param = Params.Input[i];
-                        param.RemoveAllSources();
-                        doc.RemoveObject(param, false);
-                        Params.UnregisterInputParameter(param, true);
-                    }
+                    var param = Params.Input[i];
+                    param.RemoveAllSources();
+                    doc.RemoveObject(param, false);
+                    Params.UnregisterInputParameter(param, true);
                 }
 
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
