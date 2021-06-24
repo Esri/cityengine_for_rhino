@@ -164,17 +164,44 @@ namespace PumaGrasshopper
             PRTWrapper.ClearInitialShapes();
 
             // Get the initial shape inputs
-            if (!DA.GetDataTree<IGH_GeometricGoo>(GEOM_INPUT_NAME, out GH_Structure<IGH_GeometricGoo> shapeTree))
+            List<Mesh> inputMeshes = CreateInputMeshes(DA);
+
+            // No compatible mesh was given
+            if (inputMeshes == null || inputMeshes.Count == 0)
                 return;
 
-            // Transform each geometry to a mesh
-            List<Mesh> meshes = new List<Mesh>();
+            if(!PRTWrapper.AddMesh(inputMeshes))
+                return;
+
+            // Get all node input corresponding to the list of mRuleAttributes registered.
+            FillAttributesFromNode(DA, inputMeshes.Count);
+
+            var outputMeshes = PRTWrapper.GenerateMesh();
+
+            if (mDoGenerateMaterials && outputMeshes != null)
+            {
+                GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(outputMeshes.DataCount);
+                DA.SetDataTree(1, materials);
+            }
+
+            if (outputMeshes != null)
+            {
+                OutputReports(DA, outputMeshes);
+                DA.SetDataTree(0, outputMeshes);
+            }
+        }
+
+        private List<Mesh> CreateInputMeshes(IGH_DataAccess dataAccess)
+        {
+            if (!dataAccess.GetDataTree<IGH_GeometricGoo>(GEOM_INPUT_NAME, out GH_Structure<IGH_GeometricGoo> inputShapes))
+                return null;
+
+            var meshes = new List<Mesh>();
 
             int initShapeIdx = 0;
-            foreach(IGH_GeometricGoo geom in shapeTree.AllData(true))
+            foreach (IGH_GeometricGoo geom in inputShapes.AllData(true))
             {
                 Mesh mesh = ConvertToMesh(geom);
-
                 if (mesh != null)
                 {
                     mesh.SetUserString(PRTWrapper.INIT_SHAPE_IDX_KEY, initShapeIdx.ToString());
@@ -183,29 +210,7 @@ namespace PumaGrasshopper
                 initShapeIdx++;
             }
 
-            // No compatible mesh was given
-            if (meshes.Count == 0)
-                return;
-
-            if(!PRTWrapper.AddMesh(meshes))
-                return;
-
-            // Get all node input corresponding to the list of mRuleAttributes registered.
-            FillAttributesFromNode(DA, meshes.Count);
-
-            var generatedMeshes = PRTWrapper.GenerateMesh();
-
-            if (mDoGenerateMaterials && generatedMeshes != null)
-            {
-                GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes.DataCount);
-                DA.SetDataTree(1, materials);
-            }
-
-            if (generatedMeshes != null)
-            {
-                OutputReports(DA, generatedMeshes);
-                DA.SetDataTree(0, generatedMeshes);
-            }
+            return meshes;
         }
 
         private void RemoveAttributeInputParameters()
