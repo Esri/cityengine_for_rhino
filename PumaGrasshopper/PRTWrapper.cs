@@ -432,7 +432,7 @@ namespace PumaGrasshopper
                 attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());
 
                 // get the potential annotations
-                List<Annotations.Annotation> annotations = GetAnnotations(i);
+                List<Annotations.Base> annotations = GetAnnotations(i);
                 attributes[i].mAnnotations.AddRange(annotations);
             }
             
@@ -454,7 +454,7 @@ namespace PumaGrasshopper
             return version;
         }
 
-        public static List<Annotations.Annotation> GetAnnotations(int ruleIdx)
+        public static List<Annotations.Base> GetAnnotations(int ruleIdx)
         {
             int[] intArray = null;
             using(var array = new SimpleArrayInt())
@@ -466,7 +466,7 @@ namespace PumaGrasshopper
                 intArray = array.ToArray();
             }
 
-            var annots = new List<Annotations.Annotation>();
+            var annots = new List<Annotations.Base>();
 
             for(int enumIdx = 0; enumIdx < intArray.Length; ++enumIdx)
             {
@@ -474,7 +474,7 @@ namespace PumaGrasshopper
                 switch (type)
                 {
                     case Annotations.AttributeAnnotation.A_COLOR:
-                        annots.Add(new Annotations.AnnotationColor());
+                        annots.Add(new Annotations.Color());
                         break;
                     case Annotations.AttributeAnnotation.A_ENUM:
                         Annotations.EnumAnnotationType enumType = Annotations.EnumAnnotationType.ENUM_DOUBLE;
@@ -485,7 +485,7 @@ namespace PumaGrasshopper
                         {
                             case Annotations.EnumAnnotationType.ENUM_BOOL:
                                 bool[] boolArray = { true, false };
-                                annots.Add(new Annotations.AnnotationEnum<bool>(boolArray, true));
+                                annots.Add(new Annotations.Enum<bool>(boolArray, true));
                                 break;
                             case Annotations.EnumAnnotationType.ENUM_DOUBLE:
                                 annots.Add(GetAnnotationEnumDouble(ruleIdx, enumIdx));
@@ -502,10 +502,10 @@ namespace PumaGrasshopper
                         annots.Add(GetAnnotationRange(ruleIdx, enumIdx));
                         break;
                     case Annotations.AttributeAnnotation.A_DIR:
-                        annots.Add(new Annotations.AnnotationDir());
+                        annots.Add(new Annotations.Directory());
                         break;
                     case Annotations.AttributeAnnotation.A_FILE:
-                        annots.Add(new Annotations.AnnotationFile());
+                        annots.Add(new Annotations.File());
                         break;
                     default:
                         continue;
@@ -515,7 +515,7 @@ namespace PumaGrasshopper
             return annots;
         }
 
-        public static Annotations.AnnotationEnum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
+        public static Annotations.Enum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
         {
             double[] enumArray = null;
             bool restricted = true;
@@ -529,10 +529,10 @@ namespace PumaGrasshopper
                 enumArray = array.ToArray();
             }
 
-            return new Annotations.AnnotationEnum<double>(enumArray, restricted);
+            return new Annotations.Enum<double>(enumArray, restricted);
         }
 
-        public static Annotations.AnnotationEnum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
+        public static Annotations.Enum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
         {
             string[] enumArray = null;
             bool restricted = true;
@@ -545,10 +545,10 @@ namespace PumaGrasshopper
                 enumArray = array.ToArray();
             }
 
-            return new Annotations.AnnotationEnum<string>(enumArray, restricted);
+            return new Annotations.Enum<string>(enumArray, restricted);
         }
 
-        public static Annotations.AnnotationRange GetAnnotationRange(int ruleIdx, int enumIdx)
+        public static Annotations.Range GetAnnotationRange(int ruleIdx, int enumIdx)
         {
             double min = 0;
             double max = 0;
@@ -558,7 +558,7 @@ namespace PumaGrasshopper
             bool status = GetAnnotationRange(ruleIdx, enumIdx, ref min, ref max, ref stepsize, ref restricted);
             if (status)
             {
-                return new Annotations.AnnotationRange(min, max, stepsize, restricted);
+                return new Annotations.Range(min, max, stepsize, restricted);
             }
             return null;
         }

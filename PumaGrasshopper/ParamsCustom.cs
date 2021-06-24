@@ -32,10 +32,10 @@ namespace PumaGrasshopper
 {
     public class BooleanRuleAttribute : Param_Boolean
     {
-        private List<Annotations.Annotation> mAnnotation;
+        private List<Annotations.Base> mAnnotation;
         private string mGroupName;
 
-        public BooleanRuleAttribute(List<Annotations.Annotation> annot, string groupName = ""): base()
+        public BooleanRuleAttribute(List<Annotations.Base> annot, string groupName = ""): base()
         {
             mAnnotation = annot;
             mGroupName = groupName;
@@ -84,10 +84,10 @@ namespace PumaGrasshopper
 
     public class NumberRuleAttribute: Param_Number
     {
-        private List<Annotations.Annotation> mAnnotations;
+        private List<Annotations.Base> mAnnotations;
         private string mGroupName;
 
-        public NumberRuleAttribute(List<Annotations.Annotation> annots, string groupName)
+        public NumberRuleAttribute(List<Annotations.Base> annots, string groupName)
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -156,10 +156,10 @@ namespace PumaGrasshopper
 
     public class StringRuleAttribute: Param_String
     {
-        private List<Annotations.Annotation> mAnnotations;
+        private List<Annotations.Base> mAnnotations;
         private string mGroupName;
 
-        public StringRuleAttribute(List<Annotations.Annotation> annots, string groupName = ""): base()
+        public StringRuleAttribute(List<Annotations.Base> annots, string groupName = ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -226,10 +226,10 @@ namespace PumaGrasshopper
 
     public class ColourRuleAttribute: Param_Colour
     {
-        private List<Annotations.Annotation> mAnnotations;
+        private List<Annotations.Base> mAnnotations;
         private string mGroupName;
 
-        public ColourRuleAttribute(List<Annotations.Annotation> annots, string groupName= ""): base()
+        public ColourRuleAttribute(List<Annotations.Base> annots, string groupName= ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;

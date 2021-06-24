@@ -10,9 +10,9 @@ namespace PumaGrasshopper.Annotations
     public enum AttributeAnnotation { A_COLOR = 0, A_RANGE, A_ENUM, A_FILE, A_DIR, A_NOANNOT };
     public enum EnumAnnotationType { ENUM_DOUBLE = 0, ENUM_BOOL, ENUM_STRING };
 
-    public class Annotation
+    public class Base
     {
-        public Annotation(AttributeAnnotation annot = AttributeAnnotation.A_NOANNOT)
+        public Base(AttributeAnnotation annot = AttributeAnnotation.A_NOANNOT)
         {
             this.mAnnotType = annot;
         }
@@ -28,9 +28,9 @@ namespace PumaGrasshopper.Annotations
         protected AttributeAnnotation mAnnotType;
     }
 
-    public class AnnotationRange : Annotation
+    public class Range : Base
     {
-        public AnnotationRange(double min, double max, double stepsize = 0, bool restricted = true) : base(AttributeAnnotation.A_RANGE)
+        public Range(double min, double max, double stepsize = 0, bool restricted = true) : base(AttributeAnnotation.A_RANGE)
         {
             mMin = min;
             mMax = max;
@@ -65,9 +65,9 @@ namespace PumaGrasshopper.Annotations
         private bool mRestricted;
     }
 
-    public class AnnotationEnum<T> : Annotation
+    public class Enum<T> : Base
     {
-        public AnnotationEnum(T[] enumList, bool restricted) : base(AttributeAnnotation.A_ENUM)
+        public Enum(T[] enumList, bool restricted) : base(AttributeAnnotation.A_ENUM)
         {
             mEnumList = enumList;
             mRestricted = restricted;
@@ -100,9 +100,9 @@ namespace PumaGrasshopper.Annotations
         private T[] mEnumList;
     }
 
-    public class AnnotationColor : Annotation
+    public class Color : Base
     {
-        public AnnotationColor() : base(AttributeAnnotation.A_COLOR) { }
+        public Color() : base(AttributeAnnotation.A_COLOR) { }
 
         public override string GetDescription(string ruleName)
         {
@@ -112,9 +112,9 @@ namespace PumaGrasshopper.Annotations
         public override bool IsColor() { return true; }
     }
 
-    public class AnnotationFile : Annotation
+    public class File : Base
     {
-        public AnnotationFile() : base(AttributeAnnotation.A_FILE) { }
+        public File() : base(AttributeAnnotation.A_FILE) { }
 
         public override string GetDescription(string ruleName)
         {
@@ -127,9 +127,9 @@ namespace PumaGrasshopper.Annotations
         }
     }
 
-    public class AnnotationDir : Annotation
+    public class Directory : Base
     {
-        public AnnotationDir() : base(AttributeAnnotation.A_DIR) { }
+        public Directory() : base(AttributeAnnotation.A_DIR) { }
 
         public override string GetDescription(string ruleName)
         {

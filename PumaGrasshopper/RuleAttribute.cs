@@ -32,7 +32,7 @@ namespace PumaGrasshopper
         public string mFullName;
         public string mNickname;
         public Annotations.AnnotationArgumentType mAttribType;
-        public List<Annotations.Annotation> mAnnotations;
+        public List<Annotations.Base> mAnnotations;
         public string mGroup;
 
         public RuleAttribute(string name, string nickname, string ruleFile, Annotations.AnnotationArgumentType type, string group)
@@ -41,7 +41,7 @@ namespace PumaGrasshopper
             this.mFullName = name;
             this.mNickname = nickname;
             this.mAttribType = type;
-            this.mAnnotations = new List<Annotations.Annotation>();
+            this.mAnnotations = new List<Annotations.Base>();
             this.mGroup = group;
         }
 
@@ -139,7 +139,7 @@ namespace PumaGrasshopper
                 description = "Group " + mGroup + "\n";
             }
 
-            return description + mAnnotations.Aggregate<Annotations.Annotation, string>("", (left, right) => left + " " + right.GetDescription(mFullName));
+            return description + mAnnotations.Aggregate<Annotations.Base, string>("", (left, right) => left + " " + right.GetDescription(mFullName));
         }
     }
 }
