@@ -118,9 +118,9 @@ namespace PumaGrasshopper
             grp.ExpireCaches();
         }
 
-        public static string GetCastErrorMessage(RuleAttribute attribute, string castTarget)
+        public static string GetCastErrorMessage(string attribute, string castTarget)
         {
-            return "Could not cast attribute " + attribute.mFullName + " to " + castTarget;
+            return "Could not cast attribute " + attribute + " to " + castTarget;
         }
     }
 }

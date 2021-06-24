@@ -31,6 +31,7 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Parameters;
 using System.Drawing;
+using System.Diagnostics;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -198,35 +199,14 @@ namespace PumaGrasshopper
             return meshes;
         }
 
-        private void RemoveAttributeInputParameters()
+        private void FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
         {
-            var doc = OnPingDocument();
-            for (int i = 3; i < Params.Input.Count; i++)
+
+            for (int idx = 3; idx < Params.Input.Count; ++idx)
             {
-                var param = Params.Input[i];
-                Params.UnregisterInputParameter(param, true);
+                var param = Params.Input[idx];
+                SetAttributeOfShapes(DA, shapeCount, param);
             }
-        }
-
-        private void CreateAttributeInputParameter(RuleAttribute attrib)
-        {
-            var parameter = attrib.CreateInputParameter();
-
-            // Check if the param already exists and replace it to avoid adding duplicates.
-            int index = Params.IndexOfInputParam(parameter.Name);
-            if (index != -1)
-            {
-                //If the existing parameter is connected to a remote source, the wire connection need to be ported.
-                for (int i = 0; i < Params.Input[index].SourceCount; ++i)
-                {
-                    parameter.AddSource(Params.Input[index].Sources[i]);
-                }
-
-                Params.Input.RemoveAt(index);
-                Params.Input.Insert(index, parameter);
-            }
-            else
-                Params.RegisterInputParam(parameter);
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -249,7 +229,7 @@ namespace PumaGrasshopper
             GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
 
             int count = gh_meshes.DataCount;
-            for(int meshID = 0; meshID < count; ++meshID)
+            for (int meshID = 0; meshID < count; ++meshID)
             {
                 var reports = PRTWrapper.GetAllReports(meshID);
 
@@ -273,16 +253,16 @@ namespace PumaGrasshopper
             // Cast the shape to its actual Rhino.Geometry type.
             IGH_GeometricGoo geoGoo = shape; // copy
 
-            if(geoGoo is GH_Mesh)
+            if (geoGoo is GH_Mesh)
             {
                 GH_Mesh m = geoGoo as GH_Mesh;
-                if(!GH_Convert.ToMesh(m, ref mesh, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToMesh(m, ref mesh, GH_Conversion.Both)) return null;
             }
             else if (geoGoo is GH_Brep)
             {
                 GH_Brep brep = geoGoo as GH_Brep;
                 Brep brepShape = null;
-                if(!GH_Convert.ToBrep(brep, ref brepShape, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToBrep(brep, ref brepShape, GH_Conversion.Both)) return null;
 
                 mesh = new Mesh();
                 mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.DefaultAnalysisMesh));
@@ -300,14 +280,14 @@ namespace PumaGrasshopper
             else if (geoGoo is GH_Surface)
             {
                 Surface surf = null;
-                if(!GH_Convert.ToSurface(geoGoo as GH_Surface, ref surf, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToSurface(geoGoo as GH_Surface, ref surf, GH_Conversion.Both)) return null;
                 mesh = Mesh.CreateFromSurface(surf, MeshingParameters.QualityRenderMesh);
             }
             else if (geoGoo is GH_Box)
             {
-                if(!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
             }
-            else if(geoGoo is GH_Plane)
+            else if (geoGoo is GH_Plane)
             {
                 if (!GH_Convert.ToMesh(geoGoo as GH_Plane, ref mesh, GH_Conversion.Both)) return null;
             }
@@ -322,61 +302,43 @@ namespace PumaGrasshopper
             return mesh;
         }
 
-        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, RuleAttribute attribute)
+        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, IGH_Param attributeParam)
         {
-            switch (attribute.mAttribType)
+            if (attributeParam.Type == typeof(GH_Number))
             {
-                case Annotations.AnnotationArgumentType.AAT_INT:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Integer> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
-                case Annotations.AnnotationArgumentType.AAT_BOOL:
-                case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Boolean> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
-                case Annotations.AnnotationArgumentType.AAT_FLOAT:
-                case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Number> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
-                case Annotations.AnnotationArgumentType.AAT_STR:
-                case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
-                    if (attribute.IsColor())
-                    {
-                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Colour> tree)) return;
-                        ExtractTreeValues(tree, attribute, shapeCount);
-                    }
-                    else
-                    {
-                        if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_String> tree)) return;
-                        ExtractTreeValues(tree, attribute, shapeCount);
-                    }
-                    break;
-                default:
-                {
-                    if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<IGH_Goo> tree)) return;
-                    ExtractTreeValues(tree, attribute, shapeCount);
-                    break;
-                }
+                if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Number> tree))
+                    ExtractTreeValues(tree, attributeParam, shapeCount);
+            }
+            else if (attributeParam.Type == typeof(GH_Integer))
+            {
+                if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Integer> tree))
+                    ExtractTreeValues(tree, attributeParam, shapeCount);
+            }
+            else if (attributeParam.Type == typeof(GH_Boolean))
+            {
+                if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Boolean> tree))
+                    ExtractTreeValues(tree, attributeParam, shapeCount);
+            }
+            else if (attributeParam.Type == typeof(GH_String))
+            {
+                if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_String> tree))
+                    ExtractTreeValues(tree, attributeParam, shapeCount);
+            }
+            else if (attributeParam.Type == typeof(GH_Colour))
+            {
+                if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Colour> tree))
+                    ExtractTreeValues(tree, attributeParam, shapeCount);
             }
         }
 
-        private void ExtractTreeValues<T>(GH_Structure<T> tree, RuleAttribute attribute, int shapeCount) where T: IGH_Goo
+        private void ExtractTreeValues<T>(GH_Structure<T> tree, IGH_Param attributeParam, int shapeCount) where T : IGH_Goo
         {
-            if (tree.IsEmpty) return;
+            if (tree.IsEmpty)
+                return;
 
             int shapeId = 0;
 
-            if (attribute.mAttribType == Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY ||
-               attribute.mAttribType == Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY ||
-               attribute.mAttribType == Annotations.AnnotationArgumentType.AAT_STR_ARRAY)
+            if (attributeParam.Type.IsArray)
             {
                 // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
                 while (shapeCount > tree.Branches.Count)
@@ -388,7 +350,7 @@ namespace PumaGrasshopper
                 {
                     if (shapeId >= shapeCount) return;
 
-                    SetRuleAttributeArray(shapeId, attribute, branch);
+                    SetRuleAttributeArray(shapeId, attributeParam, branch);
                     shapeId++;
                 }
             }
@@ -409,110 +371,116 @@ namespace PumaGrasshopper
                     {
                         if (shapeId >= shapeCount) return;
 
-                        SetRuleAttribute(shapeId, attribute, value);
+                        SetRuleAttribute(shapeId, attributeParam, value);
                     }
                     shapeId++;
                 }
             }
         }
 
-        private void SetRuleAttributeArray<T>(int shapeId, RuleAttribute attribute, List<T> values) where T:IGH_Goo
+        private void SetRuleAttributeArray<T>(int shapeId, IGH_Param attributeParam, List<T> values) where T : IGH_Goo
         {
-            switch (attribute.mAttribType)
+            if (attributeParam.Type == typeof(GH_Number))
             {
-                case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                    {
-                        List<double> doubleList = values.Cast<double>().ToList();
-                        PRTWrapper.SetRuleAttributeDoubleArray(shapeId, attribute.mRuleFile, attribute.mFullName, doubleList);
-                        return;
-                    }
-                case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
-                    {
-                        List<Boolean> boolList = values.Cast<bool>().ToList();
-                        PRTWrapper.SetRuleAttributeBoolArray(shapeId, attribute.mRuleFile, attribute.mFullName, boolList);
-                        return;
-                    }
-                case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
-                    {
-                        List<string> stringList = values.Cast<string>().ToList();
-                        PRTWrapper.SetRuleAttributeStringArray(shapeId, attribute.mRuleFile, attribute.mFullName, stringList);
-                        return;
-                    }
-                default:
-                    return;
+                List<double> doubleList = values.Cast<double>().ToList();
+                PRTWrapper.SetRuleAttributeDoubleArray(shapeId, attributeParam.Name, doubleList);
+            }
+            else if (attributeParam.Type == typeof(GH_Integer))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Integer arrays are not supported as input parameters, please use Number arrays.");
+            }
+            else if (attributeParam.Type == typeof(GH_Boolean))
+            {
+                List<Boolean> boolList = values.Cast<bool>().ToList();
+                PRTWrapper.SetRuleAttributeBoolArray(shapeId, attributeParam.Name, boolList);
+            }
+            else if (attributeParam.Type == typeof(GH_String))
+            {
+                List<string> stringList = values.Cast<string>().ToList();
+                PRTWrapper.SetRuleAttributeStringArray(shapeId, attributeParam.Name, stringList);
             }
         }
 
-        private void SetRuleAttribute<T>(int shapeId, RuleAttribute attribute, T value) where T : IGH_Goo {
-            switch (attribute.mAttribType)
-            {
-                case Annotations.AnnotationArgumentType.AAT_FLOAT:
-                    {
-                        if (!value.CastTo(out double number)) throw new Exception(Utils.GetCastErrorMessage(attribute, "double"));
-                        PRTWrapper.SetRuleAttributeDouble(shapeId, attribute.mRuleFile, attribute.mFullName, number);
-                        return;
-                    }
-                case Annotations.AnnotationArgumentType.AAT_BOOL:
-                    {
-                        if (!value.CastTo(out bool boolean)) throw new Exception(Utils.GetCastErrorMessage(attribute, "bool"));
-                        PRTWrapper.SetRuleAttributeBoolean(shapeId, attribute.mRuleFile, attribute.mFullName, boolean);
-                        return;
-                    }
-                case Annotations.AnnotationArgumentType.AAT_INT:
-                    {
-                        if (!value.CastTo(out int integer)) throw new Exception(Utils.GetCastErrorMessage(attribute, "integer")); 
-                        PRTWrapper.SetRuleAttributeInteger(shapeId, attribute.mRuleFile, attribute.mFullName, integer);
-                        return;
-                    }
-                case Annotations.AnnotationArgumentType.AAT_STR:
-                    {
-                        string text;
-                        if (attribute.IsColor())
-                        {
-         
-                            if (!value.CastTo(out Color color)) throw new Exception(Utils.GetCastErrorMessage(attribute, "Color"));
-                            text = Utils.hexColor(color);
-                        }
-                        else
-                        {
-                            if (!value.CastTo(out text)) throw new Exception(Utils.GetCastErrorMessage(attribute, "string"));
-                        }
-
-                        PRTWrapper.SetRuleAttributeString(shapeId, attribute.mRuleFile, attribute.mFullName, text);
-                        return;
-                    }
-                default:
-                    return;
-            }
-        }
-
-        private void FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
+        private void SetRuleAttribute<T>(int shapeId, IGH_Param attributeParam, T value) where T : IGH_Goo
         {
-            for (int idx = 0; idx < mRuleAttributes.Length; ++idx)
+            var name = attributeParam.Name;
+            if (attributeParam.Type == typeof(GH_Number))
             {
-                RuleAttribute attrib = mRuleAttributes[idx];
-                SetAttributeOfShapes(DA, shapeCount, attrib);
+                if (value.CastTo(out double number))
+                    PRTWrapper.SetRuleAttributeDouble(shapeId, name, number);
+                else
+                    throw new Exception(Utils.GetCastErrorMessage(name, "double"));
+            }
+            else if (attributeParam.Type == typeof(GH_Integer))
+            {
+                if (value.CastTo(out int integer))
+                    PRTWrapper.SetRuleAttributeInteger(shapeId, name, integer);
+                else
+                    throw new Exception(Utils.GetCastErrorMessage(name, "integer"));
+            }
+            else if (attributeParam.Type == typeof(GH_Boolean))
+            {
+                if (value.CastTo(out bool boolean))
+                    PRTWrapper.SetRuleAttributeBoolean(shapeId, name, boolean);
+                else
+                    throw new Exception(Utils.GetCastErrorMessage(name, "bool"));
+            }
+            else if (attributeParam.Type == typeof(GH_String))
+            {
+                if (value.CastTo(out string text))
+                    PRTWrapper.SetRuleAttributeString(shapeId, name, text);
+                else
+                    throw new Exception(Utils.GetCastErrorMessage(name, "string"));
+            }
+            else if (attributeParam.Type == typeof(GH_Colour))
+            {
+                if (value.CastTo(out Color color))
+                {
+                    string text = Utils.hexColor(color);
+                    PRTWrapper.SetRuleAttributeString(shapeId, name, text);
+                }
+                else
+                    throw new Exception(Utils.GetCastErrorMessage(name, "Colour"));
             }
         }
 
         public bool CanInsertParameter(GH_ParameterSide side, int index)
         {
-            return (side == GH_ParameterSide.Input);
+            return (side == GH_ParameterSide.Input) && (index > 2) && (mRuleAttributes.Length > 0);
         }
 
         public bool CanRemoveParameter(GH_ParameterSide side, int index)
         {
-            return (side == GH_ParameterSide.Input);
+            return (side == GH_ParameterSide.Input) && (index > 2);
         }
 
         public IGH_Param CreateParameter(GH_ParameterSide side, int index)
         {
+            Debug.Assert(mRuleAttributes.Length > 0); // must be guaranteed by CanInsertParameter
+            
+            var attributeNames = new List<string>();
+            foreach (var parm in mRuleAttributes)
+            {
+                attributeNames.Add(parm.mNickname);
+            }
+
+            var form = new AttributeForm(attributeNames, new System.Drawing.Point(Cursor.Position.X, Cursor.Position.Y));
+            var result = form.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                if (form.SelectedIndex >= 0 && form.SelectedIndex < mRuleAttributes.Length)
+                {
+                    var attr = mRuleAttributes[form.SelectedIndex];
+                    return attr.CreateInputParameter();
+                }
+            }
+
             return null;
         }
 
         public bool DestroyParameter(GH_ParameterSide side, int index)
         {
-            return false;
+            return true;
         }
 
         public void VariableParameterMaintenance()
@@ -528,7 +496,7 @@ namespace PumaGrasshopper
 
         public override bool Read(GH_IReader reader)
         {
-            if(reader.ChunkExists(RPK_PATH_SERIALIZE))
+            if (reader.ChunkExists(RPK_PATH_SERIALIZE))
                 mCurrentRPK = reader.GetString(RPK_PATH_SERIALIZE);
             return base.Read(reader);
         }
