@@ -147,20 +147,13 @@ namespace PumaGrasshopper
             {
                 mCurrentRPK = rpk_file;
 
-                var doc = OnPingDocument();
-                for (int i = 3; i < Params.Input.Count; i++) 
-                {
-                    var param = Params.Input[i];
-                    param.RemoveAllSources();
-                    doc.RemoveObject(param, false);
-                    Params.UnregisterInputParameter(param, true);
-                }
+                RemoveAttributeInputParameters();
 
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
                 foreach (RuleAttribute attrib in mRuleAttributes)
                 {
                     if(attrib.mFullName != SEED_KEY)
-                        CreateInputParameter(attrib);
+                        CreateAttributeInputParameter(attrib);
                 }
 
                 Params.OnParametersChanged();
@@ -213,6 +206,39 @@ namespace PumaGrasshopper
                 OutputReports(DA, generatedMeshes);
                 DA.SetDataTree(0, generatedMeshes);
             }
+        }
+
+        private void RemoveAttributeInputParameters()
+        {
+            var doc = OnPingDocument();
+            for (int i = 3; i < Params.Input.Count; i++)
+            {
+                var param = Params.Input[i];
+                param.RemoveAllSources();
+                doc.RemoveObject(param, false);
+                Params.UnregisterInputParameter(param, true);
+            }
+        }
+
+        private void CreateAttributeInputParameter(RuleAttribute attrib)
+        {
+            var parameter = attrib.CreateInputParameter();
+
+            // Check if the param already exists and replace it to avoid adding duplicates.
+            int index = Params.IndexOfInputParam(parameter.Name);
+            if (index != -1)
+            {
+                //If the existing parameter is connected to a remote source, the wire connection need to be ported.
+                for (int i = 0; i < Params.Input[index].SourceCount; ++i)
+                {
+                    parameter.AddSource(Params.Input[index].Sources[i]);
+                }
+
+                Params.Input.RemoveAt(index);
+                Params.Input.Insert(index, parameter);
+            }
+            else
+                Params.RegisterInputParam(parameter);
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -306,31 +332,6 @@ namespace PumaGrasshopper
             mesh.Faces.ConvertTrianglesToQuads(Rhino.RhinoMath.ToRadians(2), .875);
 
             return mesh;
-        }
-
-        /// <summary>
-        /// Add rule attributes inputs to the grasshopper component.
-        /// </summary>
-        /// <param name="attrib">A rule attribute to add as input</param>
-        private void CreateInputParameter(RuleAttribute attrib)
-        {
-            var parameter = attrib.CreateInputParameter();
-
-            // Check if the param already exists and replace it to avoid adding duplicates.
-            int index = Params.IndexOfInputParam(parameter.Name);
-            if (index != -1)
-            {
-                //If the existing parameter is connected to a remote source, the wire connection need to be ported.
-                for(int i = 0; i < Params.Input[index].SourceCount; ++i)
-                {
-                    parameter.AddSource(Params.Input[index].Sources[i]);
-                }
-
-                Params.Input.RemoveAt(index);
-                Params.Input.Insert(index, parameter);
-            }
-            else
-                Params.RegisterInputParam(parameter);
         }
 
         private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, RuleAttribute attribute)
