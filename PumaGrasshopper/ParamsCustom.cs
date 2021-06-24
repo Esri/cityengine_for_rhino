@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace PumaGrasshopper
+namespace PumaGrasshopper.AttributeParameter
 {
     public class BooleanRuleAttribute : Param_Boolean
     {

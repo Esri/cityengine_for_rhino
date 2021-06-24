@@ -24,8 +24,6 @@ using Grasshopper.Kernel.Parameters;
 
 namespace PumaGrasshopper
 {
-
-
     public class RuleAttribute
     {
         public string mRuleFile;
@@ -52,7 +50,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_BOOL:
                     {
-                        BooleanRuleAttribute param_bool = new BooleanRuleAttribute(mAnnotations, mGroup)
+                        var param_bool = new AttributeParameter.BooleanRuleAttribute(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -67,7 +65,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_INT:
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
                     {
-                        NumberRuleAttribute param_number = new NumberRuleAttribute(mAnnotations, mGroup)
+                        var param_number = new AttributeParameter.NumberRuleAttribute(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -84,7 +82,7 @@ namespace PumaGrasshopper
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            ColourRuleAttribute param_color = new ColourRuleAttribute(mAnnotations, mGroup)
+                            var param_color = new AttributeParameter.ColourRuleAttribute(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -96,7 +94,7 @@ namespace PumaGrasshopper
                         }
                         else
                         {
-                            StringRuleAttribute param_str = new StringRuleAttribute(mAnnotations, mGroup)
+                            var param_str = new AttributeParameter.StringRuleAttribute(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
