@@ -169,19 +169,8 @@ namespace PumaGrasshopper
             if (mCurrentRPK != potentiallyNewRulePackage)
             {
                 mCurrentRPK = potentiallyNewRulePackage;
-
-                RemoveAttributeInputParameters();
-
                 PRTWrapper.SetPackage(mCurrentRPK);
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
-                foreach (RuleAttribute attrib in mRuleAttributes)
-                {
-                    if (attrib.mFullName != SEED_KEY)
-                        CreateAttributeInputParameter(attrib);
-                }
-
-                Params.OnParametersChanged();
-                ExpireSolution(true);
             }
             else
                 PRTWrapper.SetPackage(mCurrentRPK);
@@ -215,8 +204,6 @@ namespace PumaGrasshopper
             for (int i = 3; i < Params.Input.Count; i++)
             {
                 var param = Params.Input[i];
-                param.RemoveAllSources();
-                doc.RemoveObject(param, false);
                 Params.UnregisterInputParameter(param, true);
             }
         }
