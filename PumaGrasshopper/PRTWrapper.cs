@@ -74,25 +74,25 @@ namespace PumaGrasshopper
         public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref Annotations.AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDouble(int initialShapeIndex, string rule, string fullName, double value);
+        public static extern void SetRuleAttributeDouble(int initialShapeIndex, string fullName, double value);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string rule, string fullName, bool value);
+        public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string fullName, bool value);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeInteger(int initialShapeIndex, string rule, string fullName, int value);
+        public static extern void SetRuleAttributeInteger(int initialShapeIndex, string fullName, int value);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeString(int initialShapeIndex, string rule, string fullName, string value);
+        public static extern void SetRuleAttributeString(int initialShapeIndex, string fullName, string value);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
@@ -563,29 +563,29 @@ namespace PumaGrasshopper
             return null;
         }
 
-        public static void SetRuleAttributeDoubleArray(int initialShapeIndex, string rule, string fullName, List<double> doubleList)
+        public static void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, List<double> doubleList)
         {
             if (doubleList.Count == 0) return;
 
             using (SimpleArrayDouble array = new SimpleArrayDouble(doubleList))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeDoubleArray(initialShapeIndex, rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeDoubleArray(initialShapeIndex, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string rule, string fullName, List<Boolean> boolList)
+        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, List<Boolean> boolList)
         {
             if (boolList.Count == 0) return;
 
             using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeStringArray(int initialShapeIndex, string rule, string fullName, List<string> stringList)
+        public static void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, List<string> stringList)
         {
             if (stringList.Count == 0) return;
 
@@ -594,7 +594,7 @@ namespace PumaGrasshopper
                 stringList.ForEach(x => array.Add(x));
 
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeStringArray(initialShapeIndex, rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeStringArray(initialShapeIndex, fullName, pArray);
             }
         }
     }

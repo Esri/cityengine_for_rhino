@@ -31,8 +31,8 @@ const wchar_t* to_wchar_array(const ON_wString& x) {
 }
 
 template <typename T>
-void fillAttributeFromNode(RhinoPRT::RhinoPRTAPI& prtApi, const int initialShapeIndex, const std::wstring& /*ruleName*/,
-                           const std::wstring& attrFullName, T value, size_t count = 1) {
+void fillAttributeFromNode(RhinoPRT::RhinoPRTAPI& prtApi, const int initialShapeIndex, const std::wstring& attrFullName,
+                           T value, size_t count = 1) {
 
 	const auto& ruleAttributes = prtApi.GetRuleAttributes();
 
@@ -358,48 +358,44 @@ RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* p
 	return true;
 }
 
-RHINOPRT_API void SetRuleAttributeDouble(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                         double value) {
-	if (!rule || !fullName)
+RHINOPRT_API void SetRuleAttributeDouble(const int initialShapeIndex, const wchar_t* fullName, double value) {
+	if (!fullName)
 		return;
-	fillAttributeFromNode<double>(RhinoPRT::get(), initialShapeIndex, rule, fullName, value);
+	fillAttributeFromNode<double>(RhinoPRT::get(), initialShapeIndex, fullName, value);
 }
 
-RHINOPRT_API void SetRuleAttributeBoolean(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                          bool value) {
-	if (!rule || !fullName)
+RHINOPRT_API void SetRuleAttributeBoolean(const int initialShapeIndex, const wchar_t* fullName, bool value) {
+	if (!fullName)
 		return;
-	fillAttributeFromNode<bool>(RhinoPRT::get(), initialShapeIndex, rule, fullName, value);
+	fillAttributeFromNode<bool>(RhinoPRT::get(), initialShapeIndex, fullName, value);
 }
 
-RHINOPRT_API void SetRuleAttributeInteger(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                          int value) {
-	if (!rule || !fullName)
+RHINOPRT_API void SetRuleAttributeInteger(const int initialShapeIndex, const wchar_t* fullName, int value) {
+	if (!fullName)
 		return;
-	fillAttributeFromNode<int>(RhinoPRT::get(), initialShapeIndex, rule, fullName, value);
+	fillAttributeFromNode<int>(RhinoPRT::get(), initialShapeIndex, fullName, value);
 }
 
-RHINOPRT_API void SetRuleAttributeString(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                         const wchar_t* value) {
-	if (!rule || !fullName || !value)
+RHINOPRT_API void SetRuleAttributeString(const int initialShapeIndex, const wchar_t* fullName, const wchar_t* value) {
+	if (!fullName || !value)
 		return;
-	fillAttributeFromNode<std::wstring>(RhinoPRT::get(), initialShapeIndex, rule, fullName, value);
+	fillAttributeFromNode<std::wstring>(RhinoPRT::get(), initialShapeIndex, fullName, value);
 }
 
-RHINOPRT_API void SetRuleAttributeDoubleArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
+RHINOPRT_API void SetRuleAttributeDoubleArray(const int initialShapeIndex, const wchar_t* fullName,
                                               ON_SimpleArray<double>* pValueArray) {
-	if (!rule || !fullName || !pValueArray)
+	if (!fullName || !pValueArray)
 		return;
 
 	const double* valueArray = pValueArray->Array();
 	const size_t size = pValueArray->Count();
 
-	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, rule, fullName, valueArray, size);
+	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, valueArray, size);
 }
 
-RHINOPRT_API void SetRuleAttributeBoolArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
+RHINOPRT_API void SetRuleAttributeBoolArray(const int initialShapeIndex, const wchar_t* fullName,
                                             ON_SimpleArray<int>* pValueArray) {
-	if (!rule || !fullName || !pValueArray)
+	if (!fullName || !pValueArray)
 		return;
 
 	const int* valueArray = pValueArray->Array();
@@ -409,12 +405,12 @@ RHINOPRT_API void SetRuleAttributeBoolArray(const int initialShapeIndex, const w
 	std::unique_ptr<bool[]> boolArray(new bool[size]);
 	std::transform(valueArray, valueArray + size, boolArray.get(), static_cast_fct<bool, int>);
 
-	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, rule, fullName, boolArray.get(), size);
+	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, boolArray.get(), size);
 }
 
-RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
+RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const wchar_t* fullName,
                                               ON_ClassArray<ON_wString>* pValueArray) {
-	if (!rule || !fullName || !pValueArray)
+	if (!fullName || !pValueArray)
 		return;
 
 	const ON_wString* valueArray = pValueArray->Array();
@@ -424,7 +420,7 @@ RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const
 	std::vector<const wchar_t*> strVector(size);
 	std::transform(valueArray, valueArray + size, strVector.begin(), to_wchar_array);
 
-	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, rule, fullName, strVector, size);
+	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, strVector, size);
 }
 
 RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* pKeysArray,

@@ -136,25 +136,21 @@ RHINOPRT_API int GetRuleAttributesCount();
 RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname,
                                    prt::AnnotationArgumentType* type, ON_wString* pGroup);
 
-RHINOPRT_API void SetRuleAttributeDouble(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                         double value);
+RHINOPRT_API void SetRuleAttributeDouble(const int initialShapeIndex, const wchar_t* fullName, double value);
 
-RHINOPRT_API void SetRuleAttributeBoolean(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                          bool value);
+RHINOPRT_API void SetRuleAttributeBoolean(const int initialShapeIndex, const wchar_t* fullName, bool value);
 
-RHINOPRT_API void SetRuleAttributeInteger(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                          int value);
+RHINOPRT_API void SetRuleAttributeInteger(const int initialShapeIndex, const wchar_t* fullName, int value);
 
-RHINOPRT_API void SetRuleAttributeString(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
-                                         const wchar_t* value);
+RHINOPRT_API void SetRuleAttributeString(const int initialShapeIndex, const wchar_t* fullName, const wchar_t* value);
 
-RHINOPRT_API void SetRuleAttributeDoubleArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
+RHINOPRT_API void SetRuleAttributeDoubleArray(const int initialShapeIndex, const wchar_t* fullName,
                                               ON_SimpleArray<double>* pValueArray);
 
-RHINOPRT_API void SetRuleAttributeBoolArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
+RHINOPRT_API void SetRuleAttributeBoolArray(const int initialShapeIndex, const wchar_t* fullName,
                                             ON_SimpleArray<int>* pValueArray);
 
-RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const wchar_t* rule, const wchar_t* fullName,
+RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const wchar_t* fullName,
                                               ON_ClassArray<ON_wString>* pValueArray);
 
 RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* pKeysArray,
