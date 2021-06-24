@@ -65,7 +65,6 @@ namespace PumaGrasshopper
 
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
-        private readonly List<IGH_Param> mParams;
 
         bool mDoGenerateMaterials;
 
@@ -88,7 +87,6 @@ namespace PumaGrasshopper
             if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
 
             mRuleAttributes = new RuleAttribute[0];
-            mParams = new List<IGH_Param>();
 
             mDoGenerateMaterials = true;
         }
@@ -104,8 +102,8 @@ namespace PumaGrasshopper
             pManager.AddGeometryParameter(GEOM_INPUT_NAME, GEOM_INPUT_NICK_NAME,
                 "Input shapes on which to execute the rules.",
                 GH_ParamAccess.tree);
-            pManager.AddIntegerParameter(SEED_KEY, SEED_INPUT_NAME, 
-                "A number that will be used to seed the PRT random number generator.", 
+            pManager.AddIntegerParameter(SEED_KEY, SEED_INPUT_NAME,
+                "A number that will be used to seed the PRT random number generator.",
                 GH_ParamAccess.tree, 0);
         }
 
@@ -152,12 +150,14 @@ namespace PumaGrasshopper
                 //if rule attributes input parameters are already existing, remove them.
                 if(mRuleAttributes.Length > 0)
                 {
-                    foreach(var param in mParams)
+                    var doc = OnPingDocument();
+                    for (int i = 3; i < Params.Input.Count; i++) 
                     {
-                        Params.UnregisterInputParameter(param);
+                        var param = Params.Input[i];
+                        param.RemoveAllSources();
+                        doc.RemoveObject(param, false);
+                        Params.UnregisterInputParameter(param, true);
                     }
-
-                    mParams.Clear();
                 }
 
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
@@ -319,7 +319,6 @@ namespace PumaGrasshopper
         private void CreateInputParameter(RuleAttribute attrib)
         {
             var parameter = attrib.GetInputParameter();
-            mParams.Add(parameter);
 
             // Check if the param already exists and replace it to avoid adding duplicates.
             int index = Params.IndexOfInputParam(parameter.Name);
