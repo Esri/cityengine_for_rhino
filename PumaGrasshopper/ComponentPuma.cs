@@ -201,8 +201,8 @@ namespace PumaGrasshopper
 
         private void FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
         {
-
-            for (int idx = 3; idx < Params.Input.Count; ++idx)
+            // we start and index 2 which includes the seed parameter
+            for (int idx = 2; idx < Params.Input.Count; ++idx)
             {
                 var param = Params.Input[idx];
                 SetAttributeOfShapes(DA, shapeCount, param);
@@ -456,7 +456,7 @@ namespace PumaGrasshopper
 
         public IGH_Param CreateParameter(GH_ParameterSide side, int index)
         {
-            Debug.Assert(mRuleAttributes.Length > 0); // must be guaranteed by CanInsertParameter
+            Debug.Assert(mRuleAttributes.Length > 0); // ensured by CanInsertParameter
             
             var attributeNames = new List<string>();
             foreach (var parm in mRuleAttributes)
