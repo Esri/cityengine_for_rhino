@@ -326,28 +326,28 @@ namespace PumaGrasshopper
         {
             switch (attribute.mAttribType)
             {
-                case AnnotationArgumentType.AAT_INT:
+                case Annotations.AnnotationArgumentType.AAT_INT:
                 {
                     if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Integer> tree)) return;
                     ExtractTreeValues(tree, attribute, shapeCount);
                     break;
                 }
-                case AnnotationArgumentType.AAT_BOOL:
-                case AnnotationArgumentType.AAT_BOOL_ARRAY:
+                case Annotations.AnnotationArgumentType.AAT_BOOL:
+                case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                 {
                     if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Boolean> tree)) return;
                     ExtractTreeValues(tree, attribute, shapeCount);
                     break;
                 }
-                case AnnotationArgumentType.AAT_FLOAT:
-                case AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                case Annotations.AnnotationArgumentType.AAT_FLOAT:
+                case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
                 {
                     if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Number> tree)) return;
                     ExtractTreeValues(tree, attribute, shapeCount);
                     break;
                 }
-                case AnnotationArgumentType.AAT_STR:
-                case AnnotationArgumentType.AAT_STR_ARRAY:
+                case Annotations.AnnotationArgumentType.AAT_STR:
+                case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
                     if (attribute.IsColor())
                     {
                         if (!DA.GetDataTree(attribute.mFullName, out GH_Structure<GH_Colour> tree)) return;
@@ -374,9 +374,9 @@ namespace PumaGrasshopper
 
             int shapeId = 0;
 
-            if (attribute.mAttribType == AnnotationArgumentType.AAT_BOOL_ARRAY ||
-               attribute.mAttribType == AnnotationArgumentType.AAT_FLOAT_ARRAY ||
-               attribute.mAttribType == AnnotationArgumentType.AAT_STR_ARRAY)
+            if (attribute.mAttribType == Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY ||
+               attribute.mAttribType == Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY ||
+               attribute.mAttribType == Annotations.AnnotationArgumentType.AAT_STR_ARRAY)
             {
                 // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
                 while (shapeCount > tree.Branches.Count)
@@ -420,19 +420,19 @@ namespace PumaGrasshopper
         {
             switch (attribute.mAttribType)
             {
-                case AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
                     {
                         List<double> doubleList = values.Cast<double>().ToList();
                         PRTWrapper.SetRuleAttributeDoubleArray(shapeId, attribute.mRuleFile, attribute.mFullName, doubleList);
                         return;
                     }
-                case AnnotationArgumentType.AAT_BOOL_ARRAY:
+                case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                     {
                         List<Boolean> boolList = values.Cast<bool>().ToList();
                         PRTWrapper.SetRuleAttributeBoolArray(shapeId, attribute.mRuleFile, attribute.mFullName, boolList);
                         return;
                     }
-                case AnnotationArgumentType.AAT_STR_ARRAY:
+                case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
                     {
                         List<string> stringList = values.Cast<string>().ToList();
                         PRTWrapper.SetRuleAttributeStringArray(shapeId, attribute.mRuleFile, attribute.mFullName, stringList);
@@ -446,25 +446,25 @@ namespace PumaGrasshopper
         private void SetRuleAttribute<T>(int shapeId, RuleAttribute attribute, T value) where T : IGH_Goo {
             switch (attribute.mAttribType)
             {
-                case AnnotationArgumentType.AAT_FLOAT:
+                case Annotations.AnnotationArgumentType.AAT_FLOAT:
                     {
                         if (!value.CastTo(out double number)) throw new Exception(Utils.GetCastErrorMessage(attribute, "double"));
                         PRTWrapper.SetRuleAttributeDouble(shapeId, attribute.mRuleFile, attribute.mFullName, number);
                         return;
                     }
-                case AnnotationArgumentType.AAT_BOOL:
+                case Annotations.AnnotationArgumentType.AAT_BOOL:
                     {
                         if (!value.CastTo(out bool boolean)) throw new Exception(Utils.GetCastErrorMessage(attribute, "bool"));
                         PRTWrapper.SetRuleAttributeBoolean(shapeId, attribute.mRuleFile, attribute.mFullName, boolean);
                         return;
                     }
-                case AnnotationArgumentType.AAT_INT:
+                case Annotations.AnnotationArgumentType.AAT_INT:
                     {
                         if (!value.CastTo(out int integer)) throw new Exception(Utils.GetCastErrorMessage(attribute, "integer")); 
                         PRTWrapper.SetRuleAttributeInteger(shapeId, attribute.mRuleFile, attribute.mFullName, integer);
                         return;
                     }
-                case AnnotationArgumentType.AAT_STR:
+                case Annotations.AnnotationArgumentType.AAT_STR:
                     {
                         string text;
                         if (attribute.IsColor())

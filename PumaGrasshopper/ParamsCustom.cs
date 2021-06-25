@@ -32,10 +32,10 @@ namespace PumaGrasshopper
 {
     public class BooleanRuleAttribute : Param_Boolean
     {
-        private List<Annotation> mAnnotation;
+        private List<Annotations.Annotation> mAnnotation;
         private string mGroupName;
 
-        public BooleanRuleAttribute(List<Annotation> annot, string groupName = ""): base()
+        public BooleanRuleAttribute(List<Annotations.Annotation> annot, string groupName = ""): base()
         {
             mAnnotation = annot;
             mGroupName = groupName;
@@ -84,10 +84,10 @@ namespace PumaGrasshopper
 
     public class NumberRuleAttribute: Param_Number
     {
-        private List<Annotation> mAnnotations;
+        private List<Annotations.Annotation> mAnnotations;
         private string mGroupName;
 
-        public NumberRuleAttribute(List<Annotation> annots, string groupName = ""): base()
+        public NumberRuleAttribute(List<Annotations.Annotation> annots, string groupName)
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -105,8 +105,8 @@ namespace PumaGrasshopper
 
             IGH_Param param = null;
 
-            var annot = mAnnotations.Find(x => x.GetAnnotationType() == AttributeAnnotation.A_RANGE ||
-                                               x.GetAnnotationType() == AttributeAnnotation.A_ENUM);
+            var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE ||
+                                               x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM);
 
             if (annot != null)
             {
@@ -114,12 +114,12 @@ namespace PumaGrasshopper
 
                 if (hasDefault)
                 {
-                    if (annot.GetAnnotationType() == AttributeAnnotation.A_ENUM)
+                    if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
                     {
                         int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == value.ToString());
                         ((GH_ValueList)param).SelectItem(itemIndex);
                     }
-                    else if (annot.GetAnnotationType() == AttributeAnnotation.A_RANGE)
+                    else if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE)
                     {
                         ((GH_NumberSlider)param).SetSliderValue((decimal)value);
                     }
@@ -156,10 +156,10 @@ namespace PumaGrasshopper
 
     public class StringRuleAttribute: Param_String
     {
-        private List<Annotation> mAnnotations;
+        private List<Annotations.Annotation> mAnnotations;
         private string mGroupName;
 
-        public StringRuleAttribute(List<Annotation> annots, string groupName = ""): base()
+        public StringRuleAttribute(List<Annotations.Annotation> annots, string groupName = ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -175,9 +175,9 @@ namespace PumaGrasshopper
             IGH_Param param = null;
 
             // annots: file, dir, enum, enum.
-            var annot = mAnnotations.Find(x => x.GetAnnotationType() == AttributeAnnotation.A_ENUM ||
-                                               x.GetAnnotationType() == AttributeAnnotation.A_DIR ||
-                                               x.GetAnnotationType() == AttributeAnnotation.A_FILE);
+            var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM ||
+                                               x.GetAnnotationType() == Annotations.AttributeAnnotation.A_DIR ||
+                                               x.GetAnnotationType() == Annotations.AttributeAnnotation.A_FILE);
             
             // find default string value
             StringWrapper value = new StringWrapper();
@@ -191,7 +191,7 @@ namespace PumaGrasshopper
                 param = annot.GetGhSpecializedParam();
                 if (hasDefault)
                 {
-                    if(annot.GetAnnotationType() == AttributeAnnotation.A_ENUM)
+                    if(annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
                     {
                         int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == defaultText);
                         ((GH_ValueList)param).SelectItem(itemIndex);
@@ -226,10 +226,10 @@ namespace PumaGrasshopper
 
     public class ColourRuleAttribute: Param_Colour
     {
-        private List<Annotation> mAnnotations;
+        private List<Annotations.Annotation> mAnnotations;
         private string mGroupName;
 
-        public ColourRuleAttribute(List<Annotation> annots, string groupName= ""): base()
+        public ColourRuleAttribute(List<Annotations.Annotation> annots, string groupName= ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
