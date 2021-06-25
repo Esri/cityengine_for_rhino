@@ -50,7 +50,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_BOOL:
                     {
-                        var param_bool = new AttributeParameter.BooleanRuleAttribute(mAnnotations, mGroup)
+                        var param_bool = new AttributeParameter.Boolean(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -65,7 +65,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_INT:
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
                     {
-                        var param_number = new AttributeParameter.NumberRuleAttribute(mAnnotations, mGroup)
+                        var param_number = new AttributeParameter.Number(mAnnotations, mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -82,7 +82,7 @@ namespace PumaGrasshopper
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            var param_color = new AttributeParameter.ColourRuleAttribute(mAnnotations, mGroup)
+                            var param_color = new AttributeParameter.Colour(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -94,7 +94,7 @@ namespace PumaGrasshopper
                         }
                         else
                         {
-                            var param_str = new AttributeParameter.StringRuleAttribute(mAnnotations, mGroup)
+                            var param_str = new AttributeParameter.String(mAnnotations, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
