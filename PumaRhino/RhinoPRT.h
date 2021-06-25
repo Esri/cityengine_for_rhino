@@ -58,19 +58,16 @@ public:
 
 	bool GenerateGeometry();
 
-	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, double value,
+	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, double value, size_t /*count*/);
+	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, int value, size_t /*count*/);
+	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, bool value, size_t /*count*/);
+	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, std::wstring& value,
 	                           size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, int value, size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, bool value,
-	                           size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, std::wstring& value,
-	                           size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, const double* value,
+	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, const double* value,
 	                           const size_t count);
-	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, bool* value,
-	                           const size_t count);
-	void setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule,
-	                           std::vector<const wchar_t*> value, const size_t /*count*/);
+	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, bool* value, const size_t count);
+	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, std::vector<const wchar_t*> value,
+	                           const size_t /*count*/);
 
 	const Reporting::GroupedReports& getReports() const {
 		return mGroupedReports;

@@ -33,20 +33,7 @@ const wchar_t* to_wchar_array(const ON_wString& x) {
 template <typename T>
 void fillAttributeFromNode(RhinoPRT::RhinoPRTAPI& prtApi, const int initialShapeIndex, const std::wstring& attrFullName,
                            T value, size_t count = 1) {
-
-	const auto& ruleAttributes = prtApi.GetRuleAttributes();
-
-	const RuleAttributes::const_iterator it =
-	        std::find_if(ruleAttributes.begin(), ruleAttributes.end(),
-	                     [&attrFullName](const auto& ra) { return ra->mFullName == attrFullName; });
-
-	if (it != ruleAttributes.cend()) {
-		const RuleAttributeUPtr& rule = *it;
-		assert(!rule->mFullName.empty()); // Check if the rule was found
-
-		// If the attribute is found, register the value in the attribute map builder
-		prtApi.setRuleAttributeValue(initialShapeIndex, rule, value, count);
-	}
+	prtApi.setRuleAttributeValue(initialShapeIndex, attrFullName, value, count);
 }
 
 } // namespace
@@ -137,74 +124,39 @@ std::vector<GeneratedModel>& RhinoPRTAPI::getGenModels() {
 	return mGeneratedModels;
 }
 
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, double value,
+void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, double value,
                                         size_t /*count*/) {
-	if (rule->mType == prt::AAT_FLOAT) {
-		mAttrBuilders[initialShapeIndex]->setFloat(rule->mFullName.c_str(), value);
-	}
-	else {
-		LOG_ERR << L"Trying to set a double value to an attribute of type " << rule->mType << std::endl;
-	}
+	mAttrBuilders[initialShapeIndex]->setFloat(name.c_str(), value);
 }
 
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, int value,
+void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, int value,
                                         size_t /*count*/) {
-	if (rule->mType == prt::AAT_INT) {
-		mAttrBuilders[initialShapeIndex]->setInt(rule->mFullName.c_str(), value);
-	}
-	else {
-		LOG_ERR << L"Trying to set an int value to an attribute of type " << rule->mType << std::endl;
-	}
+	mAttrBuilders[initialShapeIndex]->setInt(name.c_str(), value);
 }
 
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, bool value,
+void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, bool value,
                                         size_t /*count*/) {
-	if (rule->mType == prt::AAT_BOOL) {
-		mAttrBuilders[initialShapeIndex]->setBool(rule->mFullName.c_str(), value);
-	}
-	else {
-		LOG_ERR << L"Trying to set a boolean value to an attribute of type " << rule->mType << std::endl;
-	}
+	mAttrBuilders[initialShapeIndex]->setBool(name.c_str(), value);
 }
 
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, std::wstring& value,
+void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, std::wstring& value,
                                         size_t /*count*/) {
-	if (rule->mType == prt::AAT_STR) {
-		mAttrBuilders[initialShapeIndex]->setString(rule->mFullName.c_str(), value.c_str());
-	}
-	else {
-		LOG_ERR << L"Trying to set a wstring to an attribute of type " << rule->mType << std::endl;
-	}
+	mAttrBuilders[initialShapeIndex]->setString(name.c_str(), value.c_str());
 }
 
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, const double* value,
+void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, const double* value,
                                         const size_t count) {
-	if (rule->mType == prt::AAT_FLOAT_ARRAY) {
-		mAttrBuilders[initialShapeIndex]->setFloatArray(rule->mFullName.c_str(), value, count);
-	}
-	else {
-		LOG_ERR << L"Trying to set an array of double to an attribute of type " << rule->mType << std::endl;
-	}
+	mAttrBuilders[initialShapeIndex]->setFloatArray(name.c_str(), value, count);
 }
 
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule, bool* value,
+void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, bool* value,
                                         const size_t count) {
-	if (rule->mType == prt::AAT_BOOL_ARRAY) {
-		mAttrBuilders[initialShapeIndex]->setBoolArray(rule->mFullName.c_str(), value, count);
-	}
-	else {
-		LOG_ERR << L"Trying to set an array of bool to an attribute of type " << rule->mType << std::endl;
-	}
+	mAttrBuilders[initialShapeIndex]->setBoolArray(name.c_str(), value, count);
 }
 
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const RuleAttributeUPtr& rule,
+void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name,
                                         std::vector<const wchar_t*> value, const size_t /*count*/) {
-	if (rule->mType == prt::AAT_STR_ARRAY) {
-		mAttrBuilders[initialShapeIndex]->setStringArray(rule->mFullName.c_str(), value.data(), value.size());
-	}
-	else {
-		LOG_ERR << L"Trying to set an array of wstring to an attribute of type " << rule->mType << std::endl;
-	}
+	mAttrBuilders[initialShapeIndex]->setStringArray(name.c_str(), value.data(), value.size());
 }
 
 Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex) {
