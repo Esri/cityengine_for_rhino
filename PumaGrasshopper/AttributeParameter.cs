@@ -30,12 +30,12 @@ using System.Windows.Forms;
 
 namespace PumaGrasshopper.AttributeParameter
 {
-    public class BooleanRuleAttribute : Param_Boolean
+    public class Boolean : Param_Boolean
     {
         private List<Annotations.Base> mAnnotation;
         private string mGroupName;
 
-        public BooleanRuleAttribute(List<Annotations.Base> annot, string groupName = ""): base()
+        public Boolean(List<Annotations.Base> annot, string groupName = ""): base()
         {
             mAnnotation = annot;
             mGroupName = groupName;
@@ -82,12 +82,12 @@ namespace PumaGrasshopper.AttributeParameter
         }
     }
 
-    public class NumberRuleAttribute: Param_Number
+    public class Number: Param_Number
     {
         private List<Annotations.Base> mAnnotations;
         private string mGroupName;
 
-        public NumberRuleAttribute(List<Annotations.Base> annots, string groupName)
+        public Number(List<Annotations.Base> annots, string groupName)
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -154,12 +154,12 @@ namespace PumaGrasshopper.AttributeParameter
         }
     }
 
-    public class StringRuleAttribute: Param_String
+    public class String: Param_String
     {
         private List<Annotations.Base> mAnnotations;
         private string mGroupName;
 
-        public StringRuleAttribute(List<Annotations.Base> annots, string groupName = ""): base()
+        public String(List<Annotations.Base> annots, string groupName = ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -224,12 +224,12 @@ namespace PumaGrasshopper.AttributeParameter
         }
     }
 
-    public class ColourRuleAttribute: Param_Colour
+    public class Colour: Param_Colour
     {
         private List<Annotations.Base> mAnnotations;
         private string mGroupName;
 
-        public ColourRuleAttribute(List<Annotations.Base> annots, string groupName= ""): base()
+        public Colour(List<Annotations.Base> annots, string groupName= ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
