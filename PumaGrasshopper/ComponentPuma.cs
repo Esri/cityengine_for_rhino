@@ -444,9 +444,26 @@ namespace PumaGrasshopper
             }
         }
 
+        private List<RuleAttribute> GetEligibleAttributes()
+        {
+            var eligibleAttributes = new List<RuleAttribute>();
+            foreach (var attr in mRuleAttributes)
+            {
+                if (!Params.Input.Exists(x => x.NickName == attr.mNickname))
+                {
+                    eligibleAttributes.Add(attr);
+                }
+            }
+            return eligibleAttributes;
+        }
+
         public bool CanInsertParameter(GH_ParameterSide side, int index)
         {
-            return (side == GH_ParameterSide.Input) && (index > 2) && (mRuleAttributes.Length > 0);
+            if ((side != GH_ParameterSide.Input) || (index <= 2))
+                return false;
+
+            List<RuleAttribute> eligibleAttributes = GetEligibleAttributes();
+            return (eligibleAttributes.Count > 0);
         }
 
         public bool CanRemoveParameter(GH_ParameterSide side, int index)
@@ -457,12 +474,11 @@ namespace PumaGrasshopper
         public IGH_Param CreateParameter(GH_ParameterSide side, int index)
         {
             Debug.Assert(mRuleAttributes.Length > 0); // ensured by CanInsertParameter
-            
+
+            List<RuleAttribute> eligibleAttributes = GetEligibleAttributes();
             var attributeNames = new List<string>();
-            foreach (var parm in mRuleAttributes)
-            {
-                attributeNames.Add(parm.mNickname);
-            }
+            foreach (var attr in eligibleAttributes)
+                attributeNames.Add(attr.mNickname);
 
             var form = new AttributeForm(attributeNames, new System.Drawing.Point(Cursor.Position.X, Cursor.Position.Y));
             var result = form.ShowDialog();
@@ -470,7 +486,7 @@ namespace PumaGrasshopper
             {
                 if (form.SelectedIndex >= 0 && form.SelectedIndex < mRuleAttributes.Length)
                 {
-                    var attr = mRuleAttributes[form.SelectedIndex];
+                    var attr = eligibleAttributes[form.SelectedIndex];
                     return attr.CreateInputParameter();
                 }
             }
