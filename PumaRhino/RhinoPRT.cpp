@@ -277,7 +277,7 @@ inline RHINOPRT_API size_t Generate() {
 RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 	const auto& models = RhinoPRT::get().getGenModels();
 
-	if (!models[initialShapeIndex])
+	if (models.size() <= initialShapeIndex || !models[initialShapeIndex])
 		return 0;
 
 	return models[initialShapeIndex]->getMeshPartCount();
