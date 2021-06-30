@@ -20,73 +20,19 @@
 #pragma once
 
 #include "IRhinoCallbacks.h"
-#include "prt/Callbacks.h"
 
-#include "prtx/PRTUtils.h"
-#include "prtx/Types.h"
-
+#include "GeneratedModel.h"
 #include "Logger.h"
 #include "MaterialAttribute.h"
 #include "ReportAttribute.h"
 #include "utils.h"
 
+#include "prt/Callbacks.h"
+
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-
-struct ModelPart {
-	std::vector<double> mVertices;
-	prtx::DoubleVector mNormals;
-	std::vector<uint32_t> mIndices;
-	std::vector<uint32_t> mFaces;
-	ON_2fPointArray mUVs;
-	std::vector<uint32_t> mUVIndices;
-	std::vector<uint32_t> mUVCounts;
-};
-
-class Model {
-public:
-	Model() = default;
-
-	ModelPart& addModelPart() {
-		mModelParts.push_back(ModelPart());
-		return mModelParts.back();
-	}
-
-	ModelPart& getCurrentModelPart() {
-		return mModelParts.back();
-	}
-
-	void addMaterial(const Materials::MaterialAttribute& ma);
-	void addReport(const Reporting::ReportAttribute& ra);
-	void addPrintOutput(const std::wstring_view& message) {
-		assert(message.length() > 0); // we expect at least the newline character added by PRT
-		mPrintOutput.emplace_back(message.substr(0, message.length() - 1)); // let's trim the newline away
-	}
-	void addErrorOutput(const std::wstring_view& error) {
-		mErrorOutput.emplace_back(error);
-	}
-
-	const std::vector<ModelPart>& getModelParts() const;
-	const Reporting::ReportMap& getReports() const;
-	const Materials::MaterialsMap& getMaterials() const;
-	const std::vector<std::wstring>& getPrintOutput() const {
-		return mPrintOutput;
-	}
-	const std::vector<std::wstring>& getErrorOutput() const {
-		return mErrorOutput;
-	}
-
-private:
-	std::vector<ModelPart> mModelParts;
-	Reporting::ReportMap mReports;
-	Materials::MaterialsMap mMaterials;
-	std::vector<std::wstring> mPrintOutput;
-	std::vector<std::wstring> mErrorOutput;
-};
-
-using ModelPtr = std::shared_ptr<Model>;
 
 class RhinoCallbacks : public IRhinoCallbacks {
 public:
@@ -111,7 +57,7 @@ public:
 
 	// local helper functions
 
-	const ModelPtr& getModel(const size_t initialShapeIdx) const;
+	const std::vector<GeneratedModelPtr>& getModels() const;
 	const Reporting::ReportMap& getReport(const size_t initialShapeIdx) const;
 
 	// functions from prt::Callbacks
@@ -151,7 +97,7 @@ public:
 	                            const wchar_t* const* /*ptr*/, size_t /*size*/, size_t nRows) override;
 
 private:
-	Model& getOrCreateModel(size_t initialShapeIndex);
+	GeneratedModel& getOrCreateModel(size_t initialShapeIndex);
 
 	bool addGeometry(const size_t initialShapeIndex, const double* vertexCoords, const size_t vertexCoordsCount,
 	                 const double* normals, const size_t normalsCount, const uint32_t* faceIndices,
@@ -162,5 +108,5 @@ private:
 	                      uint32_t const* const* uvIndices, size_t const* uvIndicesSizes, uint32_t uvSets);
 
 private:
-	std::vector<ModelPtr> mModels;
+	std::vector<GeneratedModelPtr> mModels;
 };

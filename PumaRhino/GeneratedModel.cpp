@@ -20,26 +20,64 @@
 #include "GeneratedModel.h"
 #include "InitialShape.h"
 
-GeneratedModel::GeneratedModel(const ModelPtr& model) : mModel(model) {}
-
-int GeneratedModel::getMeshPartCount() const {
-	return static_cast<int>(mModel->getModelParts().size());
+ModelPart& GeneratedModel::addModelPart() {
+	mModelParts.push_back(ModelPart());
+	return mModelParts.back();
 }
 
-const Reporting::ReportMap& GeneratedModel::getReport() const {
-	return mModel->getReports();
+const std::vector<ModelPart>& GeneratedModel::getModelParts() const {
+	return mModelParts;
+}
+
+int GeneratedModel::getMeshPartCount() const {
+	return static_cast<int>(getModelParts().size());
+}
+
+ModelPart& GeneratedModel::getCurrentModelPart() {
+	return mModelParts.back();
+}
+
+void GeneratedModel::addReport(const Reporting::ReportAttribute& ra) {
+	mReports.emplace(ra.mReportName, ra);
+}
+
+const Reporting::ReportMap& GeneratedModel::getReports() const {
+	return mReports;
 }
 
 const Materials::MaterialsMap& GeneratedModel::getMaterials() const {
-	return mModel->getMaterials();
+	return mMaterials;
+}
+
+void GeneratedModel::addPrintOutput(const std::wstring_view& message) {
+	assert(message.length() > 0); // we expect at least the newline character added by PRT
+	mPrintOutput.emplace_back(message.substr(0, message.length() - 1)); // let's trim the newline away
 }
 
 const std::vector<std::wstring>& GeneratedModel::getPrintOutput() const {
-	return mModel->getPrintOutput();
+	return mPrintOutput;
+}
+
+void GeneratedModel::addErrorOutput(const std::wstring_view& error) {
+	mErrorOutput.emplace_back(error);
 }
 
 const std::vector<std::wstring>& GeneratedModel::getErrorOutput() const {
-	return mModel->getErrorOutput();
+	return mErrorOutput;
+}
+
+void GeneratedModel::addMaterial(const Materials::MaterialAttribute& ma) {
+	mMaterials.insert_or_assign(ma.mMatId, ma);
+}
+
+const GeneratedModel::MeshBundle GeneratedModel::getMeshesFromGenModel(size_t initialShapeIndex) const {
+	const std::wstring idKey = std::to_wstring(initialShapeIndex);
+
+	MeshBundle mesh;
+	mesh.reserve(mModelParts.size());
+	std::transform(mModelParts.begin(), mModelParts.end(), std::back_inserter(mesh),
+	               [this, &idKey](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part, idKey); });
+	return mesh;
 }
 
 ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) const {
@@ -93,17 +131,5 @@ ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart, const std::wstring
 		LOG_ERR << log_str;
 	}
 
-	return mesh;
-}
-
-const GeneratedModel::MeshBundle GeneratedModel::getMeshesFromGenModel(size_t initialShapeIndex) const {
-	const auto& modelParts = mModel->getModelParts();
-
-	const std::wstring idKey = std::to_wstring(initialShapeIndex);
-
-	MeshBundle mesh;
-	mesh.reserve(modelParts.size());
-	std::transform(modelParts.begin(), modelParts.end(), std::back_inserter(mesh),
-	               [this, &idKey](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part, idKey); });
 	return mesh;
 }

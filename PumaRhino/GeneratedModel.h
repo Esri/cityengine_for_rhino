@@ -19,24 +19,53 @@
 
 #pragma once
 
-#include "RhinoCallbacks.h"
+#include "MaterialAttribute.h"
+#include "ReportAttribute.h"
+
+#include <vector>
+#include <string>
+
+struct ModelPart {
+	std::vector<double> mVertices;
+	std::vector<double> mNormals;
+	std::vector<uint32_t> mIndices;
+	std::vector<uint32_t> mFaces;
+	ON_2fPointArray mUVs;
+	std::vector<uint32_t> mUVIndices;
+	std::vector<uint32_t> mUVCounts;
+};
 
 class GeneratedModel final {
 public:
 	GeneratedModel() = default;
-	GeneratedModel(const ModelPtr& model);
 	~GeneratedModel() = default;
+
+	ModelPart& addModelPart();
+	const std::vector<ModelPart>& getModelParts() const;
+	int getMeshPartCount() const;
+	ModelPart& getCurrentModelPart();
+
+	void addMaterial(const Materials::MaterialAttribute& ma);
+	const Materials::MaterialsMap& getMaterials() const;
+
+	void addReport(const Reporting::ReportAttribute& ra);
+	const Reporting::ReportMap& getReports() const;
+
+	void addPrintOutput(const std::wstring_view& message);
+	const std::vector<std::wstring>& getPrintOutput() const;
+
+	void addErrorOutput(const std::wstring_view& error);
+	const std::vector<std::wstring>& getErrorOutput() const;
 
 	using MeshBundle = std::vector<ON_Mesh>;
 	const MeshBundle getMeshesFromGenModel(size_t initialShapeIndex) const;
-	int getMeshPartCount() const;
-	const Reporting::ReportMap& getReport() const;
-	const Materials::MaterialsMap& getMaterials() const;
-	const std::vector<std::wstring>& getPrintOutput() const;
-	const std::vector<std::wstring>& getErrorOutput() const;
 
 private:
-	ModelPtr mModel;
+	std::vector<ModelPart> mModelParts;
+	Reporting::ReportMap mReports;
+	Materials::MaterialsMap mMaterials;
+	std::vector<std::wstring> mPrintOutput;
+	std::vector<std::wstring> mErrorOutput;
 
 	/// Creates an ON_Mesh and setup its uv coordinates, for a given ModelPart.
 	ON_Mesh toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) const;

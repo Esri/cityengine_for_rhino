@@ -211,7 +211,7 @@ Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex) {
 	if ((mGeneratedModels.size() <= initialShapeIndex) || !mGeneratedModels[initialShapeIndex])
 		return Reporting::EMPTY_REPORTS;
 
-	const auto& reports = mGeneratedModels[initialShapeIndex]->getReport();
+	const auto& reports = mGeneratedModels[initialShapeIndex]->getReports();
 	return Reporting::ToReportsVector(reports);
 }
 

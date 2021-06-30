@@ -203,7 +203,7 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<I
 		}
 	}
 
-	std::vector<GeneratedModelPtr> generated_models(mInitialShapesBuilders.size());
+	std::vector<GeneratedModelPtr> generatedModels(mInitialShapesBuilders.size());
 
 	try {
 
@@ -237,11 +237,8 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<I
 			return {};
 		}
 
-		for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
-			const ModelPtr& m = roc->getModel(idx);
-			if (m)
-				generated_models[idx] = std::make_shared<GeneratedModel>(m);
-		}
+		generatedModels = roc->getModels();
+		assert(mInitialShapesBuilders.size() == generate_models.size());
 	}
 	catch (const std::exception& e) {
 		LOG_ERR << "caught exception: " << e.what();
@@ -250,7 +247,7 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<I
 		LOG_ERR << "caught unknown exception.";
 	}
 
-	return generated_models;
+	return generatedModels;
 }
 
 void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
