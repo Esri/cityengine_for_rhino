@@ -46,33 +46,23 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 
 } // namespace
 
-ResolveMap::ResolveMapCache::CacheStatus ModelGenerator::initResolveMap(const std::filesystem::path& rpk) {
-	if (rpk.empty())
-		return ResolveMap::ResolveMapCache::CacheStatus::FAILURE;
-
-	// Get the resolvemap from the resolve map cache
-	auto lookup = PRTContext::get()->getResolveMap(rpk);
-
-	if (lookup.second != ResolveMap::ResolveMapCache::CacheStatus::FAILURE) {
+void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
+	try {
+		const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
+		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::HIT && rulePkg == mRulePkg) {
+			// resolvemap already exists and the rule file was not changed, no need to update.
+			return;
+		}
 		mResolveMap = lookup.first;
 	}
-
-	return lookup.second;
-}
-
-void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
-	// Get the resolve map.
-	auto cacheStatus = initResolveMap(rulePkg);
-	if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::FAILURE) {
-		LOG_ERR << "Failed to create the resolve map from rule package " << mRulePkg << std::endl;
+	catch (std::exception&) {
+		mResolveMap.reset();
+		mRuleFile.clear();
+		mStartRule.clear();
 		mRuleAttributes.clear();
-		return;
+		throw;
 	}
-	else if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::HIT && rulePkg == mRulePkg) {
-		// resolvemap already exists and the rule file was not changed, no need to update.
-		return;
-	}
-
+	
 	// Cache miss -> initialize everything
 	// Reset the rule infos
 	mRuleAttributes.clear();
@@ -90,7 +80,7 @@ void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	// To create the ruleFileInfo, we first need the ruleFileURI
 	const wchar_t* ruleFileURI = mResolveMap->getString(mRuleFile.c_str());
 	if (ruleFileURI == nullptr) {
-		LOG_ERR << "could not find rule file URI in resolve map of rule package " << mRulePkg;
+		LOG_ERR << "Could not find rule file URI in resolve map of rule package " << mRulePkg;
 		return;
 	}
 

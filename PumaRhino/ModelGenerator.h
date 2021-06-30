@@ -39,7 +39,6 @@ public:
 	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
 
-	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::filesystem::path& rpk);
 	void updateRuleFiles(const std::wstring& rulePkg);
 
 	const RuleAttributes& getRuleAttributes() const {

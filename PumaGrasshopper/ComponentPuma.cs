@@ -31,6 +31,7 @@ using System.Windows.Forms;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Parameters;
 using System.Drawing;
+using Rhino.Runtime.InteropWrappers;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -203,7 +204,7 @@ namespace PumaGrasshopper
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            // Get default inputs
+            ClearRuntimeMessages();
 
             // RPK path is a single item.
             string rpk_file = "";
@@ -213,7 +214,15 @@ namespace PumaGrasshopper
                 return;
 
             // Once we have a rpk file, directly extract the rule attributes
-            PRTWrapper.SetPackage(rpk_file);
+            var errorMsg = new StringWrapper();
+            var pErrorMsg = errorMsg.NonConstPointer;
+            PRTWrapper.SetPackage(rpk_file, pErrorMsg);
+            if (errorMsg.ToString().Length > 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to read Rule Package: " + errorMsg);
+                //ClearData();
+                return;
+            }
 
             // Update the rule attributes only if the rpk is changed.
             if (mCurrentRPK != rpk_file)

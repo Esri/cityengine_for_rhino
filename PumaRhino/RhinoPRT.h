@@ -48,7 +48,7 @@ public:
 	void ShutdownRhinoPRT();
 	bool IsPRTInitialized();
 
-	void SetRPKPath(const std::wstring& rpk_path);
+	void SetRPKPath(const std::wstring& rpk_path); // might throw!
 
 	int GetRuleAttributeCount();
 	const RuleAttributes& GetRuleAttributes() const;
@@ -115,7 +115,7 @@ RHINOPRT_API bool InitializeRhinoPRT();
 
 RHINOPRT_API void ShutdownRhinoPRT();
 
-RHINOPRT_API void SetPackage(const wchar_t* rpk_path);
+RHINOPRT_API void SetPackage(const wchar_t* rpk_path, ON_wString* errorMsg);
 
 RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh);
 

@@ -141,7 +141,13 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 		return failure;
 	}
 
-	SetPackage(rpk.c_str());
+	try {
+		RhinoPRT::get().SetRPKPath(rpk);
+	}
+	catch (std::exception& e) {
+		LOG_ERR << "Failed to set Rule Packages: " << e.what();
+		return CRhinoCommand::failure;
+	}
 
 	ClearInitialShapes();
 

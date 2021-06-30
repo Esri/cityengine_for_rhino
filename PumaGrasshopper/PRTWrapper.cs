@@ -47,7 +47,7 @@ namespace PumaGrasshopper
         public static extern bool InitializeRhinoPRT();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetPackage(string rpk_path);
+        public static extern void SetPackage(string rpk_path, [In, Out] IntPtr errorMsg);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool AddInitialMesh([In]IntPtr pMesh);

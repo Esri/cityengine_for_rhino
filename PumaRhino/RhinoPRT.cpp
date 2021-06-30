@@ -89,7 +89,7 @@ void RhinoPRTAPI::SetRPKPath(const std::wstring& rpk_path) {
 		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
 
 	// This also creates the resolve map
-	mModelGenerator->updateRuleFiles(mPackagePath);
+	mModelGenerator->updateRuleFiles(mPackagePath); // might throw !
 
 	// Also create the attribute map builder that will receive the rule attributes.
 	mAttrBuilder.reset(prt::AttributeMapBuilder::create());
@@ -246,10 +246,14 @@ RHINOPRT_API void ShutdownRhinoPRT() {
 	RhinoPRT::get().ShutdownRhinoPRT();
 }
 
-RHINOPRT_API void SetPackage(const wchar_t* rpk_path) {
-	if (!rpk_path)
-		return;
-	RhinoPRT::get().SetRPKPath(rpk_path);
+RHINOPRT_API void SetPackage(const wchar_t* rpk_path, ON_wString* errorMsg) {
+	assert(rpk_path != nullptr); // guaranteed by managed call site
+	try {
+		RhinoPRT::get().SetRPKPath(rpk_path);
+	}
+	catch (std::exception& e) {
+		*errorMsg += pcu::toUTF16FromOSNarrow(e.what()).c_str();
+	}
 }
 
 inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh) {
