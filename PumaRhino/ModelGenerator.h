@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "GeneratedModel.h"
 #include "PRTContext.h"
 #include "PRTUtilityModels.h"
 #include "ResolveMapCache.h"
@@ -32,9 +33,9 @@
 class ModelGenerator {
 public:
 	std::vector<GeneratedModelPtr> generateModel(const std::vector<InitialShape>& initial_geom,
-	                                          std::vector<pcu::ShapeAttributes>& shapeAttributes,
-	                                          const pcu::EncoderOptions& geometryEncoderOptions,
-	                                          pcu::AttributeMapBuilderVector& aBuilders);
+	                                             std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	                                             const pcu::EncoderOptions& geometryEncoderOptions,
+	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
 	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
