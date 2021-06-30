@@ -17,6 +17,7 @@
     <ClCompile Include="MaterialAttribute.cpp" />
     <ClCompile Include="ModelGenerator.cpp" />
     <ClCompile Include="InitialShape.cpp" />
+    <ClCompile Include="PumaGrasshopperAPI.cpp" />
     <ClCompile Include="ReportAttribute.cpp" />
     <ClCompile Include="ResolveMapCache.cpp" />
     <ClCompile Include="RhinoCallbacks.cpp" />

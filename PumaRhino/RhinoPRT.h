@@ -36,8 +36,6 @@
 #pragma comment(lib, "ole32.lib") // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was
                                   // unexpected here" when using /permissive-
 
-#define RHINOPRT_API __declspec(dllexport)
-
 namespace RhinoPRT {
 
 class RhinoPRTAPI {
