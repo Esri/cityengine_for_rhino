@@ -293,7 +293,7 @@ RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>*
 	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
 		return false;
 
-	const auto meshBundle = models[initialShapeIndex]->getMeshesFromGenModel(initialShapeIndex);
+	const auto meshBundle = models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
 	for (const auto& meshPart : meshBundle) {
 		pMeshArray->Append(new ON_Mesh(meshPart));
 	}

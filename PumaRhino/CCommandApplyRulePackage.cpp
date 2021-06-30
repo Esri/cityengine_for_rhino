@@ -168,7 +168,7 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 		if (!generated_models[initialShapeIndex])
 			continue;
 
-		const auto& meshBundle = generated_models[initialShapeIndex]->getMeshesFromGenModel(initialShapeIndex);
+		const auto& meshBundle = generated_models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
 
 		std::for_each(meshBundle.begin(), meshBundle.end(),
 		              [&context](const ON_Mesh& mesh) { context.m_doc.AddMeshObject(mesh); });

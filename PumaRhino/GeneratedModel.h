@@ -58,7 +58,7 @@ public:
 	const std::vector<std::wstring>& getErrorOutput() const;
 
 	using MeshBundle = std::vector<ON_Mesh>;
-	const MeshBundle getMeshesFromGenModel(size_t initialShapeIndex) const;
+	const MeshBundle createRhinoMeshes(size_t initialShapeIndex) const;
 
 private:
 	std::vector<ModelPart> mModelParts;
@@ -66,9 +66,6 @@ private:
 	Materials::MaterialsMap mMaterials;
 	std::vector<std::wstring> mPrintOutput;
 	std::vector<std::wstring> mErrorOutput;
-
-	/// Creates an ON_Mesh and setup its uv coordinates, for a given ModelPart.
-	ON_Mesh toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) const;
 };
 
 using GeneratedModelPtr = std::shared_ptr<GeneratedModel>;
