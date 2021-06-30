@@ -71,3 +71,31 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 		}
 	}
 }
+
+int InitialShape::getID() const {
+	return mID;
+}
+
+const double* InitialShape::getVertices() const {
+	return mVertices.data();
+}
+
+size_t InitialShape::getVertexCount() const {
+	return mVertices.size();
+}
+
+const uint32_t* InitialShape::getIndices() const {
+	return mIndices.data();
+}
+
+size_t InitialShape::getIndexCount() const {
+	return mIndices.size();
+}
+
+const uint32_t* InitialShape::getFaceCounts() const {
+	return mFaceCounts.data();
+}
+
+size_t InitialShape::getFaceCountsCount() const {
+	return mFaceCounts.size();
+}

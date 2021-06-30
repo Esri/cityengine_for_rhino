@@ -32,37 +32,17 @@ class InitialShape {
 public:
 	InitialShape() = default;
 	InitialShape(const ON_Mesh& mesh);
-	~InitialShape() {}
+	~InitialShape() = default;
 
-	const int getID() const {
-		return mID;
-	}
+	int getID() const;
+	const double* getVertices() const;
+	size_t getVertexCount() const;
+	const uint32_t* getIndices() const;
+	size_t getIndexCount() const;
+	const uint32_t* getFaceCounts() const;
+	size_t getFaceCountsCount() const;
 
-	const double* getVertices() const {
-		return mVertices.data();
-	}
-
-	size_t getVertexCount() const {
-		return mVertices.size();
-	}
-
-	const uint32_t* getIndices() const {
-		return mIndices.data();
-	}
-
-	size_t getIndexCount() const {
-		return mIndices.size();
-	}
-
-	const uint32_t* getFaceCounts() const {
-		return mFaceCounts.data();
-	}
-
-	size_t getFaceCountsCount() const {
-		return mFaceCounts.size();
-	}
-
-protected:
+private:
 	int mID;
 	std::vector<double> mVertices;
 	std::vector<uint32_t> mIndices;
