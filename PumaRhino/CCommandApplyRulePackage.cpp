@@ -149,12 +149,13 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 		return CRhinoCommand::failure;
 	}
 
-	ClearInitialShapes();
+	RhinoPRT::get().ClearInitialShapes();
 
-	if (!AddInitialMesh(&mesh_array)) {
-		LOG_ERR << L"Failed to add initial shapes, aborting command.";
-		return failure;
-	}
+	std::vector<InitialShape> initShapes;
+	initShapes.reserve(mesh_array.Count());
+	for (int i = 0; i < mesh_array.Count(); ++i)
+		initShapes.emplace_back(*mesh_array[i]);
+	RhinoPRT::get().AddInitialShape(initShapes);
 
 	// PRT Generation
 	bool status = RhinoPRT::get().GenerateGeometry();

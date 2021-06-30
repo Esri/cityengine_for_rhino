@@ -146,7 +146,7 @@ BOOL CRhinoPRTPlugIn::OnLoadPlugIn() {
 	//    override this function and do it here.  It is not necessary to call
 	//    CPlugIn::OnLoadPlugIn() from your derived class.
 
-	return InitializeRhinoPRT();
+	return RhinoPRT::get().InitializeRhinoPRT();
 }
 
 void CRhinoPRTPlugIn::OnUnloadPlugIn() {
@@ -157,5 +157,5 @@ void CRhinoPRTPlugIn::OnUnloadPlugIn() {
 	//    view at this time. Thus, you should only be manipulating your own objects.
 	//    or tools here.
 
-	ShutdownRhinoPRT();
+	RhinoPRT::get().ShutdownRhinoPRT();
 }
