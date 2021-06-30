@@ -23,33 +23,17 @@
 
 class GeneratedModel final {
 public:
-	GeneratedModel(const ModelPtr& model);
-
 	GeneratedModel() = default;
+	GeneratedModel(const ModelPtr& model);
 	~GeneratedModel() = default;
 
 	using MeshBundle = std::vector<ON_Mesh>;
 	const MeshBundle getMeshesFromGenModel(size_t initialShapeIndex) const;
-
-	int getMeshPartCount() const {
-		return static_cast<int>(mModel->getModelParts().size());
-	}
-
-	const Reporting::ReportMap& getReport() const {
-		return mModel->getReports();
-	}
-
-	const Materials::MaterialsMap& getMaterials() const {
-		return mModel->getMaterials();
-	}
-
-	const std::vector<std::wstring>& getPrintOutput() const {
-		return mModel->getPrintOutput();
-	}
-
-	const std::vector<std::wstring>& getErrorOutput() const {
-		return mModel->getErrorOutput();
-	}
+	int getMeshPartCount() const;
+	const Reporting::ReportMap& getReport() const;
+	const Materials::MaterialsMap& getMaterials() const;
+	const std::vector<std::wstring>& getPrintOutput() const;
+	const std::vector<std::wstring>& getErrorOutput() const;
 
 private:
 	ModelPtr mModel;

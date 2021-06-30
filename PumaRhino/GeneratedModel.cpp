@@ -22,6 +22,26 @@
 
 GeneratedModel::GeneratedModel(const ModelPtr& model) : mModel(model) {}
 
+int GeneratedModel::getMeshPartCount() const {
+	return static_cast<int>(mModel->getModelParts().size());
+}
+
+const Reporting::ReportMap& GeneratedModel::getReport() const {
+	return mModel->getReports();
+}
+
+const Materials::MaterialsMap& GeneratedModel::getMaterials() const {
+	return mModel->getMaterials();
+}
+
+const std::vector<std::wstring>& GeneratedModel::getPrintOutput() const {
+	return mModel->getPrintOutput();
+}
+
+const std::vector<std::wstring>& GeneratedModel::getErrorOutput() const {
+	return mModel->getErrorOutput();
+}
+
 ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) const {
 	ON_Mesh mesh(static_cast<int>(modelPart.mFaces.size()), static_cast<int>(modelPart.mIndices.size()), true, true);
 
