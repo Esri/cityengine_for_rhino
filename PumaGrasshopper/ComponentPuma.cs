@@ -382,7 +382,7 @@ namespace PumaGrasshopper
         {
             if (attributeParam.Type == typeof(GH_Number))
             {
-                List<double> doubleList = values.Cast<double>().ToList();
+                List<double> doubleList = values.ConvertAll((x) => { x.CastTo<double>(out double d); return d; });
                 PRTWrapper.SetRuleAttributeDoubleArray(shapeId, attributeParam.Name, doubleList);
             }
             else if (attributeParam.Type == typeof(GH_Integer))
@@ -391,12 +391,12 @@ namespace PumaGrasshopper
             }
             else if (attributeParam.Type == typeof(GH_Boolean))
             {
-                List<Boolean> boolList = values.Cast<bool>().ToList();
+                List<bool> boolList = values.ConvertAll((x) => { x.CastTo<bool>(out bool b); return b; });
                 PRTWrapper.SetRuleAttributeBoolArray(shapeId, attributeParam.Name, boolList);
             }
             else if (attributeParam.Type == typeof(GH_String))
             {
-                List<string> stringList = values.Cast<string>().ToList();
+                List<string> stringList = values.ConvertAll((x) => { x.CastTo<string>(out string s); return s; });
                 PRTWrapper.SetRuleAttributeStringArray(shapeId, attributeParam.Name, stringList);
             }
         }

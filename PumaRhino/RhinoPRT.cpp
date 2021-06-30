@@ -26,10 +26,6 @@ T static_cast_fct(const T1& x) {
 	return static_cast<T>(x);
 }
 
-const wchar_t* to_wchar_array(const ON_wString& x) {
-	return x.Array();
-}
-
 template <typename T>
 void fillAttributeFromNode(RhinoPRT::RhinoPRTAPI& prtApi, const int initialShapeIndex, const std::wstring& attrFullName,
                            T value, size_t count = 1) {
@@ -370,7 +366,8 @@ RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const
 
 	// convert the array of ON_wString to a std::vector of wstring.
 	std::vector<const wchar_t*> strVector(size);
-	std::transform(valueArray, valueArray + size, strVector.begin(), to_wchar_array);
+	std::transform(valueArray, valueArray + size, strVector.begin(),
+	               [](const ON_wString& ws) { return static_cast<const wchar_t*>(ws); }); // see ON_wString::operator const wchar_t*()
 
 	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, strVector, size);
 }
