@@ -16,7 +16,7 @@
     <ClCompile Include="GeneratedModel.cpp" />
     <ClCompile Include="MaterialAttribute.cpp" />
     <ClCompile Include="ModelGenerator.cpp" />
-    <ClCompile Include="PRTUtilityModels.cpp" />
+    <ClCompile Include="InitialShape.cpp" />
     <ClCompile Include="ReportAttribute.cpp" />
     <ClCompile Include="ResolveMapCache.cpp" />
     <ClCompile Include="RhinoCallbacks.cpp" />
@@ -36,7 +36,7 @@
     <ClInclude Include="GeneratedModel.h" />
     <ClInclude Include="MaterialAttribute.h" />
     <ClInclude Include="ModelGenerator.h" />
-    <ClInclude Include="PRTUtilityModels.h" />
+    <ClInclude Include="InitialShape.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="ReportAttribute.h" />
     <ClInclude Include="ResolveMapCache.h" />

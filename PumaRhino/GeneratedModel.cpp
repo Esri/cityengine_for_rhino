@@ -18,7 +18,7 @@
  */
 
 #include "GeneratedModel.h"
-#include "PRTUtilityModels.h"
+#include "InitialShape.h"
 
 GeneratedModel::GeneratedModel(const ModelPtr& model) : mModel(model) {}
 

@@ -18,9 +18,6 @@
  */
 
 #include "MaterialAttribute.h"
-
-#include "PRTUtilityModels.h"
-
 #include "Logger.h"
 
 ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* attrMap) {

@@ -21,7 +21,7 @@
 
 #include "GeneratedModel.h"
 #include "PRTContext.h"
-#include "PRTUtilityModels.h"
+#include "InitialShape.h"
 #include "ResolveMapCache.h"
 #include "RhinoCallbacks.h"
 #include "RuleAttributes.h"

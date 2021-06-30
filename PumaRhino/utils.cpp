@@ -20,7 +20,6 @@
 #include "utils.h"
 
 #include "Logger.h"
-#include "PRTUtilityModels.h"
 
 #include "prt/StringUtils.h"
 
