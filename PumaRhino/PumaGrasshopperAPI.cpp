@@ -89,8 +89,19 @@ RHINOPRT_API void ClearInitialShapes() {
 	RhinoPRT::get().ClearInitialShapes();
 }
 
-inline RHINOPRT_API size_t Generate() {
-	return RhinoPRT::get().GenerateGeometry();
+RHINOPRT_API bool Generate(ON_SimpleArray<int>* pMeshCounts, ON_SimpleArray<ON_Mesh*>* pMeshArray) {
+	RhinoPRT::get().GenerateGeometry();
+	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
+
+	for (size_t initialShapeIndex = 0; initialShapeIndex < models.size(); initialShapeIndex++) {
+		const auto meshBundle = models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
+		pMeshCounts->Append(static_cast<int>(meshBundle.size()));
+		for (const auto& meshPart : meshBundle) {
+			pMeshArray->Append(new ON_Mesh(meshPart));
+		}
+	}
+
+	return !models.empty();
 }
 
 RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
@@ -100,20 +111,6 @@ RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 		return 0;
 
 	return models[initialShapeIndex]->getMeshPartCount();
-}
-
-RHINOPRT_API bool GetMeshBundle(int initialShapeIndex, ON_SimpleArray<ON_Mesh*>* pMeshArray) {
-	const auto& models = RhinoPRT::get().getGenModels();
-
-	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
-		return false;
-
-	const auto meshBundle = models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
-	for (const auto& meshPart : meshBundle) {
-		pMeshArray->Append(new ON_Mesh(meshPart));
-	}
-
-	return true;
 }
 
 RHINOPRT_API int GetRuleAttributesCount() {
