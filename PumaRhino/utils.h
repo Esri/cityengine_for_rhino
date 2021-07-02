@@ -40,11 +40,6 @@
 struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when
                  // using /permissive-
 
-/**
- * commonly used constant
- */
-const std::wstring ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
-
 // forward declaration to break include loop
 class GeneratedModel;
 class RhinoCallbacks;

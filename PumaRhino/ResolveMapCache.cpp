@@ -18,6 +18,7 @@
  */
 
 #include "ResolveMapCache.h"
+#include "PRTContext.h"
 
 #include <chrono>
 #include <filesystem>
@@ -63,9 +64,9 @@ ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& 
 		LOG_DBG << "rpk: current timestamp: "
 		        << std::chrono::duration_cast<std::chrono::nanoseconds>(timeStamp.time_since_epoch()).count() << "ns";
 
-	// verify timestamp
 	if (timeStamp == INVALID_TIMESTAMP)
-		return LOOKUP_FAILURE;
+		throw std::invalid_argument("Cannot get time stamp of " + rpk.generic_string() +
+		                            ", make sure to specify an existing and valid rule package.");
 
 	CacheStatus cs = CacheStatus::HIT;
 	auto it = mCache.find(cacheKey);
@@ -104,7 +105,7 @@ ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& 
 		rmce.mResolveMap.reset(prt::createResolveMap(wRpkURI.c_str(), rmce.mExtractionPath->wstring().c_str(), &status),
 		                       pcu::PRTDestroyer());
 		if (status != prt::STATUS_OK)
-			return LOOKUP_FAILURE;
+			throw std::runtime_error("Failed to read and unpack the rule package at " + rpk.generic_string() + ", please check the log file at " + PRTContext::getLogFilePath().generic_string());
 
 		it = mCache.emplace(cacheKey, std::move(rmce)).first;
 		LOG_DBG << "Unpacked RPK " << rpk << " to " << mUnpackPath;

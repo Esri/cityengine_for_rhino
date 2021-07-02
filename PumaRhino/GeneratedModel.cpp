@@ -17,69 +17,16 @@
  * limitations under the License.
  */
 
-#include "PRTUtilityModels.h"
+#include "GeneratedModel.h"
+#include "InitialShape.h"
 
-#include "Logger.h"
+namespace {
 
-#include <algorithm>
-#include <numeric>
-
-InitialShape::InitialShape(const ON_Mesh& mesh) {
-	ON_wString shapeIdxStr;
-	if (!mesh.GetUserString(INIT_SHAPE_ID_KEY.c_str(), shapeIdxStr)) {
-		LOG_WRN << L"InitialShapeID not found in given mesh";
-		mID = -1;
-	}
-	else {
-		std::wstring str(shapeIdxStr.Array());
-
-		// cast to int
-		try {
-			mID = std::stoi(str);
-		}
-		catch (std::invalid_argument) {
-			LOG_ERR << "Mesh id string was not a number, so it could not be parsed -> setting initial shape id to -1.";
-			mID = -1;
-		}
-		catch (std::out_of_range) {
-			LOG_ERR << "Mesh id could not be parsed, setting initial shape id to 0.";
-			mID = -1;
-		}
-	}
-
-	mVertices.reserve(static_cast<size_t>(mesh.VertexCount() * 3));
-	mIndices.reserve(static_cast<size_t>(mesh.FaceCount() * 4));
-	mFaceCounts.reserve(mesh.FaceCount());
-
-	for (int i = 0; i < mesh.VertexCount(); ++i) {
-		ON_3dPoint vertex = mesh.Vertex(i);
-		mVertices.push_back(vertex.x);
-		mVertices.push_back(vertex.z);
-		mVertices.push_back(-vertex.y);
-	}
-
-	for (int i = 0; i < mesh.FaceCount(); ++i) {
-		mIndices.push_back(mesh.m_F.At(i)->vi[0]);
-		mIndices.push_back(mesh.m_F.At(i)->vi[1]);
-		mIndices.push_back(mesh.m_F.At(i)->vi[2]);
-		if (mesh.m_F.At(i)->IsQuad()) {
-			mIndices.push_back(mesh.m_F.At(i)->vi[3]);
-			mFaceCounts.push_back(4);
-		}
-		else {
-			mFaceCounts.push_back(3);
-		}
-	}
-}
-
-GeneratedModel::GeneratedModel(const size_t& initialShapeIdx, const Model& model)
-    : mInitialShapeIndex(initialShapeIdx), mModel(model) {}
-
-const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const {
+ON_Mesh toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) {
 	ON_Mesh mesh(static_cast<int>(modelPart.mFaces.size()), static_cast<int>(modelPart.mIndices.size()), true, true);
 
 	// Set the initial shape id.
-	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), std::to_wstring(mInitialShapeIndex).c_str());
+	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), idKey.c_str());
 
 	// Duplicate vertices
 	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
@@ -129,12 +76,64 @@ const ON_Mesh GeneratedModel::toON_Mesh(const ModelPart& modelPart) const {
 	return mesh;
 }
 
-const MeshBundle GeneratedModel::getMeshesFromGenModel() const {
-	const auto& modelParts = mModel.getModelParts();
+} // namespace
+
+ModelPart& GeneratedModel::addModelPart() {
+	mModelParts.push_back(ModelPart());
+	return mModelParts.back();
+}
+
+const std::vector<ModelPart>& GeneratedModel::getModelParts() const {
+	return mModelParts;
+}
+
+int GeneratedModel::getMeshPartCount() const {
+	return static_cast<int>(getModelParts().size());
+}
+
+ModelPart& GeneratedModel::getCurrentModelPart() {
+	return mModelParts.back();
+}
+
+void GeneratedModel::addReport(const Reporting::ReportAttribute& ra) {
+	mReports.emplace(ra.mReportName, ra);
+}
+
+const Reporting::ReportMap& GeneratedModel::getReports() const {
+	return mReports;
+}
+
+const Materials::MaterialsMap& GeneratedModel::getMaterials() const {
+	return mMaterials;
+}
+
+void GeneratedModel::addPrintOutput(const std::wstring_view& message) {
+	assert(message.length() > 0); // we expect at least the newline character added by PRT
+	mPrintOutput.emplace_back(message.substr(0, message.length() - 1)); // let's trim the newline away
+}
+
+const std::vector<std::wstring>& GeneratedModel::getPrintOutput() const {
+	return mPrintOutput;
+}
+
+void GeneratedModel::addErrorOutput(const std::wstring_view& error) {
+	mErrorOutput.emplace_back(error);
+}
+
+const std::vector<std::wstring>& GeneratedModel::getErrorOutput() const {
+	return mErrorOutput;
+}
+
+void GeneratedModel::addMaterial(const Materials::MaterialAttribute& ma) {
+	mMaterials.insert_or_assign(ma.mMatId, ma);
+}
+
+const GeneratedModel::MeshBundle GeneratedModel::createRhinoMeshes(size_t initialShapeIndex) const {
+	const std::wstring idKey = std::to_wstring(initialShapeIndex);
 
 	MeshBundle mesh;
-	mesh.reserve(modelParts.size());
-	std::transform(modelParts.begin(), modelParts.end(), std::back_inserter(mesh),
-	               [this](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part); });
+	mesh.reserve(mModelParts.size());
+	std::transform(mModelParts.begin(), mModelParts.end(), std::back_inserter(mesh),
+	               [this, &idKey](const ModelPart& part) -> ON_Mesh { return toON_Mesh(part, idKey); });
 	return mesh;
 }

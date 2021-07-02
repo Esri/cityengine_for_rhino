@@ -38,7 +38,7 @@ public:
 	ResolveMapCache& operator=(ResolveMapCache&&) = delete;
 	~ResolveMapCache() = default;
 
-	enum class CacheStatus { HIT, MISS, FAILURE };
+	enum class CacheStatus { HIT, MISS };
 	using LookupResult = std::pair<pcu::ResolveMapSPtr, CacheStatus>;
 	LookupResult get(const std::filesystem::path& rpk);
 
@@ -57,6 +57,5 @@ private:
 using ResolveMapCacheUPtr = std::unique_ptr<ResolveMapCache>;
 
 const static pcu::ResolveMapSPtr RESOLVE_MAP_NONE;
-const static ResolveMapCache::LookupResult LOOKUP_FAILURE = {RESOLVE_MAP_NONE, ResolveMapCache::CacheStatus::FAILURE};
 
 } // namespace ResolveMap

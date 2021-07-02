@@ -55,12 +55,28 @@
   </Target>
   <Target Name="CopyPRT" AfterTargets="Build">
     <ItemGroup>
+      <!-- whitelisting core PRT components -->
       <PRT_CORE_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\bin\*.dll" />
-      <PRT_EXTENSION_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.adaptors.dll;$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.codecs.dll" />
+
+      <!-- whitelisting main PRT extension libraries -->
+      <PRT_EXT_MAIN_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.adaptors.dll" />
+      <PRT_EXT_MAIN_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.codecs.dll" />
+
+      <!-- whitelisting USD extension libraries -->
+      <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.usd.dll" />
+      <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\usd_ms.dll" />
+      <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\tbb.dll" />
+      <PRT_EXT_USD_PLUGIN_FILES Include="$(SolutionDir)deps\ce_sdk\lib\usd\**\*.*" />
+
+      <!-- whitelisting DWG extension library -->
+      <PRT_EXT_DWG_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.dwg.dll" />
     </ItemGroup>
-    <Message Importance="High" Text="Copying dlls..." />
+    <Message Importance="High" Text="Copying PRT dependency..." />
     <Copy SourceFiles="@(PRT_CORE_LIBRARIES)" DestinationFolder="$(OutputDirectory)" />
-    <Copy SourceFiles="@(PRT_EXTENSION_LIBRARIES)" DestinationFolder="$(OutputDirectory)lib" />
+    <Copy SourceFiles="@(PRT_EXT_MAIN_LIBRARIES)" DestinationFolder="$(OutputDirectory)lib\%(RecursiveDir)" />
+    <Copy SourceFiles="@(PRT_EXT_USD_LIBRARIES)" DestinationFolder="$(OutputDirectory)lib\%(RecursiveDir)" />
+    <Copy SourceFiles="@(PRT_EXT_USD_PLUGIN_FILES)" DestinationFolder="$(OutputDirectory)lib\usd\%(RecursiveDir)" />
+    <Copy SourceFiles="@(PRT_EXT_DWG_LIBRARIES)" DestinationFolder="$(OutputDirectory)lib\%(RecursiveDir)" />
   </Target>
   <Target Name="Clean">
     <RemoveDir Directories="$(OutputDirectory);$(DependencyDir)">

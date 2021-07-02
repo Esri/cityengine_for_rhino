@@ -141,14 +141,21 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 		return failure;
 	}
 
-	SetPackage(rpk.c_str());
-
-	ClearInitialShapes();
-
-	if (!AddInitialMesh(&mesh_array)) {
-		LOG_ERR << L"Failed to add initial shapes, aborting command.";
-		return failure;
+	try {
+		RhinoPRT::get().SetRPKPath(rpk);
 	}
+	catch (std::exception& e) {
+		LOG_ERR << "Failed to set Rule Packages: " << e.what();
+		return CRhinoCommand::failure;
+	}
+
+	RhinoPRT::get().ClearInitialShapes();
+
+	std::vector<InitialShape> initShapes;
+	initShapes.reserve(mesh_array.Count());
+	for (int i = 0; i < mesh_array.Count(); ++i)
+		initShapes.emplace_back(*mesh_array[i]);
+	RhinoPRT::get().AddInitialShape(initShapes);
 
 	// PRT Generation
 	bool status = RhinoPRT::get().GenerateGeometry();
@@ -158,8 +165,11 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 	const auto& generated_models = RhinoPRT::get().getGenModels();
 
 	// Add the objects to the Rhino scene.
-	for (auto& model : generated_models) {
-		const auto& meshBundle = model.getMeshesFromGenModel();
+	for (size_t initialShapeIndex = 0; initialShapeIndex < generated_models.size(); initialShapeIndex++) {
+		if (!generated_models[initialShapeIndex])
+			continue;
+
+		const auto& meshBundle = generated_models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
 
 		std::for_each(meshBundle.begin(), meshBundle.end(),
 		              [&context](const ON_Mesh& mesh) { context.m_doc.AddMeshObject(mesh); });

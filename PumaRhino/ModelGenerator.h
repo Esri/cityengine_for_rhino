@@ -19,8 +19,9 @@
 
 #pragma once
 
+#include "GeneratedModel.h"
 #include "PRTContext.h"
-#include "PRTUtilityModels.h"
+#include "InitialShape.h"
 #include "ResolveMapCache.h"
 #include "RhinoCallbacks.h"
 #include "RuleAttributes.h"
@@ -31,15 +32,14 @@
  */
 class ModelGenerator {
 public:
-	void generateModel(const std::vector<InitialShape>& initial_geom,
-	                   std::vector<pcu::ShapeAttributes>& shapeAttributes, const std::wstring& geometryEncoderName,
-	                   const pcu::EncoderOptions& geometryEncoderOptions, pcu::AttributeMapBuilderVector& aBuilders,
-	                   std::vector<GeneratedModel>& generated_models);
+	std::vector<GeneratedModelPtr> generateModel(const std::vector<InitialShape>& initial_geom,
+	                                             std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	                                             const pcu::EncoderOptions& geometryEncoderOptions,
+	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
 	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
 
-	ResolveMap::ResolveMapCache::CacheStatus initResolveMap(const std::filesystem::path& rpk);
 	void updateRuleFiles(const std::wstring& rulePkg);
 
 	const RuleAttributes& getRuleAttributes() const {
@@ -86,7 +86,7 @@ private:
 	                              std::vector<pcu::InitialShapePtr>& initShapesPtrs,
 	                              std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
 
-	void initializeEncoderData(const std::wstring& encName, const pcu::EncoderOptions& encOpt);
+	void initializeEncoderData(const pcu::EncoderOptions& encOpt);
 
 	void fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom);
 

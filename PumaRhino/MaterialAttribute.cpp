@@ -18,9 +18,6 @@
  */
 
 #include "MaterialAttribute.h"
-
-#include "PRTUtilityModels.h"
-
 #include "Logger.h"
 
 ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* attrMap) {
@@ -38,10 +35,8 @@ ON_Color Materials::extractColor(const wchar_t* key, const prt::AttributeMap* at
 	return on_color;
 }
 
-Materials::MaterialAttribute Materials::extractMaterials(const size_t initialShapeIndex, const size_t instanceIndex,
-                                                         const prt::AttributeMap* attrMap) {
+Materials::MaterialAttribute Materials::extractMaterials(const size_t instanceIndex, const prt::AttributeMap* attrMap) {
 	Materials::MaterialAttribute ma;
-	ma.mInitialShapeId = initialShapeIndex;
 	ma.mMatId = instanceIndex;
 
 	// process all keys

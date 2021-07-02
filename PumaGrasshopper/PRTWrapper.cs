@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Drawing;
+
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -29,7 +29,6 @@ using Rhino.Geometry;
 using Rhino.DocObjects;
 
 using Rhino.Runtime.InteropWrappers;
-using Rhino.Display;
 
 namespace PumaGrasshopper
 {
@@ -39,83 +38,87 @@ namespace PumaGrasshopper
     class PRTWrapper
     {
         public static String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
+        private const String PUMA_RHINO_LIBRARY = "PumaRhino.rhp";
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void GetProductVersion([In, Out]IntPtr version_Str);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetPackage(string rpk_path);
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void SetPackage(string rpk_path, [In, Out] IntPtr errorMsg);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool AddInitialMesh([In]IntPtr pMesh);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Generate();
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int Generate();
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out]IntPtr pMeshArray);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void GetAllMeshIDs([In, Out]IntPtr pMeshIDs);
-
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetMeshPartCount(int initialShapeIndex);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetRuleAttributesCount();
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref Annotations.AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDouble(int initialShapeIndex, string fullName, double value);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string fullName, bool value);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeInteger(int initialShapeIndex, string fullName, int value);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeString(int initialShapeIndex, string fullName, string value);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref Annotations.EnumAnnotationType type);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetAnnotationEnumString(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetReports(int initialShapeIndex, [In, Out] IntPtr pKeysArray,
         [In, Out] IntPtr pDoubleReports,
         [In, Out] IntPtr pBoolReports,
         [In, Out] IntPtr pStringReports);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetCGAPrintOutput(int initialShapeIndex, [In, Out] IntPtr pPrintOutput);
+
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void GetCGAErrorOutput(int initialShapeIndex, [In, Out] IntPtr pErrorOutput);
+
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetMaterial(int initialShapeIndex, int shapeID, ref int pUvSet,
                                                 [In, Out] IntPtr pTexKeys,
                                                 [In, Out] IntPtr pTexPaths,
@@ -125,16 +128,16 @@ namespace PumaGrasshopper
                                                 ref double opacity,
                                                 ref double shininess);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetMaterialGenerationOption(bool doGenerate);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueBoolean(string key, ref bool value);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueNumber(string key, ref double value);
 
-        [DllImport(dllName: "PumaRhino.rhp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueText(string key, [In, Out] IntPtr pText);
 
         public static bool AddMesh(List<Mesh> meshes)
@@ -155,49 +158,54 @@ namespace PumaGrasshopper
             return status;
         }
 
-        public static GH_Structure<GH_Mesh> GenerateMesh()
+        public static List<Mesh[]> GenerateMesh()
         {
-            bool status = Generate();
-            if (!status) return null;
+            int shapeCount = Generate();
+            if (shapeCount == 0)
+                return null;
 
-            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
-            // thus a conversion is necessary when adding Meshes.
-            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
-
-            // retrieve the meshBundle for each initial shape id
-            int[] mesh_ids = null;
-            using(var idsArray = new SimpleArrayInt())
-            {
-                var pIdsArray = idsArray.NonConstPointer();
-                GetAllMeshIDs(pIdsArray);
-                mesh_ids = idsArray.ToArray();
-            }
-
-            foreach(int id in mesh_ids)
+            var generatedMeshes = new List<Mesh[]>();
+            for (int id = 0; id < shapeCount; id++)
             {
                 using(var arr = new SimpleArrayMeshPointer())
                 {
                     var ptr_array = arr.NonConstPointer();
 
-                    status = GetMeshBundle(id, ptr_array);
-
-                    if(status)
+                    bool status = GetMeshBundle(id, ptr_array);
+                    if (status)
                     {
                         var meshBundle = arr.ToNonConstArray();
+                        generatedMeshes.Add(meshBundle);
+                    }
+                    else
+                        generatedMeshes.Add(null);
+                }
+            }
 
-                        foreach(var mesh in meshBundle)
-                        {
-                            // Directly convert to to GH_Mesh and add it to the GH_Structure at the branch corresponding to the mesh id
-                            GH_Mesh gh_mesh = null;
-                            status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+            return generatedMeshes;
+        }
 
-                            if (status)
-                            {
-                                GH_Path path = new GH_Path(id);
-                                mesh_struct.Append(gh_mesh, path);
-                            }
-                        }
-                    }                    
+        public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
+        {
+            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
+            // thus a conversion is necessary when adding Meshes.
+            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
+
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            {
+                if (generatedMeshes[shapeId] == null)
+                    continue;
+
+                GH_Path path = new GH_Path(shapeId);
+                var meshBundle = generatedMeshes[shapeId];
+                foreach (var mesh in meshBundle)
+                {
+                    GH_Mesh gh_mesh = null;
+                    var status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+                    if (status)
+                    {
+                        mesh_struct.Append(gh_mesh, path);
+                    }
                 }
             }
 
@@ -327,25 +335,16 @@ namespace PumaGrasshopper
             return materials;
         }
 
-        public static GH_Structure<GH_Material> GetAllMaterialIds(int meshCount)
+        public static GH_Structure<GH_Material> GetAllMaterialIds(List<Mesh[]> generatedMeshes)
         {
-            int[] initShapeIds = null;
-            using(var meshIdsArray = new SimpleArrayInt())
-            {
-                var pMeshIDArray = meshIdsArray.NonConstPointer();
-
-                GetAllMeshIDs(pMeshIDArray);
-                initShapeIds = meshIdsArray.ToArray();
-            }
-
             GH_Structure<GH_Material> material_struct = new GH_Structure<GH_Material>();
 
-            foreach(int initShapeId in initShapeIds)
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
             {
-                var mats = GetMaterialsOfMesh(initShapeId);
-
-                GH_Path path = new GH_Path(initShapeId);
-
+                if (generatedMeshes[shapeId] == null)
+                    continue;
+                var mats = GetMaterialsOfMesh(shapeId);
+                GH_Path path = new GH_Path(shapeId);
                 material_struct.AppendRange(mats, path);
             }
 
@@ -402,6 +401,32 @@ namespace PumaGrasshopper
             }
 
             return ras;
+        }
+
+        public static List<String> GetCGAPrintOutput(int initialShapeIndex)
+        {
+            var printOutput = new ClassArrayString();
+            var pPrintOutput = printOutput.NonConstPointer();
+
+            GetCGAPrintOutput(initialShapeIndex, pPrintOutput);
+
+            var printOutputArray = printOutput.ToArray();
+            printOutput.Dispose();
+
+            return new List<String>(printOutputArray);
+        }
+
+        public static List<String> GetCGAErrorOutput(int initialShapeIndex)
+        {
+            var errorOutput = new ClassArrayString();
+            var pErrorOutput = errorOutput.NonConstPointer();
+
+            GetCGAErrorOutput(initialShapeIndex, pErrorOutput);
+
+            var errorOutputArray = errorOutput.ToArray();
+            errorOutput.Dispose();
+
+            return new List<String>(errorOutputArray);
         }
 
         public static RuleAttribute[] GetRuleAttributes()

@@ -34,7 +34,6 @@ class GeneratedModel;
 namespace Materials {
 
 struct MaterialAttribute {
-	size_t mInitialShapeId;
 	size_t mMatId;
 
 	std::map<std::wstring, std::wstring> mTexturePaths;
@@ -59,7 +58,6 @@ const std::set<std::wstring> TEXTURE_KEYS = {
 using MaterialsMap = std::map<size_t, MaterialAttribute>;
 
 ON_Color extractColor(const wchar_t* key, const prt::AttributeMap* attrMap);
-MaterialAttribute extractMaterials(const size_t initialShapeIndex, const size_t faceRangeId,
-                                   const prt::AttributeMap* attrMap);
+MaterialAttribute extractMaterials(const size_t faceRangeId, const prt::AttributeMap* attrMap);
 
 } // namespace Materials
