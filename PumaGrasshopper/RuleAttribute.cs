@@ -50,7 +50,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_BOOL:
                     {
-                        var param_bool = new AttributeParameter.Boolean(mAnnotations, mGroup)
+                        var param_bool = new AttributeParameter.Boolean(mGroup)
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -82,7 +82,7 @@ namespace PumaGrasshopper
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            var param_color = new AttributeParameter.Colour(mAnnotations, mGroup)
+                            var param_color = new AttributeParameter.Colour(mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,

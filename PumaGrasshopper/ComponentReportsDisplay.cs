@@ -99,14 +99,10 @@ namespace PumaGrasshopper
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            var meshTree = new GH_Structure<GH_Mesh>();
-            bool locateFromMeshes = DA.GetDataTree(0, out meshTree);
+            bool locateFromMeshes = DA.GetDataTree(0, out GH_Structure<GH_Mesh> meshTree);
 
-            var reportTree = new GH_Structure<IGH_Goo>();
-            if(!DA.GetDataTree<IGH_Goo>(1, out reportTree))
-            {
+            if(!DA.GetDataTree<IGH_Goo>(1, out GH_Structure<IGH_Goo> reportTree))
                 return;
-            }
             var reports = GetReports(ref reportTree);
 
             List<int> initialShapeIds = new List<int>();
@@ -192,7 +188,7 @@ namespace PumaGrasshopper
             {
                 int lineCount = currShapeReps.Value.Count + 1;
 
-                List<string> reportArray = new List<string>();
+                var reportArray = new List<string>();
 
                 reportArray.Add("Reports of shape " + currShapeReps.Key.ToString());
 
@@ -284,7 +280,7 @@ namespace PumaGrasshopper
                             if(valueKeys.Count > keyId && valueKeys[keyId].Count > 0 && valueKeys[keyId][0] != string.Empty)
                             {
                                 var values = valueKeys[keyId];
-                                if(values.Contains(currReport.Value.getFormatedValue()))
+                                if(values.Contains(currReport.Value.GetFormatedValue()))
                                 {
                                     tmpReports[currShape.Key].Add(currReport.Key, currReport.Value);
                                 }
@@ -317,7 +313,7 @@ namespace PumaGrasshopper
                     reports.Add(new Dictionary<string, ReportAttribute>());
                 }
 
-                reports[report.InitialShapeIndex].Add(report.getKey(), report);
+                reports[report.InitialShapeIndex].Add(report.GetReportKey(), report);
             }
 
             return reports;

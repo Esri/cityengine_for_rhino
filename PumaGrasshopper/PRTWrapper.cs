@@ -386,17 +386,17 @@ namespace PumaGrasshopper
 
             for(int i = 0; i < doubleReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
                 kId++;
             }
             for(int i = 0; i < boolReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
                 kId++;    
             }
             for(int i = 0; i < stringReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
                 kId++;
             }
 

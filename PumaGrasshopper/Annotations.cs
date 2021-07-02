@@ -53,16 +53,16 @@ namespace PumaGrasshopper.Annotations
 
             slider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Float;
 
-            if (Utils.isInteger(mStepSize) && Utils.isInteger(mMin) && mStepSize != 0)
+            if (Utils.IsInteger(mStepSize) && Utils.IsInteger(mMin) && mStepSize != 0)
                 slider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Integer;
 
             return slider;
         }
 
-        private double mMax;
-        private double mMin;
-        private double mStepSize;
-        private bool mRestricted;
+        private readonly double mMax;
+        private readonly double mMin;
+        private readonly double mStepSize;
+        private readonly bool   mRestricted;
     }
 
     public class Enum<T> : Base
@@ -96,8 +96,8 @@ namespace PumaGrasshopper.Annotations
             return vList;
         }
 
-        private bool mRestricted;
-        private T[] mEnumList;
+        private readonly bool mRestricted;
+        private readonly T[] mEnumList;
     }
 
     public class Color : Base

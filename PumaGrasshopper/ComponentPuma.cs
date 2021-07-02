@@ -568,7 +568,7 @@ namespace PumaGrasshopper
             {
                 if (value.CastTo(out Color color))
                 {
-                    string text = Utils.hexColor(color);
+                    string text = Utils.HexColor(color);
                     PRTWrapper.SetRuleAttributeString(shapeId, name, text);
                 }
                 else

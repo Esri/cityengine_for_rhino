@@ -32,12 +32,10 @@ namespace PumaGrasshopper.AttributeParameter
 {
     public class Boolean : Param_Boolean
     {
-        private List<Annotations.Base> mAnnotation;
-        private string mGroupName;
+        private readonly string mGroupName;
 
-        public Boolean(List<Annotations.Base> annot, string groupName = ""): base()
+        public Boolean(string groupName = ""): base()
         {
-            mAnnotation = annot;
             mGroupName = groupName;
         }
 
@@ -84,8 +82,8 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class Number: Param_Number
     {
-        private List<Annotations.Base> mAnnotations;
-        private string mGroupName;
+        private readonly List<Annotations.Base> mAnnotations;
+        private readonly string mGroupName;
 
         public Number(List<Annotations.Base> annots, string groupName)
         {
@@ -131,8 +129,7 @@ namespace PumaGrasshopper.AttributeParameter
                 
                 if (hasDefault)
                 {
-                    GH_Number nb_val = new GH_Number();
-                    nb_val.Value = value;
+                    var nb_val = new GH_Number(value);
                     param.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), 0, nb_val);
                 }
             }
@@ -156,8 +153,8 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class String: Param_String
     {
-        private List<Annotations.Base> mAnnotations;
-        private string mGroupName;
+        private readonly List<Annotations.Base> mAnnotations;
+        private readonly string mGroupName;
 
         public String(List<Annotations.Base> annots, string groupName = ""): base()
         {
@@ -226,12 +223,10 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class Colour: Param_Colour
     {
-        private List<Annotations.Base> mAnnotations;
-        private string mGroupName;
+        private readonly string mGroupName;
 
-        public Colour(List<Annotations.Base> annots, string groupName= ""): base()
+        public Colour(string groupName= ""): base()
         {
-            mAnnotations = annots;
             mGroupName = groupName;
         }
 
@@ -248,10 +243,6 @@ namespace PumaGrasshopper.AttributeParameter
             param.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
                                                                 Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
             param.Description = Description;
-
-            // find default string value
-            StringWrapper value = new StringWrapper();
-            var pValue = value.NonConstPointer;
 
             var doc = OnPingDocument();
             doc.AddObject(param, false);

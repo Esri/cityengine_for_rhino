@@ -46,8 +46,8 @@ namespace PumaGrasshopper
 
     public class ReportAttribute: GH_Goo<Param_GenericObject>
     {
-        private string mKey;
-        private ReportTypes mType;
+        private readonly string mKey;
+        private readonly ReportTypes mType;
 
         public override bool IsValid => true;
 
@@ -68,15 +68,7 @@ namespace PumaGrasshopper
             this.mType = type;
         }
 
-        public ReportAttribute(int initialShapeIndex, string key, string nickname, ReportTypes type)
-            : base()
-        {
-            this.InitialShapeIndex = initialShapeIndex;
-            this.mKey = key;
-            this.mType = type;
-        }
-
-        public string getFormatedValue()
+        public string GetFormatedValue()
         {
             switch(mType)
             {
@@ -91,27 +83,34 @@ namespace PumaGrasshopper
             }
         }
 
-        public string getKey() { return mKey; }
-        public ReportTypes getType() { return mType; }
+        public string GetReportKey() { return mKey; }
 
-        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, string nickname, ReportTypes type, string value)
+        public ReportTypes GetReportType() { return mType; }
+
+        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, ReportTypes type, string value)
         {
-            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, nickname, type);
-            report.StringValue = value;
+            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, type)
+            {
+                StringValue = value
+            };
             return report;
         }
 
-        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, string nickname, ReportTypes type, double value)
+        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, ReportTypes type, double value)
         {
-            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, nickname, type);
-            report.DoubleValue = value;
+            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, type)
+            {
+                DoubleValue = value
+            };
             return report;
         }
 
-        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, string nickname, ReportTypes type, bool value)
+        public static ReportAttribute CreateReportAttribute(int initialShapeIndex, string name, ReportTypes type, bool value)
         {
-            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, nickname, type);
-            report.BoolValue = value;
+            ReportAttribute report = new ReportAttribute(initialShapeIndex, name, type)
+            {
+                BoolValue = value
+            };
             return report;
         }
 
@@ -122,12 +121,12 @@ namespace PumaGrasshopper
 
         public override string ToString()
         {
-            return "[ InitialShapeIndex: " + InitialShapeIndex + ", Key: " + mKey + ", Value: " + getFormatedValue() + " ]";
+            return "[ InitialShapeIndex: " + InitialShapeIndex + ", Key: " + mKey + ", Value: " + GetFormatedValue() + " ]";
         }
 
         public string ToNiceString()
         {
-            return "  " + mKey + " : " + getFormatedValue();
+            return "  " + mKey + " : " + GetFormatedValue();
         }
     }
 }
