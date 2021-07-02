@@ -21,6 +21,7 @@ Puma requires so-called rule packages (RPK) as input, which are authored in City
 
 * [User Manual](#user-manual)
 * [Developer Manual](#developer-manual)
+* [Release Notes](#release-notes)
 * [Licensing Information](#licensing-information)
 
 ## User Manual
@@ -183,6 +184,13 @@ Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box
 ### Debug the native code
 
 For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
+
+## Release Notes
+
+### Puma 1.0 (2021-07-XX)
+
+#### Known Limitations
+* Depending on the location of the system temp directory, complex Rule Packages (RPK) might trigger the maximum Windows path length limitation. As a workaround, please change the TEMP environment variable to a shorter path and/or shorten the asset directories within the Rule Package.
 
 ## Licensing Information
 

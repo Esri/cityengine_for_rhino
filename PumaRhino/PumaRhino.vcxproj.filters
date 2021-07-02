@@ -36,9 +36,6 @@
     <ClCompile Include="RhinoPRT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PRTUtilityModels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ModelGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -58,6 +55,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AttrEvalCallbacks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PumaGrasshopperAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InitialShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,9 +92,6 @@
     <ClInclude Include="RuleAttributes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PRTUtilityModels.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ModelGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -114,6 +117,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AttrEvalCallbacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InitialShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
