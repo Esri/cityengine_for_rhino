@@ -7,22 +7,35 @@ from pathlib import Path
 import subprocess
 
 PACKAGE_WHITELIST = ["PumaGrasshopper.gha", "PumaRhino.rhp", "com.esri.prt.core.dll", "glutess.dll",
-                     "lib/PumaCodecs.dll", "lib/com.esri.prt.adaptors.dll", "lib/com.esri.prt.codecs.dll"]
+                     "lib/PumaCodecs.dll", "lib/com.esri.prt.adaptors.dll", "lib/com.esri.prt.codecs.dll",
+                     "lib/com.esri.prt.usd.dll", "lib/usd_ms.dll", "lib/tbb.dll", "lib/usd",
+                     "lib/com.esri.prt.dwg.dll"]
+      
 
-
-def copy_to_zip(src_path: Path, relative_file_paths: list, dst: zipfile.ZipFile):
-    for file_path in relative_file_paths:
-        src_file = Path(src_path, file_path)
-        dst.write(filename=src_file, arcname=file_path)
-
-
-def copy_to_dir(src_path: Path, relative_file_paths: list, dst_path: Path):
+def copy_to_zip(root_path: Path, src_path: Path, relative_file_paths: list, dst: zipfile.ZipFile):
     for rel_path in relative_file_paths:
-        src_abs_path = Path(src_path, rel_path)
-        if src_abs_path.is_file():
+        src_abs_path = Path(root_path, rel_path)
+        if not src_abs_path.exists():
+            raise IOError("Cannot copy non-existing file ")
+        if src_abs_path.is_dir():
+            children = [x.relative_to(root_path) for x in src_abs_path.iterdir()]
+            copy_to_zip(root_path, src_abs_path, children, dst)  # recursively copy specified dirs
+        elif src_abs_path.is_file():
+            dst.write(filename=src_abs_path, arcname=rel_path)
+
+
+def copy_to_dir(root_path: Path, src_path: Path, relative_file_paths: list, dst_path: Path):
+    for rel_path in relative_file_paths:
+        src_abs_path = Path(root_path, rel_path)
+        if not src_abs_path.exists():
+            raise IOError("Cannot copy non-existing file ")
+        if src_abs_path.is_dir():
+            children = [x.relative_to(root_path) for x in src_abs_path.iterdir()]
+            copy_to_dir(root_path, src_abs_path, children, dst_path)
+        elif src_abs_path.is_file():
             dst_abs_path = Path(dst_path, rel_path)
             dst_abs_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src_abs_path, dst_abs_path)
+            shutil.copyfile(src_abs_path, dst_abs_path)
 
 
 # Parse file "version.h" to get major, minor, revision, build numbers
@@ -63,14 +76,15 @@ def build_rhi_package(build_dir: str, package_dir: str, v_major, v_minor, v_revi
     version_str: str = f'v{v_major}.{v_minor}.{v_revision}.{v_build}'
     rhi_path = Path(package_dir, f'Puma_{version_str}.rhi')
     with zipfile.ZipFile(rhi_path, 'w') as myZip:
-        copy_to_zip(Path(build_dir), PACKAGE_WHITELIST, myZip)
+        root_path = Path(build_dir)
+        copy_to_zip(root_path, root_path, PACKAGE_WHITELIST, myZip)
 
 
 def build_yak_package(build_dir: str, package_dir: str, v_major, v_minor, v_revision):
     build_path = Path(build_dir)
     yak_temp_path = Path(package_dir, "yak_temp")
-    copy_to_dir(build_path, PACKAGE_WHITELIST, yak_temp_path)
-    copy_to_dir(build_path.parent, ['manifest.yml'], yak_temp_path)
+    copy_to_dir(build_path, build_path, PACKAGE_WHITELIST, yak_temp_path)
+    copy_to_dir(build_path.parent, build_path.parent, ['manifest.yml'], yak_temp_path)
 
     subprocess.run(["C:\\Program Files\\Rhino 7\\System\\Yak.exe", "build"], shell=True, check=True, cwd=yak_temp_path)
 

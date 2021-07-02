@@ -55,7 +55,7 @@ const std::wstring EMPTY_REPORT_STRING(L"\0");
 
 ReportAttribute getEmptyReport(size_t initialShapeIndex);
 
-void extractReports(size_t initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports);
+void extractReports(size_t initShapeId, GeneratedModel& model, const prtx::PRTUtils::AttributeMapPtr reports);
 ReportsVector ToReportsVector(const ReportMap& reports);
 
 class GroupedReports {

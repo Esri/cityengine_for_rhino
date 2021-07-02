@@ -28,26 +28,12 @@ namespace {
 
 constexpr bool DBG = false;
 
+const Reporting::ReportMap EMPTY_REPORT_MAP;
+
 } // namespace
 
-void Model::addMaterial(const Materials::MaterialAttribute& ma) {
-	mMaterials.insert_or_assign(ma.mMatId, ma);
-}
-
-void Model::addReport(const Reporting::ReportAttribute& ra) {
-	mReports.emplace(ra.mReportName, ra);
-}
-
-const std::vector<ModelPart>& Model::getModelParts() const {
-	return mModelParts;
-}
-
-const Reporting::ReportMap& Model::getReports() const {
-	return mReports;
-}
-
-const Materials::MaterialsMap& Model::getMaterials() const {
-	return mMaterials;
+RhinoCallbacks::RhinoCallbacks(const size_t initialShapeCount) {
+	mModels.resize(initialShapeCount);
 }
 
 bool RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double* vertexCoords,
@@ -57,7 +43,7 @@ bool RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double* v
 	if (vertexCoords == nullptr || normals == nullptr || faceIndices == nullptr || faceCounts == nullptr)
 		return false;
 
-	Model& currentModel = mModels[initialShapeIndex];
+	GeneratedModel& currentModel = *mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.addModelPart();
 
 	modelPart.mVertices.assign(vertexCoords, vertexCoords + vertexCoordsCount);
@@ -71,7 +57,7 @@ bool RhinoCallbacks::addGeometry(const size_t initialShapeIndex, const double* v
 void RhinoCallbacks::addUVCoordinates(const size_t initialShapeIndex, double const* const* uvs, size_t const* uvsSizes,
                                       uint32_t const* const* uvCounts, size_t const* uvCountsSizes,
                                       uint32_t const* const* uvIndices, size_t const* uvIndicesSizes, uint32_t uvSets) {
-	Model& currentModel = mModels[initialShapeIndex];
+	GeneratedModel& currentModel = *mModels[initialShapeIndex];
 	ModelPart& modelPart = currentModel.getCurrentModelPart();
 
 	// Add texture coordinates
@@ -118,12 +104,13 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
                          uint32_t const* const* uvCounts, size_t const* uvCountsSizes, uint32_t const* const* uvIndices,
                          size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* /*faceRanges*/,
                          size_t /*faceRangesSize*/, const prt::AttributeMap** materials, const size_t matCount) {
+
+	GeneratedModel& currentModel = getOrCreateModel(initialShapeIndex);
+
 	if (!addGeometry(initialShapeIndex, vertexCoords, vertexCoordsCount, normals, normalsCount, faceIndices,
 	                 faceIndicesCount, faceCounts, faceCountsCount))
 		return;
 	addUVCoordinates(initialShapeIndex, uvs, uvsSizes, uvCounts, uvCountsSizes, uvIndices, uvIndicesSizes, uvSets);
-
-	Model& currentModel = mModels[initialShapeIndex];
 
 	// -- convert materials into material attributes
 	if constexpr (DBG)
@@ -136,7 +123,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 		}
 
 		const prt::AttributeMap* attrMap = materials[0];
-		auto ma = Materials::extractMaterials(initialShapeIndex, instanceIndex, attrMap);
+		auto ma = Materials::extractMaterials(instanceIndex, attrMap);
 		currentModel.addMaterial(ma);
 	}
 }
@@ -155,7 +142,10 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUt
 		return;
 	}
 
-	Model& model = mModels[initialShapeIndex];
+	if (!mModels[initialShapeIndex])
+		return;
+
+	GeneratedModel& model = *mModels[initialShapeIndex];
 
 	Reporting::extractReports(initialShapeIndex, model, reports);
 
@@ -199,4 +189,114 @@ void RhinoCallbacks::addAsset(const wchar_t* name, const uint8_t* buffer, size_t
 	wcsncpy_s(result, resultSize, pathStr.c_str(), resultSize);
 	result[resultSize - 1] = 0x0;
 	resultSize = pathStr.length() + 1;
+}
+
+const std::vector<GeneratedModelPtr>& RhinoCallbacks::getModels() const {
+	return mModels;
+}
+
+const Reporting::ReportMap& RhinoCallbacks::getReport(const size_t initialShapeIdx) const {
+	if (initialShapeIdx >= mModels.size())
+		throw std::out_of_range("initial shape index is out of range.");
+
+	if (!mModels[initialShapeIdx])
+		return EMPTY_REPORT_MAP;
+
+	return mModels[initialShapeIdx]->getReports();
+}
+
+prt::Status RhinoCallbacks::generateError(size_t isIndex, prt::Status status, const wchar_t* message) {
+	LOG_ERR << L"GENERATE ERROR:" << isIndex << " " << status << " " << message;
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::assetError(size_t isIndex, prt::CGAErrorLevel level, const wchar_t* key, const wchar_t* uri,
+                                       const wchar_t* message) {
+	GeneratedModel& model = getOrCreateModel(isIndex);
+
+	if (message != nullptr) {
+		auto msg = std::wstring(L"Asset Error: ").append(message);
+		if (key != nullptr)
+			msg.append(L"; CGA key = '").append(key).append(L"'");
+		if (uri != nullptr)
+			msg.append(L"; CGA URI = '").append(uri).append(L"'");
+		model.addErrorOutput(msg);
+	}
+
+	LOG_ERR << L"ASSET ERROR:" << isIndex << " " << level << " " << key << " " << uri << " " << message << std::endl;
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::cgaError(size_t isIndex, int32_t shapeID, prt::CGAErrorLevel level, int32_t methodId,
+                                     int32_t pc, const wchar_t* message) {
+	GeneratedModel& model = getOrCreateModel(isIndex);
+
+	if (message != nullptr) {
+		auto msg = std::wstring(L"CGA Error: ").append(message);
+		model.addErrorOutput(msg);
+	}
+
+	LOG_ERR << L"CGA ERROR:" << isIndex << " " << shapeID << " " << level << " " << methodId << " " << pc << " "
+	        << message << std::endl;
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::cgaPrint(size_t isIndex, int32_t shapeID, const wchar_t* txt) {
+	GeneratedModel& model = getOrCreateModel(isIndex);
+
+	if (txt != nullptr)
+		model.addPrintOutput(txt);
+
+	LOG_INF << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::cgaReportBool(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                          bool /*value*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::cgaReportFloat(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                           double /*value*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::cgaReportString(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                            const wchar_t* /*value*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::attrBool(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/, bool /*value*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::attrFloat(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                      double /*value*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::attrString(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                       const wchar_t* /*value*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::attrBoolArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                          const bool* /*ptr*/, size_t /*size*/, size_t /*nRows*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::attrFloatArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                           const double* /*ptr*/, size_t /*size*/, size_t /*nRows*/) {
+	return prt::STATUS_OK;
+}
+
+prt::Status RhinoCallbacks::attrStringArray(size_t /*isIndex*/, int32_t /*shapeID*/, const wchar_t* /*key*/,
+                                            const wchar_t* const* /*ptr*/, size_t /*size*/, size_t /*nRows*/) {
+	return prt::STATUS_OK;
+}
+
+GeneratedModel& RhinoCallbacks::getOrCreateModel(size_t initialShapeIndex) {
+	if (!mModels[initialShapeIndex])
+		mModels[initialShapeIndex] = std::make_shared<GeneratedModel>();
+	return *mModels[initialShapeIndex];
 }

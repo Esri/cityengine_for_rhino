@@ -26,6 +26,14 @@
 #include <filesystem>
 
 namespace {
+
+constexpr const wchar_t* ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
+constexpr const wchar_t* ENCODER_ID_CGA_ERROR = L"com.esri.prt.core.CGAErrorEncoder";
+constexpr const wchar_t* ENCODER_ID_CGA_PRINT = L"com.esri.prt.core.CGAPrintEncoder";
+
+constexpr const wchar_t* FILE_CGA_ERROR = L"CGAErrors.txt";
+constexpr const wchar_t* FILE_CGA_PRINT = L"CGAPrint.txt";
+
 constexpr const wchar_t* RESOLVEMAP_EXTRACTION_PREFIX = L"rhino_prt";
 constexpr const wchar_t* ENCODER_ID_CGA_EVALATTR = L"com.esri.prt.core.AttributeEvalEncoder";
 
@@ -38,33 +46,23 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 
 } // namespace
 
-ResolveMap::ResolveMapCache::CacheStatus ModelGenerator::initResolveMap(const std::filesystem::path& rpk) {
-	if (rpk.empty())
-		return ResolveMap::ResolveMapCache::CacheStatus::FAILURE;
-
-	// Get the resolvemap from the resolve map cache
-	auto lookup = PRTContext::get()->getResolveMap(rpk);
-
-	if (lookup.second != ResolveMap::ResolveMapCache::CacheStatus::FAILURE) {
+void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
+	try {
+		const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
+		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::HIT && rulePkg == mRulePkg) {
+			// resolvemap already exists and the rule file was not changed, no need to update.
+			return;
+		}
 		mResolveMap = lookup.first;
 	}
-
-	return lookup.second;
-}
-
-void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
-	// Get the resolve map.
-	auto cacheStatus = initResolveMap(rulePkg);
-	if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::FAILURE) {
-		LOG_ERR << "Failed to create the resolve map from rule package " << mRulePkg << std::endl;
+	catch (std::exception&) {
+		mResolveMap.reset();
+		mRuleFile.clear();
+		mStartRule.clear();
 		mRuleAttributes.clear();
-		return;
+		throw;
 	}
-	else if (cacheStatus == ResolveMap::ResolveMapCache::CacheStatus::HIT && rulePkg == mRulePkg) {
-		// resolvemap already exists and the rule file was not changed, no need to update.
-		return;
-	}
-
+	
 	// Cache miss -> initialize everything
 	// Reset the rule infos
 	mRuleAttributes.clear();
@@ -82,7 +80,7 @@ void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	// To create the ruleFileInfo, we first need the ruleFileURI
 	const wchar_t* ruleFileURI = mResolveMap->getString(mRuleFile.c_str());
 	if (ruleFileURI == nullptr) {
-		LOG_ERR << "could not find rule file URI in resolve map of rule package " << mRulePkg;
+		LOG_ERR << "Could not find rule file URI in resolve map of rule package " << mRulePkg;
 		return;
 	}
 
@@ -176,40 +174,38 @@ void ModelGenerator::fillInitialShapeBuilder(const std::vector<InitialShape>& in
 	}
 }
 
-void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
-                                   std::vector<pcu::ShapeAttributes>& shapeAttributes,
-                                   const std::wstring& geometryEncoderName,
-                                   const pcu::EncoderOptions& geometryEncoderOptions,
-                                   pcu::AttributeMapBuilderVector& aBuilders,
-                                   std::vector<GeneratedModel>& generated_models) {
+std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
+                                                             std::vector<pcu::ShapeAttributes>& shapeAttributes,
+                                                             const pcu::EncoderOptions& geometryEncoderOptions,
+                                                             pcu::AttributeMapBuilderVector& aBuilders) {
 	fillInitialShapeBuilder(initial_geom);
 
 	if (!mValid) {
 		LOG_ERR << "invalid ModelGenerator instance.";
-		return;
+		return {};
 	}
 
 	if ((shapeAttributes.size() != 1) && (shapeAttributes.size() < mInitialShapesBuilders.size())) {
 		LOG_ERR << "not enough shape attributes dictionaries defined.";
-		return;
+		return {};
 	}
 	else if (shapeAttributes.size() > mInitialShapesBuilders.size()) {
 		LOG_WRN << "number of shape attributes dictionaries defined greater than number of initial shapes given."
 		        << std::endl;
 	}
 
-	generated_models.reserve(mInitialShapesBuilders.size());
+	if (!mRulePkg.empty()) {
+		LOG_INF << "using rule package " << mRulePkg << std::endl;
+
+		if (!mResolveMap || mRuleFile.empty() || !mRuleFileInfo) {
+			LOG_ERR << "Rule package not processed correcty." << std::endl;
+			return {};
+		}
+	}
+
+	std::vector<GeneratedModelPtr> generatedModels(mInitialShapesBuilders.size());
 
 	try {
-
-		if (!mRulePkg.empty()) {
-			LOG_INF << "using rule package " << mRulePkg << std::endl;
-
-			if (!mResolveMap || mRuleFile.empty() || !mRuleFileInfo) {
-				LOG_ERR << "Rule package not processed correcty." << std::endl;
-				return;
-			}
-		}
 
 		std::vector<const prt::InitialShape*> initialShapes(mInitialShapesBuilders.size());
 		std::vector<pcu::InitialShapePtr> initialShapePtrs(mInitialShapesBuilders.size());
@@ -219,8 +215,7 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 		if (!mEncoderBuilder)
 			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());
 
-		if (!geometryEncoderName.empty())
-			initializeEncoderData(geometryEncoderName, geometryEncoderOptions);
+		initializeEncoderData(geometryEncoderOptions);
 
 		std::vector<const wchar_t*> encoders;
 		encoders.reserve(3);
@@ -239,21 +234,20 @@ void ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom
 		if (genStat != prt::STATUS_OK) {
 			LOG_ERR << "prt::generate() failed with status: '" << prt::getStatusDescription(genStat) << "' (" << genStat
 			        << ")";
-			return;
+			return {};
 		}
 
-		for (size_t idx = 0; idx < mInitialShapesBuilders.size(); ++idx) {
-			generated_models.emplace_back(idx, roc->getModel(idx));
-		}
+		generatedModels = roc->getModels();
+		assert(mInitialShapesBuilders.size() == generate_models.size());
 	}
 	catch (const std::exception& e) {
 		LOG_ERR << "caught exception: " << e.what();
-		return;
 	}
 	catch (...) {
 		LOG_ERR << "caught unknown exception.";
-		return;
 	}
+
+	return generatedModels;
 }
 
 void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
@@ -282,13 +276,25 @@ void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aB
 	}
 }
 
-void ModelGenerator::initializeEncoderData(const std::wstring& encName, const pcu::EncoderOptions& encOpt) {
+void ModelGenerator::initializeEncoderData(const pcu::EncoderOptions& encOpt) {
 	mEncodersNames.clear();
 	mEncodersOptionsPtr.clear();
 
-	mEncodersNames.push_back(encName);
+	mEncodersNames.emplace_back(ENCODER_ID_RHINO);
 	const pcu::AttributeMapPtr encOptions{pcu::createAttributeMapForEncoder(encOpt, *mEncoderBuilder)};
-	mEncodersOptionsPtr.push_back(createValidatedOptions(encName.c_str(), encOptions));
+	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_RHINO, encOptions));
+
+	pcu::AttributeMapBuilderPtr optionsBuilder(prt::AttributeMapBuilder::create());
+
+	mEncodersNames.emplace_back(ENCODER_ID_CGA_ERROR);
+	optionsBuilder->setString(L"name", FILE_CGA_ERROR);
+	const pcu::AttributeMapPtr errOptions(optionsBuilder->createAttributeMapAndReset());
+	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_CGA_ERROR, errOptions));
+
+	mEncodersNames.emplace_back(ENCODER_ID_CGA_PRINT);
+	optionsBuilder->setString(L"name", FILE_CGA_PRINT);
+	const pcu::AttributeMapPtr printOptions(optionsBuilder->createAttributeMapAndReset());
+	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions));
 }
 
 void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,

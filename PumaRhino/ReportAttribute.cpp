@@ -63,7 +63,7 @@ ReportAttribute getEmptyReport(size_t initialShapeIndex) {
 	return report;
 }
 
-void extractReports(size_t initShapeId, Model& model, const prtx::PRTUtils::AttributeMapPtr reports) {
+void extractReports(size_t initShapeId, GeneratedModel& model, const prtx::PRTUtils::AttributeMapPtr reports) {
 	size_t keyCount = 0;
 	auto keys = reports->getKeys(&keyCount);
 

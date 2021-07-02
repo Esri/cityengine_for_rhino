@@ -20,7 +20,6 @@
 #include "utils.h"
 
 #include "Logger.h"
-#include "PRTUtilityModels.h"
 
 #include "prt/StringUtils.h"
 
@@ -55,13 +54,13 @@ ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring st
 // location of RhinoPRT shared library
 std::filesystem::path getDllLocation() {
 	HMODULE hModule = 0;
-	GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-	                  (LPCWSTR)getDllLocation, &hModule);
-	checkLastError("Failed to get plugin library handle: ");
+	if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+	                       (LPCWSTR)getDllLocation, &hModule))
+		checkLastError("Failed to get plugin library handle: ");
 
 	char libraryPathStr[_MAX_PATH];
-	GetModuleFileNameA(hModule, libraryPathStr, _MAX_PATH);
-	checkLastError("Failed to get plugin file system location: ");
+	if (!GetModuleFileNameA(hModule, libraryPathStr, _MAX_PATH))
+		checkLastError("Failed to get plugin file system location: ");
 
 	const std::filesystem::path libraryPath(libraryPathStr);
 	return libraryPath.parent_path();
