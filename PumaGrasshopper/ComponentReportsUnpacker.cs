@@ -87,10 +87,10 @@ namespace PumaGrasshopper
             {
                 ReportAttribute report = (ReportAttribute)input;
 
-                DA.SetData(REPORT_KEY_NAME, report.getKey());
+                DA.SetData(REPORT_KEY_NAME, report.GetReportKey());
                 DA.SetData(REPORT_SHAPE_ID_NAME, report.InitialShapeIndex);
 
-                switch (report.getType())
+                switch (report.GetReportType())
                 {
                     case ReportTypes.PT_FLOAT:
                         DA.SetData(REPORT_VALUE_NAME, report.DoubleValue);

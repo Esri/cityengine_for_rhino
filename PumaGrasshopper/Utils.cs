@@ -79,7 +79,7 @@ namespace PumaGrasshopper
         /// </summary>
         /// <param name="ghColor">the grasshopper color to convert</param>
         /// <returns>a hex color string</returns>
-        public static string hexColor(Color color)
+        public static string HexColor(Color color)
         {
             string hexStr = "#" + color.R.ToString("X2") +
                 color.G.ToString("X2") +
@@ -88,7 +88,7 @@ namespace PumaGrasshopper
             return hexStr;
         }
 
-        public static bool isInteger(double d)
+        public static bool IsInteger(double d)
         {
             return Math.Abs(d % 1) <= (Double.Epsilon * 100);
         }
@@ -118,9 +118,9 @@ namespace PumaGrasshopper
             grp.ExpireCaches();
         }
 
-        public static string GetCastErrorMessage(RuleAttribute attribute, string castTarget)
+        public static string GetCastErrorMessage(string attribute, string castTarget)
         {
-            return "Could not cast attribute " + attribute.mFullName + " to " + castTarget;
+            return "Could not cast attribute " + attribute + " to " + castTarget;
         }
     }
 }

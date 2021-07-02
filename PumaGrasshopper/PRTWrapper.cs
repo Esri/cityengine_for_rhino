@@ -68,34 +68,34 @@ namespace PumaGrasshopper
         public static extern int GetRuleAttributesCount();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref AnnotationArgumentType type, [In,Out]IntPtr pGroup);
+        public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref Annotations.AnnotationArgumentType type, [In,Out]IntPtr pGroup);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDouble(int initialShapeIndex, string rule, string fullName, double value);
+        public static extern void SetRuleAttributeDouble(int initialShapeIndex, string fullName, double value);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string rule, string fullName, bool value);
+        public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string fullName, bool value);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeInteger(int initialShapeIndex, string rule, string fullName, int value);
+        public static extern void SetRuleAttributeInteger(int initialShapeIndex, string fullName, int value);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeString(int initialShapeIndex, string rule, string fullName, string value);
+        public static extern void SetRuleAttributeString(int initialShapeIndex, string fullName, string value);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string rule, string fullName, [In, Out]IntPtr pValueArray);
+        public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref EnumAnnotationType type);
+        public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref Annotations.EnumAnnotationType type);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
@@ -386,17 +386,17 @@ namespace PumaGrasshopper
 
             for(int i = 0; i < doubleReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
                 kId++;
             }
             for(int i = 0; i < boolReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
                 kId++;    
             }
             for(int i = 0; i < stringReportsArray.Length; ++i)
             {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
+                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
                 kId++;
             }
 
@@ -449,7 +449,7 @@ namespace PumaGrasshopper
                 var pNickNameBuilder = nicknameBuilder.NonConstPointer;
                 var pGroup = group.NonConstPointer;
 
-                AnnotationArgumentType type = AnnotationArgumentType.AAT_INT;
+                Annotations.AnnotationArgumentType type = Annotations.AnnotationArgumentType.AAT_INT;
 
                 bool status = GetRuleAttribute(i, pRuleBuilder, pNameBuilder, pNickNameBuilder, ref type, pGroup);
                 if (!status) return new RuleAttribute[0] {};
@@ -457,7 +457,7 @@ namespace PumaGrasshopper
                 attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());
 
                 // get the potential annotations
-                List<Annotation> annotations = GetAnnotations(i);
+                List<Annotations.Base> annotations = GetAnnotations(i);
                 attributes[i].mAnnotations.AddRange(annotations);
             }
             
@@ -479,7 +479,7 @@ namespace PumaGrasshopper
             return version;
         }
 
-        public static List<Annotation> GetAnnotations(int ruleIdx)
+        public static List<Annotations.Base> GetAnnotations(int ruleIdx)
         {
             int[] intArray = null;
             using(var array = new SimpleArrayInt())
@@ -491,31 +491,31 @@ namespace PumaGrasshopper
                 intArray = array.ToArray();
             }
 
-            List<Annotation> annots = new List<Annotation>();
+            var annots = new List<Annotations.Base>();
 
             for(int enumIdx = 0; enumIdx < intArray.Length; ++enumIdx)
             {
-                AttributeAnnotation type = (AttributeAnnotation)intArray[enumIdx];
+                Annotations.AttributeAnnotation type = (Annotations.AttributeAnnotation)intArray[enumIdx];
                 switch (type)
                 {
-                    case AttributeAnnotation.A_COLOR:
-                        annots.Add(new AnnotationColor());
+                    case Annotations.AttributeAnnotation.A_COLOR:
+                        annots.Add(new Annotations.Color());
                         break;
-                    case AttributeAnnotation.A_ENUM:
-                        EnumAnnotationType enumType = EnumAnnotationType.ENUM_DOUBLE;
+                    case Annotations.AttributeAnnotation.A_ENUM:
+                        Annotations.EnumAnnotationType enumType = Annotations.EnumAnnotationType.ENUM_DOUBLE;
                         bool status = GetEnumType(ruleIdx, enumIdx, ref enumType);
                         if (!status) break;
 
                         switch (enumType)
                         {
-                            case EnumAnnotationType.ENUM_BOOL:
+                            case Annotations.EnumAnnotationType.ENUM_BOOL:
                                 bool[] boolArray = { true, false };
-                                annots.Add(new AnnotationEnum<bool>(boolArray, true));
+                                annots.Add(new Annotations.Enum<bool>(boolArray, true));
                                 break;
-                            case EnumAnnotationType.ENUM_DOUBLE:
+                            case Annotations.EnumAnnotationType.ENUM_DOUBLE:
                                 annots.Add(GetAnnotationEnumDouble(ruleIdx, enumIdx));
                                 break;
-                            case EnumAnnotationType.ENUM_STRING:
+                            case Annotations.EnumAnnotationType.ENUM_STRING:
                                 annots.Add(GetAnnotationEnumString(ruleIdx, enumIdx));
                                 break;
                             default:
@@ -523,14 +523,14 @@ namespace PumaGrasshopper
                         }
                         
                         break;
-                    case AttributeAnnotation.A_RANGE:
+                    case Annotations.AttributeAnnotation.A_RANGE:
                         annots.Add(GetAnnotationRange(ruleIdx, enumIdx));
                         break;
-                    case AttributeAnnotation.A_DIR:
-                        annots.Add(new AnnotationDir());
+                    case Annotations.AttributeAnnotation.A_DIR:
+                        annots.Add(new Annotations.Directory());
                         break;
-                    case AttributeAnnotation.A_FILE:
-                        annots.Add(new AnnotationFile());
+                    case Annotations.AttributeAnnotation.A_FILE:
+                        annots.Add(new Annotations.File());
                         break;
                     default:
                         continue;
@@ -540,7 +540,7 @@ namespace PumaGrasshopper
             return annots;
         }
 
-        public static AnnotationEnum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
+        public static Annotations.Enum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
         {
             double[] enumArray = null;
             bool restricted = true;
@@ -554,10 +554,10 @@ namespace PumaGrasshopper
                 enumArray = array.ToArray();
             }
 
-            return new AnnotationEnum<double>(enumArray, restricted);
+            return new Annotations.Enum<double>(enumArray, restricted);
         }
 
-        public static AnnotationEnum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
+        public static Annotations.Enum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
         {
             string[] enumArray = null;
             bool restricted = true;
@@ -570,10 +570,10 @@ namespace PumaGrasshopper
                 enumArray = array.ToArray();
             }
 
-            return new AnnotationEnum<string>(enumArray, restricted);
+            return new Annotations.Enum<string>(enumArray, restricted);
         }
 
-        public static AnnotationRange GetAnnotationRange(int ruleIdx, int enumIdx)
+        public static Annotations.Range GetAnnotationRange(int ruleIdx, int enumIdx)
         {
             double min = 0;
             double max = 0;
@@ -583,34 +583,34 @@ namespace PumaGrasshopper
             bool status = GetAnnotationRange(ruleIdx, enumIdx, ref min, ref max, ref stepsize, ref restricted);
             if (status)
             {
-                return new AnnotationRange(min, max, stepsize, restricted);
+                return new Annotations.Range(min, max, stepsize, restricted);
             }
             return null;
         }
 
-        public static void SetRuleAttributeDoubleArray(int initialShapeIndex, string rule, string fullName, List<double> doubleList)
+        public static void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, List<double> doubleList)
         {
             if (doubleList.Count == 0) return;
 
             using (SimpleArrayDouble array = new SimpleArrayDouble(doubleList))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeDoubleArray(initialShapeIndex, rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeDoubleArray(initialShapeIndex, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string rule, string fullName, List<Boolean> boolList)
+        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, List<Boolean> boolList)
         {
             if (boolList.Count == 0) return;
 
             using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
             {
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, fullName, pArray);
             }
         }
 
-        public static void SetRuleAttributeStringArray(int initialShapeIndex, string rule, string fullName, List<string> stringList)
+        public static void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, List<string> stringList)
         {
             if (stringList.Count == 0) return;
 
@@ -619,7 +619,7 @@ namespace PumaGrasshopper
                 stringList.ForEach(x => array.Add(x));
 
                 var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeStringArray(initialShapeIndex, rule, fullName, pArray);
+                PRTWrapper.SetRuleAttributeStringArray(initialShapeIndex, fullName, pArray);
             }
         }
     }

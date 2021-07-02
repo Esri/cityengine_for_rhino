@@ -28,16 +28,14 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace PumaGrasshopper
+namespace PumaGrasshopper.AttributeParameter
 {
-    public class BooleanRuleAttribute : Param_Boolean
+    public class Boolean : Param_Boolean
     {
-        private List<Annotation> mAnnotation;
-        private string mGroupName;
+        private readonly string mGroupName;
 
-        public BooleanRuleAttribute(List<Annotation> annot, string groupName = ""): base()
+        public Boolean(string groupName = ""): base()
         {
-            mAnnotation = annot;
             mGroupName = groupName;
         }
 
@@ -82,12 +80,12 @@ namespace PumaGrasshopper
         }
     }
 
-    public class NumberRuleAttribute: Param_Number
+    public class Number: Param_Number
     {
-        private List<Annotation> mAnnotations;
-        private string mGroupName;
+        private readonly List<Annotations.Base> mAnnotations;
+        private readonly string mGroupName;
 
-        public NumberRuleAttribute(List<Annotation> annots, string groupName = ""): base()
+        public Number(List<Annotations.Base> annots, string groupName)
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -105,8 +103,8 @@ namespace PumaGrasshopper
 
             IGH_Param param = null;
 
-            var annot = mAnnotations.Find(x => x.GetAnnotationType() == AttributeAnnotation.A_RANGE ||
-                                               x.GetAnnotationType() == AttributeAnnotation.A_ENUM);
+            var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE ||
+                                               x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM);
 
             if (annot != null)
             {
@@ -114,12 +112,12 @@ namespace PumaGrasshopper
 
                 if (hasDefault)
                 {
-                    if (annot.GetAnnotationType() == AttributeAnnotation.A_ENUM)
+                    if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
                     {
                         int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == value.ToString());
                         ((GH_ValueList)param).SelectItem(itemIndex);
                     }
-                    else if (annot.GetAnnotationType() == AttributeAnnotation.A_RANGE)
+                    else if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE)
                     {
                         ((GH_NumberSlider)param).SetSliderValue((decimal)value);
                     }
@@ -131,8 +129,7 @@ namespace PumaGrasshopper
                 
                 if (hasDefault)
                 {
-                    GH_Number nb_val = new GH_Number();
-                    nb_val.Value = value;
+                    var nb_val = new GH_Number(value);
                     param.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), 0, nb_val);
                 }
             }
@@ -154,12 +151,12 @@ namespace PumaGrasshopper
         }
     }
 
-    public class StringRuleAttribute: Param_String
+    public class String: Param_String
     {
-        private List<Annotation> mAnnotations;
-        private string mGroupName;
+        private readonly List<Annotations.Base> mAnnotations;
+        private readonly string mGroupName;
 
-        public StringRuleAttribute(List<Annotation> annots, string groupName = ""): base()
+        public String(List<Annotations.Base> annots, string groupName = ""): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
@@ -175,9 +172,9 @@ namespace PumaGrasshopper
             IGH_Param param = null;
 
             // annots: file, dir, enum, enum.
-            var annot = mAnnotations.Find(x => x.GetAnnotationType() == AttributeAnnotation.A_ENUM ||
-                                               x.GetAnnotationType() == AttributeAnnotation.A_DIR ||
-                                               x.GetAnnotationType() == AttributeAnnotation.A_FILE);
+            var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM ||
+                                               x.GetAnnotationType() == Annotations.AttributeAnnotation.A_DIR ||
+                                               x.GetAnnotationType() == Annotations.AttributeAnnotation.A_FILE);
             
             // find default string value
             StringWrapper value = new StringWrapper();
@@ -191,7 +188,7 @@ namespace PumaGrasshopper
                 param = annot.GetGhSpecializedParam();
                 if (hasDefault)
                 {
-                    if(annot.GetAnnotationType() == AttributeAnnotation.A_ENUM)
+                    if(annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
                     {
                         int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == defaultText);
                         ((GH_ValueList)param).SelectItem(itemIndex);
@@ -224,14 +221,12 @@ namespace PumaGrasshopper
         }
     }
 
-    public class ColourRuleAttribute: Param_Colour
+    public class Colour: Param_Colour
     {
-        private List<Annotation> mAnnotations;
-        private string mGroupName;
+        private readonly string mGroupName;
 
-        public ColourRuleAttribute(List<Annotation> annots, string groupName= ""): base()
+        public Colour(string groupName= ""): base()
         {
-            mAnnotations = annots;
             mGroupName = groupName;
         }
 
@@ -248,10 +243,6 @@ namespace PumaGrasshopper
             param.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
                                                                 Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
             param.Description = Description;
-
-            // find default string value
-            StringWrapper value = new StringWrapper();
-            var pValue = value.NonConstPointer;
 
             var doc = OnPingDocument();
             doc.AddObject(param, false);
