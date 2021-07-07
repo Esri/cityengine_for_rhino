@@ -25,10 +25,6 @@ namespace {
 ON_Mesh toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) {
 	ON_Mesh mesh(static_cast<int>(modelPart.mFaces.size()), static_cast<int>(modelPart.mIndices.size()), true, true);
 
-	// Set the initial shape id.
-	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), idKey.c_str());
-
-	// Duplicate vertices
 	for (size_t v_id = 0; v_id < modelPart.mIndices.size(); ++v_id) {
 		auto index = modelPart.mIndices[v_id];
 		mesh.SetVertex(static_cast<int>(v_id),
@@ -41,22 +37,30 @@ ON_Mesh toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) {
 
 	int faceid(0);
 	int currindex(0);
-	for (int face : modelPart.mFaces) {
-		if (face == 3) {
-			mesh.SetTriangle(faceid, currindex, currindex + 1, currindex + 2);
-			currindex += face;
-			faceid++;
+	for (int faceVertexCount : modelPart.mFaces) {
+		if (faceVertexCount == 3) {
+			mesh.SetTriangle(faceid++, currindex, currindex + 1, currindex + 2);
 		}
-		else if (face == 4) {
-			mesh.SetQuad(faceid, currindex, currindex + 1, currindex + 2, currindex + 3);
-			currindex += face;
-			faceid++;
+		else if (faceVertexCount == 4) {
+			mesh.SetQuad(faceid++, currindex, currindex + 1, currindex + 2, currindex + 3);
 		}
 		else {
-			// ignore face because it is invalid
-			currindex += face;
-			LOG_WRN << "Ignored face with invalid number of vertices :" << face;
+			ON_SimpleArray<int> triangleIndices((faceVertexCount - 2) * 3);
+			triangleIndices.SetCount(triangleIndices.Capacity());
+			int rc = RhinoTriangulate3dPolygon(faceVertexCount, 3, mesh.m_dV[currindex], 3, triangleIndices.Array());
+			if (rc >= 0) {
+				int triangle_count = triangleIndices.Count() / 3;
+				for (int i = 0; i < triangle_count; i++) {
+					mesh.SetTriangle(faceid++, currindex + triangleIndices[3 * i],
+					                 currindex + triangleIndices[(3 * i) + 1],
+					                 currindex + triangleIndices[(3 * i) + 2]);
+				}
+			}
+			else {
+				LOG_ERR << "Rhino failed to triangulate a generated polygon from shape " << idKey;
+			}
 		}
+		currindex += faceVertexCount;
 	}
 
 	for (int i = 0; i < modelPart.mUVs.Count(); ++i) {
@@ -64,6 +68,7 @@ ON_Mesh toON_Mesh(const ModelPart& modelPart, const std::wstring& idKey) {
 	}
 
 	mesh.Compact();
+	mesh.SetUserString(INIT_SHAPE_ID_KEY.c_str(), idKey.c_str());
 
 	// Printing a rhino error log if the created mesh is invalid
 	ON_wString log_str;
