@@ -82,7 +82,6 @@ private:
 
 	void setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
 	                              const std::vector<pcu::ShapeAttributes>& shapesAttr,
-	                              std::vector<const prt::InitialShape*>& initShapes,
 	                              std::vector<pcu::InitialShapePtr>& initShapesPtrs,
 	                              std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
 

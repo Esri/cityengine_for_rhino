@@ -22,8 +22,10 @@
 #include "AttrEvalCallbacks.h"
 #include "Logger.h"
 
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
+#include <future>
 
 namespace {
 
@@ -44,6 +46,62 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 	return pcu::AttributeMapPtr(encOpts);
 }
 
+template <typename T, typename U>
+std::vector<T*> toRawPtrs(const std::vector<U>& owningVector) {
+	std::vector<T*> rawPtrs(owningVector.size());
+	std::transform(owningVector.begin(), owningVector.end(), rawPtrs.begin(), [](const auto& p) { return p.get(); });
+	return rawPtrs;
+}
+
+std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShapePtr>& initialShapes,
+                                             const std::vector<const wchar_t*>& allEncoders,
+                                             const std::vector<const prt::AttributeMap*>& allEncoderOptions,
+                                             prt::Cache* prtCache) {
+	const size_t nThreads = std::min<size_t>(std::thread::hardware_concurrency(), initialShapes.size());
+	const size_t isRangeSize = static_cast<size_t>(std::ceil(initialShapes.size() / nThreads));
+	// TODO: if nThreads is smaller than cpu cores we can enable multi-threaded generation within a shape
+
+	std::vector<prt::InitialShape const*> rawInitialShapes = toRawPtrs<const prt::InitialShape>(initialShapes);
+
+	std::vector<pcu::RhinoCallbacksPtr> callbacks(nThreads); // one callback per thread
+	std::generate(callbacks.begin(), callbacks.end(), [&isRangeSize]() { return std::make_unique<RhinoCallbacks>(isRangeSize); });
+	std::vector<RhinoCallbacks*> rawCallbacks = toRawPtrs<RhinoCallbacks>(callbacks);
+
+	std::vector<std::future<void>> futures;
+	futures.reserve(nThreads);
+	for (int8_t ti = 0; ti < nThreads; ti++) {
+		auto f = std::async(std::launch::async, [&, ti] {
+			const size_t isStartPos = ti * isRangeSize;
+			const size_t isPastEndPos = (ti < nThreads - 1) ? (ti + 1) * isRangeSize : initialShapes.size();
+			const size_t isActualRangeSize = isPastEndPos - isStartPos;
+			prt::InitialShape const* const* isRangeStart = &rawInitialShapes[isStartPos];
+
+			LOG_DBG << "thread " << ti << ": #is = " << isActualRangeSize;
+
+			const prt::Status generateStatus =
+			        prt::generate(isRangeStart, isActualRangeSize, nullptr, allEncoders.data(), allEncoders.size(),
+			                      allEncoderOptions.data(), rawCallbacks[ti], prtCache, nullptr);
+
+			if (generateStatus != prt::STATUS_OK) {
+				LOG_WRN << "generation (batch " << ti << ") failed with status: '"
+				        << prt::getStatusDescription(generateStatus) << "' (" << generateStatus << ")";
+			}
+		});
+		futures.emplace_back(std::move(f));
+	}
+	std::for_each(futures.begin(), futures.end(), [](std::future<void>& f) { f.wait(); });
+
+	std::vector<GeneratedModelPtr> generatedModels(initialShapes.size());
+	for (size_t ri = 0; ri < callbacks.size(); ri++) {
+		const std::vector<GeneratedModelPtr>& models = callbacks[ri]->getModels();
+		for (size_t mi = 0; mi < models.size(); mi++) {
+			generatedModels[ri * isRangeSize + mi] = models[mi];
+		}
+	}
+
+	return generatedModels;
+}
+
 } // namespace
 
 void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
@@ -62,7 +120,7 @@ void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 		mRuleAttributes.clear();
 		throw;
 	}
-	
+
 	// Cache miss -> initialize everything
 	// Reset the rule infos
 	mRuleAttributes.clear();
@@ -120,18 +178,16 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& init
 		attribMapBuilders.emplace_back(std::move(amb));
 	}
 
-	std::vector<const prt::InitialShape*> initShapes(numShapes);
 	std::vector<pcu::InitialShapePtr> initialShapePtrs(numShapes);
 	std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(numShapes);
-	setAndCreateInitialShape(attribMapBuilders, shapeAttributes, initShapes, initialShapePtrs, convertedShapeAttrVec);
-
+	setAndCreateInitialShape(attribMapBuilders, shapeAttributes, initialShapePtrs, convertedShapeAttrVec);
+	const std::vector<prt::InitialShape const*> rawInitialShapes = toRawPtrs<const prt::InitialShape>(initialShapePtrs);
 	assert(attribMapBuilders.size() == initShapes.size());
-	assert(initShapes.size() == mInitialShapesBuilders.size());
 
 	// run generate
 	AttrEvalCallbacks aec(attribMapBuilders, mRuleFileInfo);
-	const prt::Status status = prt::generate(initShapes.data(), initShapes.size(), nullptr, encs, encsCount, encsOpts,
-	                                         &aec, PRTContext::get()->mPRTCache.get(), nullptr);
+	const prt::Status status = prt::generate(rawInitialShapes.data(), rawInitialShapes.size(), nullptr, encs, encsCount,
+	                                         encsOpts, &aec, PRTContext::get()->mPRTCache.get(), nullptr);
 	if (status != prt::STATUS_OK) {
 		LOG_ERR << "assign: prt::generate() failed with status: '" << prt::getStatusDescription(status) << "' ("
 		        << status << ")";
@@ -203,14 +259,10 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<I
 		}
 	}
 
-	std::vector<GeneratedModelPtr> generatedModels(mInitialShapesBuilders.size());
-
 	try {
-
-		std::vector<const prt::InitialShape*> initialShapes(mInitialShapesBuilders.size());
 		std::vector<pcu::InitialShapePtr> initialShapePtrs(mInitialShapesBuilders.size());
 		std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(mInitialShapesBuilders.size());
-		setAndCreateInitialShape(aBuilders, shapeAttributes, initialShapes, initialShapePtrs, convertedShapeAttrVec);
+		setAndCreateInitialShape(aBuilders, shapeAttributes, initialShapePtrs, convertedShapeAttrVec);
 
 		if (!mEncoderBuilder)
 			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());
@@ -224,21 +276,10 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<I
 
 		getRawEncoderDataPointers(encoders, encodersOptions);
 
-		pcu::RhinoCallbacksPtr roc{std::make_unique<RhinoCallbacks>(mInitialShapesBuilders.size())};
+		const std::vector<GeneratedModelPtr> generatedModels =
+		        batchGenerate(initialShapePtrs, encoders, encodersOptions, PRTContext::get()->mPRTCache.get());
 
-		// GENERATE!
-		const prt::Status genStat =
-		        prt::generate(initialShapes.data(), initialShapes.size(), nullptr, encoders.data(), encoders.size(),
-		                      encodersOptions.data(), roc.get(), PRTContext::get()->mPRTCache.get(), nullptr);
-
-		if (genStat != prt::STATUS_OK) {
-			LOG_ERR << "prt::generate() failed with status: '" << prt::getStatusDescription(genStat) << "' (" << genStat
-			        << ")";
-			return {};
-		}
-
-		generatedModels = roc->getModels();
-		assert(mInitialShapesBuilders.size() == generate_models.size());
+		return generatedModels;
 	}
 	catch (const std::exception& e) {
 		LOG_ERR << "caught exception: " << e.what();
@@ -247,12 +288,11 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<I
 		LOG_ERR << "caught unknown exception.";
 	}
 
-	return generatedModels;
+	return {};
 }
 
 void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
                                               const std::vector<pcu::ShapeAttributes>& shapesAttr,
-                                              std::vector<const prt::InitialShape*>& initShapes,
                                               std::vector<pcu::InitialShapePtr>& initShapesPtrs,
                                               std::vector<pcu::AttributeMapPtr>& convertedShapeAttr) {
 	for (size_t i = 0; i < mInitialShapesBuilders.size(); ++i) {
@@ -272,7 +312,6 @@ void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aB
 		                                         convertedShapeAttr[i].get(), mResolveMap.get());
 
 		initShapesPtrs[i].reset(mInitialShapesBuilders[i]->createInitialShape());
-		initShapes[i] = initShapesPtrs[i].get();
 	}
 }
 
