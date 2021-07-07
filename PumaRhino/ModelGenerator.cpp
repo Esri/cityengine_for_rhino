@@ -46,16 +46,22 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 	return pcu::AttributeMapPtr(encOpts);
 }
 
-template <typename T, typename U>
-std::vector<T*> toRawPtrs(const std::vector<U>& owningVector) {
-	std::vector<T*> rawPtrs(owningVector.size());
-	std::transform(owningVector.begin(), owningVector.end(), rawPtrs.begin(), [](const auto& p) { return p.get(); });
+template <typename T, typename D >
+std::vector<T*> toRawPtrs(const std::vector<std::unique_ptr<T, D>>& smartPtrs) {
+	std::vector<T*> rawPtrs(smartPtrs.size());
+	std::transform(smartPtrs.begin(), smartPtrs.end(), rawPtrs.begin(), [](const auto& o) { return o.get(); });
+	return rawPtrs;
+}
+
+std::vector<const wchar_t*> toRawPtrs(const std::vector<std::wstring>& strings) {
+	std::vector<const wchar_t*> rawPtrs(strings.size());
+	std::transform(strings.begin(), strings.end(), rawPtrs.begin(), [](const auto& s) { return s.c_str(); });
 	return rawPtrs;
 }
 
 std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShapePtr>& initialShapes,
-                                             const std::vector<const wchar_t*>& allEncoders,
-                                             const std::vector<const prt::AttributeMap*>& allEncoderOptions,
+                                             const std::vector<std::wstring>& encoderNames,
+                                             const std::vector<pcu::AttributeMapPtr>& encoderOptions,
                                              prt::Cache* prtCache) {
 	const size_t nThreads = std::min<size_t>(std::thread::hardware_concurrency(), initialShapes.size());
 	const size_t isRangeSize = static_cast<size_t>(std::ceil(initialShapes.size() / nThreads));
@@ -64,8 +70,12 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 	std::vector<prt::InitialShape const*> rawInitialShapes = toRawPtrs<const prt::InitialShape>(initialShapes);
 
 	std::vector<pcu::RhinoCallbacksPtr> callbacks(nThreads); // one callback per thread
-	std::generate(callbacks.begin(), callbacks.end(), [&isRangeSize]() { return std::make_unique<RhinoCallbacks>(isRangeSize); });
+	std::generate(callbacks.begin(), callbacks.end(),
+	              [&isRangeSize]() { return std::make_unique<RhinoCallbacks>(isRangeSize); });
 	std::vector<RhinoCallbacks*> rawCallbacks = toRawPtrs<RhinoCallbacks>(callbacks);
+
+	const std::vector<const wchar_t*> rawEncoderNames = toRawPtrs(encoderNames);
+	const std::vector<const prt::AttributeMap*> rawEncoderOptions = toRawPtrs<const prt::AttributeMap>(encoderOptions);
 
 	std::vector<std::future<void>> futures;
 	futures.reserve(nThreads);
@@ -78,9 +88,9 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 
 			LOG_DBG << "thread " << ti << ": #is = " << isActualRangeSize;
 
-			const prt::Status generateStatus =
-			        prt::generate(isRangeStart, isActualRangeSize, nullptr, allEncoders.data(), allEncoders.size(),
-			                      allEncoderOptions.data(), rawCallbacks[ti], prtCache, nullptr);
+			const prt::Status generateStatus = prt::generate(
+			        isRangeStart, isActualRangeSize, nullptr, rawEncoderNames.data(), rawEncoderNames.size(),
+			        rawEncoderOptions.data(), rawCallbacks[ti], prtCache, nullptr);
 
 			if (generateStatus != prt::STATUS_OK) {
 				LOG_WRN << "generation (batch " << ti << ") failed with status: '"
@@ -274,10 +284,8 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<I
 		std::vector<const prt::AttributeMap*> encodersOptions;
 		encodersOptions.reserve(3);
 
-		getRawEncoderDataPointers(encoders, encodersOptions);
-
-		const std::vector<GeneratedModelPtr> generatedModels =
-		        batchGenerate(initialShapePtrs, encoders, encodersOptions, PRTContext::get()->mPRTCache.get());
+		const std::vector<GeneratedModelPtr> generatedModels = batchGenerate(
+		        initialShapePtrs, mEncodersNames, mEncodersOptionsPtr, PRTContext::get()->mPRTCache.get());
 
 		return generatedModels;
 	}
@@ -334,17 +342,6 @@ void ModelGenerator::initializeEncoderData(const pcu::EncoderOptions& encOpt) {
 	optionsBuilder->setString(L"name", FILE_CGA_PRINT);
 	const pcu::AttributeMapPtr printOptions(optionsBuilder->createAttributeMapAndReset());
 	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions));
-}
-
-void ModelGenerator::getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,
-                                               std::vector<const prt::AttributeMap*>& allEncOpt) {
-	allEnc.clear();
-	for (const std::wstring& encID : mEncodersNames)
-		allEnc.push_back(encID.c_str());
-
-	allEncOpt.clear();
-	for (const auto& encOpts : mEncodersOptionsPtr)
-		allEncOpt.push_back(encOpts.get());
 }
 
 void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder,

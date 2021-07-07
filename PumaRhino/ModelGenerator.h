@@ -91,9 +91,6 @@ private:
 
 	void createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv);
 
-	void getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,
-	                               std::vector<const prt::AttributeMap*>& allEncOpt);
-
 	void extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr,
 	                                std::wstring& ruleFile, std::wstring& startRule, int32_t& seed,
 	                                std::wstring& shapeName, pcu::AttributeMapPtr& convertShapeAttr);
