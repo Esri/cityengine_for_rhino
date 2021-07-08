@@ -151,7 +151,7 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 
 	RhinoPRT::get().ClearInitialShapes();
 
-	std::vector<InitialShape> initShapes;
+	std::vector<RawInitialShape> initShapes;
 	initShapes.reserve(mesh_array.Count());
 	for (int i = 0; i < mesh_array.Count(); ++i)
 		initShapes.emplace_back(*mesh_array[i]);

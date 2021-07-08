@@ -51,7 +51,7 @@ public:
 	int GetRuleAttributeCount();
 	const RuleAttributes& GetRuleAttributes() const;
 
-	void AddInitialShape(const std::vector<InitialShape>& shapes);
+	void AddInitialShape(const std::vector<RawInitialShape>& shapes);
 	void ClearInitialShapes();
 
 	size_t GenerateGeometry();
@@ -81,7 +81,7 @@ public:
 	bool getDefaultValueText(const std::wstring key, ON_wString* pText);
 
 private:
-	std::vector<InitialShape> mShapes;
+	std::vector<RawInitialShape> mShapes;
 	std::wstring mPackagePath;
 	std::vector<pcu::ShapeAttributes> mAttributes;
 

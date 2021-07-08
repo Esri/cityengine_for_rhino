@@ -18,7 +18,10 @@
  */
 
 #include "GeneratedModel.h"
-#include "InitialShape.h"
+#include "RawInitialShape.h"
+#include "Logger.h"
+
+#include <cassert>
 
 namespace {
 

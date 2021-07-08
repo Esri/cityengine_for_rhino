@@ -75,7 +75,7 @@ inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh) {
 	if (pMesh == nullptr)
 		return false;
 
-	std::vector<InitialShape> initShapes;
+	std::vector<RawInitialShape> initShapes;
 	initShapes.reserve(pMesh->Count());
 	for (int i = 0; i < pMesh->Count(); ++i) {
 		initShapes.emplace_back(**pMesh->At(i));

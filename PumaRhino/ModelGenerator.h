@@ -21,7 +21,7 @@
 
 #include "GeneratedModel.h"
 #include "PRTContext.h"
-#include "InitialShape.h"
+#include "RawInitialShape.h"
 #include "ResolveMapCache.h"
 #include "RhinoCallbacks.h"
 #include "RuleAttributes.h"
@@ -32,12 +32,12 @@
  */
 class ModelGenerator {
 public:
-	std::vector<GeneratedModelPtr> generateModel(const std::vector<InitialShape>& initial_geom,
+	std::vector<GeneratedModelPtr> generateModel(const std::vector<RawInitialShape>& initial_geom,
 	                                             std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	                                             const pcu::EncoderOptions& geometryEncoderOptions,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
-	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
+	bool evalDefaultAttributes(const std::vector<RawInitialShape>& initial_geom,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
 
 	void updateRuleFiles(const std::wstring& rulePkg);
@@ -87,7 +87,7 @@ private:
 
 	void initializeEncoderData(const pcu::EncoderOptions& encOpt);
 
-	void fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom);
+	void fillInitialShapeBuilder(const std::vector<RawInitialShape>& initial_geom);
 
 	void createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv);
 

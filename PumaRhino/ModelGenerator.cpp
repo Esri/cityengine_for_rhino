@@ -46,7 +46,7 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 	return pcu::AttributeMapPtr(encOpts);
 }
 
-template <typename T, typename D >
+template <typename T, typename D>
 std::vector<T*> toRawPtrs(const std::vector<std::unique_ptr<T, D>>& smartPtrs) {
 	std::vector<T*> rawPtrs(smartPtrs.size());
 	std::transform(smartPtrs.begin(), smartPtrs.end(), rawPtrs.begin(), [](const auto& o) { return o.get(); });
@@ -167,7 +167,7 @@ void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	createRuleAttributes(mRuleFile, *mRuleFileInfo.get(), mRuleAttributes);
 }
 
-bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
+bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& initial_geom,
                                            std::vector<pcu::ShapeAttributes>& shapeAttributes) {
 	// setup encoder options for attribute evaluation encoder
 	constexpr const wchar_t* encs[] = {ENCODER_ID_CGA_EVALATTR};
@@ -218,7 +218,7 @@ void ModelGenerator::createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv
 	}
 }
 
-void ModelGenerator::fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom) {
+void ModelGenerator::fillInitialShapeBuilder(const std::vector<RawInitialShape>& initial_geom) {
 	mInitialShapesBuilders.resize(initial_geom.size());
 
 	// Initial shapes initializing
@@ -240,7 +240,7 @@ void ModelGenerator::fillInitialShapeBuilder(const std::vector<InitialShape>& in
 	}
 }
 
-std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<InitialShape>& initial_geom,
+std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<RawInitialShape>& initial_geom,
                                                              std::vector<pcu::ShapeAttributes>& shapeAttributes,
                                                              const pcu::EncoderOptions& geometryEncoderOptions,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
