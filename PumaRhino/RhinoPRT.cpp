@@ -28,16 +28,15 @@ RhinoPRTAPI& get() {
 }
 
 bool RhinoPRTAPI::InitializeRhinoPRT() {
-	return PRTContext::get()->isAlive();
+	return !!PRTContext::get() && PRTContext::get()->isAlive();
 }
 
 void RhinoPRTAPI::ShutdownRhinoPRT() {
-	
 	PRTContext::get().reset();
 }
 
 bool RhinoPRTAPI::IsPRTInitialized() {
-	return PRTContext::get()->isAlive();
+	return !!PRTContext::get() && PRTContext::get()->isAlive();
 }
 
 int RhinoPRTAPI::GetRuleAttributeCount() {
