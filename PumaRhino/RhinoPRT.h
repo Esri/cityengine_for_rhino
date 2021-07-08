@@ -88,8 +88,6 @@ private:
 	pcu::AttributeMapBuilderPtr mAttrBuilder;
 	pcu::AttributeMapBuilderVector mAttrBuilders;
 
-	pcu::EncoderOptions options;
-
 	std::unique_ptr<ModelGenerator> mModelGenerator;
 	std::vector<GeneratedModelPtr> mGeneratedModels;
 

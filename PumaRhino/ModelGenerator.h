@@ -32,15 +32,18 @@
  */
 class ModelGenerator {
 public:
+	ModelGenerator();
+
 	std::vector<GeneratedModelPtr> generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
 	                                             const std::vector<pcu::ShapeAttributes>& shapeAttributes,
-	                                             const pcu::EncoderOptions& geometryEncoderOptions,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
 	bool evalDefaultAttributes(const std::vector<RawInitialShape>& rawInitialShapes,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
 
 	void updateRuleFiles(const std::wstring& rulePkg);
+
+	void updateEncoderOptions(bool emitMaterials);
 
 	const RuleAttributes& getRuleAttributes() const {
 		return mRuleAttributes;
@@ -63,10 +66,11 @@ public:
 private:
 	pcu::RuleFileInfoPtr mRuleFileInfo;
 	pcu::ResolveMapSPtr mResolveMap;
-	pcu::AttributeMapBuilderPtr mEncoderBuilder;
-	std::vector<std::wstring> mEncodersNames;
-	std::vector<pcu::AttributeMapPtr> mEncodersOptionsPtr;
 	RuleAttributes mRuleAttributes;
+
+	pcu::AttributeMapPtr mRhinoEncoderOptions;
+	pcu::AttributeMapPtr mCGAErrorOptions;
+	pcu::AttributeMapPtr mCGAPrintOptions;
 
 	// contains the rule attributes evaluated
 	pcu::AttributeMapPtrVector mDefaultValuesMap;
@@ -82,7 +86,6 @@ private:
 	                         pcu::AttributeMapBuilderVector& aBuilders,
 	                         std::vector<pcu::InitialShapePtr>& initialShapes,
 	                         std::vector<pcu::AttributeMapPtr>& initialShapeAttributes) const;
-	void initializeEncoderData(const pcu::EncoderOptions& encOpt);
 
 	void createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv);
 

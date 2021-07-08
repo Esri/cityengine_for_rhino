@@ -23,6 +23,7 @@
 #include "Logger.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <filesystem>
 #include <future>
@@ -32,6 +33,9 @@ namespace {
 constexpr const wchar_t* ENCODER_ID_RHINO = L"com.esri.rhinoprt.RhinoEncoder";
 constexpr const wchar_t* ENCODER_ID_CGA_ERROR = L"com.esri.prt.core.CGAErrorEncoder";
 constexpr const wchar_t* ENCODER_ID_CGA_PRINT = L"com.esri.prt.core.CGAPrintEncoder";
+
+constexpr std::array<const wchar_t*, 3> ALL_ENCODER_IDS = {ENCODER_ID_RHINO, ENCODER_ID_CGA_ERROR,
+                                                           ENCODER_ID_CGA_PRINT};
 
 constexpr const wchar_t* FILE_CGA_ERROR = L"CGAErrors.txt";
 constexpr const wchar_t* FILE_CGA_PRINT = L"CGAPrint.txt";
@@ -60,8 +64,7 @@ std::vector<const wchar_t*> toRawPtrs(const std::vector<std::wstring>& strings) 
 }
 
 std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShapePtr>& initialShapes,
-                                             const std::vector<std::wstring>& encoderNames,
-                                             const std::vector<pcu::AttributeMapPtr>& encoderOptions,
+                                             const std::vector<const prt::AttributeMap*>& encoderOptions,
                                              prt::Cache* prtCache) {
 	const size_t nThreads = std::min<size_t>(std::thread::hardware_concurrency(), initialShapes.size());
 	const size_t isRangeSize = static_cast<size_t>(std::ceil(initialShapes.size() / nThreads));
@@ -74,9 +77,6 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 	              [&isRangeSize]() { return std::make_unique<RhinoCallbacks>(isRangeSize); });
 	std::vector<RhinoCallbacks*> rawCallbacks = toRawPtrs<RhinoCallbacks>(callbacks);
 
-	const std::vector<const wchar_t*> rawEncoderNames = toRawPtrs(encoderNames);
-	const std::vector<const prt::AttributeMap*> rawEncoderOptions = toRawPtrs<const prt::AttributeMap>(encoderOptions);
-
 	std::vector<std::future<void>> futures;
 	futures.reserve(nThreads);
 	for (int8_t ti = 0; ti < nThreads; ti++) {
@@ -88,9 +88,9 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 
 			LOG_DBG << "thread " << ti << ": #is = " << isActualRangeSize;
 
-			const prt::Status generateStatus = prt::generate(
-			        isRangeStart, isActualRangeSize, nullptr, rawEncoderNames.data(), rawEncoderNames.size(),
-			        rawEncoderOptions.data(), rawCallbacks[ti], prtCache, nullptr);
+			const prt::Status generateStatus =
+			        prt::generate(isRangeStart, isActualRangeSize, nullptr, ALL_ENCODER_IDS.data(),
+			                      ALL_ENCODER_IDS.size(), encoderOptions.data(), rawCallbacks[ti], prtCache, nullptr);
 
 			if (generateStatus != prt::STATUS_OK) {
 				LOG_WRN << "generation (batch " << ti << ") failed with status: '"
@@ -113,6 +113,18 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 }
 
 } // namespace
+
+ModelGenerator::ModelGenerator() {
+	pcu::AttributeMapBuilderPtr optionsBuilder(prt::AttributeMapBuilder::create());
+
+	optionsBuilder->setString(L"name", FILE_CGA_ERROR);
+	const pcu::AttributeMapPtr errOptions(optionsBuilder->createAttributeMapAndReset());
+	mCGAErrorOptions = createValidatedOptions(ENCODER_ID_CGA_ERROR, errOptions);
+
+	optionsBuilder->setString(L"name", FILE_CGA_PRINT);
+	const pcu::AttributeMapPtr printOptions(optionsBuilder->createAttributeMapAndReset());
+	mCGAPrintOptions = createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions);
+}
 
 void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	try {
@@ -184,7 +196,6 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& r
 		pcu::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 		attribMapBuilders.emplace_back(std::move(amb));
 	}
-
 
 	std::vector<pcu::InitialShapePtr> initialShapes;
 	std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
@@ -273,7 +284,6 @@ bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& raw
 
 std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
                                                              const std::vector<pcu::ShapeAttributes>& shapeAttributes,
-                                                             const pcu::EncoderOptions& geometryEncoderOptions,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
 	if ((shapeAttributes.size() != 1) && (shapeAttributes.size() < rawInitialShapes.size())) {
 		LOG_ERR << "Not enough shape attributes dictionaries defined.";
@@ -297,17 +307,11 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<R
 		if (!createInitialShapes(rawInitialShapes, shapeAttributes, aBuilders, initialShapes, initialShapeAttributes))
 			return {};
 
-		if (!mEncoderBuilder)
-			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());
-		initializeEncoderData(geometryEncoderOptions);
-
-		std::vector<const wchar_t*> encoders;
-		encoders.reserve(3);
-		std::vector<const prt::AttributeMap*> encodersOptions;
-		encodersOptions.reserve(3);
+		const std::vector<const prt::AttributeMap*> encoderOptions = {mRhinoEncoderOptions.get(),
+		                                                              mCGAErrorOptions.get(), mCGAPrintOptions.get()};
 
 		const std::vector<GeneratedModelPtr> generatedModels =
-		        batchGenerate(initialShapes, mEncodersNames, mEncodersOptionsPtr, PRTContext::get()->mPRTCache.get());
+		        batchGenerate(initialShapes, encoderOptions, PRTContext::get()->mPRTCache.get());
 
 		return generatedModels;
 	}
@@ -321,25 +325,11 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<R
 	return {};
 }
 
-void ModelGenerator::initializeEncoderData(const pcu::EncoderOptions& encOpt) {
-	mEncodersNames.clear();
-	mEncodersOptionsPtr.clear();
-
-	mEncodersNames.emplace_back(ENCODER_ID_RHINO);
-	const pcu::AttributeMapPtr encOptions{pcu::createAttributeMapForEncoder(encOpt, *mEncoderBuilder)};
-	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_RHINO, encOptions));
-
+void ModelGenerator::updateEncoderOptions(bool emitMaterials) {
 	pcu::AttributeMapBuilderPtr optionsBuilder(prt::AttributeMapBuilder::create());
-
-	mEncodersNames.emplace_back(ENCODER_ID_CGA_ERROR);
-	optionsBuilder->setString(L"name", FILE_CGA_ERROR);
-	const pcu::AttributeMapPtr errOptions(optionsBuilder->createAttributeMapAndReset());
-	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_CGA_ERROR, errOptions));
-
-	mEncodersNames.emplace_back(ENCODER_ID_CGA_PRINT);
-	optionsBuilder->setString(L"name", FILE_CGA_PRINT);
-	const pcu::AttributeMapPtr printOptions(optionsBuilder->createAttributeMapAndReset());
-	mEncodersOptionsPtr.emplace_back(createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions));
+	optionsBuilder->setBool(L"emitMaterials", emitMaterials);
+	pcu::AttributeMapPtr rawOptions(optionsBuilder->createAttributeMap());
+	mRhinoEncoderOptions = pcu::createValidatedOptions(ENCODER_ID_RHINO, rawOptions);
 }
 
 void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder,

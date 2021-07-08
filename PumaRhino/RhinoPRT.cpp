@@ -95,7 +95,7 @@ void RhinoPRTAPI::ClearInitialShapes() {
 }
 
 size_t RhinoPRTAPI::GenerateGeometry() {
-	mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, options, mAttrBuilders);
+	mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, mAttrBuilders);
 	assert(mGeneratedModels.size() == mShapes.size());
 	return mShapes.size();
 }
@@ -148,7 +148,7 @@ Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex) {
 }
 
 void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {
-	options.emitMaterial = emitMaterial;
+	mModelGenerator->updateEncoderOptions(emitMaterial);
 }
 
 bool RhinoPRTAPI::getDefaultValueBoolean(const std::wstring key, bool* value) {
