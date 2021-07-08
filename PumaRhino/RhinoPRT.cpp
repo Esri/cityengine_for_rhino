@@ -62,7 +62,7 @@ void RhinoPRTAPI::SetRPKPath(const std::wstring& rpk_path) {
 	mAttrBuilder.reset(prt::AttributeMapBuilder::create());
 }
 
-void RhinoPRTAPI::AddInitialShape(const std::vector<RawInitialShape>& shapes) {
+void RhinoPRTAPI::SetInitialShapes(const std::vector<RawInitialShape>& shapes) {
 
 	// get the shape attributes data from ModelGenerator
 	std::wstring rulef = mModelGenerator->getRuleFile();

@@ -167,40 +167,39 @@ void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
 	createRuleAttributes(mRuleFile, *mRuleFileInfo.get(), mRuleAttributes);
 }
 
-bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& initial_geom,
+bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& rawInitialShapes,
                                            std::vector<pcu::ShapeAttributes>& shapeAttributes) {
 	// setup encoder options for attribute evaluation encoder
 	constexpr const wchar_t* encs[] = {ENCODER_ID_CGA_EVALATTR};
-	constexpr size_t encsCount = sizeof(encs) / (sizeof(encs[0]));
+	constexpr size_t encsCount = sizeof(encs) / sizeof(encs[0]);
 	const pcu::AttributeMapPtr encOpts = getAttrEvalEncoderInfo();
 	const prt::AttributeMap* encsOpts[] = {encOpts.get()};
 
-	const size_t numShapes = initial_geom.size();
-
-	fillInitialShapeBuilder(initial_geom);
+	const size_t numShapes = rawInitialShapes.size();
 
 	pcu::AttributeMapBuilderVector attribMapBuilders;
 	attribMapBuilders.reserve(numShapes);
 
 	for (size_t isIdx = 0; isIdx < numShapes; ++isIdx) {
 		pcu::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
-		pcu::AttributeMapPtr ruleAttr(amb->createAttributeMap());
 		attribMapBuilders.emplace_back(std::move(amb));
 	}
 
-	std::vector<pcu::InitialShapePtr> initialShapePtrs(numShapes);
-	std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(numShapes);
-	setAndCreateInitialShape(attribMapBuilders, shapeAttributes, initialShapePtrs, convertedShapeAttrVec);
-	const std::vector<prt::InitialShape const*> rawInitialShapes = toRawPtrs<const prt::InitialShape>(initialShapePtrs);
-	assert(attribMapBuilders.size() == initShapes.size());
+
+	std::vector<pcu::InitialShapePtr> initialShapes;
+	std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
+	if (!createInitialShapes(rawInitialShapes, shapeAttributes, attribMapBuilders, initialShapes,
+	                         initialShapeAttributes))
+		return false;
 
 	// run generate
 	AttrEvalCallbacks aec(attribMapBuilders, mRuleFileInfo);
-	const prt::Status status = prt::generate(rawInitialShapes.data(), rawInitialShapes.size(), nullptr, encs, encsCount,
-	                                         encsOpts, &aec, PRTContext::get()->mPRTCache.get(), nullptr);
+	const std::vector<prt::InitialShape const*> rawInitialShapePtrs = toRawPtrs<const prt::InitialShape>(initialShapes);
+	const prt::Status status = prt::generate(rawInitialShapePtrs.data(), rawInitialShapePtrs.size(), nullptr, encs,
+	                                         encsCount, encsOpts, &aec, PRTContext::get()->mPRTCache.get(), nullptr);
 	if (status != prt::STATUS_OK) {
-		LOG_ERR << "assign: prt::generate() failed with status: '" << prt::getStatusDescription(status) << "' ("
-		        << status << ")";
+		LOG_ERR << "Failed to get default rule attributes: '" << prt::getStatusDescription(status) << "' (" << status
+		        << ")";
 		return false;
 	}
 
@@ -218,65 +217,88 @@ void ModelGenerator::createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv
 	}
 }
 
-void ModelGenerator::fillInitialShapeBuilder(const std::vector<RawInitialShape>& initial_geom) {
-	mInitialShapesBuilders.resize(initial_geom.size());
+bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& rawInitialShapes,
+                                         const std::vector<pcu::ShapeAttributes>& shapeAttributes,
+                                         pcu::AttributeMapBuilderVector& aBuilders,
+                                         std::vector<pcu::InitialShapePtr>& initialShapes,
+                                         std::vector<pcu::AttributeMapPtr>& initialShapesAttributes) const {
 
-	// Initial shapes initializing
-	for (size_t i = 0; i < initial_geom.size(); ++i) {
-		pcu::InitialShapeBuilderPtr isb{prt::InitialShapeBuilder::create()};
+	pcu::InitialShapeBuilderPtr isb(prt::InitialShapeBuilder::create());
+	initialShapes.reserve(rawInitialShapes.size());
+	initialShapesAttributes.reserve(rawInitialShapes.size());
 
-		if (isb->setGeometry(initial_geom[i].getVertices(), initial_geom[i].getVertexCount(),
-		                     initial_geom[i].getIndices(), initial_geom[i].getIndexCount(),
-		                     initial_geom[i].getFaceCounts(), initial_geom[i].getFaceCountsCount()) != prt::STATUS_OK) {
+	for (size_t i = 0; i < rawInitialShapes.size(); ++i) {
+		const RawInitialShape& ris = rawInitialShapes[i];
 
-			LOG_ERR << "invalid initial geometry";
-
-			mValid = false;
+		const prt::Status geometryStatus =
+		        isb->setGeometry(ris.getVertices(), ris.getVertexCount(), ris.getIndices(), ris.getIndexCount(),
+		                         ris.getFaceCounts(), ris.getFaceCountsCount());
+		if (geometryStatus != prt::STATUS_OK) {
+			LOG_ERR << "Encountered invalid initial shape geometry: " << prt::getStatusDescription(geometryStatus);
+			return false;
 		}
 
-		if (mValid) {
-			mInitialShapesBuilders[i] = std::move(isb);
+		// TODO: is this check necessary?
+		pcu::ShapeAttributes shapeAttr = (shapeAttributes.size() > i) ? shapeAttributes[0] : shapeAttributes[i];
+
+		// Set to default values
+		std::wstring ruleF = mRuleFile;
+		std::wstring startR = mStartRule;
+		int32_t randomS = mSeed;
+		std::wstring shapeN = mShapeName;
+
+		pcu::AttributeMapPtr initialShapeAttributes;
+		extractMainShapeAttributes(aBuilders[i], shapeAttr, ruleF, startR, randomS, shapeN, initialShapeAttributes);
+
+		const prt::Status attributeStatus = isb->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(),
+		                                                       initialShapeAttributes.get(), mResolveMap.get());
+		if (attributeStatus != prt::STATUS_OK) {
+			LOG_ERR << "Failed to set initial shape attributes: " << prt::getStatusDescription(attributeStatus);
+			return false;
 		}
+
+		prt::Status creationStatus = prt::STATUS_UNSPECIFIED_ERROR;
+		pcu::InitialShapePtr initialShape(isb->createInitialShapeAndReset(&creationStatus));
+		if (creationStatus != prt::STATUS_OK) {
+			LOG_ERR << "Failed to create initial shape: " << prt::getStatusDescription(creationStatus);
+			return false;
+		}
+
+		initialShapes.emplace_back(std::move(initialShape));
+		initialShapesAttributes.emplace_back(std::move(initialShapeAttributes));
 	}
+
+	return true;
 }
 
-std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<RawInitialShape>& initial_geom,
-                                                             std::vector<pcu::ShapeAttributes>& shapeAttributes,
+std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
+                                                             const std::vector<pcu::ShapeAttributes>& shapeAttributes,
                                                              const pcu::EncoderOptions& geometryEncoderOptions,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
-	fillInitialShapeBuilder(initial_geom);
-
-	if (!mValid) {
-		LOG_ERR << "invalid ModelGenerator instance.";
+	if ((shapeAttributes.size() != 1) && (shapeAttributes.size() < rawInitialShapes.size())) {
+		LOG_ERR << "Not enough shape attributes dictionaries defined.";
 		return {};
 	}
-
-	if ((shapeAttributes.size() != 1) && (shapeAttributes.size() < mInitialShapesBuilders.size())) {
-		LOG_ERR << "not enough shape attributes dictionaries defined.";
-		return {};
-	}
-	else if (shapeAttributes.size() > mInitialShapesBuilders.size()) {
-		LOG_WRN << "number of shape attributes dictionaries defined greater than number of initial shapes given."
-		        << std::endl;
+	else if (shapeAttributes.size() > rawInitialShapes.size()) {
+		LOG_WRN << "Number of shape attributes dictionaries defined greater than number of initial shapes given.";
 	}
 
 	if (!mRulePkg.empty()) {
-		LOG_INF << "using rule package " << mRulePkg << std::endl;
-
+		LOG_INF << "using rule package " << mRulePkg;
 		if (!mResolveMap || mRuleFile.empty() || !mRuleFileInfo) {
-			LOG_ERR << "Rule package not processed correcty." << std::endl;
+			LOG_ERR << "Rule package not processed correcty.";
 			return {};
 		}
 	}
 
 	try {
-		std::vector<pcu::InitialShapePtr> initialShapePtrs(mInitialShapesBuilders.size());
-		std::vector<pcu::AttributeMapPtr> convertedShapeAttrVec(mInitialShapesBuilders.size());
-		setAndCreateInitialShape(aBuilders, shapeAttributes, initialShapePtrs, convertedShapeAttrVec);
+		std::vector<pcu::InitialShapePtr> initialShapes;
+		std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
+		if (!createInitialShapes(rawInitialShapes, shapeAttributes, aBuilders, initialShapes, initialShapeAttributes))
+			return {};
 
 		if (!mEncoderBuilder)
 			mEncoderBuilder.reset(prt::AttributeMapBuilder::create());
-
 		initializeEncoderData(geometryEncoderOptions);
 
 		std::vector<const wchar_t*> encoders;
@@ -284,8 +306,8 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<R
 		std::vector<const prt::AttributeMap*> encodersOptions;
 		encodersOptions.reserve(3);
 
-		const std::vector<GeneratedModelPtr> generatedModels = batchGenerate(
-		        initialShapePtrs, mEncodersNames, mEncodersOptionsPtr, PRTContext::get()->mPRTCache.get());
+		const std::vector<GeneratedModelPtr> generatedModels =
+		        batchGenerate(initialShapes, mEncodersNames, mEncodersOptionsPtr, PRTContext::get()->mPRTCache.get());
 
 		return generatedModels;
 	}
@@ -297,30 +319,6 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<R
 	}
 
 	return {};
-}
-
-void ModelGenerator::setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
-                                              const std::vector<pcu::ShapeAttributes>& shapesAttr,
-                                              std::vector<pcu::InitialShapePtr>& initShapesPtrs,
-                                              std::vector<pcu::AttributeMapPtr>& convertedShapeAttr) {
-	for (size_t i = 0; i < mInitialShapesBuilders.size(); ++i) {
-		pcu::ShapeAttributes shapeAttr = shapesAttr[0];
-		if (shapesAttr.size() > i) {
-			shapeAttr = shapesAttr[i];
-		}
-
-		// Set to default values
-		std::wstring ruleF = mRuleFile;
-		std::wstring startR = mStartRule;
-		int32_t randomS = mSeed;
-		std::wstring shapeN = mShapeName;
-		extractMainShapeAttributes(aBuilders[i], shapeAttr, ruleF, startR, randomS, shapeN, convertedShapeAttr[i]);
-
-		mInitialShapesBuilders[i]->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(),
-		                                         convertedShapeAttr[i].get(), mResolveMap.get());
-
-		initShapesPtrs[i].reset(mInitialShapesBuilders[i]->createInitialShape());
-	}
 }
 
 void ModelGenerator::initializeEncoderData(const pcu::EncoderOptions& encOpt) {
@@ -347,7 +345,7 @@ void ModelGenerator::initializeEncoderData(const pcu::EncoderOptions& encOpt) {
 void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder,
                                                 const pcu::ShapeAttributes& shapeAttr, std::wstring& ruleFile,
                                                 std::wstring& startRule, int32_t& seed, std::wstring& shapeName,
-                                                pcu::AttributeMapPtr& convertShapeAttr) {
+                                                pcu::AttributeMapPtr& convertShapeAttr) const {
 	convertShapeAttr = pcu::createAttributeMapForShape(shapeAttr, *aBuilder.get());
 
 	if (convertShapeAttr) {

@@ -151,11 +151,11 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 
 	RhinoPRT::get().ClearInitialShapes();
 
-	std::vector<RawInitialShape> initShapes;
-	initShapes.reserve(mesh_array.Count());
+	std::vector<RawInitialShape> rawInitialShapes;
+	rawInitialShapes.reserve(mesh_array.Count());
 	for (int i = 0; i < mesh_array.Count(); ++i)
-		initShapes.emplace_back(*mesh_array[i]);
-	RhinoPRT::get().AddInitialShape(initShapes);
+		rawInitialShapes.emplace_back(*mesh_array[i]);
+	RhinoPRT::get().SetInitialShapes(rawInitialShapes);
 
 	// PRT Generation
 	bool status = RhinoPRT::get().GenerateGeometry();

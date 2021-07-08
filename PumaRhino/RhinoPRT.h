@@ -51,7 +51,7 @@ public:
 	int GetRuleAttributeCount();
 	const RuleAttributes& GetRuleAttributes() const;
 
-	void AddInitialShape(const std::vector<RawInitialShape>& shapes);
+	void SetInitialShapes(const std::vector<RawInitialShape>& shapes);
 	void ClearInitialShapes();
 
 	size_t GenerateGeometry();
