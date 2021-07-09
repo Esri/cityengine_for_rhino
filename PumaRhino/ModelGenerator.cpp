@@ -27,6 +27,7 @@
 #include <cassert>
 #include <filesystem>
 #include <future>
+#include <numeric>
 
 namespace {
 
@@ -63,34 +64,45 @@ std::vector<const wchar_t*> toRawPtrs(const std::vector<std::wstring>& strings) 
 	return rawPtrs;
 }
 
+std::vector<size_t> distribute(size_t tasks, size_t slots) {
+	const size_t base = tasks / slots;
+	const size_t extra = tasks % slots;
+
+	std::vector<size_t> d(slots, base);
+	std::fill_n(d.begin(), extra, base + 1);
+
+	return d;
+}
+
 std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShapePtr>& initialShapes,
                                              const std::vector<const prt::AttributeMap*>& encoderOptions,
                                              prt::Cache* prtCache) {
 	const size_t nThreads = std::min<size_t>(std::thread::hardware_concurrency(), initialShapes.size());
-	const size_t isRangeSize = static_cast<size_t>(std::ceil(initialShapes.size() / nThreads));
-	// TODO: if nThreads is smaller than cpu cores we can enable multi-threaded generation within a shape
+	const std::vector<size_t> initialShapesPerThread = distribute(initialShapes.size(), nThreads);
+
+	std::vector<size_t> offsets(nThreads, 0);
+	std::partial_sum(initialShapesPerThread.begin(), std::prev(initialShapesPerThread.end()),
+	                 std::next(offsets.begin()));
+
+	// TODO: if nThreads is smaller than cpu cores we can enable multi-threaded generation within a shape with the
+	// remaining cores
 
 	std::vector<prt::InitialShape const*> rawInitialShapes = toRawPtrs<const prt::InitialShape>(initialShapes);
-
 	std::vector<pcu::RhinoCallbacksPtr> callbacks(nThreads); // one callback per thread
-	std::generate(callbacks.begin(), callbacks.end(),
-	              [&isRangeSize]() { return std::make_unique<RhinoCallbacks>(isRangeSize); });
-	std::vector<RhinoCallbacks*> rawCallbacks = toRawPtrs<RhinoCallbacks>(callbacks);
-
 	std::vector<std::future<void>> futures;
 	futures.reserve(nThreads);
+
 	for (int8_t ti = 0; ti < nThreads; ti++) {
-		auto f = std::async(std::launch::async, [&, ti] {
-			const size_t isStartPos = ti * isRangeSize;
-			const size_t isPastEndPos = (ti < nThreads - 1) ? (ti + 1) * isRangeSize : initialShapes.size();
-			const size_t isActualRangeSize = isPastEndPos - isStartPos;
-			prt::InitialShape const* const* isRangeStart = &rawInitialShapes[isStartPos];
+		auto f = std::async(std::launch::async, [ti, &initialShapesPerThread, &offsets, &callbacks, &rawInitialShapes,
+		                                         &encoderOptions, &prtCache] {
+			LOG_DBG << "thread " << ti << ": shapes = " << initialShapesPerThread[ti] << ", offset = " << offsets[ti];
 
-			LOG_DBG << "thread " << ti << ": #is = " << isActualRangeSize;
+			prt::InitialShape const* const* isRangeStart = &rawInitialShapes[offsets[ti]];
+			callbacks[ti] = std::make_unique<RhinoCallbacks>(initialShapesPerThread[ti]);
 
-			const prt::Status generateStatus =
-			        prt::generate(isRangeStart, isActualRangeSize, nullptr, ALL_ENCODER_IDS.data(),
-			                      ALL_ENCODER_IDS.size(), encoderOptions.data(), rawCallbacks[ti], prtCache, nullptr);
+			const prt::Status generateStatus = prt::generate(
+			        isRangeStart, initialShapesPerThread[ti], nullptr, ALL_ENCODER_IDS.data(), ALL_ENCODER_IDS.size(),
+			        encoderOptions.data(), callbacks[ti].get(), prtCache, nullptr);
 
 			if (generateStatus != prt::STATUS_OK) {
 				LOG_WRN << "generation (batch " << ti << ") failed with status: '"
@@ -105,7 +117,7 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 	for (size_t ri = 0; ri < callbacks.size(); ri++) {
 		const std::vector<GeneratedModelPtr>& models = callbacks[ri]->getModels();
 		for (size_t mi = 0; mi < models.size(); mi++) {
-			generatedModels[ri * isRangeSize + mi] = models[mi];
+			generatedModels[offsets[ri] + mi] = models[mi];
 		}
 	}
 
