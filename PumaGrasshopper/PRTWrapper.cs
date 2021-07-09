@@ -30,6 +30,7 @@ using Rhino.DocObjects;
 
 using Rhino.Runtime.InteropWrappers;
 using System.Linq;
+using System.Diagnostics;
 
 namespace PumaGrasshopper
 {
@@ -171,6 +172,7 @@ namespace PumaGrasshopper
 
             var meshCountsArray = meshCounts.ToArray();
             var meshesArray = meshes.ToNonConstArray();
+            Debug.Assert(meshCountsArray.Length == meshesArray.Length);
             var generatedMeshes = new List<Mesh[]>();
             int indexOffset = 0;
             for (int id = 0; id < meshCountsArray.Length; id++)

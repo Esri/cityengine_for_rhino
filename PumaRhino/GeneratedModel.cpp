@@ -137,6 +137,9 @@ void GeneratedModel::addMaterial(const Materials::MaterialAttribute& ma) {
 }
 
 const GeneratedModel::MeshBundle GeneratedModel::createRhinoMeshes(size_t initialShapeIndex) const {
+	if (mModelParts.empty())
+		return {};
+	
 	const std::wstring idKey = std::to_wstring(initialShapeIndex);
 
 	MeshBundle mesh;

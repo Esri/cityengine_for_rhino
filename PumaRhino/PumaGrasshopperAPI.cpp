@@ -94,10 +94,16 @@ RHINOPRT_API bool Generate(ON_SimpleArray<int>* pMeshCounts, ON_SimpleArray<ON_M
 	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
 
 	for (size_t initialShapeIndex = 0; initialShapeIndex < models.size(); initialShapeIndex++) {
-		const auto meshBundle = models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
-		pMeshCounts->Append(static_cast<int>(meshBundle.size()));
-		for (const auto& meshPart : meshBundle) {
-			pMeshArray->Append(new ON_Mesh(meshPart));
+		if (models[initialShapeIndex]) {
+			const GeneratedModel::MeshBundle meshBundle =
+			        models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
+			pMeshCounts->Append(static_cast<int>(meshBundle.size()));
+			for (const auto& meshPart : meshBundle) {
+				pMeshArray->Append(new ON_Mesh(meshPart));
+			}
+		}
+		else {
+			pMeshCounts->Append(0);
 		}
 	}
 
@@ -198,7 +204,7 @@ RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const
 	std::vector<const wchar_t*> strVector(size);
 	std::transform(valueArray, valueArray + size, strVector.begin(), [](const ON_wString& ws) {
 		return static_cast<const wchar_t*>(ws); // see ON_wString::operator const wchar_t*()
-	}); 
+	});
 
 	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, strVector, size);
 }
