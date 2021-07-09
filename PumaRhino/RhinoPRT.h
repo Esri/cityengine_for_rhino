@@ -82,7 +82,6 @@ public:
 
 private:
 	std::vector<RawInitialShape> mShapes;
-	std::wstring mPackagePath;
 	std::vector<pcu::ShapeAttributes> mAttributes;
 
 	pcu::AttributeMapBuilderPtr mAttrBuilder;
