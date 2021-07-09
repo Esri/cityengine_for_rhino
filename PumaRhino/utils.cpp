@@ -146,16 +146,16 @@ AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::At
 	return AttributeMapPtr{bld.createAttributeMap()};
 }
 
-AttributeMapPtr createValidatedOptions(const wchar_t* encID, const AttributeMapPtr& unvalidatedOptions) {
+AttributeMapPtr createValidatedOptions(const wchar_t* encID, const prt::AttributeMap* unvalidatedOptions) {
 	const EncoderInfoPtr encInfo{prt::createEncoderInfo(encID)};
 
 	if (!encInfo) {
-		LOG_ERR << "Failed to create encoder info: encoder not found for given ID." << std::endl;
+		LOG_ERR << "Failed to create encoder info: encoder not found for given ID.";
 		return {};
 	}
 
 	const prt::AttributeMap* validatedOptions = nullptr;
-	encInfo->createValidatedOptionsAndStates(unvalidatedOptions.get(), &validatedOptions);
+	encInfo->createValidatedOptionsAndStates(unvalidatedOptions, &validatedOptions);
 	return AttributeMapPtr(validatedOptions);
 }
 

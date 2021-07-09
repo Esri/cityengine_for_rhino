@@ -97,7 +97,7 @@ using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRT
 using RhinoCallbacksPtr = std::unique_ptr<RhinoCallbacks>;
 
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
-AttributeMapPtr createValidatedOptions(const wchar_t* encID, const AttributeMapPtr& unvalidatedOptions);
+AttributeMapPtr createValidatedOptions(const wchar_t* encID, const prt::AttributeMap* unvalidatedOptions = nullptr);
 
 /**
  * String and URI helpers

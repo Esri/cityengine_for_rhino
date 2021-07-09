@@ -117,13 +117,15 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 ModelGenerator::ModelGenerator() {
 	pcu::AttributeMapBuilderPtr optionsBuilder(prt::AttributeMapBuilder::create());
 
+	mRhinoEncoderOptions = pcu::createValidatedOptions(ENCODER_ID_RHINO);
+
 	optionsBuilder->setString(L"name", FILE_CGA_ERROR);
 	const pcu::AttributeMapPtr errOptions(optionsBuilder->createAttributeMapAndReset());
-	mCGAErrorOptions = createValidatedOptions(ENCODER_ID_CGA_ERROR, errOptions);
+	mCGAErrorOptions = pcu::createValidatedOptions(ENCODER_ID_CGA_ERROR, errOptions.get());
 
 	optionsBuilder->setString(L"name", FILE_CGA_PRINT);
 	const pcu::AttributeMapPtr printOptions(optionsBuilder->createAttributeMapAndReset());
-	mCGAPrintOptions = createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions);
+	mCGAPrintOptions = pcu::createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions.get());
 }
 
 void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
@@ -329,7 +331,7 @@ void ModelGenerator::updateEncoderOptions(bool emitMaterials) {
 	pcu::AttributeMapBuilderPtr optionsBuilder(prt::AttributeMapBuilder::create());
 	optionsBuilder->setBool(L"emitMaterials", emitMaterials);
 	pcu::AttributeMapPtr rawOptions(optionsBuilder->createAttributeMap());
-	mRhinoEncoderOptions = pcu::createValidatedOptions(ENCODER_ID_RHINO, rawOptions);
+	mRhinoEncoderOptions = pcu::createValidatedOptions(ENCODER_ID_RHINO, rawOptions.get());
 }
 
 void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder,
