@@ -29,6 +29,28 @@ std::wstring getNiceName(const std::wstring& attrName) {
 	return pcu::removeStyle(attrName);
 }
 
+int compareImport(const std::wstring& left, const std::wstring& right) {
+	const auto& leftImport = pcu::getImportPrefix(left);
+	const auto& rightImport = pcu::getImportPrefix(right);
+
+	if (leftImport.empty()) {
+		if (!rightImport.empty())
+			return -1;
+	}
+	else if (rightImport.empty()) {
+		return 1;
+	}
+	else if (leftImport.compare(rightImport) == 0) {
+		// same import, compare next import level if any
+		return compareImport(pcu::removeImport(left), pcu::removeImport(right));
+	}
+	else {
+		return leftImport.compare(rightImport);
+	}
+
+	return 0;
+}
+
 } // namespace
 
 AnnotationRange::AnnotationRange(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::RANGE), mStepSize(0) {
@@ -205,10 +227,16 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 	}
 
 	// Group and order attributes.
-	// Set a global order:
+	// Order by descending priorities:
+	// - Import prefix
 	// - First sort by group / group order
 	// - Then by order in group
+	// - Alphanumerical in case no annotation
 	std::sort(ra.begin(), ra.end(), [](const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
+		int result = compareImport(left->mFullName, right->mFullName);
+		if (result != 0)
+			return result < 0;
+
 		if (left->groups.size() == 0) {
 			if (right->groups.size() == 0) {
 				// No groups for both attributes: sort by order if they are set, else sort by string compare.
