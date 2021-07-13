@@ -49,8 +49,8 @@ constexpr const wchar_t* ANNOT_FILE = L"@File";
 constexpr const wchar_t* ANNOT_ORDER = L"@Order";
 constexpr const wchar_t* ANNOT_GROUP = L"@Group";
 
-constexpr int ORDER_FIRST = std::numeric_limits<int>::lowest();
-constexpr int ORDER_NONE = std::numeric_limits<int>::infinity();
+const double ORDER_FIRST = std::numeric_limits<double>::min();
+const double ORDER_NONE = std::numeric_limits<double>::max();
 
 constexpr const wchar_t* SEED_KEY = L"seed";
 
@@ -150,8 +150,8 @@ struct RuleAttribute {
 	prt::AnnotationArgumentType mType;
 
 	AttributeGroup groups;
-	int order = ORDER_NONE;
-	int groupOrder = ORDER_NONE;
+	double order = ORDER_NONE;
+	double groupOrder = ORDER_NONE;
 
 	std::vector<AnnotationUPtr> mAnnotations;
 };
