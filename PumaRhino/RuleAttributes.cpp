@@ -51,6 +51,42 @@ int compareImport(const std::wstring& left, const std::wstring& right) {
 	return 0;
 }
 
+bool compareRuleAttributes(const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
+	int result = compareImport(left->mFullName, right->mFullName);
+	if (result != 0)
+		return result < 0;
+
+	if (left->groups.size() == 0) {
+		if (right->groups.size() == 0) {
+			// No groups for both attributes: sort by order if they are set, else sort by string compare.
+			if (left->order != right->order)
+				return left->order < right->order;
+			return left->mNickname.compare(right->mNickname) < 0;
+		}
+		else {
+			return true; // Attributes without group are placed first.
+		}
+	}
+	else if (right->groups.size() == 0) {
+		return false; // Attributes without group are placed first.
+	}
+
+	// support only first level groups for now.
+	int group_cmpr = left->groups.front().compare(right->groups.front());
+	if (group_cmpr == 0) {
+		// same group, sort by order if set.
+		if (left->order != right->order)
+			return left->order < right->order;
+		return left->mNickname.compare(right->mNickname) < 0;
+	}
+	else {
+		// different group, sort by groupOrder if they are set, else use string compare.
+		if (left->groupOrder != right->groupOrder)
+			return left->groupOrder < right->groupOrder;
+		return group_cmpr < 0;
+	}
+}
+
 } // namespace
 
 AnnotationRange::AnnotationRange(const prt::Annotation* an) : AnnotationBase(AttributeAnnotation::RANGE), mStepSize(0) {
@@ -232,41 +268,7 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 	// - First sort by group / group order
 	// - Then by order in group
 	// - Alphanumerical in case no annotation
-	std::sort(ra.begin(), ra.end(), [](const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
-		int result = compareImport(left->mFullName, right->mFullName);
-		if (result != 0)
-			return result < 0;
-
-		if (left->groups.size() == 0) {
-			if (right->groups.size() == 0) {
-				// No groups for both attributes: sort by order if they are set, else sort by string compare.
-				if (left->order != right->order)
-					return left->order < right->order;
-				return left->mNickname.compare(right->mNickname) < 0;
-			}
-			else {
-				return true; // Attributes without group are placed first.
-			}
-		}
-		else if (right->groups.size() == 0) {
-			return false; // Attributes without group are placed first.
-		}
-
-		// support only first level groups for now.
-		int group_cmpr = left->groups.front().compare(right->groups.front());
-		if (group_cmpr == 0) {
-			// same group, sort by order if set.
-			if (left->order != right->order)
-				return left->order < right->order;
-			return left->mNickname.compare(right->mNickname) < 0;
-		}
-		else {
-			// different group, sort by groupOrder if they are set, else use string compare.
-			if (left->groupOrder != right->groupOrder)
-				return left->groupOrder < right->groupOrder;
-			return left->groups.front().compare(right->groups.front()) < 0;
-		}
-	});
+	std::sort(ra.begin(), ra.end(), compareRuleAttributes);
 }
 
 std::wostream& operator<<(std::wostream& ostr, const RuleAttribute& ap) {
