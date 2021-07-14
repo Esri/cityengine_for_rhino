@@ -25,36 +25,36 @@
 
 namespace {
 
+enum class CompareResult { SKIP = 0, LESS_THAN, GREATER_THAN };
+
 std::wstring getNiceName(const std::wstring& attrName) {
 	return pcu::removeStyle(attrName);
 }
 
-int compareImport(const std::wstring& left, const std::wstring& right) {
+CompareResult compareImport(const std::wstring& left, const std::wstring& right) {
 	const auto& leftImport = pcu::getImportPrefix(left);
 	const auto& rightImport = pcu::getImportPrefix(right);
 
 	if (leftImport.empty()) {
 		if (!rightImport.empty())
-			return -1;
+			return CompareResult::LESS_THAN;
 	}
 	else if (rightImport.empty()) {
-		return 1;
+		return CompareResult::GREATER_THAN;
 	}
 	else if (leftImport.compare(rightImport) == 0) {
 		// same import, compare next import level if any
 		return compareImport(pcu::removeImport(left), pcu::removeImport(right));
 	}
 	else {
-		return leftImport.compare(rightImport);
+		return leftImport.compare(rightImport) < 0 ? CompareResult::LESS_THAN : CompareResult::GREATER_THAN;
 	}
-
-	return 0;
 }
 
 bool compareRuleAttributes(const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
-	int result = compareImport(left->mFullName, right->mFullName);
-	if (result != 0)
-		return result < 0;
+	CompareResult result = compareImport(left->mFullName, right->mFullName);
+	if (result != CompareResult::SKIP)
+		return result == CompareResult::LESS_THAN;
 
 	if (left->groups.size() == 0) {
 		if (right->groups.size() == 0) {
