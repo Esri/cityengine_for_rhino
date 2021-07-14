@@ -25,8 +25,66 @@
 
 namespace {
 
+enum class CompareResult { SKIP = 0, LESS_THAN, GREATER_THAN };
+
 std::wstring getNiceName(const std::wstring& attrName) {
 	return pcu::removeStyle(attrName);
+}
+
+CompareResult compareImport(const std::wstring& left, const std::wstring& right) {
+	const auto& leftImport = pcu::getImportPrefix(left);
+	const auto& rightImport = pcu::getImportPrefix(right);
+
+	if (leftImport.empty()) {
+		if (!rightImport.empty())
+			return CompareResult::LESS_THAN;
+	}
+	else if (rightImport.empty()) {
+		return CompareResult::GREATER_THAN;
+	}
+	else if (leftImport.compare(rightImport) == 0) {
+		// same import, compare next import level if any
+		return compareImport(pcu::removeImport(left), pcu::removeImport(right));
+	}
+	else {
+		return leftImport.compare(rightImport) < 0 ? CompareResult::LESS_THAN : CompareResult::GREATER_THAN;
+	}
+}
+
+bool compareRuleAttributes(const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
+	CompareResult result = compareImport(left->mFullName, right->mFullName);
+	if (result != CompareResult::SKIP)
+		return result == CompareResult::LESS_THAN;
+
+	if (left->groups.size() == 0) {
+		if (right->groups.size() == 0) {
+			// No groups for both attributes: sort by order if they are set, else sort by string compare.
+			if (left->order != right->order)
+				return left->order < right->order;
+			return left->mNickname.compare(right->mNickname) < 0;
+		}
+		else {
+			return true; // Attributes without group are placed first.
+		}
+	}
+	else if (right->groups.size() == 0) {
+		return false; // Attributes without group are placed first.
+	}
+
+	// support only first level groups for now.
+	int group_cmpr = left->groups.front().compare(right->groups.front());
+	if (group_cmpr == 0) {
+		// same group, sort by order if set.
+		if (left->order != right->order)
+			return left->order < right->order;
+		return left->mNickname.compare(right->mNickname) < 0;
+	}
+	else {
+		// different group, sort by groupOrder if they are set, else use string compare.
+		if (left->groupOrder != right->groupOrder)
+			return left->groupOrder < right->groupOrder;
+		return group_cmpr < 0;
+	}
 }
 
 } // namespace
@@ -205,40 +263,12 @@ void createRuleAttributes(const std::wstring& ruleFile, const prt::RuleFileInfo&
 	}
 
 	// Group and order attributes.
-	// Set a global order:
+	// Order by descending priorities:
+	// - Import prefix
 	// - First sort by group / group order
 	// - Then by order in group
-	std::sort(ra.begin(), ra.end(), [](const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
-		if (left->groups.size() == 0) {
-			if (right->groups.size() == 0) {
-				// No groups for both attributes: sort by order if they are set, else sort by string compare.
-				if (left->order != right->order)
-					return left->order < right->order;
-				return left->mNickname.compare(right->mNickname) < 0;
-			}
-			else {
-				return true; // Attributes without group are placed first.
-			}
-		}
-		else if (right->groups.size() == 0) {
-			return false; // Attributes without group are placed first.
-		}
-
-		// support only first level groups for now.
-		int group_cmpr = left->groups.front().compare(right->groups.front());
-		if (group_cmpr == 0) {
-			// same group, sort by order if set.
-			if (left->order != right->order)
-				return left->order < right->order;
-			return left->mNickname.compare(right->mNickname) < 0;
-		}
-		else {
-			// different group, sort by groupOrder if they are set, else use string compare.
-			if (left->groupOrder != right->groupOrder)
-				return left->groupOrder < right->groupOrder;
-			return left->groups.front().compare(right->groups.front()) < 0;
-		}
-	});
+	// - Alphanumerical in case no annotation
+	std::sort(ra.begin(), ra.end(), compareRuleAttributes);
 }
 
 std::wostream& operator<<(std::wostream& ostr, const RuleAttribute& ap) {

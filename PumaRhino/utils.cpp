@@ -249,6 +249,18 @@ std::wstring removeStyle(const std::wstring& attrName) {
 	return removePrefix(attrName, STYLE_DELIMITER);
 }
 
+std::wstring removeImport(const std::wstring& attrName) {
+	return removePrefix(attrName, IMPORT_DELIMITER);
+}
+
+std::wstring getImportPrefix(const std::wstring& attrName) {
+	const auto sepPos = attrName.find(IMPORT_DELIMITER);
+
+	if (sepPos == std::wstring::npos)
+		return {};
+	return attrName.substr(0, sepPos);
+}
+
 std::wstring getRuleFileEntry(const ResolveMapSPtr& resolveMap) {
 	const std::wstring sCGB(L".cgb");
 
