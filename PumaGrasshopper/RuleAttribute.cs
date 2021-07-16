@@ -124,6 +124,13 @@ namespace PumaGrasshopper
             return mAnnotations.Any(x => x.IsColor());
         }
 
+        public bool IsArray()
+        {
+            return mAttribType == Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY 
+                || mAttribType == Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY 
+                || mAttribType == Annotations.AnnotationArgumentType.AAT_STR_ARRAY;
+        }
+
         private GH_ParamAccess GetAccess()
         {
             return GH_ParamAccess.tree;
