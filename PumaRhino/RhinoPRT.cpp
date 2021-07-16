@@ -28,16 +28,15 @@ RhinoPRTAPI& get() {
 }
 
 bool RhinoPRTAPI::InitializeRhinoPRT() {
-	return PRTContext::get()->isAlive();
+	return !!PRTContext::get() && PRTContext::get()->isAlive();
 }
 
 void RhinoPRTAPI::ShutdownRhinoPRT() {
-
 	PRTContext::get().reset();
 }
 
 bool RhinoPRTAPI::IsPRTInitialized() {
-	return PRTContext::get()->isAlive();
+	return !!PRTContext::get() && PRTContext::get()->isAlive();
 }
 
 int RhinoPRTAPI::GetRuleAttributeCount() {
@@ -48,22 +47,19 @@ const RuleAttributes& RhinoPRTAPI::GetRuleAttributes() const {
 	return mModelGenerator->getRuleAttributes();
 }
 
-void RhinoPRTAPI::SetRPKPath(const std::wstring& rpk_path) {
-
-	mPackagePath = rpk_path;
-
+void RhinoPRTAPI::SetRPKPath(const std::wstring& rpkPath) {
 	// initialize the resolve map and rule infos here. Create the vector of rule attributes.
 	if (!mModelGenerator)
 		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
 
 	// This also creates the resolve map
-	mModelGenerator->updateRuleFiles(mPackagePath); // might throw !
+	mModelGenerator->updateRuleFiles(rpkPath); // might throw !
 
 	// Also create the attribute map builder that will receive the rule attributes.
 	mAttrBuilder.reset(prt::AttributeMapBuilder::create());
 }
 
-void RhinoPRTAPI::AddInitialShape(const std::vector<InitialShape>& shapes) {
+void RhinoPRTAPI::SetInitialShapes(const std::vector<RawInitialShape>& shapes) {
 
 	// get the shape attributes data from ModelGenerator
 	std::wstring rulef = mModelGenerator->getRuleFile();
@@ -96,7 +92,7 @@ void RhinoPRTAPI::ClearInitialShapes() {
 }
 
 size_t RhinoPRTAPI::GenerateGeometry() {
-	mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, options, mAttrBuilders);
+	mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, mAttrBuilders);
 	assert(mGeneratedModels.size() == mShapes.size());
 	return mShapes.size();
 }
@@ -149,7 +145,7 @@ Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex) {
 }
 
 void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {
-	options.emitMaterial = emitMaterial;
+	mModelGenerator->updateEncoderOptions(emitMaterial);
 }
 
 bool RhinoPRTAPI::getDefaultValueBoolean(const std::wstring key, bool* value) {

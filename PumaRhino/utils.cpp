@@ -146,24 +146,16 @@ AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::At
 	return AttributeMapPtr{bld.createAttributeMap()};
 }
 
-AttributeMapPtr createAttributeMapForEncoder(const EncoderOptions& encOpts, prt::AttributeMapBuilder& bld) {
-	bld.setBool(L"emitReport", encOpts.emitReport);
-	bld.setBool(L"emitGeometry", encOpts.emitGeometry);
-	bld.setBool(L"emitMaterials", encOpts.emitMaterial);
-
-	return AttributeMapPtr{bld.createAttributeMap()};
-}
-
-AttributeMapPtr createValidatedOptions(const std::wstring& encID, const AttributeMapPtr& unvalidatedOptions) {
-	const EncoderInfoPtr encInfo{prt::createEncoderInfo(encID.c_str())};
+AttributeMapPtr createValidatedOptions(const wchar_t* encID, const prt::AttributeMap* unvalidatedOptions) {
+	const EncoderInfoPtr encInfo{prt::createEncoderInfo(encID)};
 
 	if (!encInfo) {
-		LOG_ERR << "Failed to create encoder info: encoder not found for given ID." << std::endl;
-		return nullptr;
+		LOG_ERR << "Failed to create encoder info: encoder not found for given ID.";
+		return {};
 	}
 
 	const prt::AttributeMap* validatedOptions = nullptr;
-	encInfo->createValidatedOptionsAndStates(unvalidatedOptions.get(), &validatedOptions);
+	encInfo->createValidatedOptionsAndStates(unvalidatedOptions, &validatedOptions);
 	return AttributeMapPtr(validatedOptions);
 }
 

@@ -51,7 +51,7 @@ public:
 	int GetRuleAttributeCount();
 	const RuleAttributes& GetRuleAttributes() const;
 
-	void AddInitialShape(const std::vector<InitialShape>& shapes);
+	void SetInitialShapes(const std::vector<RawInitialShape>& shapes);
 	void ClearInitialShapes();
 
 	size_t GenerateGeometry();
@@ -81,14 +81,11 @@ public:
 	bool getDefaultValueText(const std::wstring key, ON_wString* pText);
 
 private:
-	std::vector<InitialShape> mShapes;
-	std::wstring mPackagePath;
+	std::vector<RawInitialShape> mShapes;
 	std::vector<pcu::ShapeAttributes> mAttributes;
 
 	pcu::AttributeMapBuilderPtr mAttrBuilder;
 	pcu::AttributeMapBuilderVector mAttrBuilders;
-
-	pcu::EncoderOptions options;
 
 	std::unique_ptr<ModelGenerator> mModelGenerator;
 	std::vector<GeneratedModelPtr> mGeneratedModels;

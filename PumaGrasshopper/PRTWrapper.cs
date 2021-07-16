@@ -29,6 +29,7 @@ using Rhino.Geometry;
 using Rhino.DocObjects;
 
 using Rhino.Runtime.InteropWrappers;
+using System.Linq;
 
 namespace PumaGrasshopper
 {
@@ -56,7 +57,7 @@ namespace PumaGrasshopper
         public static extern void ClearInitialShapes();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int Generate();
+        public static extern int Generate([In, Out] IntPtr pMeshCounts, [In, Out] IntPtr pMeshArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out]IntPtr pMeshArray);
@@ -160,26 +161,29 @@ namespace PumaGrasshopper
 
         public static List<Mesh[]> GenerateMesh()
         {
-            int shapeCount = Generate();
-            if (shapeCount == 0)
-                return null;
+            var meshCounts = new SimpleArrayInt();
+            var pMeshCounts = meshCounts.NonConstPointer();
 
+            var meshes = new SimpleArrayMeshPointer();
+            var pMeshes = meshes.NonConstPointer();
+
+            Generate(pMeshCounts, pMeshes);
+
+            var meshCountsArray = meshCounts.ToArray();
+            var meshesArray = meshes.ToNonConstArray();
             var generatedMeshes = new List<Mesh[]>();
-            for (int id = 0; id < shapeCount; id++)
+            int indexOffset = 0;
+            for (int id = 0; id < meshCountsArray.Length; id++)
             {
-                using(var arr = new SimpleArrayMeshPointer())
+                if (meshCountsArray[id] > 0)
                 {
-                    var ptr_array = arr.NonConstPointer();
-
-                    bool status = GetMeshBundle(id, ptr_array);
-                    if (status)
-                    {
-                        var meshBundle = arr.ToNonConstArray();
-                        generatedMeshes.Add(meshBundle);
-                    }
-                    else
-                        generatedMeshes.Add(null);
+                    var meshesForShape = meshesArray.Skip(indexOffset).Take(meshCountsArray[id]).ToArray();
+                    generatedMeshes.Add(meshesForShape);
                 }
+                else
+                    generatedMeshes.Add(null);
+
+                indexOffset += meshCountsArray[id];
             }
 
             return generatedMeshes;

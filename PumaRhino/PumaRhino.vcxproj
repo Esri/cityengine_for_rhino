@@ -16,7 +16,7 @@
     <ClCompile Include="GeneratedModel.cpp" />
     <ClCompile Include="MaterialAttribute.cpp" />
     <ClCompile Include="ModelGenerator.cpp" />
-    <ClCompile Include="InitialShape.cpp" />
+    <ClCompile Include="RawInitialShape.cpp" />
     <ClCompile Include="PumaGrasshopperAPI.cpp" />
     <ClCompile Include="ReportAttribute.cpp" />
     <ClCompile Include="ResolveMapCache.cpp" />
@@ -37,7 +37,7 @@
     <ClInclude Include="GeneratedModel.h" />
     <ClInclude Include="MaterialAttribute.h" />
     <ClInclude Include="ModelGenerator.h" />
-    <ClInclude Include="InitialShape.h" />
+    <ClInclude Include="RawInitialShape.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="ReportAttribute.h" />
     <ClInclude Include="ResolveMapCache.h" />

@@ -28,11 +28,11 @@
 
 const std::wstring INIT_SHAPE_ID_KEY = L"InitShapeIdx";
 
-class InitialShape {
+class RawInitialShape {
 public:
-	InitialShape() = default;
-	InitialShape(const ON_Mesh& mesh);
-	~InitialShape() = default;
+	RawInitialShape() = default;
+	RawInitialShape(const ON_Mesh& mesh);
+	~RawInitialShape() = default;
 
 	int getID() const;
 	const double* getVertices() const;

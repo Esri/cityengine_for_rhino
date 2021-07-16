@@ -21,7 +21,7 @@
 
 #include "GeneratedModel.h"
 #include "PRTContext.h"
-#include "InitialShape.h"
+#include "RawInitialShape.h"
 #include "ResolveMapCache.h"
 #include "RhinoCallbacks.h"
 #include "RuleAttributes.h"
@@ -32,15 +32,18 @@
  */
 class ModelGenerator {
 public:
-	std::vector<GeneratedModelPtr> generateModel(const std::vector<InitialShape>& initial_geom,
-	                                             std::vector<pcu::ShapeAttributes>& shapeAttributes,
-	                                             const pcu::EncoderOptions& geometryEncoderOptions,
+	ModelGenerator();
+
+	std::vector<GeneratedModelPtr> generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
+	                                             const std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
-	bool evalDefaultAttributes(const std::vector<InitialShape>& initial_geom,
+	bool evalDefaultAttributes(const std::vector<RawInitialShape>& rawInitialShapes,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
 
 	void updateRuleFiles(const std::wstring& rulePkg);
+
+	void updateEncoderOptions(bool emitMaterials);
 
 	const RuleAttributes& getRuleAttributes() const {
 		return mRuleAttributes;
@@ -63,11 +66,11 @@ public:
 private:
 	pcu::RuleFileInfoPtr mRuleFileInfo;
 	pcu::ResolveMapSPtr mResolveMap;
-	pcu::AttributeMapBuilderPtr mEncoderBuilder;
-	std::vector<pcu::InitialShapeBuilderPtr> mInitialShapesBuilders;
-	std::vector<std::wstring> mEncodersNames;
-	std::vector<pcu::AttributeMapPtr> mEncodersOptionsPtr;
 	RuleAttributes mRuleAttributes;
+
+	pcu::AttributeMapPtr mRhinoEncoderOptions;
+	pcu::AttributeMapPtr mCGAErrorOptions;
+	pcu::AttributeMapPtr mCGAPrintOptions;
 
 	// contains the rule attributes evaluated
 	pcu::AttributeMapPtrVector mDefaultValuesMap;
@@ -78,24 +81,15 @@ private:
 	int32_t mSeed = 0;
 	std::wstring mShapeName = L"Lot";
 
-	bool mValid = true;
-
-	void setAndCreateInitialShape(pcu::AttributeMapBuilderVector& aBuilders,
-	                              const std::vector<pcu::ShapeAttributes>& shapesAttr,
-	                              std::vector<const prt::InitialShape*>& initShapes,
-	                              std::vector<pcu::InitialShapePtr>& initShapesPtrs,
-	                              std::vector<pcu::AttributeMapPtr>& convertedShapeAttr);
-
-	void initializeEncoderData(const pcu::EncoderOptions& encOpt);
-
-	void fillInitialShapeBuilder(const std::vector<InitialShape>& initial_geom);
+	bool createInitialShapes(const std::vector<RawInitialShape>& rawInitialShapes,
+	                         const std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	                         pcu::AttributeMapBuilderVector& aBuilders,
+	                         std::vector<pcu::InitialShapePtr>& initialShapes,
+	                         std::vector<pcu::AttributeMapPtr>& initialShapeAttributes) const;
 
 	void createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv);
 
-	void getRawEncoderDataPointers(std::vector<const wchar_t*>& allEnc,
-	                               std::vector<const prt::AttributeMap*>& allEncOpt);
-
 	void extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr,
 	                                std::wstring& ruleFile, std::wstring& startRule, int32_t& seed,
-	                                std::wstring& shapeName, pcu::AttributeMapPtr& convertShapeAttr);
+	                                std::wstring& shapeName, pcu::AttributeMapPtr& convertShapeAttr) const;
 };
