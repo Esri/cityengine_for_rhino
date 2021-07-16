@@ -46,9 +46,8 @@ CompareResult compareImport(const std::wstring& left, const std::wstring& right)
 		// same import, compare next import level if any
 		return compareImport(pcu::removeImport(left), pcu::removeImport(right));
 	}
-	else {
-		return leftImport.compare(rightImport) < 0 ? CompareResult::LESS_THAN : CompareResult::GREATER_THAN;
-	}
+
+	return leftImport.compare(rightImport) < 0 ? CompareResult::LESS_THAN : CompareResult::GREATER_THAN;
 }
 
 bool compareRuleAttributes(const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
