@@ -201,7 +201,7 @@ RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const
 	std::vector<const wchar_t*> strVector(size);
 	std::transform(valueArray, valueArray + size, strVector.begin(), [](const ON_wString& ws) {
 		return static_cast<const wchar_t*>(ws); // see ON_wString::operator const wchar_t*()
-	}); 
+	});
 
 	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, strVector, size);
 }
@@ -435,5 +435,17 @@ RHINOPRT_API bool GetDefaultValueNumber(const wchar_t* key, double* value) {
 
 RHINOPRT_API bool GetDefaultValueText(const wchar_t* key, ON_wString* pText) {
 	return RhinoPRT::get().getDefaultValueText(key, pText);
+}
+
+RHINOPRT_API bool GetDefaultValueBooleanArray(const wchar_t* key, ON_SimpleArray<bool>* pValues) {
+	return RhinoPRT::get().getDefaultValueBooleanArray(key, pValues);
+}
+
+RHINOPRT_API bool GetDefaultValueNumberArray(const wchar_t* key, ON_SimpleArray<double>* pValues) {
+	return RhinoPRT::get().getDefaultValueNumberArray(key, pValues);
+}
+
+RHINOPRT_API bool GetDefaultValueTextArray(const wchar_t* key, ON_ClassArray<ON_wString>* pTexts) {
+	return RhinoPRT::get().getDefaultValueTextArray(key, pTexts);
 }
 }

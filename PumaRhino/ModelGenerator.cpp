@@ -409,3 +409,95 @@ bool ModelGenerator::getDefaultValueText(const std::wstring key, ON_wString* pTe
 
 	return false;
 }
+
+bool ModelGenerator::getDefaultValueBooleanArray(const std::wstring key, ON_SimpleArray<bool>* pValues) {
+	if (mDefaultValuesMap.empty())
+		return false;
+
+	for each (const auto& am in mDefaultValuesMap) {
+		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_BOOL_ARRAY) {
+			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+			size_t count = 0;
+			const bool* pBoolArray = am->getBoolArray(key.c_str(), &count, &status);
+			if (status == prt::STATUS_OK) {
+				for (size_t i = 0; i < count; ++i) {
+					pValues->Append(pBoolArray[i]);
+				}
+				
+				return true;
+			}
+			else {
+				LOG_ERR << "Impossible to get default value for rule attribute: " << key
+				        << " with error: " << prt::getStatusDescription(status);
+			}
+		}
+	}
+
+	return false;
+}
+
+bool ModelGenerator::getDefaultValueNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues) {
+	if (mDefaultValuesMap.empty())
+		return false;
+
+	for each (const auto& am in mDefaultValuesMap) {
+		if (am->hasKey(key.c_str())) {
+			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+			size_t count = 0;
+
+			if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_FLOAT_ARRAY) {
+				const double* pDoubleArray = am->getFloatArray(key.c_str(), &count, &status);
+				if (status == prt::STATUS_OK) {
+					for (size_t i = 0; i < count; ++i) {
+						pValues->Append(pDoubleArray[i]);
+					}
+
+					return true;
+				}
+			}
+			else if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_INT_ARRAY) {
+				const int32_t* pIntArray = am->getIntArray(key.c_str(), &count, &status);
+				if (status == prt::STATUS_OK) {
+					for (size_t i = 0; i < count; ++i) {
+						pValues->Append(pIntArray[i]);
+					}
+
+					return true;
+				}
+			}
+			
+			if(status != prt::STATUS_OK) {
+				LOG_ERR << "Impossible to get default value for rule attribute: " << key
+					    << " with error: " << prt::getStatusDescription(status);
+			}
+		}
+	}
+
+	return false;
+}
+
+bool ModelGenerator::getDefaultValueTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts) {
+	if (mDefaultValuesMap.empty())
+		return false;
+
+	for each (const auto& am in mDefaultValuesMap) {
+		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_STRING_ARRAY) {
+			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+			size_t count = 0;
+			const wchar_t* const* pStringArray = am->getStringArray(key.c_str(), &count, &status);
+			if (status == prt::STATUS_OK) {
+				for (size_t i = 0; i < count; ++i) {
+					pTexts->Append(ON_wString(pStringArray[i]));
+				}
+					
+				return true;
+			}
+			else {
+				LOG_ERR << "Impossible to get default value for rule attribute: " << key
+					    << " with error: " << prt::getStatusDescription(status);
+			}
+		}
+	}
+
+	return false;
+}

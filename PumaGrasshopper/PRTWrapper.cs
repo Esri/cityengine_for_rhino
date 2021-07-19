@@ -140,6 +140,15 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValueText(string key, [In, Out] IntPtr pText);
 
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetDefaultValueBooleanArray(string key, [In, Out] IntPtr pValues);
+
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetDefaultValueNumberArray(string key, [In, Out] IntPtr pValues);
+
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetDefaultValueTextArray(string key, [In, Out] IntPtr pTexts);
+
         public static bool AddMesh(List<Mesh> meshes)
         {
             bool status;

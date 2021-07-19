@@ -79,6 +79,9 @@ public:
 	bool getDefaultValueBoolean(const std::wstring key, bool* value);
 	bool getDefaultValueNumber(const std::wstring key, double* value);
 	bool getDefaultValueText(const std::wstring key, ON_wString* pText);
+	bool getDefaultValueBooleanArray(const std::wstring key, ON_SimpleArray<bool>* pValues);
+	bool getDefaultValueNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues);
+	bool getDefaultValueTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts);
 
 private:
 	std::vector<InitialShape> mShapes;

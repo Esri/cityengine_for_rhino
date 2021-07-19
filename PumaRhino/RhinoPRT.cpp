@@ -163,4 +163,16 @@ bool RhinoPRTAPI::getDefaultValueNumber(const std::wstring key, double* value) {
 bool RhinoPRTAPI::getDefaultValueText(const std::wstring key, ON_wString* pText) {
 	return mModelGenerator->getDefaultValueText(key, pText);
 }
+
+bool RhinoPRTAPI::getDefaultValueBooleanArray(const std::wstring key, ON_SimpleArray<bool>* pValues) {
+	return mModelGenerator->getDefaultValueBooleanArray(key, pValues);
+}
+
+bool RhinoPRTAPI::getDefaultValueNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues) {
+	return mModelGenerator->getDefaultValueNumberArray(key, pValues);
+}
+
+bool RhinoPRTAPI::getDefaultValueTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts) {
+	return mModelGenerator->getDefaultValueTextArray(key, pTexts);
+}
 } // namespace RhinoPRT
