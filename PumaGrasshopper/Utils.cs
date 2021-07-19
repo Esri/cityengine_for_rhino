@@ -88,6 +88,11 @@ namespace PumaGrasshopper
             return hexStr;
         }
 
+        public static Color FromHex(string hexColor)
+        {
+            return ColorTranslator.FromHtml(hexColor);
+        }
+
         public static bool IsInteger(double d)
         {
             return Math.Abs(d % 1) <= (Double.Epsilon * 100);

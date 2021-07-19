@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-using GH_IO.Serialization;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
@@ -33,10 +33,12 @@ namespace PumaGrasshopper.AttributeParameter
     public class Boolean : Param_Boolean
     {
         private readonly string mGroupName;
+        private readonly bool mExpectsArray;
 
-        public Boolean(string groupName = ""): base()
+        public Boolean(string groupName = "", bool expectsArray = false): base()
         {
             mGroupName = groupName;
+            mExpectsArray = expectsArray;
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -46,27 +48,42 @@ namespace PumaGrasshopper.AttributeParameter
 
         private void OnExtractParamClicked(object sender, EventArgs e)
         {
-            var toggle = new GH_BooleanToggle();
-            toggle.CreateAttributes();
-            toggle.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Location.X - toggle.Attributes.Bounds.Width - 20, 
-                                                                Attributes.Pivot.Y - toggle.Attributes.Bounds.Height/2);
-            toggle.Description = Description;
-
             IGH_Param param;
 
-            //Get the default value from the Rhino side.
-            if (Access == GH_ParamAccess.item)
+            if (mExpectsArray)
             {
-                bool val = false;
-                if (PRTWrapper.GetDefaultValueBoolean(Name, ref val))
-                    toggle.Value = val;
+                SimpleArrayInt boolArray = new SimpleArrayInt();
+                var pBoolArray = boolArray.NonConstPointer();
+                bool hasDefault = PRTWrapper.GetDefaultValueBooleanArray(Name, pBoolArray);
 
-                param = toggle;
+                param = new Param_Boolean();
+
+                if(hasDefault)
+                {
+                    List<bool> boolList = new List<int>(boolArray.ToArray()).ConvertAll(x => Convert.ToBoolean(x));
+                    param.AddVolatileDataList(new GH_Path(0), boolList);
+                }
+
+                boolArray.Dispose();
             }
             else
             {
-                param = new Param_Boolean();
+                var toggle = new GH_BooleanToggle();
+                toggle.CreateAttributes();
+                toggle.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - toggle.Attributes.Bounds.Width - 20, 
+                                                                    Attributes.Pivot.Y - toggle.Attributes.Bounds.Height/2);
+                bool val = false;
+                if(PRTWrapper.GetDefaultValueBoolean(Name, ref val))
+                {
+                    toggle.Value = val;
+                }
+
+                param = toggle;
             }
+
+            param.Description = Description;
+            param.Name = Name;
+            param.NickName = NickName;
 
             var doc = OnPingDocument();
             doc.AddObject(param, false);
@@ -84,11 +101,13 @@ namespace PumaGrasshopper.AttributeParameter
     {
         private readonly List<Annotations.Base> mAnnotations;
         private readonly string mGroupName;
+        private readonly bool mExpectsArray;
 
-        public Number(List<Annotations.Base> annots, string groupName)
+        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray)
         {
             mAnnotations = annots;
             mGroupName = groupName;
+            mExpectsArray = expectsArray;
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -98,19 +117,31 @@ namespace PumaGrasshopper.AttributeParameter
 
         private void OnExtractParamClicked(object sender, EventArgs e)
         {
-            double value = 0;
-            bool hasDefault = PRTWrapper.GetDefaultValueNumber(Name, ref value);
-
             IGH_Param param = null;
 
             var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE ||
                                                x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM);
 
-            if (annot != null)
+            if(mExpectsArray)
+            {
+                param = new Param_Number();
+
+                SimpleArrayDouble defaultValues = new SimpleArrayDouble();
+                var pDefaultValues = defaultValues.NonConstPointer();
+                if(PRTWrapper.GetDefaultValueNumberArray(Name, pDefaultValues))
+                {
+                    param.AddVolatileDataList(new GH_Path(0), defaultValues.ToArray());
+                    param.CollectData();
+                }
+
+                defaultValues.Dispose();
+            } 
+            else if(annot != null)
             {
                 param = annot.GetGhSpecializedParam();
 
-                if (hasDefault)
+                double value = 0;
+                if (PRTWrapper.GetDefaultValueNumber(Name, ref value))
                 {
                     if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
                     {
@@ -122,22 +153,25 @@ namespace PumaGrasshopper.AttributeParameter
                         ((GH_NumberSlider)param).SetSliderValue((decimal)value);
                     }
                 }
-            }
+            } 
             else
             {
                 param = new Param_Number();
-                
-                if (hasDefault)
+
+                double value = 0;
+                if (PRTWrapper.GetDefaultValueNumber(Name, ref value))
                 {
                     var nb_val = new GH_Number(value);
-                    param.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(0), 0, nb_val);
+                    param.AddVolatileData(new GH_Path(), 0, nb_val);
                 }
             }
 
             param.CreateAttributes();
-            param.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
+            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
                                                                 Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
             param.Description = Description;
+            param.Name = Name;
+            param.NickName = NickName;
 
             var doc = OnPingDocument();
             doc.AddObject(param, false);
@@ -155,11 +189,13 @@ namespace PumaGrasshopper.AttributeParameter
     {
         private readonly List<Annotations.Base> mAnnotations;
         private readonly string mGroupName;
+        private readonly bool mExpectsArray;
 
-        public String(List<Annotations.Base> annots, string groupName = ""): base()
+        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false): base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
+            mExpectsArray = expectsArray;
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -176,38 +212,58 @@ namespace PumaGrasshopper.AttributeParameter
                                                x.GetAnnotationType() == Annotations.AttributeAnnotation.A_DIR ||
                                                x.GetAnnotationType() == Annotations.AttributeAnnotation.A_FILE);
             
-            // find default string value
-            StringWrapper value = new StringWrapper();
-            var pValue = value.NonConstPointer;
-            string defaultText = string.Empty;
-            bool hasDefault = PRTWrapper.GetDefaultValueText(Name, pValue);
-            if(hasDefault) defaultText = pValue.ToString();
-
-            if (annot != null)
+            if(mExpectsArray)
             {
-                param = annot.GetGhSpecializedParam();
-                if (hasDefault)
+                param = new Param_String();
+
+                ClassArrayString defaultStrings = new ClassArrayString();
+                var pDefaultStrings = defaultStrings.NonConstPointer();
+                if (PRTWrapper.GetDefaultValueTextArray(Name, pDefaultStrings))
                 {
-                    if(annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
-                    {
-                        int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == defaultText);
-                        ((GH_ValueList)param).SelectItem(itemIndex);
-                    }
+                    if(annot == null || annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
+                        param.AddVolatileDataList(new GH_Path(0), defaultStrings.ToArray());
+
+                    // For files and documents, keeping data empty will force PRT to use the default values.
                 }
-                
-                // For files and documents, keeping data empty will force PRT to use the default values.
+                defaultStrings.Dispose();
             }
             else
             {
-                param = new Param_String();
-                if(hasDefault)
-                    param.AddVolatileData(new Grasshopper.Kernel.Data.GH_Path(),0, defaultText);
+                // find default string value
+                StringWrapper value = new StringWrapper();
+                var pValue = value.NonConstPointer;
+                string defaultText = string.Empty;
+                bool hasDefault = PRTWrapper.GetDefaultValueText(Name, pValue);
+                if(hasDefault) defaultText = value.ToString();
+
+                if (annot != null)
+                {
+                    param = annot.GetGhSpecializedParam();
+                    if (hasDefault)
+                    {
+                        if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
+                        {
+                            int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == defaultText);
+                            ((GH_ValueList)param).SelectItem(itemIndex);
+                        }
+                    }
+
+                    // For files and documents, keeping data empty will force PRT to use the default values.
+                }
+                else
+                {
+                    param = new Param_String();
+                    if (hasDefault)
+                        param.AddVolatileData(new GH_Path(0), 0, defaultText);
+                }
             }
 
             param.CreateAttributes();
-            param.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
+            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
                                                                 Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
             param.Description = Description;
+            param.Name = Name;
+            param.NickName = NickName;
 
             var doc = OnPingDocument();
             doc.AddObject(param, false);
@@ -224,10 +280,12 @@ namespace PumaGrasshopper.AttributeParameter
     public class Colour: Param_Colour
     {
         private readonly string mGroupName;
+        private readonly bool mExpectsArray;
 
-        public Colour(string groupName= ""): base()
+        public Colour(string groupName= "", bool expectsArray = false): base()
         {
             mGroupName = groupName;
+            mExpectsArray = expectsArray;
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -237,12 +295,41 @@ namespace PumaGrasshopper.AttributeParameter
 
         private void OnExtractParamClicked(object sender, EventArgs e)
         {
-            GH_ColourPickerObject param = new GH_ColourPickerObject();
+            IGH_Param param;
+
+            if(mExpectsArray)
+            {
+                param = new Param_Colour();
+
+                ClassArrayString defaultColors = new ClassArrayString();
+                var pDefaultColors = defaultColors.NonConstPointer();
+                if(PRTWrapper.GetDefaultValueTextArray(Name, pDefaultColors))
+                {
+                    var colorArray = new List<string>(defaultColors.ToArray()).ConvertAll(x => Utils.FromHex(x));
+                    param.AddVolatileDataList(new GH_Path(0), colorArray);
+                }
+                defaultColors.Dispose();
+            }
+            else
+            {
+                StringWrapper value = new StringWrapper();
+                var pValue = value.NonConstPointer;
+                Color defaultColor = new Color();
+                bool hasDefault = PRTWrapper.GetDefaultValueText(Name, pValue);
+                if (hasDefault) defaultColor = Utils.FromHex(value.ToString());
+
+                param = new GH_ColourPickerObject
+                {
+                    Colour = defaultColor
+                };
+            }
 
             param.CreateAttributes();
-            param.Attributes.Pivot = new System.Drawing.PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
+            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
                                                                 Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
             param.Description = Description;
+            param.Name = Name;
+            param.NickName = NickName;
 
             var doc = OnPingDocument();
             doc.AddObject(param, false);

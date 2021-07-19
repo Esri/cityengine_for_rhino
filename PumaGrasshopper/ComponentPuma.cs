@@ -293,7 +293,7 @@ namespace PumaGrasshopper
 
                 RuleAttribute attribute = attributeList.Find(x => x.mFullName == param.Name);
 
-                bool expectArray = attribute == null ? false : attribute.IsArray();
+                bool expectArray = attribute != null && attribute.IsArray();
 
                 SetAttributeOfShapes(DA, shapeCount, param, expectArray);
             }
@@ -474,8 +474,6 @@ namespace PumaGrasshopper
         {
             if (tree.IsEmpty)
                 return;
-
-            
 
             int shapeId = 0;
 
