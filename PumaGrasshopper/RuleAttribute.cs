@@ -82,7 +82,7 @@ namespace PumaGrasshopper
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            var param_color = new AttributeParameter.Colour(mGroup, IsArray())
+                            var param_color = new AttributeParameter.Colour(mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,

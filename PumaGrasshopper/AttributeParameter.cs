@@ -280,12 +280,10 @@ namespace PumaGrasshopper.AttributeParameter
     public class Colour: Param_Colour
     {
         private readonly string mGroupName;
-        private readonly bool mExpectsArray;
 
-        public Colour(string groupName= "", bool expectsArray = false): base()
+        public Colour(string groupName= ""): base()
         {
             mGroupName = groupName;
-            mExpectsArray = expectsArray;
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -296,33 +294,17 @@ namespace PumaGrasshopper.AttributeParameter
         private void OnExtractParamClicked(object sender, EventArgs e)
         {
             IGH_Param param;
+         
+            StringWrapper value = new StringWrapper();
+            var pValue = value.NonConstPointer;
+            Color defaultColor = new Color();
+            bool hasDefault = PRTWrapper.GetDefaultValueText(Name, pValue);
+            if (hasDefault) defaultColor = Utils.FromHex(value.ToString());
 
-            if(mExpectsArray)
+            param = new GH_ColourPickerObject
             {
-                param = new Param_Colour();
-
-                ClassArrayString defaultColors = new ClassArrayString();
-                var pDefaultColors = defaultColors.NonConstPointer();
-                if(PRTWrapper.GetDefaultValueTextArray(Name, pDefaultColors))
-                {
-                    var colorArray = new List<string>(defaultColors.ToArray()).ConvertAll(x => Utils.FromHex(x));
-                    param.AddVolatileDataList(new GH_Path(0), colorArray);
-                }
-                defaultColors.Dispose();
-            }
-            else
-            {
-                StringWrapper value = new StringWrapper();
-                var pValue = value.NonConstPointer;
-                Color defaultColor = new Color();
-                bool hasDefault = PRTWrapper.GetDefaultValueText(Name, pValue);
-                if (hasDefault) defaultColor = Utils.FromHex(value.ToString());
-
-                param = new GH_ColourPickerObject
-                {
-                    Colour = defaultColor
-                };
-            }
+                Colour = defaultColor
+            };
 
             param.CreateAttributes();
             param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
