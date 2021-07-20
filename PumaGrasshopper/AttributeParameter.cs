@@ -162,7 +162,7 @@ namespace PumaGrasshopper.AttributeParameter
                 if (PRTWrapper.GetDefaultValueNumber(Name, ref value))
                 {
                     var nb_val = new GH_Number(value);
-                    param.AddVolatileData(new GH_Path(), 0, nb_val);
+                    param.AddVolatileData(new GH_Path(0), 0, nb_val);
                 }
             }
 
