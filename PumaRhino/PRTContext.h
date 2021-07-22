@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "AssetCache.h"
 #include "ResolveMapCache.h"
 #include "utils.h"
 
@@ -39,6 +40,7 @@ public:
 
 	ResolveMap::ResolveMapCache::LookupResult getResolveMap(const std::filesystem::path& rpk);
 	bool isAlive() const;
+	AssetCache& getAssetCache() const;
 
 	pcu::ConsoleLogHandlerPtr mLogHandler;
 	pcu::FileLogHandlerPtr mFileLogHandler;

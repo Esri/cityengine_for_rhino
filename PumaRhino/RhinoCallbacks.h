@@ -29,9 +29,7 @@
 
 #include "prt/Callbacks.h"
 
-#include <cassert>
 #include <iostream>
-#include <unordered_map>
 #include <vector>
 
 class RhinoCallbacks : public IRhinoCallbacks {
