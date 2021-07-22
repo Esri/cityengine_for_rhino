@@ -61,7 +61,7 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
       mFileLogHandler(prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT,
                                                   getLogFilePath().wstring().c_str())),
       mPRTCache{prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT)},
-      mResolveMapCache{new ResolveMap::ResolveMapCache(getGlobalTempDir())} {
+      mResolveMapCache{new ResolveMap::ResolveMapCache()} {
 	prt::addLogHandler(mLogHandler.get());
 	prt::addLogHandler(mFileLogHandler.get());
 
