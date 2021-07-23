@@ -20,6 +20,7 @@
 #pragma once
 
 #include <filesystem>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -34,4 +35,5 @@ private:
 
 	std::unordered_map<std::wstring, std::filesystem::path> mCache;
 	const std::filesystem::path& mCacheRootPath;
+	std::mutex mMutex;
 };

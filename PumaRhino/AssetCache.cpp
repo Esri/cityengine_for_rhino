@@ -25,6 +25,8 @@ AssetCache::AssetCache(const std::filesystem::path& cacheRootPath) : mCacheRootP
 const std::filesystem::path& AssetCache::put(const wchar_t* name, const uint8_t* buffer, size_t size) {
 	assert(name != nullptr);
 
+	std::lock_guard<std::mutex> lock(mMutex);
+
 	const std::filesystem::path& assetPath = get(name);
 	if (assetPath != NONE)
 		return assetPath;
