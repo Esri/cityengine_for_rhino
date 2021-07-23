@@ -17,9 +17,6 @@
  * limitations under the License.
  */
 
-#include "RhinoPRT.h"
-#include "version.h"
-
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable : 26451)
@@ -29,6 +26,9 @@
 #ifdef _MSC_VER
 #	pragma warning(pop)
 #endif
+
+#include "RhinoPRT.h"
+#include "version.h"
 
 #define RHINOPRT_API __declspec(dllexport)
 
