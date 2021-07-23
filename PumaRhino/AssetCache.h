@@ -31,6 +31,8 @@ public:
 	std::filesystem::path put(const wchar_t* name, const uint8_t* buffer, size_t size);
 
 private:
+	std::filesystem::path AssetCache::getCachedPath(const wchar_t* name, size_t hash) const;
+
 	std::unordered_map<std::wstring, std::pair<std::filesystem::path, size_t>> mCache;
 	const std::filesystem::path& mCacheRootPath;
 	std::mutex mMutex;

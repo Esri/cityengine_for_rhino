@@ -30,6 +30,11 @@ bool writeCacheEntry(const std::filesystem::path& assetPath, const uint8_t* buff
 	return true;
 }
 
+void removeCacheEntry(const std::filesystem::path& expiredAssetPath) {
+	if (std::error_code removeError; !std::filesystem::remove(expiredAssetPath, removeError))
+		LOG_WRN << "Failed to delete expired asset cache entry " << expiredAssetPath << ": " << removeError.message();
+}
+
 } // namespace
 
 AssetCache::AssetCache(const std::filesystem::path& cacheRootPath) : mCacheRootPath(cacheRootPath) {}
@@ -49,7 +54,7 @@ std::filesystem::path AssetCache::put(const wchar_t* name, const uint8_t* buffer
 		return assetPath;
 	}
 
-	const std::filesystem::path newAssetPath = mCacheRootPath / (std::to_wstring(hash) + L"_" + name);
+	const std::filesystem::path newAssetPath = getCachedPath(name, hash);
 
 	if (!writeCacheEntry(newAssetPath, buffer, size)) {
 		LOG_ERR << "Failed to put asset into cache, skipping asset: " << newAssetPath;
@@ -60,13 +65,15 @@ std::filesystem::path AssetCache::put(const wchar_t* name, const uint8_t* buffer
 		mCache.emplace(name, std::make_pair(newAssetPath, hash));
 	}
 	else { // hash mismatch
-		const std::filesystem::path expiredAsset = mCacheRootPath / (std::to_wstring(it->second.second) + L"_" + name);
-
-		if (std::error_code removeError; !std::filesystem::remove(expiredAsset, removeError))
-			LOG_WRN << "Failed to delete expired asset cache entry: " << expiredAsset;
-
+		const std::filesystem::path expiredAsset = getCachedPath(name, it->second.second);
+		removeCacheEntry(expiredAsset);
 		it->second = std::make_pair(newAssetPath, hash);
 	}
 
 	return newAssetPath;
+}
+
+std::filesystem::path AssetCache::getCachedPath(const wchar_t* name, size_t hash) const {
+	const std::filesystem::path path = mCacheRootPath / (std::to_wstring(hash) + L"_" + name);
+	return path;
 }
