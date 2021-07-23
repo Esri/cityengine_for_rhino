@@ -113,6 +113,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\</OutDir>
     <TargetName>$(ProjectName)</TargetName>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);stduuid</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
