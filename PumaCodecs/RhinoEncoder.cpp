@@ -119,8 +119,9 @@ std::wstring getTexturePath(const prtx::TexturePtr& texture, IRhinoCallbacks* ca
 				if (moc->getNumBlocks() == 1) {
 					size_t bufferSize = 0;
 					const uint8_t* buffer = moc->getBlock(0, &bufferSize);
-					const std::wstring assetPath = callAPI<wchar_t>(&IRhinoCallbacks::addAsset, *callbacks,
-					                                                validatedFilename.c_str(), buffer, bufferSize);
+					const std::wstring assetPath =
+					        callAPI<wchar_t>(&IRhinoCallbacks::addAsset, *callbacks, uri->wstring().c_str(),
+					                         validatedFilename.c_str(), buffer, bufferSize);
 					if (!assetPath.empty())
 						return assetPath;
 					else
@@ -129,7 +130,8 @@ std::wstring getTexturePath(const prtx::TexturePtr& texture, IRhinoCallbacks* ca
 				}
 			}
 			catch (std::exception& e) {
-				log_warn("Failed to encode or write texture at %1% to the local filesystem: %2%") % uri->wstring() % e.what();
+				log_warn("Failed to encode or write texture at %1% to the local filesystem: %2%") % uri->wstring() %
+				        e.what();
 			}
 		}
 	}

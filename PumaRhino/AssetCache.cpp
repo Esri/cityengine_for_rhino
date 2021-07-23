@@ -11,6 +11,15 @@
 #include "AssetCache.h"
 #include "Logger.h"
 
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 4244)
+#endif
+#include "stduuid/uuid.h"
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
+
 #include <cassert>
 #include <fstream>
 #include <functional>
@@ -39,8 +48,8 @@ void removeCacheEntry(const std::filesystem::path& expiredAssetPath) {
 
 AssetCache::AssetCache(const std::filesystem::path& cacheRootPath) : mCacheRootPath(cacheRootPath) {}
 
-std::filesystem::path AssetCache::put(const wchar_t* name, const uint8_t* buffer, size_t size) {
-	assert(name != nullptr);
+std::filesystem::path AssetCache::put(const wchar_t* uri, const wchar_t* fileName, const uint8_t* buffer, size_t size) {
+	assert(uri != nullptr);
 
 	std::lock_guard<std::mutex> lock(mMutex);
 
@@ -48,13 +57,19 @@ std::filesystem::path AssetCache::put(const wchar_t* name, const uint8_t* buffer
 	const size_t hash = std::hash<std::string_view>{}(bufferView);
 
 	const auto it = std::find_if(mCache.begin(), mCache.end(),
-	                             [&name](const auto& p) { return (std::wcscmp(p.first.c_str(), name) == 0); });
+	                             [&uri](const auto& p) { return (std::wcscmp(p.first.c_str(), uri) == 0); });
+
+	// reuse cached asset if uri and hash match
 	if ((it != mCache.end()) && (it->second.second == hash)) {
 		const std::filesystem::path& assetPath = it->second.first;
 		return assetPath;
 	}
 
-	const std::filesystem::path newAssetPath = getCachedPath(name, hash);
+	const std::filesystem::path newAssetPath = getCachedPath(fileName);
+	if (newAssetPath.empty()) {
+		LOG_ERR << "Invalid URI, cannot cache the asset: " << uri;
+		return {};		
+	}
 
 	if (!writeCacheEntry(newAssetPath, buffer, size)) {
 		LOG_ERR << "Failed to put asset into cache, skipping asset: " << newAssetPath;
@@ -62,18 +77,26 @@ std::filesystem::path AssetCache::put(const wchar_t* name, const uint8_t* buffer
 	}
 
 	if (it == mCache.end()) {
-		mCache.emplace(name, std::make_pair(newAssetPath, hash));
+		mCache.emplace(uri, std::make_pair(newAssetPath, hash));
 	}
-	else { // hash mismatch
-		const std::filesystem::path expiredAsset = getCachedPath(name, it->second.second);
-		removeCacheEntry(expiredAsset);
+	else {
+		// handle hash mismatch
+		removeCacheEntry(it->second.first);
 		it->second = std::make_pair(newAssetPath, hash);
 	}
 
 	return newAssetPath;
 }
 
-std::filesystem::path AssetCache::getCachedPath(const wchar_t* name, size_t hash) const {
-	const std::filesystem::path path = mCacheRootPath / (std::to_wstring(hash) + L"_" + name);
-	return path;
+std::filesystem::path AssetCache::getCachedPath(const wchar_t* fileName) const {
+	// we use an UUID to have unique entries (filenames might clash across different RPKs)
+	const uuids::uuid uuid = uuids::uuid_system_generator{}();
+	std::wstring cachedAssetName = uuids::to_wstring(uuid);
+
+	// we append the filename constructed by the encoder from the URI
+	assert(fileName != nullptr);
+	cachedAssetName.append(L"_").append(fileName);
+
+	const std::filesystem::path cachedAssetPath = mCacheRootPath / cachedAssetName;
+	return cachedAssetPath;
 }

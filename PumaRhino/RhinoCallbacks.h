@@ -50,7 +50,7 @@ public:
 
 	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
 
-	void addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
+	void addAsset(const wchar_t* uri, const wchar_t* fileName, const uint8_t* buffer, size_t size, wchar_t* result,
 	              size_t& resultSize) override;
 
 	// local helper functions

@@ -163,14 +163,15 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUt
 		LOG_DBG << "End of RhinoCallback::addReport";
 }
 
-void RhinoCallbacks::addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
+void RhinoCallbacks::addAsset(const wchar_t* uri, const wchar_t* fileName, const uint8_t* buffer, size_t size,
+                              wchar_t* result,
                               size_t& resultSize) {
-	if (name == nullptr || std::wcslen(name) == 0) {
+	if (uri == nullptr || std::wcslen(uri) == 0 || fileName == nullptr || std::wcslen(fileName) == 0) {
 		resultSize = 0;
 		return;
 	}
 
-	const std::filesystem::path& assetPath = PRTContext::get()->getAssetCache().put(name, buffer, size);
+	const std::filesystem::path& assetPath = PRTContext::get()->getAssetCache().put(uri, fileName, buffer, size);
 	if (assetPath.empty()) {
 		resultSize = 0;
 		return;
