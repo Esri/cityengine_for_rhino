@@ -152,27 +152,29 @@ void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {
 	options.emitMaterial = emitMaterial;
 }
 
-bool RhinoPRTAPI::getDefaultValueBoolean(const std::wstring key, bool* value) {
-	return mModelGenerator->getDefaultValueBoolean(key, value);
+bool RhinoPRTAPI::getDefaultValuesBoolean(const std::wstring key, ON_SimpleArray<bool>* pValues) {
+	return mModelGenerator->getDefaultValuesBoolean(key, pValues);
 }
 
-bool RhinoPRTAPI::getDefaultValueNumber(const std::wstring key, double* value) {
-	return mModelGenerator->getDefaultValueNumber(key, value);
+bool RhinoPRTAPI::getDefaultValuesNumber(const std::wstring key, ON_SimpleArray<double>* pValues) {
+	return mModelGenerator->getDefaultValuesNumber(key, pValues);
 }
 
-bool RhinoPRTAPI::getDefaultValueText(const std::wstring key, ON_wString* pText) {
-	return mModelGenerator->getDefaultValueText(key, pText);
+bool RhinoPRTAPI::getDefaultValuesText(const std::wstring key, ON_ClassArray<ON_wString>* pTexts) {
+	return mModelGenerator->getDefaultValuesText(key, pTexts);
 }
 
-bool RhinoPRTAPI::getDefaultValueBooleanArray(const std::wstring key, ON_SimpleArray<bool>* pValues) {
-	return mModelGenerator->getDefaultValueBooleanArray(key, pValues);
+bool RhinoPRTAPI::getDefaultValuesBooleanArray(const std::wstring key, ON_SimpleArray<bool>* pValues, ON_SimpleArray<int>* pSizes) {
+	return mModelGenerator->getDefaultValuesBooleanArray(key, pValues, pSizes);
 }
 
-bool RhinoPRTAPI::getDefaultValueNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues) {
-	return mModelGenerator->getDefaultValueNumberArray(key, pValues);
+bool RhinoPRTAPI::getDefaultValuesNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues,
+                                              ON_SimpleArray<int>* pSizes) {
+	return mModelGenerator->getDefaultValuesNumberArray(key, pValues, pSizes);
 }
 
-bool RhinoPRTAPI::getDefaultValueTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts) {
-	return mModelGenerator->getDefaultValueTextArray(key, pTexts);
+bool RhinoPRTAPI::getDefaultValuesTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts,
+                                            ON_SimpleArray<int>* pSizes) {
+	return mModelGenerator->getDefaultValuesTextArray(key, pTexts, pSizes);
 }
 } // namespace RhinoPRT
