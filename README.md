@@ -187,7 +187,7 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
-### Puma 1.0.0 (2021-07-XX)
+### Puma 1.0.0 (2021-08-XX)
 * First public release.
 * Supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.0 and older.
@@ -219,6 +219,8 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 * Supports Rhino 6.
 * Supports Rule Packages from CityEngine 2020.0 and older.
 * Supports multiple input shapes with same rule attributes.
+* Added Grasshopper helper components to process and display CGA report values.
+* Development: Added support for creating "rhi" packages.
 
 ### Puma 0.5.0 (Fall 2020)
 * First internal proof of concept.
