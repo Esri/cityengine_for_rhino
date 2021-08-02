@@ -17,14 +17,23 @@
  * limitations under the License.
  */
 
-#include "InitialShape.h"
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 26451)
+#	pragma warning(disable : 26495)
+#endif
+#include "stdafx.h"
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
 
 #include "Logger.h"
+#include "RawInitialShape.h"
 
 #include <algorithm>
 #include <numeric>
 
-InitialShape::InitialShape(const ON_Mesh& mesh) {
+RawInitialShape::RawInitialShape(const ON_Mesh& mesh) {
 	ON_wString shapeIdxStr;
 	if (!mesh.GetUserString(INIT_SHAPE_ID_KEY.c_str(), shapeIdxStr)) {
 		LOG_WRN << L"InitialShapeID not found in given mesh";
@@ -72,30 +81,30 @@ InitialShape::InitialShape(const ON_Mesh& mesh) {
 	}
 }
 
-int InitialShape::getID() const {
+int RawInitialShape::getID() const {
 	return mID;
 }
 
-const double* InitialShape::getVertices() const {
+const double* RawInitialShape::getVertices() const {
 	return mVertices.data();
 }
 
-size_t InitialShape::getVertexCount() const {
+size_t RawInitialShape::getVertexCount() const {
 	return mVertices.size();
 }
 
-const uint32_t* InitialShape::getIndices() const {
+const uint32_t* RawInitialShape::getIndices() const {
 	return mIndices.data();
 }
 
-size_t InitialShape::getIndexCount() const {
+size_t RawInitialShape::getIndexCount() const {
 	return mIndices.size();
 }
 
-const uint32_t* InitialShape::getFaceCounts() const {
+const uint32_t* RawInitialShape::getFaceCounts() const {
 	return mFaceCounts.data();
 }
 
-size_t InitialShape::getFaceCountsCount() const {
+size_t RawInitialShape::getFaceCountsCount() const {
 	return mFaceCounts.size();
 }

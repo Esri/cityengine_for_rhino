@@ -67,12 +67,6 @@ struct ShapeAttributes {
 	                const std::wstring shapeN = L"Lot");
 };
 
-struct EncoderOptions {
-	bool emitReport = true;
-	bool emitGeometry = true;
-	bool emitMaterial = true;
-};
-
 /**
  * helpers for prt object management
  */
@@ -103,8 +97,7 @@ using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRT
 using RhinoCallbacksPtr = std::unique_ptr<RhinoCallbacks>;
 
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
-AttributeMapPtr createAttributeMapForEncoder(const EncoderOptions& attrs, prt::AttributeMapBuilder& bld);
-AttributeMapPtr createValidatedOptions(const std::wstring& encID, const AttributeMapPtr& unvalidatedOptions);
+AttributeMapPtr createValidatedOptions(const wchar_t* encID, const prt::AttributeMap* unvalidatedOptions = nullptr);
 
 /**
  * String and URI helpers

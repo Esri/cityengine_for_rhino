@@ -58,7 +58,7 @@ const wchar_t* EO_EMIT_MATERIALS = L"emitMaterials";
 const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
         prtx::EncodePreparator::PreparationFlags()
                 .instancing(false)
-                .triangulate(true)
+                .triangulate(false)
                 .mergeVertices(false)
                 .cleanupUVs(true)
                 .cleanupVertexNormals(true)
