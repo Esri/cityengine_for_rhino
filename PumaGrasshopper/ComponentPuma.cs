@@ -402,12 +402,8 @@ namespace PumaGrasshopper
             }
             else if (geoGoo is GH_Rectangle)
             {
-                Rectangle3d rect = Rectangle3d.Unset;
-                bool status = GH_Convert.ToRectangle3d(geoGoo as GH_Rectangle, ref rect, GH_Conversion.Both);
-
-                if (!status) return null;
-
-                mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline());
+                if (!GH_Convert.ToMesh(shape, ref mesh, GH_Conversion.Both))
+                    return null;
             }
             else if (geoGoo is GH_Surface)
             {
