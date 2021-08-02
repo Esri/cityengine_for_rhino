@@ -144,6 +144,8 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<InitialShape>& init
 }
 
 void ModelGenerator::createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv) {
+	mDefaultValuesMap.clear();
+
 	for (auto& amb : ambv) {
 		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 		pcu::AttributeMapPtr am{amb->createAttributeMap(&status)};
