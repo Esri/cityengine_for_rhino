@@ -44,6 +44,11 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 	return pcu::AttributeMapPtr(encOpts);
 }
 
+void logAttributeTypeError(const std::wstring& key) {
+	LOG_ERR << "Impossible to get default value for rule attribute: " << key
+	        << " The expected type does not correspond to the actual type ot this attribute.";
+}
+
 } // namespace
 
 void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
@@ -346,16 +351,24 @@ bool ModelGenerator::getDefaultValuesBoolean(const std::wstring& key, ON_SimpleA
 		return false;
 
 	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_BOOL) {
-			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-			bool value = am->getBool(key.c_str(), &status);
-			if (status != prt::STATUS_OK) {
-				LOG_ERR << "Impossible to get default value for rule attribute: " << key
-				        << " with error: " << prt::getStatusDescription(status);
+		if (am->hasKey(key.c_str())) {
+			switch (am->getType(key.c_str())) {
+			case prt::AttributeMap::PrimitiveType::PT_BOOL: {
+				prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+				bool value = am->getBool(key.c_str(), &status);
+				if (status != prt::STATUS_OK) {
+					LOG_ERR << "Impossible to get default value for rule attribute: " << key
+							<< " with error: " << prt::getStatusDescription(status);
+					return false;
+				}
+
+				pValues->Append(value);
+				break;
+			}
+			default:
+				logAttributeTypeError(key);
 				return false;
 			}
-
-			pValues->Append(value);
 		}
 	}
 
@@ -370,15 +383,22 @@ bool ModelGenerator::getDefaultValuesNumber(const std::wstring& key, ON_SimpleAr
 		if (am->hasKey(key.c_str())) {
 			prt::Status status = prt::STATUS_OK;
 
-			if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_FLOAT) {
+			switch (am->getType(key.c_str())) { 
+			case prt::AttributeMap::PrimitiveType::PT_FLOAT: {
 				double value = am->getFloat(key.c_str(), &status);
 				if (status == prt::STATUS_OK)
 					pValues->Append(value);
+				break;
 			}
-			else if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_INT) {
+			case prt::AttributeMap::PrimitiveType::PT_INT: {
 				int32_t value = am->getInt(key.c_str(), &status);
 				if (status == prt::STATUS_OK)
 					pValues->Append(value);
+				break;
+			}
+			default:
+				logAttributeTypeError(key);
+				return false;
 			}
 
 			if (status != prt::STATUS_OK) {
@@ -397,20 +417,28 @@ bool ModelGenerator::getDefaultValuesText(const std::wstring& key, ON_ClassArray
 		return false;
 
 	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_STRING) {
-			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-			std::wstring valueStr(am->getString(key.c_str(), &status));
+		if (am->hasKey(key.c_str())) {
+			switch (am->getType(key.c_str())) {
+				case prt::AttributeMap::PrimitiveType::PT_STRING: {
 
-			if (status != prt::STATUS_OK)
-			{
-				LOG_ERR << "Impossible to get default value for rule attribute: " << key
-					    << " with error: " << prt::getStatusDescription(status);
-				return false;
+					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+					std::wstring valueStr(am->getString(key.c_str(), &status));
+
+					if (status != prt::STATUS_OK) {
+						LOG_ERR << "Impossible to get default value for rule attribute: " << key
+								<< " with error: " << prt::getStatusDescription(status);
+						return false;
+					}
+
+					ON_wString onString("");
+					pcu::appendToRhinoString(onString, valueStr);
+					pTexts->Append(onString);
+					break;
+				}
+				default:
+					logAttributeTypeError(key);
+					return false;
 			}
-
-			ON_wString onString("");
-			pcu::appendToRhinoString(onString, valueStr);
-			pTexts->Append(onString);
 		}
 	}
 
@@ -423,20 +451,28 @@ bool ModelGenerator::getDefaultValuesBooleanArray(const std::wstring& key, ON_Si
 		return false;
 
 	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_BOOL_ARRAY) {
-			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-			size_t count = 0;
-			const bool* pBoolArray = am->getBoolArray(key.c_str(), &count, &status);
-			if (status != prt::STATUS_OK) {
-				LOG_ERR << "Impossible to get default value for rule attribute: " << key
-				        << " with error: " << prt::getStatusDescription(status);
-				return false;
-			}
+		if (am->hasKey(key.c_str())) {
+			switch (am->getType(key.c_str())) {
+				case prt::AttributeMap::PrimitiveType::PT_BOOL_ARRAY: {
+					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+					size_t count = 0;
+					const bool* pBoolArray = am->getBoolArray(key.c_str(), &count, &status);
+					if (status != prt::STATUS_OK) {
+						LOG_ERR << "Impossible to get default value for rule attribute: " << key
+						        << " with error: " << prt::getStatusDescription(status);
+						return false;
+					}
 
-			for (size_t i = 0; i < count; ++i) {
-				pValues->Append(pBoolArray[i]);
+					for (size_t i = 0; i < count; ++i) {
+						pValues->Append(pBoolArray[i]);
+					}
+					pSizes->Append(count);
+					break;
+				}
+				default:
+					logAttributeTypeError(key);
+					return false;
 			}
-			pSizes->Append(count);
 		}
 	}
 
@@ -453,7 +489,8 @@ bool ModelGenerator::getDefaultValuesNumberArray(const std::wstring& key, ON_Sim
 			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 			size_t count = 0;
 
-			if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_FLOAT_ARRAY) {
+			switch (am->getType(key.c_str())) {
+			case prt::AttributeMap::PrimitiveType::PT_FLOAT_ARRAY: {
 				const double* pDoubleArray = am->getFloatArray(key.c_str(), &count, &status);
 				if (status == prt::STATUS_OK) {
 					for (size_t i = 0; i < count; ++i) {
@@ -462,16 +499,23 @@ bool ModelGenerator::getDefaultValuesNumberArray(const std::wstring& key, ON_Sim
 
 					pSizes->Append(count);
 				}
+				break;
 			}
-			else if (am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_INT_ARRAY) {
+			case prt::AttributeMap::PrimitiveType::PT_INT_ARRAY: {
 				const int32_t* pIntArray = am->getIntArray(key.c_str(), &count, &status);
 				if (status == prt::STATUS_OK) {
 					for (size_t i = 0; i < count; ++i) {
 						pValues->Append(pIntArray[i]);
 					}
-					
+
 					pSizes->Append(count);
 				}
+				break;
+			}
+			default:
+				LOG_ERR << "Impossible to get default value for rule attribute: " << key
+					    << " The expected type does not correspond to the actual type ot this attribute.";
+				return false;
 			}
 			
 			if(status != prt::STATUS_OK) {
@@ -491,21 +535,29 @@ bool ModelGenerator::getDefaultValuesTextArray(const std::wstring& key, ON_Class
 		return false;
 
 	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str()) && am->getType(key.c_str()) == prt::AttributeMap::PrimitiveType::PT_STRING_ARRAY) {
-			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-			size_t count = 0;
-			const wchar_t* const* pStringArray = am->getStringArray(key.c_str(), &count, &status);
-			if (status != prt::STATUS_OK) {
-				LOG_ERR << "Impossible to get default value for rule attribute: " << key
-					    << " with error: " << prt::getStatusDescription(status);
-				return false;
-			}
+		if (am->hasKey(key.c_str())) {
+			switch (am->getType(key.c_str())) {
+				case prt::AttributeMap::PrimitiveType::PT_STRING_ARRAY: {
+					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+					size_t count = 0;
+					const wchar_t* const* pStringArray = am->getStringArray(key.c_str(), &count, &status);
+					if (status != prt::STATUS_OK) {
+						LOG_ERR << "Impossible to get default value for rule attribute: " << key
+						        << " with error: " << prt::getStatusDescription(status);
+						return false;
+					}
 
-			for (size_t i = 0; i < count; ++i) {
-				pTexts->Append(ON_wString(pStringArray[i]));
-			}
+					for (size_t i = 0; i < count; ++i) {
+						pTexts->Append(ON_wString(pStringArray[i]));
+					}
 
-			pSizes->Append(count);
+					pSizes->Append(count);
+					break;
+				}
+				default:
+					logAttributeTypeError(key);
+					return false;
+			}
 		}
 	}
 
