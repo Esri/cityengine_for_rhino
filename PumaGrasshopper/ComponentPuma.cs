@@ -382,46 +382,27 @@ namespace PumaGrasshopper
         {
             Mesh mesh = null;
 
-            // Cast the shape to its actual Rhino.Geometry type.
-            IGH_GeometricGoo geoGoo = shape; // copy
-
-            if (geoGoo is GH_Mesh)
+            if (shape is GH_Brep)
             {
-                GH_Mesh m = geoGoo as GH_Mesh;
-                if (!GH_Convert.ToMesh(m, ref mesh, GH_Conversion.Both)) return null;
-            }
-            else if (geoGoo is GH_Brep)
-            {
-                GH_Brep brep = geoGoo as GH_Brep;
                 Brep brepShape = null;
-                if (!GH_Convert.ToBrep(brep, ref brepShape, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToBrep(shape, ref brepShape, GH_Conversion.Both))
+                    return null;
 
                 mesh = new Mesh();
                 mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.DefaultAnalysisMesh));
                 mesh.Compact();
             }
-            else if (geoGoo is GH_Rectangle)
-            {
-                if (!GH_Convert.ToMesh(shape, ref mesh, GH_Conversion.Both))
-                    return null;
-            }
-            else if (geoGoo is GH_Surface)
+            else if (shape is GH_Surface)
             {
                 Surface surf = null;
-                if (!GH_Convert.ToSurface(geoGoo as GH_Surface, ref surf, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToSurface(shape, ref surf, GH_Conversion.Both))
+                    return null;
                 mesh = Mesh.CreateFromSurface(surf, MeshingParameters.QualityRenderMesh);
-            }
-            else if (geoGoo is GH_Box)
-            {
-                if (!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
-            }
-            else if (geoGoo is GH_Plane)
-            {
-                if (!GH_Convert.ToMesh(geoGoo as GH_Plane, ref mesh, GH_Conversion.Both)) return null;
             }
             else
             {
-                return null;
+                if (!GH_Convert.ToMesh(shape, ref mesh, GH_Conversion.Both))
+                    return null;
             }
 
             mesh.Vertices.UseDoublePrecisionVertices = true;
