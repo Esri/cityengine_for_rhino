@@ -389,7 +389,7 @@ namespace PumaGrasshopper
                     return null;
 
                 mesh = new Mesh();
-                mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.DefaultAnalysisMesh));
+                mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.FastRenderMesh));
                 mesh.Compact();
             }
             else if (shape is GH_Surface)
@@ -397,7 +397,7 @@ namespace PumaGrasshopper
                 Surface surf = null;
                 if (!GH_Convert.ToSurface(shape, ref surf, GH_Conversion.Both))
                     return null;
-                mesh = Mesh.CreateFromSurface(surf, MeshingParameters.QualityRenderMesh);
+                mesh = Mesh.CreateFromSurface(surf, MeshingParameters.FastRenderMesh);
             }
             else
             {
