@@ -187,10 +187,43 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
-### Puma 1.0 (2021-07-XX)
+### Puma 1.0.0 (2021-08-XX)
+* First public release.
+* Supports Rhino 6 and 7.
+* Supports Rule Packages from CityEngine 2021.0 and older.
+* Optimized loading performance of large Rule Packages with many textures.
+* Improved "extract parameter" behavior for rule attributes. This includes support for array attributes and using dedicated components (e.g. toggles and sliders) for single value attributes.
+* Limitation: no support for PBR material properties in Rhino 7
 
-#### Known Limitations
-* Depending on the location of the system temp directory, complex Rule Packages (RPK) might trigger the maximum Windows path length limitation. As a workaround, please change the TEMP environment variable to a shorter path and/or shorten the asset directories within the Rule Package.
+### Puma 0.9.1 (2021-07-16)
+* Internal test build.
+* Supports Rhino 6 and 7.
+* Supports Rule Packages from CityEngine 2021.0 and older.
+* Optimized model generation to distribute input shapes across all CPU cores.
+* Improved attribute sorting in chooser dialog to match the CityEngine inspector as close as possible.
+
+### Puma 0.9.0 (2021-07-02)
+* Internal test build.
+* Supports Rhino 6 and 7.
+* Supports Rule Packages from CityEngine 2021.0 and older.
+* Supports multiple input shapes with different rule attribute values.
+* Switched to dynamic input parameters for the rule attributes on the Puma components. Do not show all possible rule attributes by default to keep the Puma component compact.
+* Added support for rule array attributes.
+* Added input parameter to control random generator per Puma component.
+* Added output parameters for CGA print and asset error/warning outputs.
+* Added support for creating "yak" packages.
+* Added initial manual.
+
+### Puma 0.6.0 (2020-12-01)
+* Internal test build.
+* Supports Rhino 6.
+* Supports Rule Packages from CityEngine 2020.0 and older.
+* Supports multiple input shapes with same rule attributes.
+* Added Grasshopper helper components to process and display CGA report values.
+* Development: Added support for creating "rhi" packages.
+
+### Puma 0.5.0 (Fall 2020)
+* First internal proof of concept.
 
 ## Licensing Information
 
