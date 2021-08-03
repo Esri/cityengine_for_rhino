@@ -191,8 +191,8 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 * First public release.
 * Supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.0 and older.
-* TBC: Optimized loading performance of large Rule Packages with many textures.
-* TBC: Improved "extract parameter" behavior for array attributes.
+* Optimized loading performance of large Rule Packages with many textures.
+* Improved "extract parameter" behavior for rule attributes. This includes support for array attributes and using dedicated components (e.g. toggles and sliders) for single value attributes.
 * Limitation: no support for PBR material properties in Rhino 7
 
 ### Puma 0.9.1 (2021-07-16)
