@@ -406,7 +406,6 @@ namespace PumaGrasshopper
             }
 
             mesh.Vertices.UseDoublePrecisionVertices = true;
-            mesh.Faces.ConvertTrianglesToQuads(Rhino.RhinoMath.ToRadians(2), .875);
 
             return mesh;
         }
