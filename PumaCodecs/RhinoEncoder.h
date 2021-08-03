@@ -58,7 +58,8 @@ private:
 	prtx::EncodePreparatorPtr mEncodePreparator;
 
 	void convertGeometry(const prtx::InitialShape& initialShape,
-	                     const prtx::EncodePreparator::InstanceVector& instances, IRhinoCallbacks* cb);
+	                     const prtx::EncodePreparator::InstanceVector& instances, IRhinoCallbacks* cb,
+	                     prt::Cache* cache);
 };
 
 class RhinoEncoderFactory : public prtx::EncoderFactory, public prtx::Singleton<RhinoEncoderFactory> {

@@ -253,11 +253,9 @@ namespace PumaGrasshopper
                 string texKey = texKeysArray[i];
                 string texPath = texPathsArray[i];
 
-                Uri fileuri = new Uri(texPath);
-
                 Texture tex = new Texture
                 {
-                    FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(fileuri.AbsolutePath),
+                    FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(texPath),
                     TextureCombineMode = TextureCombineMode.Modulate,
                     TextureType = TextureType.Bitmap
                 };

@@ -28,10 +28,10 @@
 #endif
 
 #include "RhinoCallbacks.h"
+#include "AssetCache.h"
 #include "PRTContext.h"
 
-#include <fstream>
-#include <ostream>
+#include <filesystem>
 #include <wchar.h>
 
 namespace {
@@ -163,38 +163,27 @@ void RhinoCallbacks::addReport(const size_t initialShapeIndex, const prtx::PRTUt
 		LOG_DBG << "End of RhinoCallback::addReport";
 }
 
-void RhinoCallbacks::addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
+void RhinoCallbacks::addAsset(const wchar_t* uri, const wchar_t* fileName, const uint8_t* buffer, size_t size,
+                              wchar_t* result,
                               size_t& resultSize) {
-	static const std::filesystem::path assetsParentPath = []() {
-		const std::filesystem::path p = PRTContext::getGlobalTempDir() / "generated_assets";
-		std::filesystem::create_directories(p);
-		return p;
-	}();
-
-	if (name == nullptr || std::wcslen(name) == 0) {
+	if (uri == nullptr || std::wcslen(uri) == 0 || fileName == nullptr || std::wcslen(fileName) == 0) {
+		LOG_WRN << "Skipping asset caching for invalid uri '" << uri << "' or filename '" << fileName << '"';
 		resultSize = 0;
 		return;
 	}
 
-	const std::filesystem::path assetPath = assetsParentPath / name;
+	const std::filesystem::path& assetPath = PRTContext::get()->getAssetCache().put(uri, fileName, buffer, size);
+	if (assetPath.empty()) {
+		resultSize = 0;
+		return;
+	}
+
 	const std::wstring pathStr = assetPath.wstring();
 
 	if (resultSize <= pathStr.size()) {  // also check for null-terminator
 		resultSize = pathStr.size() + 1; // ask for space for null-terminator
 		return;
 	}
-
-	std::ofstream stream(assetPath, std::ofstream::binary | std::ofstream::trunc);
-	if (!stream) {
-		resultSize = 0;
-		return;
-	}
-	stream.write(reinterpret_cast<const char*>(buffer), size);
-	if (!stream) {
-		resultSize = 0;
-		return;
-	}
-	stream.close();
 
 	wcsncpy_s(result, resultSize, pathStr.c_str(), resultSize);
 	result[resultSize - 1] = 0x0;

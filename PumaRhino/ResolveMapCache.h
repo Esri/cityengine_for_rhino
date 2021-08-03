@@ -31,7 +31,7 @@ class ResolveMapCache {
 public:
 	using KeyType = std::wstring;
 
-	explicit ResolveMapCache(const std::filesystem::path& unpackPath) : mUnpackPath{unpackPath} {}
+	ResolveMapCache() = default;
 	ResolveMapCache(const ResolveMapCache&) = delete;
 	ResolveMapCache(ResolveMapCache&&) = delete;
 	ResolveMapCache& operator=(ResolveMapCache const&) = delete;
@@ -46,12 +46,9 @@ private:
 	struct ResolveMapCacheEntry {
 		pcu::ResolveMapSPtr mResolveMap;
 		std::chrono::system_clock::time_point mTimeStamp;
-		pcu::ScopedPath mExtractionPath;
 	};
 	using Cache = std::map<KeyType, ResolveMapCacheEntry>;
 	Cache mCache;
-
-	const std::filesystem::path mUnpackPath;
 };
 
 using ResolveMapCacheUPtr = std::unique_ptr<ResolveMapCache>;
