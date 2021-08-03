@@ -167,6 +167,7 @@ void RhinoCallbacks::addAsset(const wchar_t* uri, const wchar_t* fileName, const
                               wchar_t* result,
                               size_t& resultSize) {
 	if (uri == nullptr || std::wcslen(uri) == 0 || fileName == nullptr || std::wcslen(fileName) == 0) {
+		LOG_WRN << "Skipping asset caching for invalid uri '" << uri << "' or filename '" << fileName << '"';
 		resultSize = 0;
 		return;
 	}
