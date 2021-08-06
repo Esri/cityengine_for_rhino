@@ -428,7 +428,7 @@ RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate) {
 	RhinoPRT::get().setMaterialGeneration(doGenerate);
 }
 
-RHINOPRT_API bool GetDefaultValuesBoolean(const wchar_t* key, ON_SimpleArray<bool>* pValue) {
+RHINOPRT_API bool GetDefaultValuesBoolean(const wchar_t* key, ON_SimpleArray<int>* pValue) {
 	return RhinoPRT::get().getDefaultValuesBoolean(key, pValue);
 }
 
@@ -440,7 +440,7 @@ RHINOPRT_API bool GetDefaultValuesText(const wchar_t* key, ON_ClassArray<ON_wStr
 	return RhinoPRT::get().getDefaultValuesText(key, pTexts);
 }
 
-RHINOPRT_API bool GetDefaultValuesBooleanArray(const wchar_t* key, ON_SimpleArray<bool>* pValues, ON_SimpleArray<int>* pSizes) {
+RHINOPRT_API bool GetDefaultValuesBooleanArray(const wchar_t* key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes) {
 	return RhinoPRT::get().getDefaultValuesBooleanArray(key, pValues, pSizes);
 }
 

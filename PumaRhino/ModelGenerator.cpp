@@ -403,7 +403,7 @@ std::wstring ModelGenerator::getDefaultShapeName() {
 	return this->mShapeName;
 };
 
-bool ModelGenerator::getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<bool>* pValues) {
+bool ModelGenerator::getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues) {
 	if (mDefaultValuesMap.empty())
 		return false;
 
@@ -499,7 +499,7 @@ bool ModelGenerator::getDefaultValuesText(const std::wstring& key, ON_ClassArray
 	return true;
 }
 
-bool ModelGenerator::getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<bool>* pValues,
+bool ModelGenerator::getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<int>* pValues,
                                                   ON_SimpleArray<int>* pSizes) {
 	if (mDefaultValuesMap.empty())
 		return false;

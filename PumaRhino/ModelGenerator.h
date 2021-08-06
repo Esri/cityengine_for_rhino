@@ -59,10 +59,10 @@ public:
 		return mDefaultValuesMap;
 	};
 
-	bool getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<bool>* pValues);
+	bool getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues);
 	bool getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues);
 	bool getDefaultValuesText(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts);
-	bool getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<bool>* pValues,
+	bool getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<int>* pValues,
 	                                  ON_SimpleArray<int>* pSizes);
 	bool getDefaultValuesNumberArray(const std::wstring& key, ON_SimpleArray<double>* pValues,
 	                                 ON_SimpleArray<int>* pSizes);

@@ -158,7 +158,7 @@ void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {
 	mModelGenerator->updateEncoderOptions(emitMaterial);
 }
 
-bool RhinoPRTAPI::getDefaultValuesBoolean(const std::wstring key, ON_SimpleArray<bool>* pValues) {
+bool RhinoPRTAPI::getDefaultValuesBoolean(const std::wstring key, ON_SimpleArray<int>* pValues) {
 	return mModelGenerator->getDefaultValuesBoolean(key, pValues);
 }
 
@@ -170,7 +170,7 @@ bool RhinoPRTAPI::getDefaultValuesText(const std::wstring key, ON_ClassArray<ON_
 	return mModelGenerator->getDefaultValuesText(key, pTexts);
 }
 
-bool RhinoPRTAPI::getDefaultValuesBooleanArray(const std::wstring key, ON_SimpleArray<bool>* pValues, ON_SimpleArray<int>* pSizes) {
+bool RhinoPRTAPI::getDefaultValuesBooleanArray(const std::wstring key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes) {
 	return mModelGenerator->getDefaultValuesBooleanArray(key, pValues, pSizes);
 }
 
