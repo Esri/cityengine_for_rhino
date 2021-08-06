@@ -93,8 +93,6 @@ private:
 	                         std::vector<pcu::InitialShapePtr>& initialShapes,
 	                         std::vector<pcu::AttributeMapPtr>& initialShapeAttributes) const;
 
-	void createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv);
-
 	void extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr,
 	                                std::wstring& ruleFile, std::wstring& startRule, int32_t& seed,
 	                                std::wstring& shapeName, pcu::AttributeMapPtr& convertShapeAttr) const;
