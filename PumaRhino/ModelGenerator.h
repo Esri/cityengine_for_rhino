@@ -59,9 +59,15 @@ public:
 		return mDefaultValuesMap;
 	};
 
-	bool getDefaultValueBoolean(const std::wstring key, bool* value);
-	bool getDefaultValueNumber(const std::wstring key, double* value);
-	bool getDefaultValueText(const std::wstring key, ON_wString* pText);
+	bool getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues);
+	bool getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues);
+	bool getDefaultValuesText(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts);
+	bool getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<int>* pValues,
+	                                  ON_SimpleArray<int>* pSizes);
+	bool getDefaultValuesNumberArray(const std::wstring& key, ON_SimpleArray<double>* pValues,
+	                                 ON_SimpleArray<int>* pSizes);
+	bool getDefaultValuesTextArray(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts,
+	                               ON_SimpleArray<int>* pSizes);
 
 private:
 	pcu::RuleFileInfoPtr mRuleFileInfo;
@@ -86,8 +92,6 @@ private:
 	                         pcu::AttributeMapBuilderVector& aBuilders,
 	                         std::vector<pcu::InitialShapePtr>& initialShapes,
 	                         std::vector<pcu::AttributeMapPtr>& initialShapeAttributes) const;
-
-	void createDefaultValueMaps(pcu::AttributeMapBuilderVector& ambv);
 
 	void extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBuilder, const pcu::ShapeAttributes& shapeAttr,
 	                                std::wstring& ruleFile, std::wstring& startRule, int32_t& seed,

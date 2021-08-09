@@ -28,6 +28,7 @@ using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using System.Drawing;
+using Grasshopper.Kernel.Data;
 
 namespace PumaGrasshopper
 {
@@ -74,6 +75,48 @@ namespace PumaGrasshopper
             return array;
         }
 
+        public static GH_Structure<GH_Boolean> FromListToTree(List<List<bool>> valueList)
+        {
+            GH_Structure<GH_Boolean> tree = new GH_Structure<GH_Boolean>();
+            for (int i = 0; i < valueList.Count; ++i)
+            {
+                tree.AppendRange(valueList[i].ConvertAll(val => new GH_Boolean(val)), new GH_Path(i));
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_String> FromListToTree(List<List<string>> textList)
+        {
+            GH_Structure<GH_String> tree = new GH_Structure<GH_String>();
+            for(int i = 0; i < textList.Count; ++i)
+            {
+                tree.AppendRange(textList[i].ConvertAll(t => new GH_String(t)), new GH_Path(i));
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_Number> FromListToTree(List<List<double>> valueList)
+        {
+            GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.AppendRange(valueList[i].ConvertAll(value => new GH_Number(value)), new GH_Path(i));
+            }
+            return tree;
+        }
+
+        public static List<List<T>> UnflattenList<T>(List<T> valueList, List<int> sizes)
+        {
+            int offset = 0;
+            List<List<T>> returnList = new List<List<T>>(sizes.Count);
+            sizes.ForEach(size => {
+                returnList.Add(valueList.GetRange(offset, size));
+                offset += size;
+            });
+
+            return returnList;
+        }
+
         /// <summary>
         /// Returns a string representation of a hex color given a GH_Colour object
         /// </summary>
@@ -86,6 +129,11 @@ namespace PumaGrasshopper
                 color.B.ToString("X2");
 
             return hexStr;
+        }
+
+        public static Color FromHex(string hexColor)
+        {
+            return ColorTranslator.FromHtml(hexColor);
         }
 
         public static bool IsInteger(double d)

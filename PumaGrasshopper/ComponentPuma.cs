@@ -285,10 +285,17 @@ namespace PumaGrasshopper
 
         private void FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
         {
+            List<RuleAttribute> attributeList = mRuleAttributes.ToList();
+
             for (int idx = (int)InputParams.SEEDS; idx < Params.Input.Count; ++idx)
             {
                 var param = Params.Input[idx];
-                SetAttributeOfShapes(DA, shapeCount, param);
+
+                RuleAttribute attribute = attributeList.Find(x => x.mFullName == param.Name);
+
+                bool expectArray = attribute != null && attribute.IsArray();
+
+                SetAttributeOfShapes(DA, shapeCount, param, expectArray);
             }
         }
 
@@ -410,55 +417,56 @@ namespace PumaGrasshopper
             return mesh;
         }
 
-        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, IGH_Param attributeParam)
+        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, IGH_Param attributeParam, bool expectArray)
         {
             if (attributeParam.Type == typeof(GH_Number))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Number> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_Integer))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Integer> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_Boolean))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Boolean> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_String))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_String> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_Colour))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Colour> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
         }
 
-        private void ExtractTreeValues<T>(GH_Structure<T> tree, IGH_Param attributeParam, int shapeCount) where T : IGH_Goo
+        private void ExtractTreeValues<T>(GH_Structure<T> tree, IGH_Param attributeParam, int shapeCount, bool expectArray) where T : IGH_Goo
         {
             if (tree.IsEmpty)
                 return;
 
             int shapeId = 0;
 
-            if (attributeParam.Type.IsArray)
+            if (expectArray)
             {
-                // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
-                while (shapeCount > tree.Branches.Count)
-                {
-                    tree.Branches.Add(tree.Branches.Last());
-                }
-
                 foreach (List<T> branch in tree.Branches)
                 {
                     if (shapeId >= shapeCount) return;
 
                     SetRuleAttributeArray(shapeId, attributeParam, branch);
+                    shapeId++;
+                }
+
+                // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
+                while(shapeId < shapeCount)
+                {
+                    SetRuleAttributeArray(shapeId, attributeParam, tree.Branches.Last());
                     shapeId++;
                 }
             }

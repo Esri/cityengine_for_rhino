@@ -50,7 +50,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_BOOL:
                     {
-                        var param_bool = new AttributeParameter.Boolean(mGroup)
+                        var param_bool = new AttributeParameter.Boolean(mGroup, IsArray())
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -65,7 +65,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_INT:
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
                     {
-                        var param_number = new AttributeParameter.Number(mAnnotations, mGroup)
+                        var param_number = new AttributeParameter.Number(mAnnotations, mGroup, IsArray())
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -94,7 +94,7 @@ namespace PumaGrasshopper
                         }
                         else
                         {
-                            var param_str = new AttributeParameter.String(mAnnotations, mGroup)
+                            var param_str = new AttributeParameter.String(mAnnotations, mGroup, IsArray())
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -124,6 +124,13 @@ namespace PumaGrasshopper
             return mAnnotations.Any(x => x.IsColor());
         }
 
+        public bool IsArray()
+        {
+            return mAttribType == Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY 
+                || mAttribType == Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY 
+                || mAttribType == Annotations.AnnotationArgumentType.AAT_STR_ARRAY;
+        }
+
         private GH_ParamAccess GetAccess()
         {
             return GH_ParamAccess.tree;
@@ -137,7 +144,15 @@ namespace PumaGrasshopper
                 description = "Group " + mGroup + "\n";
             }
 
-            return description + mAnnotations.Aggregate<Annotations.Base, string>("", (left, right) => left + " " + right.GetDescription(mFullName));
+            if(this.IsArray())
+            {
+                description += "Expects a list of items by initial shape.\n";
+            } else
+            {
+                description += "Expects a single item by initial shape.\n";
+            }
+
+            return description + mAnnotations.Aggregate("", (left, right) => left + " " + right.GetDescription(mFullName));
         }
     }
 }
