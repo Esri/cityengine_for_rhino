@@ -144,7 +144,7 @@ std::vector<GeneratedModelPtr> batchGenerate(const std::vector<pcu::InitialShape
 	return generatedModels;
 }
 
-pcu::AttributeMapPtrVector createAttributeMap(pcu::AttributeMapBuilderVector& ambv) {
+pcu::AttributeMapPtrVector createAttributeMaps(pcu::AttributeMapBuilderVector& ambv) {
 	pcu::AttributeMapPtrVector attributeMaps;
 
 	for (auto& amb : ambv) {
@@ -263,7 +263,7 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& r
 		return false;
 	}
 
-	mDefaultValuesMap = createAttributeMap(attribMapBuilders);
+	mDefaultValuesMap = createAttributeMaps(attribMapBuilders);
 
 	return true;
 }
