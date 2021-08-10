@@ -114,7 +114,7 @@ The `Models` output will contain for each input shape a list of meshes (one mesh
 
 <img src="doc/img/man_gh_apply_material_2.jpg" height=215>
 
-Each Grasshopper component has an option menu that can be opened by right-clicking on the component's name. Puma's menu contains the usual options, and a custom function to toggle on and off the material generation. Since the material generation is a expensive process, it can be useful to disable it when working on the massing of complex scenes and enable it when it is needed.
+Each Grasshopper component has an option menu that can be opened by right-clicking on the component name. The Puma menu contains an additional menu item to toggle the material generation. This is useful to speedup model generation when working with complex scenes.
 
 #### Using the Puma reports helper components
 
