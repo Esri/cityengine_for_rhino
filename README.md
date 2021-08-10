@@ -10,7 +10,7 @@ Puma requires so-called rule packages (RPK) as input, which are authored in City
 
 1. Install Puma from the [Puma market place at food4rhino](https://www.food4rhino.com/app/puma).
 1. Start Rhino and open Grasshopper
-1. In Grasshopper go to the "Special" tab and find the "Esri" section, drag the Puma component into the sheet.
+1. In Grasshopper go to the "Esri" tab and find the "Puma" section, drag the Puma component into the sheet.
 1. Create a "File Path" component and use the "Select one existing file" context menu entry to locate an RPK file from the examples directory.
 1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
 1. Connect the "File Path" component to the "RPK" input of Puma and "Surface" to the "Shape" input. Now Puma will generate the model in the Rhino viewport.
@@ -92,7 +92,7 @@ If the CGA rule attribute is annotated as an enumeration the tooltips will list 
 
 ##### Extract parameter
 
-<img src="doc/img/man_gh_extract_param.jpg" height=215>
+<img src="doc/img/man_gh_extract_param.jpg" width=50%>
 
 It is possible to automatically create connected input components by using the `Extract Parameter` feature. Right-click on the input parameter you want to extract and select `Extract parameter`. The new component will display the same name and description as the input parameter, and have the attribute's default value(s) assigned to it.
 
