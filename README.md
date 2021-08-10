@@ -94,7 +94,7 @@ If the CGA rule attribute is annotated as an enumeration the tooltips will list 
 
 <img src="doc/img/man_gh_extract_param.jpg" height=215>
 
-It is possible to automatically create connected input components by using the `Extract Parameter` feature. Right click on the input parameter you want to extract and select `Extract parameter`. The new component will display the same name and description as the input parameter, and have the attribute's default value(s) assigned to it.
+It is possible to automatically create connected input components by using the `Extract Parameter` feature. Right-click on the input parameter you want to extract and select `Extract parameter`. The new component will display the same name and description as the input parameter, and have the attribute's default value(s) assigned to it.
 
 #### Working with the Puma outputs
 
