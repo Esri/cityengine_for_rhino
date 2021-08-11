@@ -176,7 +176,7 @@ After having built the plugins, they have to be installed in Rhino and Grasshopp
 
 ### Create installation packages (rhi, yak)
 
-Once both plugins (rhp, gha) are built, it is possible to create a RHI (Rhino Installer) package and/or a YAK package using the `create_package.py` python script. A RHI package is simply a zip archive containing all files required to run a plugin. If Rhino is installed, the plugin can be installed by double-clicking the package. It will extract the files and Rhino/Grasshopper will load them when started. The YAK package is the archive that can be uploaded to the Rhino marketplace in order to publish the plug-in.
+Once both plugins (`rhp` for Rhino, `gha` for Grasshopper) are built, it is possible to create a `rhi` (Rhino Installer) package and/or a `yak` package using the `create_package.py` python script. A `rhi` package is simply a zip archive containing all files required to run a plugin. If Rhino is installed, the plugin can be installed by double-clicking the package. It will extract the files and Rhino/Grasshopper will load them when started. The `yak` package is the archive that can be uploaded to the Rhino marketplace in order to publish the plug-in.
 
 1. Open a console, navigate to the Puma solution directory and run the command `python create_package.py <option>`. Valid values for `<option>` are `both` (default), `rhi`, or `yak` to choose which package type to build.
 1. The resulting `rhi` and `yak` packages will be created in a folder named `packages` located in the solution root directory.
@@ -184,7 +184,7 @@ Once both plugins (rhp, gha) are built, it is possible to create a RHI (Rhino In
 ### Install locally built packages
 
 1. Close Rhino if it is open.
-1. Run the rhi package by double-clicking it.
+1. Run the `rhi` package by double-clicking it.
 1. The package installer will open. Follow the instructions.
 1. The plugin will be loaded at the next start of Rhino/Grasshopper.
 
@@ -228,7 +228,7 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 * Added support for rule array attributes.
 * Added input parameter to control random generator per Puma component.
 * Added output parameters for CGA print and asset error/warning outputs.
-* Added support for creating "yak" packages.
+* Added support for creating `yak` packages.
 * Added initial manual.
 
 ### Puma 0.6.0 (2020-12-01)
@@ -237,7 +237,7 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 * Supports Rule Packages from CityEngine 2020.0 and older.
 * Supports multiple input shapes with same rule attributes.
 * Added Grasshopper helper components to process and display CGA report values.
-* Development: Added support for creating "rhi" packages.
+* Development: Added support for creating `rhi` packages.
 
 ### Puma 0.5.0 (Fall 2020)
 * First internal proof of concept.
