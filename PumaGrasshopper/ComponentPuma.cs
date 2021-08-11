@@ -285,10 +285,17 @@ namespace PumaGrasshopper
 
         private void FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
         {
+            List<RuleAttribute> attributeList = mRuleAttributes.ToList();
+
             for (int idx = (int)InputParams.SEEDS; idx < Params.Input.Count; ++idx)
             {
                 var param = Params.Input[idx];
-                SetAttributeOfShapes(DA, shapeCount, param);
+
+                RuleAttribute attribute = attributeList.Find(x => x.mFullName == param.Name);
+
+                bool expectArray = attribute != null && attribute.IsArray();
+
+                SetAttributeOfShapes(DA, shapeCount, param, expectArray);
             }
         }
 
@@ -382,107 +389,84 @@ namespace PumaGrasshopper
         {
             Mesh mesh = null;
 
-            // Cast the shape to its actual Rhino.Geometry type.
-            IGH_GeometricGoo geoGoo = shape; // copy
-
-            if (geoGoo is GH_Mesh)
+            if (shape is GH_Brep)
             {
-                GH_Mesh m = geoGoo as GH_Mesh;
-                if (!GH_Convert.ToMesh(m, ref mesh, GH_Conversion.Both)) return null;
-            }
-            else if (geoGoo is GH_Brep)
-            {
-                GH_Brep brep = geoGoo as GH_Brep;
                 Brep brepShape = null;
-                if (!GH_Convert.ToBrep(brep, ref brepShape, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToBrep(shape, ref brepShape, GH_Conversion.Both))
+                    return null;
 
                 mesh = new Mesh();
-                mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.DefaultAnalysisMesh));
+                mesh.Append(Mesh.CreateFromBrep(brepShape, MeshingParameters.FastRenderMesh));
                 mesh.Compact();
             }
-            else if (geoGoo is GH_Rectangle)
-            {
-                Rectangle3d rect = Rectangle3d.Unset;
-                bool status = GH_Convert.ToRectangle3d(geoGoo as GH_Rectangle, ref rect, GH_Conversion.Both);
-
-                if (!status) return null;
-
-                mesh = Mesh.CreateFromClosedPolyline(rect.ToPolyline());
-            }
-            else if (geoGoo is GH_Surface)
+            else if (shape is GH_Surface)
             {
                 Surface surf = null;
-                if (!GH_Convert.ToSurface(geoGoo as GH_Surface, ref surf, GH_Conversion.Both)) return null;
-                mesh = Mesh.CreateFromSurface(surf, MeshingParameters.QualityRenderMesh);
-            }
-            else if (geoGoo is GH_Box)
-            {
-                if (!GH_Convert.ToMesh(geoGoo as GH_Box, ref mesh, GH_Conversion.Both)) return null;
-            }
-            else if (geoGoo is GH_Plane)
-            {
-                if (!GH_Convert.ToMesh(geoGoo as GH_Plane, ref mesh, GH_Conversion.Both)) return null;
+                if (!GH_Convert.ToSurface(shape, ref surf, GH_Conversion.Both))
+                    return null;
+                mesh = Mesh.CreateFromSurface(surf, MeshingParameters.FastRenderMesh);
             }
             else
             {
-                return null;
+                if (!GH_Convert.ToMesh(shape, ref mesh, GH_Conversion.Both))
+                    return null;
             }
 
             mesh.Vertices.UseDoublePrecisionVertices = true;
-            mesh.Faces.ConvertTrianglesToQuads(Rhino.RhinoMath.ToRadians(2), .875);
 
             return mesh;
         }
 
-        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, IGH_Param attributeParam)
+        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, IGH_Param attributeParam, bool expectArray)
         {
             if (attributeParam.Type == typeof(GH_Number))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Number> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_Integer))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Integer> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_Boolean))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Boolean> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_String))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_String> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
             else if (attributeParam.Type == typeof(GH_Colour))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Colour> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
             }
         }
 
-        private void ExtractTreeValues<T>(GH_Structure<T> tree, IGH_Param attributeParam, int shapeCount) where T : IGH_Goo
+        private void ExtractTreeValues<T>(GH_Structure<T> tree, IGH_Param attributeParam, int shapeCount, bool expectArray) where T : IGH_Goo
         {
             if (tree.IsEmpty)
                 return;
 
             int shapeId = 0;
 
-            if (attributeParam.Type.IsArray)
+            if (expectArray)
             {
-                // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
-                while (shapeCount > tree.Branches.Count)
-                {
-                    tree.Branches.Add(tree.Branches.Last());
-                }
-
                 foreach (List<T> branch in tree.Branches)
                 {
                     if (shapeId >= shapeCount) return;
 
                     SetRuleAttributeArray(shapeId, attributeParam, branch);
+                    shapeId++;
+                }
+
+                // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
+                while(shapeId < shapeCount)
+                {
+                    SetRuleAttributeArray(shapeId, attributeParam, tree.Branches.Last());
                     shapeId++;
                 }
             }

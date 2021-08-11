@@ -76,9 +76,12 @@ public:
 
 	void setMaterialGeneration(bool emitMaterial);
 
-	bool getDefaultValueBoolean(const std::wstring key, bool* value);
-	bool getDefaultValueNumber(const std::wstring key, double* value);
-	bool getDefaultValueText(const std::wstring key, ON_wString* pText);
+	bool getDefaultValuesBoolean(const std::wstring key, ON_SimpleArray<int>* pValues);
+	bool getDefaultValuesNumber(const std::wstring key, ON_SimpleArray<double>* pValues);
+	bool getDefaultValuesText(const std::wstring key, ON_ClassArray<ON_wString>* pTexts);
+	bool getDefaultValuesBooleanArray(const std::wstring key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes);
+	bool getDefaultValuesNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues, ON_SimpleArray<int>* pSizes);
+	bool getDefaultValuesTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts, ON_SimpleArray<int>* pSizes);
 
 private:
 	std::vector<RawInitialShape> mShapes;

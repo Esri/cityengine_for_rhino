@@ -43,11 +43,14 @@ public:
 	virtual void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) = 0;
 
 	/**
-	 * Writes an asset (e.g. in-memory texture) to an implementation-defined path. Assets with same name will overwrite
-	 * each other.
-	 * @returns file system path of the asset with name as filename. Assumed to be valid for the whole process
+	 * Writes an asset (e.g. in-memory texture) to an implementation-defined path. Assets with same uri will be assumed
+	 * to contain identical data.
+	 * 
+	 * @param uri the original asset within the RPK
+	 * @param fileName local fileName derived from the URI by the asset encoder. can be used to cache the asset.
+	 * @param [out] result file system path of the locally cached asset. Expected to be valid for the whole process
 	 * life-time.
 	 */
-	virtual void addAsset(const wchar_t* name, const uint8_t* buffer, size_t size, wchar_t* result,
-	                      size_t& resultSize) = 0;
+	virtual void addAsset(const wchar_t* uri, const wchar_t* fileName, const uint8_t* buffer, size_t size,
+	                      wchar_t* result, size_t& resultSize) = 0;
 };

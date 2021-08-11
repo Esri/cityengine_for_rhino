@@ -17,6 +17,16 @@
  * limitations under the License.
  */
 
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 26451)
+#	pragma warning(disable : 26495)
+#endif
+#include "stdafx.h"
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
+
 #include "RhinoPRT.h"
 
 namespace RhinoPRT {
@@ -148,15 +158,29 @@ void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {
 	mModelGenerator->updateEncoderOptions(emitMaterial);
 }
 
-bool RhinoPRTAPI::getDefaultValueBoolean(const std::wstring key, bool* value) {
-	return mModelGenerator->getDefaultValueBoolean(key, value);
+bool RhinoPRTAPI::getDefaultValuesBoolean(const std::wstring key, ON_SimpleArray<int>* pValues) {
+	return mModelGenerator->getDefaultValuesBoolean(key, pValues);
 }
 
-bool RhinoPRTAPI::getDefaultValueNumber(const std::wstring key, double* value) {
-	return mModelGenerator->getDefaultValueNumber(key, value);
+bool RhinoPRTAPI::getDefaultValuesNumber(const std::wstring key, ON_SimpleArray<double>* pValues) {
+	return mModelGenerator->getDefaultValuesNumber(key, pValues);
 }
 
-bool RhinoPRTAPI::getDefaultValueText(const std::wstring key, ON_wString* pText) {
-	return mModelGenerator->getDefaultValueText(key, pText);
+bool RhinoPRTAPI::getDefaultValuesText(const std::wstring key, ON_ClassArray<ON_wString>* pTexts) {
+	return mModelGenerator->getDefaultValuesText(key, pTexts);
+}
+
+bool RhinoPRTAPI::getDefaultValuesBooleanArray(const std::wstring key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes) {
+	return mModelGenerator->getDefaultValuesBooleanArray(key, pValues, pSizes);
+}
+
+bool RhinoPRTAPI::getDefaultValuesNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues,
+                                              ON_SimpleArray<int>* pSizes) {
+	return mModelGenerator->getDefaultValuesNumberArray(key, pValues, pSizes);
+}
+
+bool RhinoPRTAPI::getDefaultValuesTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts,
+                                            ON_SimpleArray<int>* pSizes) {
+	return mModelGenerator->getDefaultValuesTextArray(key, pTexts, pSizes);
 }
 } // namespace RhinoPRT

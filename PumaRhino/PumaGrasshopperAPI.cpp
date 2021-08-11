@@ -17,9 +17,6 @@
  * limitations under the License.
  */
 
-#include "RhinoPRT.h"
-#include "version.h"
-
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable : 26451)
@@ -29,6 +26,9 @@
 #ifdef _MSC_VER
 #	pragma warning(pop)
 #endif
+
+#include "RhinoPRT.h"
+#include "version.h"
 
 #define RHINOPRT_API __declspec(dllexport)
 
@@ -428,15 +428,27 @@ RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate) {
 	RhinoPRT::get().setMaterialGeneration(doGenerate);
 }
 
-RHINOPRT_API bool GetDefaultValueBoolean(const wchar_t* key, bool* value) {
-	return RhinoPRT::get().getDefaultValueBoolean(key, value);
+RHINOPRT_API bool GetDefaultValuesBoolean(const wchar_t* key, ON_SimpleArray<int>* pValue) {
+	return RhinoPRT::get().getDefaultValuesBoolean(key, pValue);
 }
 
-RHINOPRT_API bool GetDefaultValueNumber(const wchar_t* key, double* value) {
-	return RhinoPRT::get().getDefaultValueNumber(key, value);
+RHINOPRT_API bool GetDefaultValuesNumber(const wchar_t* key, ON_SimpleArray<double>* pValue) {
+	return RhinoPRT::get().getDefaultValuesNumber(key, pValue);
 }
 
-RHINOPRT_API bool GetDefaultValueText(const wchar_t* key, ON_wString* pText) {
-	return RhinoPRT::get().getDefaultValueText(key, pText);
+RHINOPRT_API bool GetDefaultValuesText(const wchar_t* key, ON_ClassArray<ON_wString>* pTexts) {
+	return RhinoPRT::get().getDefaultValuesText(key, pTexts);
+}
+
+RHINOPRT_API bool GetDefaultValuesBooleanArray(const wchar_t* key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes) {
+	return RhinoPRT::get().getDefaultValuesBooleanArray(key, pValues, pSizes);
+}
+
+RHINOPRT_API bool GetDefaultValuesNumberArray(const wchar_t* key, ON_SimpleArray<double>* pValues, ON_SimpleArray<int>* pSizes) {
+	return RhinoPRT::get().getDefaultValuesNumberArray(key, pValues, pSizes);
+}
+
+RHINOPRT_API bool GetDefaultValuesTextArray(const wchar_t* key, ON_ClassArray<ON_wString>* pTexts, ON_SimpleArray<int>* pSizes) {
+	return RhinoPRT::get().getDefaultValuesTextArray(key, pTexts, pSizes);
 }
 }

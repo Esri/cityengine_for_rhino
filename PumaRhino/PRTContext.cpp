@@ -17,8 +17,17 @@
  * limitations under the License.
  */
 
-#include "PRTContext.h"
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 26451)
+#	pragma warning(disable : 26495)
+#endif
+#include "stdafx.h"
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
 
+#include "PRTContext.h"
 #include "Logger.h"
 
 #include <filesystem>
@@ -52,7 +61,7 @@ PRTContext::PRTContext(prt::LogLevel minimalLogLevel)
       mFileLogHandler(prt::FileLogHandler::create(prt::LogHandler::ALL, prt::LogHandler::ALL_COUNT,
                                                   getLogFilePath().wstring().c_str())),
       mPRTCache{prt::CacheObject::create(prt::CacheObject::CACHE_TYPE_DEFAULT)},
-      mResolveMapCache{new ResolveMap::ResolveMapCache(getGlobalTempDir())} {
+      mResolveMapCache{new ResolveMap::ResolveMapCache()} {
 	prt::addLogHandler(mLogHandler.get());
 	prt::addLogHandler(mFileLogHandler.get());
 
@@ -102,4 +111,20 @@ ResolveMap::ResolveMapCache::LookupResult PRTContext::getResolveMap(const std::f
 
 bool PRTContext::isAlive() const {
 	return !!mPRTHandle;
+}
+
+AssetCache& PRTContext::getAssetCache() const {
+	static const std::filesystem::path assetCacheParentPath = [] {
+		const auto p = PRTContext::getGlobalTempDir() / "asset_cache";
+		try {
+			std::filesystem::remove_all(p);
+			std::filesystem::create_directories(p);
+		}
+		catch (std::exception& e) {
+			LOG_ERR << "Error while cleaning the asset cache at " << p << ": " << e.what();
+		}
+		return p;
+	}();
+	static AssetCache theCache(assetCacheParentPath);
+	return theCache;
 }

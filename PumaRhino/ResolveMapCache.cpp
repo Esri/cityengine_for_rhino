@@ -17,8 +17,18 @@
  * limitations under the License.
  */
 
-#include "ResolveMapCache.h"
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 26451)
+#	pragma warning(disable : 26495)
+#endif
+#include "stdafx.h"
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
+
 #include "PRTContext.h"
+#include "ResolveMapCache.h"
 
 #include <chrono>
 #include <filesystem>
@@ -88,27 +98,17 @@ ResolveMapCache::LookupResult ResolveMapCache::get(const std::filesystem::path& 
 		const std::string rpkURI = pcu::toFileURI(rpk);
 		const std::wstring wRpkURI = pcu::toUTF16FromUTF8(rpkURI);
 
-		const std::wstring unpackSubDirPrefix = [&rpk]() {
-			std::wstring s = rpk.stem().generic_wstring(); // +L"_";
-			// static const std::wstring TEMP_DIR_CHARS =
-			// L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"; pcu::replace_not_in_range(s,
-			// TEMP_DIR_CHARS, L'_');
-			return s;
-		}();
-
 		ResolveMapCacheEntry rmce;
 		rmce.mTimeStamp = timeStamp;
-		rmce.mExtractionPath.reset(new std::filesystem::path(mUnpackPath / unpackSubDirPrefix));
 
 		prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
 		LOG_DBG << "createResolveMap from " << rpkURI;
-		rmce.mResolveMap.reset(prt::createResolveMap(wRpkURI.c_str(), rmce.mExtractionPath->wstring().c_str(), &status),
-		                       pcu::PRTDestroyer());
+		rmce.mResolveMap.reset(prt::createResolveMap(wRpkURI.c_str(), nullptr, &status), pcu::PRTDestroyer());
 		if (status != prt::STATUS_OK)
-			throw std::runtime_error("Failed to read and unpack the rule package at " + rpk.generic_string() + ", please check the log file at " + PRTContext::getLogFilePath().generic_string());
+			throw std::runtime_error("Failed to read rule package at " + rpk.generic_string() +
+			                         ", please check the log file at " + PRTContext::getLogFilePath().generic_string());
 
 		it = mCache.emplace(cacheKey, std::move(rmce)).first;
-		LOG_DBG << "Unpacked RPK " << rpk << " to " << mUnpackPath;
 	}
 
 	return {it->second.mResolveMap, cs};
