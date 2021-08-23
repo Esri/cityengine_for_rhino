@@ -494,6 +494,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 		normals.clear();
 		faceIndices.clear();
 		faceCounts.clear();
+		for (const auto* mat : matAttrMap)
+			mat->destroy();
 		matAttrMap.clear();
 		uvs.clear();
 		uvCounts.clear();
@@ -610,6 +612,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 				}
 				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys(), cb, cache);
 				matAttrMap.push_back(amb->createAttributeMapAndReset());
+				LOG_DBG << "mat map: " << prtx::PRTUtils::objectToXML(matAttrMap.back());
 			}
 		}
 		faceRanges.push_back(faceCount);
