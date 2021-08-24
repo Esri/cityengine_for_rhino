@@ -75,6 +75,8 @@ These parameters can then be connected to other components. The context menu als
 
 Rule attributes and the corresponding Puma component inputs use four basic data types: (1) Number, (2) String, (3) Boolean (Toggle) and (4) Colour. These can be either single values or lists of values. In case of lists and length mismatches, Puma will either truncate lists or repeat the last value of a list until the length of the `shape(s)` input is matched.
 
+Please note that string attributes representing assets like `.obj` or texture files can only refer to files within the current Rule Package (RPK). Puma will interpret the string as a file path (with forward slashes as separator) relative to the RPK root, e.g. `assets/my_asset.obj`. In case of unexpected behavior, it can be useful to inspect the RPK in question with a tool like `7zip` to confirm the presence of asset files.
+
 The inputs are typically created by these built-in Grasshopper components:
 
 - Number(s): `Number` and `Number Slider`
