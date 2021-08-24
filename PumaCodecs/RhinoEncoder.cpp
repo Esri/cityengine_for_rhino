@@ -665,10 +665,10 @@ RhinoEncoderFactory* RhinoEncoderFactory::createInstance() {
 	// Default encoder options
 	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 	amb->setString(EO_BASE_NAME, L"enc_default_name");
-	amb->setBool(EO_ERROR_FALLBACK, prtx::PRTX_TRUE);
-	amb->setBool(EO_EMIT_GEOMETRY, prtx::PRTX_TRUE);
-	amb->setBool(EO_EMIT_REPORTS, prtx::PRTX_TRUE);
-	amb->setBool(EO_EMIT_MATERIALS, prtx::PRTX_TRUE);
+	amb->setBool(EO_ERROR_FALLBACK, true);
+	amb->setBool(EO_EMIT_GEOMETRY, true);
+	amb->setBool(EO_EMIT_REPORTS, true);
+	amb->setBool(EO_EMIT_MATERIALS, true);
 	encoderInfoBuilder.setDefaultOptions(amb->createAttributeMap());
 
 	return new RhinoEncoderFactory(encoderInfoBuilder.create());
