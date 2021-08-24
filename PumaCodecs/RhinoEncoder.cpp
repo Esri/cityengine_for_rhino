@@ -23,6 +23,7 @@
 #include "TextureEncoder.h"
 
 #include "prtx/DataBackend.h"
+#include "prtx/EncodePreparator.h"
 #include "prtx/EncoderInfoBuilder.h"
 #include "prtx/Exception.h"
 #include "prtx/GenerateContext.h"
