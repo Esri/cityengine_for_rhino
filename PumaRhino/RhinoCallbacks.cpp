@@ -125,7 +125,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 	// -- convert materials into material attributes
 	if constexpr (DBG)
 		LOG_DBG << "got " << matCount << " materials";
-	if (matCount > 0 && materials) {
+	if (matCount > 0 && materials != nullptr) {
 		if (matCount > 1) {
 			LOG_ERR << L"Multiple material for a single mesh part is not supported by Rhino. Taking only the first "
 			           L"material"
