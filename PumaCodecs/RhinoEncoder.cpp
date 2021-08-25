@@ -496,7 +496,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 
 	prtx::PRTUtils::AttributeMapBuilderPtr amb(prt::AttributeMapBuilder::create());
 
-	size_t instanceIndex(0);
+	size_t instanceIndex = 0;
 	for (const auto& instance : instances) {
 
 		const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
