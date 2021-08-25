@@ -396,6 +396,25 @@ uint32_t scanValidTextures(const prtx::MaterialPtr& mat) {
 
 const prtx::DoubleVector EMPTY_UVS;
 const prtx::IndexVector EMPTY_IDX;
+
+auto scanMeshes(const prtx::MeshPtrVector& meshes) {
+	uint32_t numCoords = 0;
+	uint32_t numNormalCoords = 0;
+	uint32_t numFaceCounts = 0;
+	uint32_t numIndices = 0;
+
+	for (const auto& mesh : meshes) {
+		numCoords += static_cast<uint32_t>(mesh->getVertexCoords().size());
+		numNormalCoords += static_cast<uint32_t>(mesh->getVertexNormalsCoords().size());
+		numFaceCounts += static_cast<uint32_t>(mesh->getFaceCount());
+
+		const auto& vtxCnts = mesh->getFaceVertexCounts();
+		numIndices = std::accumulate(vtxCnts.begin(), vtxCnts.end(), numIndices);
+	}
+
+	return std::make_tuple(numCoords, numNormalCoords, numFaceCounts, numIndices);
+}
+
 } // namespace
 
 const std::wstring RhinoEncoder::ID = L"com.esri.rhinoprt.RhinoEncoder";
@@ -506,19 +525,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 		uvIndices.clear();
 
 		// 1st pass: scan the geometries to preallocate the sizes of vectors
-		uint32_t numCoords = 0;
-		uint32_t numNormalCoords = 0;
-		uint32_t numFaceCounts = 0;
-		uint32_t numIndices = 0;
-
-		for (const auto& mesh : meshes) {
-			numCoords += static_cast<uint32_t>(mesh->getVertexCoords().size());
-			numNormalCoords += static_cast<uint32_t>(mesh->getVertexNormalsCoords().size());
-			numFaceCounts += static_cast<uint32_t>(mesh->getFaceCount());
-
-			const auto& vtxCnts = mesh->getFaceVertexCounts();
-			numIndices = std::accumulate(vtxCnts.begin(), vtxCnts.end(), numIndices);
-		}
+		const auto [numCoords, numNormalCoords, numFaceCounts, numIndices] = scanMeshes(meshes);
 
 		vertexCoords.reserve(3 * numCoords);
 		normals.reserve(3 * numNormalCoords);
