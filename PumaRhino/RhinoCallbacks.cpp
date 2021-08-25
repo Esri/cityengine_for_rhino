@@ -113,7 +113,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
                          const size_t faceCountsCount, double const* const* uvs, size_t const* uvsSizes,
                          uint32_t const* const* uvCounts, size_t const* uvCountsSizes, uint32_t const* const* uvIndices,
                          size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* /*faceRanges*/,
-                         size_t /*faceRangesSize*/, const prt::AttributeMap** materials, const size_t matCount) {
+                         size_t /*faceRangesSize*/, prt::AttributeMap const* const* materials, const size_t matCount) {
 
 	GeneratedModel& currentModel = getOrCreateModel(initialShapeIndex);
 

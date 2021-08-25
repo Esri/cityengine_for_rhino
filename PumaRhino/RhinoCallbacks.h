@@ -46,7 +46,7 @@ public:
 	         const size_t faceCountsCount, double const* const* uvs, size_t const* uvsSizes,
 	         uint32_t const* const* uvCounts, size_t const* uvCountsSizes, uint32_t const* const* uvIndices,
 	         size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* faceRanges, size_t faceRangesSize,
-	         const prt::AttributeMap** materials, size_t matCount) override;
+	         prt::AttributeMap const* const* materials, size_t matCount) override;
 
 	void addReport(const size_t initialShapeIndex, const prtx::PRTUtils::AttributeMapPtr reports) override;
 

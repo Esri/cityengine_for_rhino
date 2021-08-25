@@ -633,7 +633,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 		assert(uvs.size() == puvCounts.first.size());
 		assert(uvs.size() == puvCounts.second.size());
 
-		std::vector<const prt::AttributeMap*> matAttrPtrs = toPtrVec(matAttrMap);
+		const std::vector<const prt::AttributeMap*> matAttrPtrs = toPtrVec(matAttrMap);
 
 		cb->add(instance.getInitialShapeIndex(), instanceIndex, vertexCoords.data(), vertexCoords.size(),
 		        normals.data(), normals.size(), faceIndices.data(), faceIndices.size(), faceCounts.data(),
