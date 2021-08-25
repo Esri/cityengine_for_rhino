@@ -28,6 +28,7 @@
 #include "prtx/GenerateContext.h"
 #include "prtx/Geometry.h"
 #include "prtx/Mesh.h"
+#include "prtx/PRTUtils.h"
 #include "prtx/ReportsCollector.h"
 #include "prtx/Shape.h"
 #include "prtx/ShapeIterator.h"
@@ -83,6 +84,13 @@ std::pair<std::vector<const T*>, std::vector<size_t>> toPtrVec(const std::vector
 		ps[i] = v[i].size();
 	}
 	return std::make_pair(pv, ps);
+}
+
+std::vector<const prt::AttributeMap*> toPtrVec(const std::vector<prtx::PRTUtils::AttributeMapUPtr>& managedPtrVec) {
+	std::vector<const prt::AttributeMap*> rawPtrVec(managedPtrVec.size(), nullptr);
+	std::transform(managedPtrVec.begin(), managedPtrVec.end(), rawPtrVec.begin(),
+	               [](const auto& managed) { return managed.get(); });
+	return rawPtrVec;
 }
 
 template <typename C, typename FUNC, typename OBJ, typename... ARGS>
@@ -462,7 +470,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 	prtx::DoubleVector normals;
 	std::vector<uint32_t> faceIndices;
 	std::vector<uint32_t> faceCounts;
-	std::vector<const prt::AttributeMap*> matAttrMap;
+	std::vector<prtx::PRTUtils::AttributeMapUPtr> matAttrMap;
 
 	uint32_t faceCount = 0;
 	std::vector<uint32_t> faceRanges;
@@ -479,8 +487,6 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 		const prtx::MeshPtrVector& meshes = instance.getGeometry()->getMeshes();
 		const prtx::MaterialPtrVector& materials = instance.getMaterials();
 
-		size_t material_count = materials.size();
-
 #if ENC_DBG == 1
 		size_t mesh_count = meshes.size();
 		LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": "
@@ -494,8 +500,6 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 		normals.clear();
 		faceIndices.clear();
 		faceCounts.clear();
-		for (const auto* mat : matAttrMap)
-			mat->destroy();
 		matAttrMap.clear();
 		uvs.clear();
 		uvCounts.clear();
@@ -611,8 +615,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 					}
 				}
 				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys(), cb, cache);
-				matAttrMap.push_back(amb->createAttributeMapAndReset());
-				LOG_DBG << "mat map: " << prtx::PRTUtils::objectToXML(matAttrMap.back());
+				matAttrMap.emplace_back(amb->createAttributeMapAndReset());
+				LOG_DBG << "mat map: " << prtx::PRTUtils::objectToXML(matAttrMap.back().get());
 			}
 		}
 		faceRanges.push_back(faceCount);
@@ -629,6 +633,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 		assert(uvs.size() == puvCounts.first.size());
 		assert(uvs.size() == puvCounts.second.size());
 
+		std::vector<const prt::AttributeMap*> matAttrPtrs = toPtrVec(matAttrMap);
+
 		cb->add(instance.getInitialShapeIndex(), instanceIndex, vertexCoords.data(), vertexCoords.size(),
 		        normals.data(), normals.size(), faceIndices.data(), faceIndices.size(), faceCounts.data(),
 		        faceCounts.size(),
@@ -636,7 +642,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 		        puvs.first.data(), puvs.second.data(), puvCounts.first.data(), puvCounts.second.data(),
 		        puvIndices.first.data(), puvIndices.second.data(), static_cast<uint32_t>(uvs.size()),
 
-		        faceRanges.data(), faceRanges.size(), matAttrMap.empty() ? nullptr : matAttrMap.data(), material_count);
+		        faceRanges.data(), faceRanges.size(), matAttrPtrs.data(), matAttrPtrs.size());
 
 		instanceIndex++;
 	}
