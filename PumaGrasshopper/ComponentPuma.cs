@@ -49,7 +49,6 @@ namespace PumaGrasshopper
         const string RPK_INPUT_NAME = "Path to Rule Package";
         const string RPK_INPUT_NICK_NAME = "RPK";
         const string RPK_INPUT_DESC = "Path to a CityEngine rule package (RPK).";
-        const string RPK_PATH_SERIALIZE = "RPK_PATH";
 
         const string GEOM_INPUT_NAME = "Input Shapes";
         const string GEOM_INPUT_NICK_NAME = "Shapes";
@@ -167,7 +166,7 @@ namespace PumaGrasshopper
                         pManager.AddGeometryParameter(desc.name, desc.nickName, desc.desc, GH_ParamAccess.tree);
                         break;
                     case ParamType.FILEPATH:
-                        pManager.AddParameter(new Param_FilePath(), desc.name, desc.nickName, desc.desc, GH_ParamAccess.item);
+                        pManager.AddParameter(new RulePackageParam(), desc.name, desc.nickName, desc.desc, GH_ParamAccess.item);
                         break;
                     case ParamType.INTEGER:
                         pManager.AddIntegerParameter(desc.name, desc.nickName, desc.desc, GH_ParamAccess.tree, 0);
@@ -230,7 +229,17 @@ namespace PumaGrasshopper
             string rpk_file = "";
             if (!dataAccess.GetData(RPK_INPUT_NAME, ref rpk_file))
                 return "";
-            return rpk_file;
+
+            string absoluteRpkPath = "";
+            try
+            {
+                absoluteRpkPath = RulePackageParam.GetAbsoluteRulePackagePath(OnPingDocument(), rpk_file);
+            }
+            catch (ArgumentException e)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Unable to compute absolute path to RPK: " + e.Message);
+            }
+            return absoluteRpkPath;
         }
 
         private bool SetRulePackage(string rulePackage)
@@ -618,19 +627,6 @@ namespace PumaGrasshopper
         public void VariableParameterMaintenance()
         {
             return;
-        }
-
-        public override bool Write(GH_IWriter writer)
-        {
-            writer.SetString(RPK_PATH_SERIALIZE, mCurrentRPK);
-            return base.Write(writer);
-        }
-
-        public override bool Read(GH_IReader reader)
-        {
-            if (reader.ChunkExists(RPK_PATH_SERIALIZE))
-                mCurrentRPK = reader.GetString(RPK_PATH_SERIALIZE);
-            return base.Read(reader);
         }
 
         /// <summary>

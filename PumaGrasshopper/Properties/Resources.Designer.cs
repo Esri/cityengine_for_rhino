@@ -89,5 +89,15 @@ namespace PumaGrasshopper.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap gh_prt_rpk_parameter {
+            get {
+                object obj = ResourceManager.GetObject("gh_prt_rpk_parameter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
