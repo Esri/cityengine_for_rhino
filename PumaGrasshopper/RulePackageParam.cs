@@ -88,8 +88,7 @@ namespace PumaGrasshopper
 
         public static string GetAbsoluteRulePackagePath(GH_Document doc, String relRulePackagePath)
         {
-            string docFilePath = doc.FilePath;
-            string docDirPath = Path.GetDirectoryName(docFilePath);
+            string docDirPath = Path.GetDirectoryName(doc.FilePath);
             return Path.Combine(docDirPath, relRulePackagePath);
         }
 
