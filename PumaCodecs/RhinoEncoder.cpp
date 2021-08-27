@@ -245,14 +245,14 @@ const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
 void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, const prtx::Material& prtxAttr,
                                    const prtx::WStringVector& keys, IRhinoCallbacks* cb, prt::Cache* cache) {
 	if constexpr (ENC_DBG)
-		LOG_DBG << L"[RHINOENCODER] Converting material " << prtxAttr.name();
+		LOG_DBG << L"Converting material " << prtxAttr.name();
 
 	for (const auto& key : keys) {
 		if (MATERIAL_ATTRIBUTE_BLACKLIST.count(key) > 0)
 			continue;
 
 		if constexpr (ENC_DBG)
-			LOG_DBG << L"   key: " << key;
+			LOG_DBG << L"key: " << key;
 
 		switch (prtxAttr.getType(key)) {
 			case prt::Attributable::PT_BOOL:
@@ -300,14 +300,14 @@ void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, c
 				const std::wstring texPath = getTexturePath(tex, cb, cache);
 				if (texPath.length() > 0) {
 					if constexpr (ENC_DBG)
-						LOG_DBG << "[RHINOENCODER] Using getTexture with key: " << key << " : " << texPath;
+						LOG_DBG << "Using getTexture with key: " << key << " : " << texPath;
 					amb->setString(key.c_str(), texPath.c_str());
 				}
 				break;
 			}
 			case prtx::Material::PT_TEXTURE_ARRAY: {
 				if constexpr (ENC_DBG)
-					LOG_DBG << "[RHINOENCODER] Texture array with key: " << key;
+					LOG_DBG << "Texture array with key: " << key;
 
 				const auto& texArray = prtxAttr.getTextureArray(key);
 
@@ -328,7 +328,7 @@ void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, c
 			}
 			default: {
 				if constexpr (ENC_DBG)
-					LOG_DBG << L"[RHINOENCODER] Ignored attribute " << key;
+					LOG_DBG << L"Ignored attribute " << key;
 				continue;
 			}
 		}
@@ -504,8 +504,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 
 		if constexpr (ENC_DBG) {
 			size_t mesh_count = meshes.size();
-			LOG_DBG << L"[RHINOENCODER] Material count for instance " << instance.getInitialShapeIndex() << ": "
-			        << materials.size() << ", meshes: " << mesh_count << std::endl;
+			LOG_DBG << L"Material count for instance " << instance.getInitialShapeIndex() << ": " << materials.size()
+			        << ", meshes: " << mesh_count << std::endl;
 		}
 
 		vertexIndexBase = 0;
