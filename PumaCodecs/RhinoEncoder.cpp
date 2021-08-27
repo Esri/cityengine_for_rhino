@@ -23,6 +23,7 @@
 #include "TextureEncoder.h"
 
 #include "prtx/DataBackend.h"
+#include "prtx/EncodePreparator.h"
 #include "prtx/EncoderInfoBuilder.h"
 #include "prtx/Exception.h"
 #include "prtx/GenerateContext.h"
@@ -65,7 +66,8 @@ const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
                 .cleanupVertexNormals(true)
                 .processVertexNormals(prtx::VertexNormalProcessor::SET_MISSING_TO_FACE_NORMALS)
                 .indexSharing(prtx::EncodePreparator::PreparationFlags::INDICES_SAME_FOR_ALL_VERTEX_ATTRIBUTES)
-                .mergeByMaterial(true);
+                .mergeByMaterial(true)
+                .processHoles(prtx::HoleProcessor::TRIANGULATE_FACES_WITH_HOLES);
 
 std::vector<const wchar_t*> toPtrVec(const prtx::WStringVector& wsv) {
 	std::vector<const wchar_t*> pw(wsv.size());
