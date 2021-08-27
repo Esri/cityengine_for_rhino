@@ -616,7 +616,8 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 				}
 				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys(), cb, cache);
 				matAttrMap.emplace_back(amb->createAttributeMapAndReset());
-				LOG_DBG << "mat map: " << prtx::PRTUtils::objectToXML(matAttrMap.back().get());
+				if constexpr (ENC_DBG)
+					LOG_DBG << "mat map: " << prtx::PRTUtils::objectToXML(matAttrMap.back().get());
 			}
 		}
 		faceRanges.push_back(faceCount);
