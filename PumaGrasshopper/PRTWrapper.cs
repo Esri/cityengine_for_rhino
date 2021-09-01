@@ -610,11 +610,11 @@ namespace PumaGrasshopper
             }
         }
 
-        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, List<bool> boolList)
+        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, List<Boolean> boolList)
         {
             if (boolList.Count == 0) return;
 
-            using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll(boolList.ToArray(), x => Convert.ToInt32(x))))
+            using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
             {
                 var pArray = array.ConstPointer();
                 PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, fullName, pArray);

@@ -102,7 +102,7 @@ namespace PumaGrasshopper.Annotations
             foreach (var item in mEnumList)
             {
                 if (item != null)
-                    vList.ListItems.Add(new GH_ValueListItem(item.ToString(), System.String.Format("\"{0}\"", item.ToString())));
+                    vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"", item.ToString())));
             }
 
             return vList;
