@@ -12,6 +12,11 @@ namespace PumaGrasshopper.Annotations
 
     public class Base
     {
+        public Base()
+        {
+            this.mAnnotType = AttributeAnnotation.A_NOANNOT;
+        }
+
         public Base(AttributeAnnotation annot = AttributeAnnotation.A_NOANNOT)
         {
             this.mAnnotType = annot;
@@ -25,11 +30,15 @@ namespace PumaGrasshopper.Annotations
 
         public AttributeAnnotation GetAnnotationType() { return mAnnotType; }
 
-        protected AttributeAnnotation mAnnotType;
+        public virtual EnumAnnotationType GetEnumType() { throw new Exception("Annotation base type does not contain an enum type."); }
+
+        public AttributeAnnotation mAnnotType { get;  set; }
     }
 
     public class Range : Base
     {
+        public Range() : base(AttributeAnnotation.A_RANGE) { }
+
         public Range(double min, double max, double stepsize = 0, bool restricted = true) : base(AttributeAnnotation.A_RANGE)
         {
             mMin = min;
@@ -59,17 +68,20 @@ namespace PumaGrasshopper.Annotations
             return slider;
         }
 
-        private readonly double mMax;
-        private readonly double mMin;
-        private readonly double mStepSize;
-        private readonly bool   mRestricted;
+        public double mMax { get; set; }
+        public double mMin { get; set; }
+        public double mStepSize { get; set; }
+        public bool mRestricted { get; set; }
     }
 
     public class Enum<T> : Base
     {
-        public Enum(T[] enumList, bool restricted) : base(AttributeAnnotation.A_ENUM)
+        public Enum() : base(AttributeAnnotation.A_ENUM) { }
+
+        public Enum(T[] enumList, EnumAnnotationType enumType, bool restricted) : base(AttributeAnnotation.A_ENUM)
         {
             mEnumList = enumList;
+            mEnumType = enumType;
             mRestricted = restricted;
         }
 
@@ -90,14 +102,20 @@ namespace PumaGrasshopper.Annotations
             foreach (var item in mEnumList)
             {
                 if (item != null)
-                    vList.ListItems.Add(new GH_ValueListItem(item.ToString(), String.Format("\"{0}\"", item.ToString())));
+                    vList.ListItems.Add(new GH_ValueListItem(item.ToString(), System.String.Format("\"{0}\"", item.ToString())));
             }
 
             return vList;
         }
 
-        private readonly bool mRestricted;
-        private readonly T[] mEnumList;
+        public override EnumAnnotationType GetEnumType()
+        {
+            return mEnumType;
+        }
+
+        public bool mRestricted { get; set; }
+        public EnumAnnotationType mEnumType { get; set; }
+        public T[] mEnumList { get; set; }
     }
 
     public class Color : Base
