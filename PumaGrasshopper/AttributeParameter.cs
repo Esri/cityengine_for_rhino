@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
@@ -29,15 +30,45 @@ using System.Windows.Forms;
 
 namespace PumaGrasshopper.AttributeParameter
 {
+    static class SerializationIds {
+        public const string GROUP_NAME = "GROUP_NAME";
+        public const string EXPECTS_ARRAY = "EXPECTS_ARRAY";
+        public const string ANNOTATION_COUNT = "ANNOTATION_COUNT";
+        public const string ANNOTATION_TYPE = "ANNOTATION_TYPE";
+        public const string ANNOTATION_ENUM_TYPE = "ANNOTATION_ENUM_TYPE";
+        public const string ANNOTATION = "ANNOTATION";
+    }
+
     public class Boolean : Param_Boolean
     {
-        private readonly string mGroupName;
-        private readonly bool mExpectsArray;
+        private string mGroupName;
+        private bool mExpectsArray;
+
+        public Boolean() : base() { }
 
         public Boolean(string groupName = "", bool expectsArray = false): base()
         {
             mGroupName = groupName;
             mExpectsArray = expectsArray;
+        }
+
+        public override Guid ComponentGuid {
+            get { return new Guid("65bc034c-5340-4d4b-88a0-c60b4c63c667"); }
+        }
+
+        public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
+            writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
+            return base.Write(writer);
+        }
+        public override bool Read(GH_IReader reader)
+        {
+            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
+            mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
+            return base.Read(reader);
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -116,15 +147,44 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class Number: Param_Number
     {
-        private readonly List<Annotations.Base> mAnnotations;
-        private readonly string mGroupName;
-        private readonly bool mExpectsArray;
+        private List<Annotations.Base> mAnnotations;
+        private string mGroupName;
+        private bool mExpectsArray;
 
-        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray)
+        public Number() : base() {
+            mAnnotations = new List<Annotations.Base>();
+        }
+
+        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray) : base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
             mExpectsArray = expectsArray;
+        }
+
+        public override Guid ComponentGuid
+        {
+            get { return new Guid("edc1c20d-b8d2-4f2f-af03-c13f0b7f3367"); }
+        }
+
+        public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
+            writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
+            AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
+
+            return base.Write(writer);
+        }
+
+        public override bool Read(GH_IReader reader)
+        {
+            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
+            mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
+            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
+
+            return base.Read(reader);
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -211,15 +271,44 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class String: Param_String
     {
-        private readonly List<Annotations.Base> mAnnotations;
-        private readonly string mGroupName;
-        private readonly bool mExpectsArray;
+        private List<Annotations.Base> mAnnotations;
+        private string mGroupName;
+        private bool mExpectsArray;
 
-        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false): base()
+        public String() : base() {
+            mAnnotations = new List<Annotations.Base>();
+        }
+
+        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false) : base()
         {
             mAnnotations = annots;
             mGroupName = groupName;
             mExpectsArray = expectsArray;
+        }
+
+        public override Guid ComponentGuid
+        {
+            get { return new Guid("27d4954d-bce4-4253-91a1-83e286199e5a"); }
+        }
+        
+        public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
+            writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
+            AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
+
+            return base.Write(writer);
+        }
+
+        public override bool Read(GH_IReader reader)
+        {
+            mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
+            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
+            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
+
+            return base.Read(reader);
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -304,11 +393,32 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class Colour: Param_Colour
     {
-        private readonly string mGroupName;
+        private string mGroupName;
+
+        public Colour() : base() { }
 
         public Colour(string groupName= ""): base()
         {
             mGroupName = groupName;
+        }
+
+        public override Guid ComponentGuid
+        {
+            get { return new Guid("2f6be11a-f0aa-4a20-a81e-ccbf345ba294"); }
+        }
+
+        public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
+            return base.Write(writer);
+        }
+
+        public override bool Read(GH_IReader reader)
+        {
+            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
+            return base.Read(reader);
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
