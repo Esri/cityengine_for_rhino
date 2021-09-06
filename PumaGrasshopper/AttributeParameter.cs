@@ -53,7 +53,7 @@ namespace PumaGrasshopper.AttributeParameter
         }
 
         public override Guid ComponentGuid {
-            get { return new Guid("65bc034c-5340-4d4b-88a0-c60b4c63c667"); }
+            get { return PumaUIDs.AttributeParameterBooleanGuid; }
         }
 
         public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
@@ -164,7 +164,7 @@ namespace PumaGrasshopper.AttributeParameter
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("edc1c20d-b8d2-4f2f-af03-c13f0b7f3367"); }
+            get { return PumaUIDs.AttributeParameterNumberGuid; }
         }
 
         public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
@@ -288,7 +288,7 @@ namespace PumaGrasshopper.AttributeParameter
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("27d4954d-bce4-4253-91a1-83e286199e5a"); }
+            get { return PumaUIDs.AttributeParameterStringGuid; }
         }
         
         public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
@@ -404,7 +404,7 @@ namespace PumaGrasshopper.AttributeParameter
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("2f6be11a-f0aa-4a20-a81e-ccbf345ba294"); }
+            get { return PumaUIDs.AttributeParameterColourGuid; }
         }
 
         public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }

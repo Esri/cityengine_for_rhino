@@ -132,7 +132,7 @@ namespace PumaGrasshopper
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("23602a6d-1137-4403-867a-082e001ca707"); }
+            get { return PumaUIDs.ComponentReportsUnpackerGuid; }
         }
     }
 }
