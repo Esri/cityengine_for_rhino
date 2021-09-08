@@ -18,7 +18,7 @@ namespace PumaGrasshopper
             for (int i = 0; i < annotations.Count; ++i)
             {
                 // use xml serializer to serialize annotations to xml string
-                string annot_xml = Utils.ToXML(annotations[i]);
+                string annotXml = Utils.ToXML(annotations[i]);
 
                 AttributeAnnotation annotType = annotations[i].GetAnnotationType();
                 if (annotType == AttributeAnnotation.A_ENUM)
@@ -28,22 +28,22 @@ namespace PumaGrasshopper
                 }
 
                 writer.SetInt32(SerializationIds.ANNOTATION_TYPE, i, (int)annotType);
-                writer.SetString(SerializationIds.ANNOTATION, i, annot_xml);
+                writer.SetString(SerializationIds.ANNOTATION, i, annotXml);
             }
         }
 
         public static List<Base> ReadAnnotations(GH_IReader reader)
         {
-            int annotation_count = reader.GetInt32(SerializationIds.ANNOTATION_COUNT);
-            List<Base> annotations = new List<Base>(annotation_count);
+            int annotationCount = reader.GetInt32(SerializationIds.ANNOTATION_COUNT);
+            List<Base> annotations = new List<Base>(annotationCount);
 
-            for (int i = 0; i < annotation_count; ++i)
+            for (int i = 0; i < annotationCount; ++i)
             {
-                string annot_xml = reader.GetString(SerializationIds.ANNOTATION, i);
-                int annot_type = reader.GetInt32(SerializationIds.ANNOTATION_TYPE, i);
+                string annotXml = reader.GetString(SerializationIds.ANNOTATION, i);
+                int annotType = reader.GetInt32(SerializationIds.ANNOTATION_TYPE, i);
 
-                int annot_enum_type = (AttributeAnnotation)annot_type == AttributeAnnotation.A_ENUM ? reader.GetInt32(SerializationIds.ANNOTATION_ENUM_TYPE, i) : 0;
-                Base annot = FromXML((AttributeAnnotation)annot_type, annot_xml, (EnumAnnotationType)annot_enum_type);
+                int annotEnumType = (AttributeAnnotation)annotType == AttributeAnnotation.A_ENUM ? reader.GetInt32(SerializationIds.ANNOTATION_ENUM_TYPE, i) : 0;
+                Base annot = FromXML((AttributeAnnotation)annotType, annotXml, (EnumAnnotationType)annotEnumType);
                 annotations.Add(annot);
             }
 

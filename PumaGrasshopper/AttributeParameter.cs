@@ -31,44 +31,102 @@ using System.Windows.Forms;
 namespace PumaGrasshopper.AttributeParameter
 {
     static class SerializationIds {
+        public const string VERSION = "VERSION";
         public const string GROUP_NAME = "GROUP_NAME";
         public const string EXPECTS_ARRAY = "EXPECTS_ARRAY";
         public const string ANNOTATION_COUNT = "ANNOTATION_COUNT";
         public const string ANNOTATION_TYPE = "ANNOTATION_TYPE";
         public const string ANNOTATION_ENUM_TYPE = "ANNOTATION_ENUM_TYPE";
         public const string ANNOTATION = "ANNOTATION";
+
+        public const int SERIALIZATION_VERSION = 1;
     }
 
-    public class Boolean : Param_Boolean
+    public class PumaParameter<T> : GH_PersistentParam<T> where T : class, IGH_Goo
     {
-        private string mGroupName;
-        private bool mExpectsArray;
+        protected string mGroupName;
+        protected bool mExpectsArray;
 
-        public Boolean() : base() { }
+        public PumaParameter() : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+        {
+            mGroupName = "";
+            mExpectsArray = false;
+        }
 
-        public Boolean(string groupName = "", bool expectsArray = false): base()
+        public PumaParameter(string groupName, bool expectsArray) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = groupName;
             mExpectsArray = expectsArray;
         }
 
-        public override Guid ComponentGuid {
-            get { return PumaUIDs.AttributeParameterBooleanGuid; }
-        }
+        public override Guid ComponentGuid => throw new NotImplementedException();
 
         public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
 
+        protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
+
+        protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
+
+        protected override GH_GetterResult Prompt_Plural(ref List<T> values)
+        {
+            return GH_GetterResult.cancel;
+        }
+
+        protected override GH_GetterResult Prompt_Singular(ref T value)
+        {
+            return GH_GetterResult.cancel;
+        }
+
         public override bool Write(GH_IWriter writer)
         {
+            writer.SetInt32(SerializationIds.VERSION, SerializationIds.SERIALIZATION_VERSION);
             writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
             writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
+            
             return base.Write(writer);
         }
+
         public override bool Read(GH_IReader reader)
         {
-            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
-            mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
+            int serializationVersion = 0;
+            if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion))
+            {
+                mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
+                mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
+            }
+
             return base.Read(reader);
+        }
+
+        protected void DisplayExtractedParam(IGH_Param param)
+        {
+            param.CreateAttributes();
+            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
+                                                                Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
+            param.Description = Description;
+            param.Name = Name;
+            param.NickName = NickName;
+
+            var doc = OnPingDocument();
+            doc.AddObject(param, false);
+
+            AddSource(param);
+
+            if (mGroupName.Length > 0)
+                Utils.AddToGroup(doc, mGroupName, param.InstanceGuid);
+
+            ExpireSolution(true);
+        }
+    } 
+
+    public class Boolean : PumaParameter<GH_Boolean>
+    {
+        public Boolean() : base() { }
+
+        public Boolean(string groupName = "", bool expectsArray = false): base(groupName, expectsArray) { }
+
+        public override Guid ComponentGuid {
+            get { return PumaUIDs.AttributeParameterBooleanGuid; }
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -126,40 +184,21 @@ namespace PumaGrasshopper.AttributeParameter
                 }
             }
 
-            param.CreateAttributes();
-            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
-                                                                Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
-            param.Description = Description;
-            param.Name = Name;
-            param.NickName = NickName;
-
-            var doc = OnPingDocument();
-            doc.AddObject(param, false);
-
-            AddSource(param);
-
-            if (mGroupName.Length > 0)
-                Utils.AddToGroup(doc, mGroupName, param.InstanceGuid);
-
-            ExpireSolution(true);
+            DisplayExtractedParam(param);
         }
     }
 
-    public class Number: Param_Number
+    public class Number: PumaParameter<GH_Number>
     {
         private List<Annotations.Base> mAnnotations;
-        private string mGroupName;
-        private bool mExpectsArray;
 
         public Number() : base() {
             mAnnotations = new List<Annotations.Base>();
         }
 
-        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray) : base()
+        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray) : base(groupName, expectsArray)
         {
             mAnnotations = annots;
-            mGroupName = groupName;
-            mExpectsArray = expectsArray;
         }
 
         public override Guid ComponentGuid
@@ -167,12 +206,8 @@ namespace PumaGrasshopper.AttributeParameter
             get { return PumaUIDs.AttributeParameterNumberGuid; }
         }
 
-        public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
-
         public override bool Write(GH_IWriter writer)
         {
-            writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
-            writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
             AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
 
             return base.Write(writer);
@@ -180,9 +215,9 @@ namespace PumaGrasshopper.AttributeParameter
 
         public override bool Read(GH_IReader reader)
         {
-            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
-            mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
-            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
+            int serializationVersion = 0;
+            if(reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion))
+                mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
 
             return base.Read(reader);
         }
@@ -249,41 +284,22 @@ namespace PumaGrasshopper.AttributeParameter
                     param = paramPersistent;
                 }
             }
-            
-            param.CreateAttributes();
-            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
-                                                                Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
-            param.Description = Description;
-            param.Name = Name;
-            param.NickName = NickName;
 
-            var doc = OnPingDocument();
-            doc.AddObject(param, false);
-
-            AddSource(param);
-
-            if (mGroupName.Length > 0)
-                Utils.AddToGroup(doc, mGroupName, param.InstanceGuid);
-
-            ExpireSolution(true);
+            DisplayExtractedParam(param);
         }
     }
 
-    public class String: Param_String
+    public class String: PumaParameter<GH_String>
     {
         private List<Annotations.Base> mAnnotations;
-        private string mGroupName;
-        private bool mExpectsArray;
 
         public String() : base() {
             mAnnotations = new List<Annotations.Base>();
         }
 
-        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false) : base()
+        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false) : base(groupName, expectsArray)
         {
             mAnnotations = annots;
-            mGroupName = groupName;
-            mExpectsArray = expectsArray;
         }
 
         public override Guid ComponentGuid
@@ -291,12 +307,8 @@ namespace PumaGrasshopper.AttributeParameter
             get { return PumaUIDs.AttributeParameterStringGuid; }
         }
         
-        public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
-
         public override bool Write(GH_IWriter writer)
         {
-            writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
-            writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
             AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
 
             return base.Write(writer);
@@ -304,9 +316,9 @@ namespace PumaGrasshopper.AttributeParameter
 
         public override bool Read(GH_IReader reader)
         {
-            mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
-            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
-            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
+            int serializationVersion = 0;
+            if(reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion))
+                mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
 
             return base.Read(reader);
         }
@@ -372,53 +384,19 @@ namespace PumaGrasshopper.AttributeParameter
                 }
             }
 
-            param.CreateAttributes();
-            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
-                                                                Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
-            param.Description = Description;
-            param.Name = Name;
-            param.NickName = NickName;
-
-            var doc = OnPingDocument();
-            doc.AddObject(param, false);
-
-            AddSource(param);
-
-            if (mGroupName.Length > 0)
-                Utils.AddToGroup(doc, mGroupName, param.InstanceGuid);
-
-            ExpireSolution(true);
+            DisplayExtractedParam(param);
         }
     }
 
-    public class Colour: Param_Colour
+    public class Colour: PumaParameter<GH_Colour>
     {
-        private string mGroupName;
-
         public Colour() : base() { }
 
-        public Colour(string groupName= ""): base()
-        {
-            mGroupName = groupName;
-        }
+        public Colour(string groupName = "") : base(groupName, false) { }
 
         public override Guid ComponentGuid
         {
             get { return PumaUIDs.AttributeParameterColourGuid; }
-        }
-
-        public override GH_Exposure Exposure { get { return GH_Exposure.hidden; } }
-
-        public override bool Write(GH_IWriter writer)
-        {
-            writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
-            return base.Write(writer);
-        }
-
-        public override bool Read(GH_IReader reader)
-        {
-            mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
-            return base.Read(reader);
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -459,24 +437,7 @@ namespace PumaGrasshopper.AttributeParameter
                 param = paramPersistent;
             }
 
-            param.CreateAttributes();
-            param.Attributes.Pivot = new PointF(Attributes.Bounds.Location.X - param.Attributes.Bounds.Width - 20,
-                                                                Attributes.Pivot.Y - param.Attributes.Bounds.Height / 2);
-            param.Description = Description;
-            param.Name = Name;
-            param.NickName = NickName;
-
-            var doc = OnPingDocument();
-            doc.AddObject(param, false);
-
-            AddSource(param);
-
-            if(mGroupName.Length > 0)
-            {
-                Utils.AddToGroup(doc, mGroupName, param.InstanceGuid);
-            }
-
-            ExpireSolution(true);
+            DisplayExtractedParam(param);
         }
     }
 }

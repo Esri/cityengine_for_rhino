@@ -76,6 +76,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PRTWrapper.cs" />
+    <Compile Include="PumaUIDs.cs" />
     <Compile Include="ReportAttribute.cs" />
     <Compile Include="RuleAttribute.cs" />
     <Compile Include="RulePackageParam.cs" />
