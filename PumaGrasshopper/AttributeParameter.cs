@@ -215,9 +215,7 @@ namespace PumaGrasshopper.AttributeParameter
 
         public override bool Read(GH_IReader reader)
         {
-            int serializationVersion = 0;
-            if(reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion))
-                mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
+            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
 
             return base.Read(reader);
         }
@@ -316,9 +314,7 @@ namespace PumaGrasshopper.AttributeParameter
 
         public override bool Read(GH_IReader reader)
         {
-            int serializationVersion = 0;
-            if(reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion))
-                mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
+            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
 
             return base.Read(reader);
         }
