@@ -244,6 +244,10 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 ### Puma 0.5.0 (Fall 2020)
 * First internal proof of concept.
 
+## Contributing
+
+Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/esri/contributing).
+
 ## Licensing Information
 
 Puma is free for personal, educational, and non-commercial use. Commercial use requires at least one commercial license of the latest CityEngine version installed in the organization. Redistribution or web service offerings are not allowed unless expressly permitted.
