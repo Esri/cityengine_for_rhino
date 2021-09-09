@@ -31,6 +31,23 @@ namespace PumaGrasshopper
             }
         }
 
+        // overwrite "Set one Text" menu item
+        // Note: there should be a simpler way via Menu_CustomSingleValueItem... 
+        protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
+        {
+            Menu_AppendItem(menu, "Set Rule Package...", (object sender, EventArgs e) =>
+            {
+                var rpk = new GH_String();
+                var getterResult = Prompt_Singular(ref rpk);
+                if (getterResult == GH_GetterResult.success)
+                {
+                    PersistentData.Clear();
+                    SetPersistentData(rpk);
+                    ExpireSolution(true);
+                }
+            });
+        }
+
         protected override void Menu_AppendPromptMore(ToolStripDropDown menu)
         {
         }
