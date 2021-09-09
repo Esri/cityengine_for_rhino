@@ -270,9 +270,6 @@ namespace PumaGrasshopper
                     return false;
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
             }
-            else
-                if (!SetRulePackage(mCurrentRPK))
-                    return false;
             return true;
         }
 
