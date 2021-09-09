@@ -34,10 +34,6 @@ using System.Drawing;
 using System.Diagnostics;
 using Rhino.Runtime.InteropWrappers;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 namespace PumaGrasshopper
 {
 
@@ -131,13 +127,6 @@ namespace PumaGrasshopper
 
         string mCurrentRPK = "";
 
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear,
-        /// Subcategory the panel. If you use non-existing tab or panel names,
-        /// new tabs/panels will automatically be created.
-        /// </summary>
         public ComponentPuma()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Puma runs CityEngine CGA rules on input shapes and returns the generated models. (Version " + PRTWrapper.GetVersion() + ")",
@@ -152,9 +141,6 @@ namespace PumaGrasshopper
             mDoGenerateMaterials = true;
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             foreach (var param in Enum.GetValues(typeof(InputParams)).Cast<InputParams>())
@@ -175,9 +161,6 @@ namespace PumaGrasshopper
             }
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             foreach (var param in Enum.GetValues(typeof(OutputParams)).Cast<OutputParams>())
@@ -389,11 +372,6 @@ namespace PumaGrasshopper
             dataAccess.SetDataTree((int)OutputParams.ERRORS, outputTree);
         }
 
-        /// <summary>
-        /// Input object types supported are: GH_Mesh, GH_Brep, GH_Rectangle, GH_Surface, GH_Box, GH_Plane.
-        /// </summary>
-        /// <param name="shape">An initial shape</param>
-        /// <returns>The shape converted to a Mesh</returns>
         private Mesh ConvertToMesh(IGH_GeometricGoo shape)
         {
             Mesh mesh = null;
@@ -472,7 +450,7 @@ namespace PumaGrasshopper
                     shapeId++;
                 }
 
-                // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
+                // Grasshopper behaviour: repeat last item to compensate mismatched list lengths
                 while(shapeId < shapeCount)
                 {
                     SetRuleAttributeArray(shapeId, attributeParam, tree.Branches.Last());
@@ -481,10 +459,9 @@ namespace PumaGrasshopper
             }
             else
             {
-                // Transform the tree to a list
                 List<T> values = tree.ToList();
 
-                // Complete missing values with the last one.
+                // Grasshopper behaviour: repeat last item to compensate mismatched list lengths
                 while (shapeCount > values.Count)
                 {
                     values.Add(values.Last());
@@ -629,24 +606,14 @@ namespace PumaGrasshopper
             return;
         }
 
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
                 return Resources.gh_prt_main_component;
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it.
-        /// It is vital this Guid doesn't change otherwise old ghx files
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("ad54a111-cdbc-4417-bddd-c2195c9482d8"); }
