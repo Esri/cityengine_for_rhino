@@ -34,11 +34,10 @@ namespace PumaGrasshopper
 
         public static List<Base> ReadAnnotations(GH_IReader reader)
         {
-            int serializationVersion = 0;
-            if (!reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion))
+            int annotationCount = 0;
+            if (!reader.TryGetInt32(SerializationIds.ANNOTATION_COUNT, ref annotationCount))
                 return new List<Base>();
 
-            int annotationCount = reader.GetInt32(SerializationIds.ANNOTATION_COUNT);
             List<Base> annotations = new List<Base>(annotationCount);
 
             for (int i = 0; i < annotationCount; ++i)

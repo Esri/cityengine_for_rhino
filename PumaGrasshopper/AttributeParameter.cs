@@ -46,17 +46,20 @@ namespace PumaGrasshopper.AttributeParameter
     {
         protected string mGroupName;
         protected bool mExpectsArray;
+        protected List<Annotations.Base> mAnnotations;
 
         public PumaParameter() : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = "";
             mExpectsArray = false;
+            mAnnotations = new List<Annotations.Base>();
         }
 
-        public PumaParameter(string groupName, bool expectsArray) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+        public PumaParameter(string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = groupName;
             mExpectsArray = expectsArray;
+            mAnnotations = annotations;
         }
 
         public override Guid ComponentGuid => throw new NotImplementedException();
@@ -82,6 +85,7 @@ namespace PumaGrasshopper.AttributeParameter
             writer.SetInt32(SerializationIds.VERSION, SerializationIds.SERIALIZATION_VERSION);
             writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
             writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
+            AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
             
             return base.Write(writer);
         }
@@ -89,10 +93,12 @@ namespace PumaGrasshopper.AttributeParameter
         public override bool Read(GH_IReader reader)
         {
             int serializationVersion = 0;
-            if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion))
+            if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
+                && serializationVersion == SerializationIds.SERIALIZATION_VERSION)
             {
                 mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
                 mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
+                mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
             }
 
             return base.Read(reader);
@@ -123,7 +129,7 @@ namespace PumaGrasshopper.AttributeParameter
     {
         public Boolean() : base() { }
 
-        public Boolean(string groupName = "", bool expectsArray = false): base(groupName, expectsArray) { }
+        public Boolean(string groupName = "", bool expectsArray = false): base(groupName, expectsArray, new List<Annotations.Base>()) { }
 
         public override Guid ComponentGuid {
             get { return PumaUIDs.AttributeParameterBooleanGuid; }
@@ -190,34 +196,13 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class Number: PumaParameter<GH_Number>
     {
-        private List<Annotations.Base> mAnnotations;
+        public Number() : base() { }
 
-        public Number() : base() {
-            mAnnotations = new List<Annotations.Base>();
-        }
-
-        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray) : base(groupName, expectsArray)
-        {
-            mAnnotations = annots;
-        }
+        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray) : base(groupName, expectsArray, annots) { }
 
         public override Guid ComponentGuid
         {
             get { return PumaUIDs.AttributeParameterNumberGuid; }
-        }
-
-        public override bool Write(GH_IWriter writer)
-        {
-            AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
-
-            return base.Write(writer);
-        }
-
-        public override bool Read(GH_IReader reader)
-        {
-            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
-
-            return base.Read(reader);
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -289,34 +274,13 @@ namespace PumaGrasshopper.AttributeParameter
 
     public class String: PumaParameter<GH_String>
     {
-        private List<Annotations.Base> mAnnotations;
+        public String() : base() { }
 
-        public String() : base() {
-            mAnnotations = new List<Annotations.Base>();
-        }
-
-        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false) : base(groupName, expectsArray)
-        {
-            mAnnotations = annots;
-        }
+        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false) : base(groupName, expectsArray, annots) { }
 
         public override Guid ComponentGuid
         {
             get { return PumaUIDs.AttributeParameterStringGuid; }
-        }
-        
-        public override bool Write(GH_IWriter writer)
-        {
-            AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
-
-            return base.Write(writer);
-        }
-
-        public override bool Read(GH_IReader reader)
-        {
-            mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
-
-            return base.Read(reader);
         }
 
         protected override void Menu_AppendExtractParameter(ToolStripDropDown menu)
@@ -388,7 +352,7 @@ namespace PumaGrasshopper.AttributeParameter
     {
         public Colour() : base() { }
 
-        public Colour(string groupName = "") : base(groupName, false) { }
+        public Colour(string groupName = "") : base(groupName, false, new List<Annotations.Base>()) { }
 
         public override Guid ComponentGuid
         {
