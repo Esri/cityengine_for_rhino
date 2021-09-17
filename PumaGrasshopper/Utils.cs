@@ -77,6 +77,45 @@ namespace PumaGrasshopper
             return array;
         }
 
+        public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
+        {
+            GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();
+            for (int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Number(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_Boolean> FromListToTree(List<bool> valueList)
+        {
+            GH_Structure<GH_Boolean> tree = new GH_Structure<GH_Boolean>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Boolean(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+        public static GH_Structure<GH_String> FromListToTree(List<string> valueList)
+        {
+            GH_Structure<GH_String> tree = new GH_Structure<GH_String>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_String(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_Colour> HexListToColorTree(List<string> valueList)
+        {
+            GH_Structure<GH_Colour> tree = new GH_Structure<GH_Colour>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Colour(FromHex(valueList[i])), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+
         public static GH_Structure<GH_Boolean> FromListToTree(List<List<bool>> valueList)
         {
             GH_Structure<GH_Boolean> tree = new GH_Structure<GH_Boolean>();
