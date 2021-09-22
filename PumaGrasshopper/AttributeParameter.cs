@@ -119,9 +119,14 @@ namespace PumaGrasshopper.AttributeParameter
             AddSource(param);
 
             if (mGroupName.Length > 0)
-                Utils.AddToGroup(doc, mGroupName, param.InstanceGuid);
+                Utils.AddToGroup(doc, GetGroupUniqueName(), mGroupName, param.InstanceGuid);
 
             ExpireSolution(true);
+        }
+
+        protected string GetGroupUniqueName()
+        {
+            return GetHashCode() + "_" + mGroupName;
         }
     } 
 

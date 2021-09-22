@@ -182,7 +182,7 @@ namespace PumaGrasshopper
             return Math.Abs(d % 1) <= (Double.Epsilon * 100);
         }
 
-        public static void AddToGroup(GH_Document doc, string groupName, Guid guid)
+        public static void AddToGroup(GH_Document doc, string groupName, string groupNickname, Guid guid)
         {
             GH_Group grp;
 
@@ -192,7 +192,7 @@ namespace PumaGrasshopper
                 grp = new GH_Group();
                 grp.CreateAttributes();
                 grp.Name = groupName;
-                grp.NickName = groupName;
+                grp.NickName = groupNickname;
                 grp.Colour = System.Drawing.Color.Aquamarine;
                 grp.Border = GH_GroupBorder.Box;
                 doc.AddObject(grp, false);
