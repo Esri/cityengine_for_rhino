@@ -201,11 +201,21 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 #### Known Limitations
 - Depending on the location of the system temp directory, complex Rule Packages (RPK) might trigger the maximum Windows path length limitation. As a workaround, please change the TEMP environment variable to a shorter path and/or shorten the asset directories within the Rule Package.
 
-### Puma 1.0.0 (2021-08-XX)
+### Puma 1.0.0 (2021-10-XX)
 * First public release.
 * Supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.0 and older.
 * Limitation: no support for PBR material properties in Rhino 7
+
+### Puma 0.9.3 (2021-09-22)
+* Supports Rhino 6 and 7.
+* Supports Rule Packages from CityEngine 2021.0 and older.
+* Improved portability of Grasshopper documents by storing relative paths to Rule Packages (introduces a "RPK" custom parameter).
+* Detect external modification of Rule Packages and potentially reload them when solving the Grasshopper document.
+* Correctly keep manually set parameter values when internalizing a parameter.
+* Fixed parameter extraction of rule attributes after loading a Grasshopper document.
+* Fixed handling of polygons with holes.
+* Various code cleanups.
 
 ### Puma 0.9.2 (2021-08-09)
 * Supports Rhino 6 and 7.
