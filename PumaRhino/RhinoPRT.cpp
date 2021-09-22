@@ -64,9 +64,6 @@ void RhinoPRTAPI::SetRPKPath(const std::wstring& rpkPath) {
 
 	// This also creates the resolve map
 	mModelGenerator->updateRuleFiles(rpkPath); // might throw !
-
-	// Also create the attribute map builder that will receive the rule attributes.
-	mAttrBuilder.reset(prt::AttributeMapBuilder::create());
 }
 
 void RhinoPRTAPI::SetInitialShapes(const std::vector<RawInitialShape>& shapes) {

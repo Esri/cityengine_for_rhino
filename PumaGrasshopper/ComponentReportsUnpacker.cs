@@ -34,9 +34,6 @@ namespace PumaGrasshopper
         const string REPORT_KEY_NAME = "Report Names";
         const string REPORT_VALUE_NAME = "Report Values";
 
-        /// <summary>
-        /// Initializes a new instance of the PumaGrasshopperReportsOutput class.
-        /// </summary>
         public ComponentReportsUnpacker()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Unpacks Puma CGA reports into report names and values per input shape. (Version " + PRTWrapper.GetVersion() + ")",
@@ -44,9 +41,6 @@ namespace PumaGrasshopper
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter(REPORT_INPUT_NAME, REPORT_INPUT_NAME,
@@ -54,9 +48,6 @@ namespace PumaGrasshopper
                 GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter(REPORT_SHAPE_ID_NAME, REPORT_SHAPE_ID_NAME,
@@ -70,11 +61,6 @@ namespace PumaGrasshopper
                 GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// Takes the given ReportAttribute and unpack the values.
-        /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             IGH_Goo input = null;
@@ -114,22 +100,14 @@ namespace PumaGrasshopper
             }
         }
 
-        /// <summary>
-        /// Provides an Icon for the component.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Resources.gh_prt_report_unpack;
             }
         }
 
-        /// <summary>
-        /// Gets the unique ID for this component. Do not change this ID after release.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return PumaUIDs.ComponentReportsUnpackerGuid; }

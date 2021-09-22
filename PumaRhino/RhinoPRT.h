@@ -87,7 +87,6 @@ private:
 	std::vector<RawInitialShape> mShapes;
 	std::vector<pcu::ShapeAttributes> mAttributes;
 
-	pcu::AttributeMapBuilderPtr mAttrBuilder;
 	pcu::AttributeMapBuilderVector mAttrBuilders;
 
 	std::unique_ptr<ModelGenerator> mModelGenerator;

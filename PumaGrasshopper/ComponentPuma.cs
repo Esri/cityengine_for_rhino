@@ -28,16 +28,11 @@ using Rhino.Geometry;
 using System.Linq;
 using PumaGrasshopper.Properties;
 using System.Windows.Forms;
-using GH_IO.Serialization;
-using Grasshopper.Kernel.Parameters;
 using System.Drawing;
 using System.Diagnostics;
 using Rhino.Runtime.InteropWrappers;
+using System.IO;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 namespace PumaGrasshopper
 {
 
@@ -129,15 +124,26 @@ namespace PumaGrasshopper
 
         bool mDoGenerateMaterials;
 
-        string mCurrentRPK = "";
+        public class RulePackage
+        {
+            public string path { get; set; }
+            public DateTime timestamp { get; set; }
+            
+            public bool IsValid()
+            {
+                return (path != null) && (path.Length > 0) && (timestamp != null);
+            }
 
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear,
-        /// Subcategory the panel. If you use non-existing tab or panel names,
-        /// new tabs/panels will automatically be created.
-        /// </summary>
+            public bool IsSame(RulePackage other)
+            {
+                if (path == null || other.path == null)
+                    return false; // default-initialized rule package paths are always different
+                return (string.Compare(path, other.path) == 0) && (timestamp == other.timestamp);
+            }
+        };
+
+        RulePackage mCurrentRPK;
+
         public ComponentPuma()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Puma runs CityEngine CGA rules on input shapes and returns the generated models. (Version " + PRTWrapper.GetVersion() + ")",
@@ -152,9 +158,6 @@ namespace PumaGrasshopper
             mDoGenerateMaterials = true;
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             foreach (var param in Enum.GetValues(typeof(InputParams)).Cast<InputParams>())
@@ -175,9 +178,6 @@ namespace PumaGrasshopper
             }
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             foreach (var param in Enum.GetValues(typeof(OutputParams)).Cast<OutputParams>())
@@ -199,11 +199,11 @@ namespace PumaGrasshopper
         {
             ClearRuntimeMessages();
 
-            String potentiallyNewRulePackage = GetRulePackage(DA);
-            if (potentiallyNewRulePackage.Length == 0)
+            RulePackage rpk = GetRulePackage(DA);
+            if (!rpk.IsValid())
                 return;
 
-            if (!CheckAndUpdateRulePackage(potentiallyNewRulePackage))
+            if (!CheckAndUpdateRulePackage(rpk))
                 return;
 
             List<Mesh> inputMeshes = CreateInputMeshes(DA);
@@ -224,29 +224,35 @@ namespace PumaGrasshopper
             OutputCGAErrors(DA, generatedMeshes);
         }
 
-        private String GetRulePackage(IGH_DataAccess dataAccess)
+        private RulePackage GetRulePackage(IGH_DataAccess dataAccess)
         {
-            string rpk_file = "";
-            if (!dataAccess.GetData(RPK_INPUT_NAME, ref rpk_file))
-                return "";
+            var result = new RulePackage();
+            
+            string rpkPath = "";
+            if (!dataAccess.GetData(RPK_INPUT_NAME, ref rpkPath))
+                return result;
 
-            string absoluteRpkPath = "";
             try
             {
-                absoluteRpkPath = RulePackageParam.GetAbsoluteRulePackagePath(OnPingDocument(), rpk_file);
+                result.path = RulePackageParam.GetAbsoluteRulePackagePath(OnPingDocument(), rpkPath);
+
+                FileInfo fi = new FileInfo(result.path);
+                result.timestamp = fi.LastWriteTime;
             }
-            catch (ArgumentException e)
+            catch (Exception e)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Unable to compute absolute path to RPK: " + e.Message);
             }
-            return absoluteRpkPath;
+
+
+            return result;
         }
 
-        private bool SetRulePackage(string rulePackage)
+        private bool SetRulePackage(RulePackage rulePackage)
         {
             var errorMsg = new StringWrapper();
             var pErrorMsg = errorMsg.NonConstPointer;
-            PRTWrapper.SetPackage(rulePackage, pErrorMsg);
+            PRTWrapper.SetPackage(rulePackage.path, pErrorMsg);
             if (errorMsg.ToString().Length > 0)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to set Rule Package: " + errorMsg);
@@ -255,18 +261,15 @@ namespace PumaGrasshopper
             return true;
         }
 
-        private bool CheckAndUpdateRulePackage(String potentiallyNewRulePackage)
+        private bool CheckAndUpdateRulePackage(RulePackage potentiallyNewRulePackage)
         {
-            if (mCurrentRPK != potentiallyNewRulePackage)
+            if (mCurrentRPK == null || !mCurrentRPK.IsSame(potentiallyNewRulePackage))
             {
                 mCurrentRPK = potentiallyNewRulePackage;
                 if (!SetRulePackage(mCurrentRPK))
                     return false;
                 mRuleAttributes = PRTWrapper.GetRuleAttributes();
             }
-            else
-                if (!SetRulePackage(mCurrentRPK))
-                    return false;
             return true;
         }
 
@@ -389,11 +392,6 @@ namespace PumaGrasshopper
             dataAccess.SetDataTree((int)OutputParams.ERRORS, outputTree);
         }
 
-        /// <summary>
-        /// Input object types supported are: GH_Mesh, GH_Brep, GH_Rectangle, GH_Surface, GH_Box, GH_Plane.
-        /// </summary>
-        /// <param name="shape">An initial shape</param>
-        /// <returns>The shape converted to a Mesh</returns>
         private Mesh ConvertToMesh(IGH_GeometricGoo shape)
         {
             Mesh mesh = null;
@@ -472,7 +470,7 @@ namespace PumaGrasshopper
                     shapeId++;
                 }
 
-                // Grasshopper behaviour: repeat last item/branch when there is more shapes than rule attributes.
+                // Grasshopper behaviour: repeat last item to compensate mismatched list lengths
                 while(shapeId < shapeCount)
                 {
                     SetRuleAttributeArray(shapeId, attributeParam, tree.Branches.Last());
@@ -481,10 +479,9 @@ namespace PumaGrasshopper
             }
             else
             {
-                // Transform the tree to a list
                 List<T> values = tree.ToList();
 
-                // Complete missing values with the last one.
+                // Grasshopper behaviour: repeat last item to compensate mismatched list lengths
                 while (shapeCount > values.Count)
                 {
                     values.Add(values.Last());
@@ -629,24 +626,14 @@ namespace PumaGrasshopper
             return;
         }
 
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
                 return Resources.gh_prt_main_component;
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it.
-        /// It is vital this Guid doesn't change otherwise old ghx files
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return PumaUIDs.ComponentPumaGuid; }
