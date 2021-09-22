@@ -29,6 +29,8 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using System.Drawing;
 using Grasshopper.Kernel.Data;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace PumaGrasshopper
 {
@@ -73,6 +75,45 @@ namespace PumaGrasshopper
             Marshal.Copy(buffer, array, 0, size);
             Marshal.FreeCoTaskMem(buffer);
             return array;
+        }
+
+        public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
+        {
+            GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();
+            for (int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Number(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_Boolean> FromListToTree(List<bool> valueList)
+        {
+            GH_Structure<GH_Boolean> tree = new GH_Structure<GH_Boolean>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Boolean(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+        public static GH_Structure<GH_String> FromListToTree(List<string> valueList)
+        {
+            GH_Structure<GH_String> tree = new GH_Structure<GH_String>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_String(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_Colour> HexListToColorTree(List<string> valueList)
+        {
+            GH_Structure<GH_Colour> tree = new GH_Structure<GH_Colour>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Colour(FromHex(valueList[i])), new GH_Path(i), 0);
+            }
+            return tree;
         }
 
         public static GH_Structure<GH_Boolean> FromListToTree(List<List<bool>> valueList)
@@ -164,6 +205,16 @@ namespace PumaGrasshopper
 
             grp.AddObject(guid);
             grp.ExpireCaches();
+        }
+
+        public static string ToXML(object obj)
+        {
+            XmlSerializer serializer = new XmlSerializer(obj.GetType());
+            MemoryStream stream = new MemoryStream();
+            serializer.Serialize(stream, obj);
+            stream.Position = 0;
+            StreamReader reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
 
         public static string GetCastErrorMessage(string attribute, string castTarget)

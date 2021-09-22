@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Annotations.cs" />
+    <Compile Include="AnnotationSerialization.cs" />
     <Compile Include="ComponentPuma.cs" />
     <Compile Include="ComponentLibraryInfo.cs" />
     <Compile Include="ComponentReportsDisplay.cs" />
@@ -75,8 +76,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PRTWrapper.cs" />
+    <Compile Include="PumaUIDs.cs" />
     <Compile Include="ReportAttribute.cs" />
     <Compile Include="RuleAttribute.cs" />
+    <Compile Include="RulePackageParam.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +89,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +100,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\gh_prt_report_unpack.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\gh_prt_rpk_parameter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

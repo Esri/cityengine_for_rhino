@@ -113,7 +113,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
                          const size_t faceCountsCount, double const* const* uvs, size_t const* uvsSizes,
                          uint32_t const* const* uvCounts, size_t const* uvCountsSizes, uint32_t const* const* uvIndices,
                          size_t const* uvIndicesSizes, uint32_t uvSets, const uint32_t* /*faceRanges*/,
-                         size_t /*faceRangesSize*/, const prt::AttributeMap** materials, const size_t matCount) {
+                         size_t /*faceRangesSize*/, prt::AttributeMap const* const* materials, const size_t matCount) {
 
 	GeneratedModel& currentModel = getOrCreateModel(initialShapeIndex);
 
@@ -125,7 +125,7 @@ void RhinoCallbacks::add(const size_t initialShapeIndex, const size_t instanceIn
 	// -- convert materials into material attributes
 	if constexpr (DBG)
 		LOG_DBG << "got " << matCount << " materials";
-	if (matCount > 0 && materials) {
+	if (matCount > 0 && materials != nullptr) {
 		if (matCount > 1) {
 			LOG_ERR << L"Multiple material for a single mesh part is not supported by Rhino. Taking only the first "
 			           L"material"

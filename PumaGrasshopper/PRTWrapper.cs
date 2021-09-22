@@ -521,7 +521,7 @@ namespace PumaGrasshopper
                         {
                             case Annotations.EnumAnnotationType.ENUM_BOOL:
                                 bool[] boolArray = { true, false };
-                                annots.Add(new Annotations.Enum<bool>(boolArray, true));
+                                annots.Add(new Annotations.Enum<bool>(boolArray, enumType, true));
                                 break;
                             case Annotations.EnumAnnotationType.ENUM_DOUBLE:
                                 annots.Add(GetAnnotationEnumDouble(ruleIdx, enumIdx));
@@ -565,7 +565,7 @@ namespace PumaGrasshopper
                 enumArray = array.ToArray();
             }
 
-            return new Annotations.Enum<double>(enumArray, restricted);
+            return new Annotations.Enum<double>(enumArray, Annotations.EnumAnnotationType.ENUM_DOUBLE, restricted);
         }
 
         public static Annotations.Enum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
@@ -581,7 +581,7 @@ namespace PumaGrasshopper
                 enumArray = array.ToArray();
             }
 
-            return new Annotations.Enum<string>(enumArray, restricted);
+            return new Annotations.Enum<string>(enumArray, Annotations.EnumAnnotationType.ENUM_STRING, restricted);
         }
 
         public static Annotations.Range GetAnnotationRange(int ruleIdx, int enumIdx)
