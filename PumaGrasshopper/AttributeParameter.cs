@@ -140,54 +140,51 @@ namespace PumaGrasshopper.AttributeParameter
             Menu_AppendItem(menu, "Extract parameter", OnExtractParamClicked);
         }
 
-        private void OnExtractParamClicked(object sender, EventArgs e)
+        private GH_Structure<GH_Boolean> GetData()
         {
-            IGH_Param param;
+            if (PersistentDataCount > 0) return PersistentData;
 
             if (mExpectsArray)
             {
-                var defaultValues = PRTWrapper.GetDefaultValuesBooleanArray(Name);
-
-                var paramPersistent = new Param_Boolean();
-
-                if(defaultValues != null)
+                List<List<bool>> defaultValues = PRTWrapper.GetDefaultValuesBooleanArray(Name);
+                if (defaultValues != null)
                 {
-                    GH_Structure<GH_Boolean> tree = Utils.FromListToTree(defaultValues);
-                    paramPersistent.SetPersistentData(tree);
+                    return Utils.FromListToTree(defaultValues);
                 }
-
-                param = paramPersistent;
             }
             else
             {
                 List<bool> defaultValues = PRTWrapper.GetDefaultValuesBoolean(Name);
-
-                if (defaultValues == null)
+                if (defaultValues != null)
                 {
-                    param = new Param_Boolean();
+                    return Utils.FromListToTree(defaultValues);
                 }
-                else if (defaultValues.Count == 1)
+            }
+
+            return new GH_Structure<GH_Boolean>();
+        }
+
+        private void OnExtractParamClicked(object sender, EventArgs e)
+        {
+            IGH_Param param = null;
+
+            GH_Structure<GH_Boolean> data = GetData();
+            
+            if(!mExpectsArray && data.DataCount == 1)
+            {
+                var toggle = new GH_BooleanToggle()
                 {
-                    var toggle = new GH_BooleanToggle()
-                    {
-                        Value = defaultValues[0]
-                    };
+                    Value = data.get_FirstItem(true).Value
+                };
                     
-                    param = toggle;
-                }
-                else
-                {
-                    GH_Structure<GH_Boolean> tree = new GH_Structure<GH_Boolean>();
+                param = toggle;
+            }
 
-                    for (int i = 0; i < defaultValues.Count; ++i)
-                    {
-                        tree.Insert(new GH_Boolean(defaultValues[i]), new GH_Path(i), 0);
-                    }
-
-                    var paramPersistent = new Param_Boolean();
-                    paramPersistent.SetPersistentData(tree);
-                    param = paramPersistent;
-                }
+            if(param == null)
+            {
+                var paramPersistent = new Param_Boolean();
+                paramPersistent.SetPersistentData(data);
+                param = paramPersistent;
             }
 
             DisplayExtractedParam(param);
@@ -210,62 +207,59 @@ namespace PumaGrasshopper.AttributeParameter
             Menu_AppendItem(menu, "Extract parameter", OnExtractParamClicked);
         }
 
+        private GH_Structure<GH_Number> GetData()
+        {
+            if (PersistentDataCount > 0) return PersistentData;
+
+            if(mExpectsArray)
+            {
+                List<List<double>> defaultValues = PRTWrapper.GetDefaultValuesNumberArray(Name);
+                if (defaultValues != null)
+                {
+                    return Utils.FromListToTree(defaultValues);
+                }
+            }
+            else
+            {
+                List<double> defaultValues = PRTWrapper.GetDefaultValuesNumber(Name);
+                if(defaultValues != null)
+                {
+                    return Utils.FromListToTree(defaultValues);
+                }
+            }
+
+            return new GH_Structure<GH_Number>();
+        }
+
         private void OnExtractParamClicked(object sender, EventArgs e)
         {
             IGH_Param param = null;
 
-            if(mExpectsArray)
+            GH_Structure<GH_Number> data = GetData();
+            
+            var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE ||
+                                               x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM);
+
+            if (!mExpectsArray && data.DataCount == 1 && annot != null)
             {
-                var defaultValues = PRTWrapper.GetDefaultValuesNumberArray(Name);
-                
+                param = annot.GetGhSpecializedParam();
+
+                if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
+                {
+                    int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == data.get_FirstItem(true).ToString());
+                    ((GH_ValueList)param).SelectItem(itemIndex);
+                }
+                else if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE)
+                {
+                    ((GH_NumberSlider)param).SetSliderValue((decimal)data.get_FirstItem(true).Value);
+                }
+            }
+
+            if (param == null)
+            {
                 var paramPersistent = new Param_Number();
-
-                if(defaultValues != null)
-                {
-                    GH_Structure<GH_Number> tree = Utils.FromListToTree(defaultValues);
-                    paramPersistent.SetPersistentData(tree);
-                }
-
+                paramPersistent.SetPersistentData(data);
                 param = paramPersistent;
-            } 
-            else
-            {
-                List<double> defaultValues = PRTWrapper.GetDefaultValuesNumber(Name);
-
-                var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE ||
-                                                       x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM);
-
-                if (defaultValues == null)
-                {
-                    param = new Param_Number();
-                }
-                else if(defaultValues.Count == 1 && annot != null)
-                {
-                    param = annot.GetGhSpecializedParam();
-
-                    if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
-                    {
-                        int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == defaultValues[0].ToString());
-                        ((GH_ValueList)param).SelectItem(itemIndex);
-                    }
-                    else if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_RANGE)
-                    {
-                        ((GH_NumberSlider)param).SetSliderValue((decimal)defaultValues[0]);
-                    }
-                }
-                else
-                {
-                    GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();
-
-                    for (int i = 0; i < defaultValues.Count; ++i)
-                    {
-                        tree.Insert(new GH_Number(defaultValues[i]), new GH_Path(i), 0);
-                    }
-
-                    var paramPersistent = new Param_Number();
-                    paramPersistent.SetPersistentData(tree);
-                    param = paramPersistent;
-                }
             }
 
             DisplayExtractedParam(param);
@@ -288,9 +282,35 @@ namespace PumaGrasshopper.AttributeParameter
             Menu_AppendItem(menu, "Extract parameter", OnExtractParamClicked);
         }
 
+        private GH_Structure<GH_String> GetData()
+        {
+            if (PersistentDataCount > 0) return PersistentData;
+
+            if (mExpectsArray)
+            {
+                List<List<string>> defaultValues = PRTWrapper.GetDefaultValuesTextArray(Name);
+                if (defaultValues != null)
+                {
+                    return Utils.FromListToTree(defaultValues);
+                }
+            }
+            else
+            {
+                List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
+                if (defaultValues != null)
+                {
+                    return Utils.FromListToTree(defaultValues);
+                }
+            }
+
+            return new GH_Structure<GH_String>();
+        }
+
         private void OnExtractParamClicked(object sender, EventArgs e)
         {
             IGH_Param param = null;
+
+            GH_Structure<GH_String> data = GetData();
 
             // annots: file, dir, enum.
             var annot = mAnnotations.Find(x => x.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM ||
@@ -299,49 +319,31 @@ namespace PumaGrasshopper.AttributeParameter
             
             if(mExpectsArray)
             {
-                var defaultValues = PRTWrapper.GetDefaultValuesTextArray(Name);
-
                 var paramPersistent = new Param_String();
                 
-                if(defaultValues != null && (annot == null || annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM))
+                if((annot == null || annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM))
                 {
-                    var tree = Utils.FromListToTree(defaultValues);
-                    paramPersistent.SetPersistentData(tree);
+                    paramPersistent.SetPersistentData(data);
                     // For files and documents, keeping data empty will force PRT to use the default values.
                 }
  
                 param = paramPersistent;
             }
-            else
+            else if (data.DataCount == 1 && annot != null)
             {
-                List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
-
-                if (defaultValues == null)
+                param = annot.GetGhSpecializedParam();
+                if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
                 {
-                    param = new Param_String();
+                    int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == data.get_FirstItem(true).Value);
+                    ((GH_ValueList)param).SelectItem(itemIndex);
                 }
-                else if(defaultValues.Count == 1 && annot != null)
-                {
-                    param = annot.GetGhSpecializedParam();
-                    if (annot.GetAnnotationType() == Annotations.AttributeAnnotation.A_ENUM)
-                    {
-                        int itemIndex = ((GH_ValueList)param).ListItems.FindIndex(x => x.Name == defaultValues[0]);
-                        ((GH_ValueList)param).SelectItem(itemIndex);
-                    }
-                }
-                else
-                {
-                    GH_Structure<GH_String> tree = new GH_Structure<GH_String>();
-
-                    for (int i = 0; i < defaultValues.Count; ++i)
-                    {
-                        tree.Insert(new GH_String(defaultValues[i]), new GH_Path(i), 0);
-                    }
-
-                    var paramPersistent = new Param_String();
-                    paramPersistent.SetPersistentData(tree);
-                    param = paramPersistent;
-                }
+            }
+            
+            if(param == null)
+            {
+                var paramPersistent = new Param_String();
+                paramPersistent.SetPersistentData(data);
+                param = paramPersistent;
             }
 
             DisplayExtractedParam(param);
@@ -364,36 +366,36 @@ namespace PumaGrasshopper.AttributeParameter
             Menu_AppendItem(menu, "Extract parameter", OnExtractParamClicked);
         }
 
-        private void OnExtractParamClicked(object sender, EventArgs e)
-        {   
-            List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
+        private GH_Structure<GH_Colour> GetData()
+        {
+            if (PersistentDataCount > 0) return PersistentData;
 
+            List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
+            if (defaultValues != null)
+            {
+                return Utils.HexListToColorTree(defaultValues);
+            }
+            
+            return new GH_Structure<GH_Colour>();
+        }
+
+        private void OnExtractParamClicked(object sender, EventArgs e)
+        {
             IGH_Param param = null;
 
-            if (defaultValues == null)
-            {
-                param = new Param_Colour();
-            }
-            else if(defaultValues.Count == 1)
+            GH_Structure<GH_Colour> data = GetData();
+
+            if(data.DataCount == 1)
             {
                 param = new GH_ColourPickerObject
                 {
-                    Colour = Utils.FromHex(defaultValues[0])
+                    Colour = data.get_FirstItem(true).Value
                 };
             }
             else
             {
-                List<Color> defaultColor = defaultValues.ConvertAll(t => Utils.FromHex(t));
-
-                GH_Structure<GH_Colour> tree = new GH_Structure<GH_Colour>();
-
-                for (int i = 0; i < defaultColor.Count; ++i)
-                {
-                    tree.Insert(new GH_Colour(defaultColor[i]), new GH_Path(i), 0);
-                }
-
                 var paramPersistent = new Param_Colour();
-                paramPersistent.SetPersistentData(tree);
+                paramPersistent.SetPersistentData(data);
                 param = paramPersistent;
             }
 
