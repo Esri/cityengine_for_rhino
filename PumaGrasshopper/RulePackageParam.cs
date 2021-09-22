@@ -20,7 +20,7 @@ namespace PumaGrasshopper
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("ed287f2d-82c2-417d-9fc4-5b1a5c268032"); }
+            get { return PumaUIDs.RulePackageParameterGuid; }
         }
 
         protected override System.Drawing.Bitmap Icon

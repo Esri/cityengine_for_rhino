@@ -29,6 +29,8 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using System.Drawing;
 using Grasshopper.Kernel.Data;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace PumaGrasshopper
 {
@@ -164,6 +166,16 @@ namespace PumaGrasshopper
 
             grp.AddObject(guid);
             grp.ExpireCaches();
+        }
+
+        public static string ToXML(object obj)
+        {
+            XmlSerializer serializer = new XmlSerializer(obj.GetType());
+            MemoryStream stream = new MemoryStream();
+            serializer.Serialize(stream, obj);
+            stream.Position = 0;
+            StreamReader reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
 
         public static string GetCastErrorMessage(string attribute, string castTarget)
