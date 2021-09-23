@@ -19,4 +19,20 @@ namespace PumaGrasshopper
         public static Guid AttributeParameterStringGuid = new Guid("27d4954d-bce4-4253-91a1-83e286199e5a");
         public static Guid AttributeParameterColourGuid = new Guid("2f6be11a-f0aa-4a20-a81e-ccbf345ba294");
     }
+
+    public static class SerializationIds
+    {
+        public const string VERSION = "VERSION";
+        public const string GROUP_NAME = "GROUP_NAME";
+        public const string GROUP_UID = "GROUP_UID";
+        public const string EXPECTS_ARRAY = "EXPECTS_ARRAY";
+        public const string ANNOTATION_COUNT = "ANNOTATION_COUNT";
+        public const string ANNOTATION_TYPE = "ANNOTATION_TYPE";
+        public const string ANNOTATION_ENUM_TYPE = "ANNOTATION_ENUM_TYPE";
+        public const string ANNOTATION = "ANNOTATION";
+
+        public const string PUMA_UID = "PUMA_UID";
+
+        public const int SERIALIZATION_VERSION = 1;
+    }
 }
