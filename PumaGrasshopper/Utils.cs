@@ -197,11 +197,10 @@ namespace PumaGrasshopper
                 grp.Border = GH_GroupBorder.Box;
                 doc.AddObject(grp, false);
             }
-            else if (group.Count() == 1)
+            else
             {
                 grp = group.First();
             }
-            else return;
 
             grp.AddObject(guid);
             grp.ExpireCaches();
