@@ -88,10 +88,10 @@ namespace PumaGrasshopper.AttributeParameter
             if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
                 && serializationVersion == SerializationIds.SERIALIZATION_VERSION)
             {
-                mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
-                mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
                 if (!reader.TryGetString(SerializationIds.PUMA_UID, ref mPumaUID))
                     mPumaUID = SerializationIds.DEFAULT_PUMA_ID;
+                mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
+                mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
                 mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
             }
 
