@@ -629,11 +629,17 @@ namespace PumaGrasshopper
         public override bool Read(GH_IReader reader)
         {
             int serializationVersion = 0;
-            mComponentUID = reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
-                            && serializationVersion == SerializationIds.SERIALIZATION_VERSION
-                ? reader.GetString(SerializationIds.PUMA_UID)
-                : GetHashCode().ToString();
-
+            if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
+               && serializationVersion == SerializationIds.SERIALIZATION_VERSION)
+            {
+                if (!reader.TryGetString(SerializationIds.PUMA_UID, ref mComponentUID))
+                    mComponentUID = GetHashCode().ToString();
+            }
+            else
+            {
+                mComponentUID = GetHashCode().ToString();
+            }
+            
             return base.Read(reader);
         }
 

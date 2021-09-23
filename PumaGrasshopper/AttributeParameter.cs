@@ -33,14 +33,14 @@ namespace PumaGrasshopper.AttributeParameter
     public class PumaParameter<T> : GH_PersistentParam<T> where T : class, IGH_Goo
     {
         protected string mGroupName;
-        protected string mGroupUID;
+        protected string mPumaUID;
         protected bool mExpectsArray;
         protected List<Annotations.Base> mAnnotations;
 
         public PumaParameter() : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = "";
-            mGroupUID = "";
+            mPumaUID = "";
             mExpectsArray = false;
             mAnnotations = new List<Annotations.Base>();
         }
@@ -48,7 +48,7 @@ namespace PumaGrasshopper.AttributeParameter
         public PumaParameter(string pumaUID, string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = groupName;
-            mGroupUID = pumaUID + "_" + groupName;
+            mPumaUID = pumaUID;
             mExpectsArray = expectsArray;
             mAnnotations = annotations;
         }
@@ -75,7 +75,7 @@ namespace PumaGrasshopper.AttributeParameter
         {
             writer.SetInt32(SerializationIds.VERSION, SerializationIds.SERIALIZATION_VERSION);
             writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
-            writer.SetString(SerializationIds.GROUP_UID, mGroupUID);
+            writer.SetString(SerializationIds.PUMA_UID, mPumaUID);
             writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
             AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
             
@@ -88,9 +88,10 @@ namespace PumaGrasshopper.AttributeParameter
             if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
                 && serializationVersion == SerializationIds.SERIALIZATION_VERSION)
             {
-                mGroupUID = reader.GetString(SerializationIds.GROUP_UID);
                 mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
                 mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
+                if (!reader.TryGetString(SerializationIds.PUMA_UID, ref mPumaUID))
+                    mPumaUID = SerializationIds.DEFAULT_PUMA_ID;
                 mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
             }
 
@@ -112,7 +113,7 @@ namespace PumaGrasshopper.AttributeParameter
             AddSource(param);
 
             if (mGroupName.Length > 0)
-                Utils.AddToGroup(doc, mGroupUID, mGroupName, param.InstanceGuid);
+                Utils.AddToGroup(doc, mPumaUID, mGroupName, param.InstanceGuid);
 
             ExpireSolution(true);
         }
