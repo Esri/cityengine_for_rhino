@@ -206,6 +206,7 @@ namespace PumaGrasshopper
 
             grp.AddObject(guid);
             grp.ExpireCaches();
+            grp.ExpirePreview(true);
         }
 
         public static string ToXML(object obj)
