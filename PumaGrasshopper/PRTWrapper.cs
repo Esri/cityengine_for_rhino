@@ -440,7 +440,7 @@ namespace PumaGrasshopper
             return new List<String>(errorOutputArray);
         }
 
-        public static RuleAttribute[] GetRuleAttributes()
+        public static RuleAttribute[] GetRuleAttributes(string pumaUID)
         {
             int attribCount = GetRuleAttributesCount();
 
@@ -465,7 +465,7 @@ namespace PumaGrasshopper
                 bool status = GetRuleAttribute(i, pRuleBuilder, pNameBuilder, pNickNameBuilder, ref type, pGroup);
                 if (!status) return new RuleAttribute[0] {};
 
-                attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());
+                attributes[i] = new RuleAttribute(pumaUID, nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());
 
                 // get the potential annotations
                 List<Annotations.Base> annotations = GetAnnotations(i);

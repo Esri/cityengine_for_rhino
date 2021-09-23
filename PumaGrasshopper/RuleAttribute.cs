@@ -32,8 +32,9 @@ namespace PumaGrasshopper
         public Annotations.AnnotationArgumentType mAttribType;
         public List<Annotations.Base> mAnnotations;
         public string mGroup;
+        public string mPumaUID;
 
-        public RuleAttribute(string name, string nickname, string ruleFile, Annotations.AnnotationArgumentType type, string group)
+        public RuleAttribute(string pumaUID, string name, string nickname, string ruleFile, Annotations.AnnotationArgumentType type, string group)
         {
             this.mRuleFile = ruleFile;
             this.mFullName = name;
@@ -41,6 +42,7 @@ namespace PumaGrasshopper
             this.mAttribType = type;
             this.mAnnotations = new List<Annotations.Base>();
             this.mGroup = group;
+            this.mPumaUID = pumaUID;
         }
 
         public IGH_Param CreateInputParameter()
@@ -50,7 +52,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_BOOL:
                     {
-                        var param_bool = new AttributeParameter.Boolean(mGroup, IsArray())
+                        var param_bool = new AttributeParameter.Boolean(mPumaUID, mGroup, IsArray())
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -65,7 +67,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_INT:
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
                     {
-                        var param_number = new AttributeParameter.Number(mAnnotations, mGroup, IsArray())
+                        var param_number = new AttributeParameter.Number(mAnnotations, mPumaUID, mGroup, IsArray())
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -82,7 +84,7 @@ namespace PumaGrasshopper
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            var param_color = new AttributeParameter.Colour(mGroup)
+                            var param_color = new AttributeParameter.Colour(mPumaUID, mGroup)
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -94,7 +96,7 @@ namespace PumaGrasshopper
                         }
                         else
                         {
-                            var param_str = new AttributeParameter.String(mAnnotations, mGroup, IsArray())
+                            var param_str = new AttributeParameter.String(mAnnotations, mPumaUID, mGroup, IsArray())
                             {
                                 Name = mFullName,
                                 NickName = mNickname,

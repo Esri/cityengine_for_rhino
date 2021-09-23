@@ -33,6 +33,7 @@ namespace PumaGrasshopper.AttributeParameter
     static class SerializationIds {
         public const string VERSION = "VERSION";
         public const string GROUP_NAME = "GROUP_NAME";
+        public const string GROUP_UID = "GROUP_UID";
         public const string EXPECTS_ARRAY = "EXPECTS_ARRAY";
         public const string ANNOTATION_COUNT = "ANNOTATION_COUNT";
         public const string ANNOTATION_TYPE = "ANNOTATION_TYPE";
@@ -45,19 +46,22 @@ namespace PumaGrasshopper.AttributeParameter
     public class PumaParameter<T> : GH_PersistentParam<T> where T : class, IGH_Goo
     {
         protected string mGroupName;
+        protected string mGroupUID;
         protected bool mExpectsArray;
         protected List<Annotations.Base> mAnnotations;
 
         public PumaParameter() : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = "";
+            mGroupUID = "";
             mExpectsArray = false;
             mAnnotations = new List<Annotations.Base>();
         }
 
-        public PumaParameter(string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+        public PumaParameter(string pumaUID, string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = groupName;
+            mGroupUID = pumaUID + "_" + groupName;
             mExpectsArray = expectsArray;
             mAnnotations = annotations;
         }
@@ -84,6 +88,7 @@ namespace PumaGrasshopper.AttributeParameter
         {
             writer.SetInt32(SerializationIds.VERSION, SerializationIds.SERIALIZATION_VERSION);
             writer.SetString(SerializationIds.GROUP_NAME, mGroupName);
+            writer.SetString(SerializationIds.GROUP_UID, mGroupUID);
             writer.SetBoolean(SerializationIds.EXPECTS_ARRAY, mExpectsArray);
             AnnotationSerialization.WriteAnnotations(writer, mAnnotations);
             
@@ -96,6 +101,7 @@ namespace PumaGrasshopper.AttributeParameter
             if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
                 && serializationVersion == SerializationIds.SERIALIZATION_VERSION)
             {
+                mGroupUID = reader.GetString(SerializationIds.GROUP_UID);
                 mGroupName = reader.GetString(SerializationIds.GROUP_NAME);
                 mExpectsArray = reader.GetBoolean(SerializationIds.EXPECTS_ARRAY);
                 mAnnotations = AnnotationSerialization.ReadAnnotations(reader);
@@ -119,14 +125,9 @@ namespace PumaGrasshopper.AttributeParameter
             AddSource(param);
 
             if (mGroupName.Length > 0)
-                Utils.AddToGroup(doc, GetGroupUniqueName(), mGroupName, param.InstanceGuid);
+                Utils.AddToGroup(doc, mGroupUID, mGroupName, param.InstanceGuid);
 
             ExpireSolution(true);
-        }
-
-        protected string GetGroupUniqueName()
-        {
-            return GetHashCode() + "_" + mGroupName;
         }
     } 
 
@@ -134,7 +135,7 @@ namespace PumaGrasshopper.AttributeParameter
     {
         public Boolean() : base() { }
 
-        public Boolean(string groupName = "", bool expectsArray = false): base(groupName, expectsArray, new List<Annotations.Base>()) { }
+        public Boolean(string pumaUID, string groupName = "", bool expectsArray = false): base(pumaUID, groupName, expectsArray, new List<Annotations.Base>()) { }
 
         public override Guid ComponentGuid {
             get { return PumaUIDs.AttributeParameterBooleanGuid; }
@@ -200,7 +201,7 @@ namespace PumaGrasshopper.AttributeParameter
     {
         public Number() : base() { }
 
-        public Number(List<Annotations.Base> annots, string groupName, bool expectsArray) : base(groupName, expectsArray, annots) { }
+        public Number(List<Annotations.Base> annots, string pumaUID, string groupName, bool expectsArray) : base(pumaUID, groupName, expectsArray, annots) { }
 
         public override Guid ComponentGuid
         {
@@ -275,7 +276,7 @@ namespace PumaGrasshopper.AttributeParameter
     {
         public String() : base() { }
 
-        public String(List<Annotations.Base> annots, string groupName = "", bool expectsArray = false) : base(groupName, expectsArray, annots) { }
+        public String(List<Annotations.Base> annots, string pumaUID, string groupName = "", bool expectsArray = false) : base(pumaUID, groupName, expectsArray, annots) { }
 
         public override Guid ComponentGuid
         {
@@ -359,7 +360,7 @@ namespace PumaGrasshopper.AttributeParameter
     {
         public Colour() : base() { }
 
-        public Colour(string groupName = "") : base(groupName, false, new List<Annotations.Base>()) { }
+        public Colour(string pumaUID, string groupName = "") : base(pumaUID, groupName, false, new List<Annotations.Base>()) { }
 
         public override Guid ComponentGuid
         {
