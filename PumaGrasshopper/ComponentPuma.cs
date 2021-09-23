@@ -32,6 +32,7 @@ using System.Drawing;
 using System.Diagnostics;
 using Rhino.Runtime.InteropWrappers;
 using System.IO;
+using GH_IO.Serialization;
 
 namespace PumaGrasshopper
 {
@@ -123,6 +124,7 @@ namespace PumaGrasshopper
         RuleAttribute[] mRuleAttributes;
 
         bool mDoGenerateMaterials;
+        string mComponentUID;
 
         public class RulePackage
         {
@@ -154,6 +156,7 @@ namespace PumaGrasshopper
             if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
 
             mRuleAttributes = new RuleAttribute[0];
+            mComponentUID = GetHashCode().ToString();
 
             mDoGenerateMaterials = true;
         }
@@ -268,7 +271,7 @@ namespace PumaGrasshopper
                 mCurrentRPK = potentiallyNewRulePackage;
                 if (!SetRulePackage(mCurrentRPK))
                     return false;
-                mRuleAttributes = PRTWrapper.GetRuleAttributes();
+                mRuleAttributes = PRTWrapper.GetRuleAttributes(mComponentUID);
             }
             return true;
         }
@@ -614,6 +617,24 @@ namespace PumaGrasshopper
             }
 
             return null;
+        }
+
+        public override bool Write(GH_IWriter writer)
+        {
+            writer.SetInt32(SerializationIds.VERSION, SerializationIds.SERIALIZATION_VERSION);
+            writer.SetString(SerializationIds.PUMA_UID, mComponentUID);
+            return base.Write(writer);
+        }
+
+        public override bool Read(GH_IReader reader)
+        {
+            int serializationVersion = 0;
+            mComponentUID = reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
+                            && serializationVersion == SerializationIds.SERIALIZATION_VERSION
+                ? reader.GetString(SerializationIds.PUMA_UID)
+                : GetHashCode().ToString();
+
+            return base.Read(reader);
         }
 
         public bool DestroyParameter(GH_ParameterSide side, int index)
