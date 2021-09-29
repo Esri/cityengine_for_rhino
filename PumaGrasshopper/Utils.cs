@@ -182,7 +182,7 @@ namespace PumaGrasshopper
             return Math.Abs(d % 1) <= (Double.Epsilon * 100);
         }
 
-        public static void AddToGroup(GH_Document doc, string pumaUID, string groupNickname, Guid guid)
+        public static void AddToGroup(GH_Document doc, Guid pumaUID, string groupNickname, Guid guid)
         {
             GH_Group grp;
 
