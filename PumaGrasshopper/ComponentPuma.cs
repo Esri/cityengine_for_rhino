@@ -124,7 +124,6 @@ namespace PumaGrasshopper
         RuleAttribute[] mRuleAttributes;
 
         bool mDoGenerateMaterials;
-        string mComponentUID;
 
         public class RulePackage
         {
@@ -156,7 +155,6 @@ namespace PumaGrasshopper
             if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
 
             mRuleAttributes = new RuleAttribute[0];
-            mComponentUID = GetHashCode().ToString();
 
             mDoGenerateMaterials = true;
         }
@@ -271,7 +269,7 @@ namespace PumaGrasshopper
                 mCurrentRPK = potentiallyNewRulePackage;
                 if (!SetRulePackage(mCurrentRPK))
                     return false;
-                mRuleAttributes = PRTWrapper.GetRuleAttributes(mComponentUID);
+                mRuleAttributes = PRTWrapper.GetRuleAttributes();
             }
             return true;
         }
@@ -617,30 +615,6 @@ namespace PumaGrasshopper
             }
 
             return null;
-        }
-
-        public override bool Write(GH_IWriter writer)
-        {
-            writer.SetInt32(SerializationIds.VERSION, SerializationIds.SERIALIZATION_VERSION);
-            writer.SetString(SerializationIds.PUMA_UID, mComponentUID);
-            return base.Write(writer);
-        }
-
-        public override bool Read(GH_IReader reader)
-        {
-            int serializationVersion = 0;
-            if (reader.TryGetInt32(SerializationIds.VERSION, ref serializationVersion)
-               && serializationVersion == SerializationIds.SERIALIZATION_VERSION)
-            {
-                if (!reader.TryGetString(SerializationIds.PUMA_UID, ref mComponentUID))
-                    mComponentUID = GetHashCode().ToString();
-            }
-            else
-            {
-                mComponentUID = GetHashCode().ToString();
-            }
-            
-            return base.Read(reader);
         }
 
         public bool DestroyParameter(GH_ParameterSide side, int index)

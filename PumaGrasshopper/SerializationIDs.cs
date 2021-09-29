@@ -17,8 +17,6 @@ namespace PumaGrasshopper
         public const string ANNOTATION_ENUM_TYPE = "ANNOTATION_ENUM_TYPE";
         public const string ANNOTATION = "ANNOTATION";
 
-        public const string PUMA_UID = "PUMA_UID";
-        public const string DEFAULT_PUMA_ID = "DEFAULT_PUMA_ID";
         public const string DEFAULT_GROUP_NAME = "DEFAULT_GROUP";
 
         public const int SERIALIZATION_VERSION = 1;
