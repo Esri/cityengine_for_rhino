@@ -182,29 +182,31 @@ namespace PumaGrasshopper
             return Math.Abs(d % 1) <= (Double.Epsilon * 100);
         }
 
-        public static void AddToGroup(GH_Document doc, string groupName, Guid guid)
+        public static void AddToGroup(GH_Document doc, Guid pumaUID, string groupNickname, Guid guid)
         {
             GH_Group grp;
 
-            var group = doc.Objects.OfType<GH_Group>().Where(gr => gr.Name == groupName);
+            string groupUID = pumaUID + "_" + groupNickname;
+
+            var group = doc.Objects.OfType<GH_Group>().Where(gr => gr.Name == groupUID);
             if (group.Count() == 0)
             {
                 grp = new GH_Group();
                 grp.CreateAttributes();
-                grp.Name = groupName;
-                grp.NickName = groupName;
+                grp.Name = groupUID;
+                grp.NickName = groupNickname;
                 grp.Colour = System.Drawing.Color.Aquamarine;
                 grp.Border = GH_GroupBorder.Box;
                 doc.AddObject(grp, false);
             }
-            else if (group.Count() == 1)
+            else
             {
                 grp = group.First();
             }
-            else return;
 
             grp.AddObject(guid);
             grp.ExpireCaches();
+            grp.ExpirePreview(true);
         }
 
         public static string ToXML(object obj)

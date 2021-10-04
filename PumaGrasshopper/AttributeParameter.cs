@@ -19,6 +19,7 @@
 
 using GH_IO.Serialization;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Attributes;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Special;
@@ -30,18 +31,6 @@ using System.Windows.Forms;
 
 namespace PumaGrasshopper.AttributeParameter
 {
-    static class SerializationIds {
-        public const string VERSION = "VERSION";
-        public const string GROUP_NAME = "GROUP_NAME";
-        public const string EXPECTS_ARRAY = "EXPECTS_ARRAY";
-        public const string ANNOTATION_COUNT = "ANNOTATION_COUNT";
-        public const string ANNOTATION_TYPE = "ANNOTATION_TYPE";
-        public const string ANNOTATION_ENUM_TYPE = "ANNOTATION_ENUM_TYPE";
-        public const string ANNOTATION = "ANNOTATION";
-
-        public const int SERIALIZATION_VERSION = 1;
-    }
-
     public class PumaParameter<T> : GH_PersistentParam<T> where T : class, IGH_Goo
     {
         protected string mGroupName;
@@ -118,8 +107,15 @@ namespace PumaGrasshopper.AttributeParameter
 
             AddSource(param);
 
+            if (Attributes.IsTopLevel)
+                throw new Exception("Puma parameters can only be used within a Puma component");
+
             if (mGroupName.Length > 0)
-                Utils.AddToGroup(doc, mGroupName, param.InstanceGuid);
+            {
+                // Get the guid of the parent object (i.e. a Puma component)
+                GH_ComponentAttributes parent = (GH_ComponentAttributes)Attributes.GetTopLevel;
+                Utils.AddToGroup(doc, parent.InstanceGuid, mGroupName, param.InstanceGuid);
+            }
 
             ExpireSolution(true);
         }
