@@ -110,11 +110,12 @@ namespace PumaGrasshopper.AttributeParameter
             if (Attributes.IsTopLevel)
                 throw new Exception("Puma parameters can only be used within a Puma component");
 
-            // Get the guid of the parent object (i.e. a Puma component)
-            GH_ComponentAttributes parent = (GH_ComponentAttributes)Attributes.GetTopLevel;
-
             if (mGroupName.Length > 0)
+            {
+                // Get the guid of the parent object (i.e. a Puma component)
+                GH_ComponentAttributes parent = (GH_ComponentAttributes)Attributes.GetTopLevel;
                 Utils.AddToGroup(doc, parent.InstanceGuid, mGroupName, param.InstanceGuid);
+            }
 
             ExpireSolution(true);
         }
