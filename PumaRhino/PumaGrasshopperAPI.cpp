@@ -71,6 +71,15 @@ RHINOPRT_API void SetPackage(const wchar_t* rpk_path, ON_wString* errorMsg) {
 	}
 }
 
+RHINOPRT_API bool GetPackagePath(ON_wString* pRpk) {
+	const std::wstring rpk = RhinoPRT::get().GetRPKPath();
+	if (rpk.empty())
+		return false;
+
+	*pRpk += rpk.c_str();
+	return true;
+}
+
 inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh) {
 	if (pMesh == nullptr)
 		return false;

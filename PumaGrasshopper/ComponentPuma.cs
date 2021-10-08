@@ -249,6 +249,15 @@ namespace PumaGrasshopper
             return result;
         }
 
+        public void RefreshRpk()
+        {
+            if (string.Compare(mCurrentRPK.path, PRTWrapper.GetPackagePath())
+                != 0)
+            {
+                ExpireSolution(true);
+            }
+        }
+
         private bool SetRulePackage(RulePackage rulePackage)
         {
             var errorMsg = new StringWrapper();
@@ -264,7 +273,11 @@ namespace PumaGrasshopper
 
         private bool CheckAndUpdateRulePackage(RulePackage potentiallyNewRulePackage)
         {
-            if (mCurrentRPK == null || !mCurrentRPK.IsSame(potentiallyNewRulePackage))
+            string currentPrtRpk = PRTWrapper.GetPackagePath();
+
+            if (mCurrentRPK == null
+                || !mCurrentRPK.IsSame(potentiallyNewRulePackage)
+                || string.Compare(potentiallyNewRulePackage.path, currentPrtRpk) != 0)
             {
                 mCurrentRPK = potentiallyNewRulePackage;
                 if (!SetRulePackage(mCurrentRPK))
