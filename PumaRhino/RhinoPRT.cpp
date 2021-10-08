@@ -94,7 +94,6 @@ void RhinoPRTAPI::ClearInitialShapes() {
 	mGeneratedModels.clear();
 	mAttributes.clear();
 	mGroupedReports.clear();
-	mGeneratedModels.clear();
 	mAttrBuilders.clear();
 }
 
