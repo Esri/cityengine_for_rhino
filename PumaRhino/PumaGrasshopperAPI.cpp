@@ -72,6 +72,9 @@ RHINOPRT_API void SetPackage(const wchar_t* rpk_path, ON_wString* errorMsg) {
 }
 
 RHINOPRT_API bool GetPackagePath(ON_wString* pRpk) {
+	if (pRpk == nullptr)
+		return false;
+
 	const std::wstring rpk = RhinoPRT::get().GetRPKPath();
 	if (rpk.empty())
 		return false;
