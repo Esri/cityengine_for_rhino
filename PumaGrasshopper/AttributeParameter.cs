@@ -93,6 +93,13 @@ namespace PumaGrasshopper.AttributeParameter
             return base.Read(reader);
         }
 
+        protected void RefreshRpk()
+        {
+            var pumaAttributes = (GH_ComponentAttributes)Attributes.GetTopLevel;
+            ComponentPuma puma = (ComponentPuma)pumaAttributes.Owner;
+            puma.RefreshRpk();
+        }
+
         protected void DisplayExtractedParam(IGH_Param param)
         {
             param.CreateAttributes();
@@ -139,6 +146,8 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_Boolean> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
+
+            RefreshRpk();
 
             if (mExpectsArray)
             {
@@ -207,7 +216,9 @@ namespace PumaGrasshopper.AttributeParameter
         {
             if (PersistentDataCount > 0) return PersistentData;
 
-            if(mExpectsArray)
+            RefreshRpk();
+
+            if (mExpectsArray)
             {
                 List<List<double>> defaultValues = PRTWrapper.GetDefaultValuesNumberArray(Name);
                 if (defaultValues != null)
@@ -281,6 +292,8 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_String> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
+
+            RefreshRpk();
 
             if (mExpectsArray)
             {
@@ -365,6 +378,8 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_Colour> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
+
+            RefreshRpk();
 
             List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
             if (defaultValues != null)

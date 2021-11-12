@@ -59,6 +59,10 @@ public:
 		return mDefaultValuesMap;
 	};
 
+	const std::wstring getPackagePath() const {
+		return mCurrentRPK;
+	}
+
 	bool getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues);
 	bool getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues);
 	bool getDefaultValuesText(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts);
@@ -86,6 +90,7 @@ private:
 	std::wstring mStartRule = L"default$Lot";
 	int32_t mSeed = 0;
 	std::wstring mShapeName = L"Lot";
+	std::wstring mCurrentRPK;
 
 	bool createInitialShapes(const std::vector<RawInitialShape>& rawInitialShapes,
 	                         const std::vector<pcu::ShapeAttributes>& shapeAttributes,

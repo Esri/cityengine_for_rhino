@@ -66,6 +66,13 @@ void RhinoPRTAPI::SetRPKPath(const std::wstring& rpkPath) {
 	mModelGenerator->updateRuleFiles(rpkPath); // might throw !
 }
 
+const std::wstring RhinoPRTAPI::GetRPKPath() const {
+	if (!mModelGenerator)
+		return {};
+
+	return mModelGenerator->getPackagePath();
+}
+
 void RhinoPRTAPI::SetInitialShapes(const std::vector<RawInitialShape>& shapes) {
 
 	// get the shape attributes data from ModelGenerator

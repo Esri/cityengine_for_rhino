@@ -50,6 +50,9 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void SetPackage(string rpk_path, [In, Out] IntPtr errorMsg);
 
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetPackagePath([In, Out] IntPtr pRpk);
+
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool AddInitialMesh([In]IntPtr pMesh);
 
@@ -149,6 +152,23 @@ namespace PumaGrasshopper
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValuesTextArray(string key, [In, Out] IntPtr pTexts, [In, Out] IntPtr pSizes);
+
+
+        public static string GetPackagePath()
+        {
+            string currentRpk = null;
+
+            StringWrapper rpk = new StringWrapper();
+            var rpkPtr = rpk.NonConstPointer;
+            bool success = GetPackagePath(rpkPtr);
+            if(success)
+            {
+                currentRpk = rpk.ToString();
+            }
+            rpk.Dispose();
+
+            return currentRpk;
+        }
 
         public static bool AddMesh(List<Mesh> meshes)
         {
