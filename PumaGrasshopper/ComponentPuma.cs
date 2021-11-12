@@ -40,7 +40,7 @@ namespace PumaGrasshopper
     public class ComponentPuma : GH_Component, IGH_VariableParameterComponent
     {
         const string COMPONENT_NAME = "Puma";
-        const string COMPONENT_NICK_NAME = "Puma";
+        const string COMPONENT_NICK_NAME = "CityEngine Puma";
 
         const string RPK_INPUT_NAME = "Path to Rule Package";
         const string RPK_INPUT_NICK_NAME = "RPK";
