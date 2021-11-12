@@ -69,7 +69,7 @@
       <PRT_EXT_USD_PLUGIN_FILES Include="$(SolutionDir)deps\ce_sdk\lib\usd\**\*.*" />
 
       <!-- whitelisting DWG extension library -->
-      <PRT_EXT_DWG_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.dwg.dll" />
+      <PRT_EXT_DWG_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.oda.dll" />
     </ItemGroup>
     <Message Importance="High" Text="Copying PRT dependency..." />
     <Copy SourceFiles="@(PRT_CORE_LIBRARIES)" DestinationFolder="$(OutputDirectory)" />
