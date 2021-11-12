@@ -68,7 +68,7 @@ void RhinoPRTAPI::SetRPKPath(const std::wstring& rpkPath) {
 
 const std::wstring RhinoPRTAPI::GetRPKPath() const {
 	if (!mModelGenerator)
-		return L"";
+		return {};
 
 	return mModelGenerator->getPackagePath();
 }
