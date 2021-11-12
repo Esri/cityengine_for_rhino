@@ -40,7 +40,7 @@ namespace PumaGrasshopper
     public class ComponentPuma : GH_Component, IGH_VariableParameterComponent
     {
         const string COMPONENT_NAME = "Puma";
-        const string COMPONENT_NICK_NAME = "Puma";
+        const string COMPONENT_NICK_NAME = "CityEngine Puma";
 
         const string RPK_INPUT_NAME = "Path to Rule Package";
         const string RPK_INPUT_NICK_NAME = "RPK";
@@ -74,6 +74,7 @@ namespace PumaGrasshopper
         const string CGA_ERROR_OUTPUT_NICK_NAME = "Errors";
         const string CGA_ERROR_OUTPUT_DESC = "CGA and asset errors encountered per input shape.";
 
+        const string CITYENGINE_RESOURCES_URL = "https://doc.arcgis.com/en/cityengine";
         enum ParamType
         {
             GEOMETRY,
@@ -317,6 +318,8 @@ namespace PumaGrasshopper
             base.AppendAdditionalComponentMenuItems(menu);
 
             Menu_AppendItem(menu, "Generate Materials", OnMaterialToggleClicked, true, mDoGenerateMaterials);
+            Menu_AppendSeparator(menu);
+            Menu_AppendItem(menu, "Go to CityEngine Resources", (object sender, EventArgs e) => { Process.Start(CITYENGINE_RESOURCES_URL); });
         }
 
         private void OnMaterialToggleClicked(object sender, EventArgs e)
