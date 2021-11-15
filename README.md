@@ -202,11 +202,17 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 #### Known Limitations
 - Depending on the location of the system temp directory, complex Rule Packages (RPK) might trigger the maximum Windows path length limitation. As a workaround, please change the TEMP environment variable to a shorter path and/or shorten the asset directories within the Rule Package.
 
-### Puma 1.0.0 (2021-10-XX)
+### Puma 1.0.0 (2021-11-XX)
 * First public release.
 * Supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.0 and older.
 * Limitation: no support for PBR material properties in Rhino 7
+
+### Puma 0.9.4 (2021-11-15)
+* Supports Rhino 6 and 7.
+* Updated to PRT 2.5: Supports Rule Packages (RPK) from CityEngine 2021.1 and older.
+* Fixed use of wrong rule attribute values in a GH document with multiple Puma nodes.
+* Fixed group assignment of extracted parameters.
 
 ### Puma 0.9.3 (2021-09-22)
 * Supports Rhino 6 and 7.

@@ -32,6 +32,7 @@ using System.Drawing;
 using System.Diagnostics;
 using Rhino.Runtime.InteropWrappers;
 using System.IO;
+using GH_IO.Serialization;
 
 namespace PumaGrasshopper
 {
@@ -39,7 +40,7 @@ namespace PumaGrasshopper
     public class ComponentPuma : GH_Component, IGH_VariableParameterComponent
     {
         const string COMPONENT_NAME = "Puma";
-        const string COMPONENT_NICK_NAME = "Puma";
+        const string COMPONENT_NICK_NAME = "CityEngine Puma";
 
         const string RPK_INPUT_NAME = "Path to Rule Package";
         const string RPK_INPUT_NICK_NAME = "RPK";
@@ -73,6 +74,7 @@ namespace PumaGrasshopper
         const string CGA_ERROR_OUTPUT_NICK_NAME = "Errors";
         const string CGA_ERROR_OUTPUT_DESC = "CGA and asset errors encountered per input shape.";
 
+        const string CITYENGINE_RESOURCES_URL = "https://doc.arcgis.com/en/cityengine";
         enum ParamType
         {
             GEOMETRY,
@@ -248,6 +250,15 @@ namespace PumaGrasshopper
             return result;
         }
 
+        public void RefreshRpk()
+        {
+            if (string.Compare(mCurrentRPK.path, PRTWrapper.GetPackagePath())
+                != 0)
+            {
+                ExpireSolution(true);
+            }
+        }
+
         private bool SetRulePackage(RulePackage rulePackage)
         {
             var errorMsg = new StringWrapper();
@@ -263,7 +274,11 @@ namespace PumaGrasshopper
 
         private bool CheckAndUpdateRulePackage(RulePackage potentiallyNewRulePackage)
         {
-            if (mCurrentRPK == null || !mCurrentRPK.IsSame(potentiallyNewRulePackage))
+            string currentPrtRpk = PRTWrapper.GetPackagePath();
+
+            if (mCurrentRPK == null
+                || !mCurrentRPK.IsSame(potentiallyNewRulePackage)
+                || string.Compare(potentiallyNewRulePackage.path, currentPrtRpk) != 0)
             {
                 mCurrentRPK = potentiallyNewRulePackage;
                 if (!SetRulePackage(mCurrentRPK))
@@ -316,6 +331,8 @@ namespace PumaGrasshopper
             base.AppendAdditionalComponentMenuItems(menu);
 
             Menu_AppendItem(menu, "Generate Materials", OnMaterialToggleClicked, true, mDoGenerateMaterials);
+            Menu_AppendSeparator(menu);
+            Menu_AppendItem(menu, "Go to CityEngine Resources", (object sender, EventArgs e) => { Process.Start(CITYENGINE_RESOURCES_URL); });
         }
 
         private void OnMaterialToggleClicked(object sender, EventArgs e)

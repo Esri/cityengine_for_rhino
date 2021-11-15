@@ -47,6 +47,7 @@ public:
 	bool IsPRTInitialized();
 
 	void SetRPKPath(const std::wstring& rpk_path); // might throw!
+	const std::wstring GetRPKPath() const; 
 
 	int GetRuleAttributeCount();
 	const RuleAttributes& GetRuleAttributes() const;

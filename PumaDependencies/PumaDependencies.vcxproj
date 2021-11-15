@@ -14,7 +14,7 @@
     <ProjectName>PumaDependencies</ProjectName>
   </PropertyGroup>
   <PropertyGroup>
-    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.4.7316/esri_ce_sdk-2.4.7316-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
+    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.5.7799/esri_ce_sdk-2.5.7799-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
     <OutputDirectory>$(SolutionDir)build\</OutputDirectory>
     <DependencyDir>$(SolutionDir)deps\</DependencyDir>
   </PropertyGroup>
@@ -69,7 +69,7 @@
       <PRT_EXT_USD_PLUGIN_FILES Include="$(SolutionDir)deps\ce_sdk\lib\usd\**\*.*" />
 
       <!-- whitelisting DWG extension library -->
-      <PRT_EXT_DWG_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.dwg.dll" />
+      <PRT_EXT_DWG_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.oda.dll" />
     </ItemGroup>
     <Message Importance="High" Text="Copying PRT dependency..." />
     <Copy SourceFiles="@(PRT_CORE_LIBRARIES)" DestinationFolder="$(OutputDirectory)" />

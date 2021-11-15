@@ -80,6 +80,7 @@
     <Compile Include="ReportAttribute.cs" />
     <Compile Include="RuleAttribute.cs" />
     <Compile Include="RulePackageParam.cs" />
+    <Compile Include="SerializationIDs.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

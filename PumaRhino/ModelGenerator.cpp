@@ -176,6 +176,8 @@ ModelGenerator::ModelGenerator() {
 }
 
 void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
+	mCurrentRPK = rulePkg;
+
 	try {
 		const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
 		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::HIT && rulePkg == mRulePkg) {
