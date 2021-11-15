@@ -9,7 +9,7 @@ import subprocess
 PACKAGE_WHITELIST = ["PumaGrasshopper.gha", "PumaRhino.rhp", "com.esri.prt.core.dll", "glutess.dll",
                      "lib/PumaCodecs.dll", "lib/com.esri.prt.adaptors.dll", "lib/com.esri.prt.codecs.dll",
                      "lib/com.esri.prt.usd.dll", "lib/usd_ms.dll", "lib/tbb.dll", "lib/usd",
-                     "lib/com.esri.prt.dwg.dll"]
+                     "lib/com.esri.prt.oda.dll"]
       
 
 def copy_to_zip(root_path: Path, src_path: Path, relative_file_paths: list, dst: zipfile.ZipFile):
