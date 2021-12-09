@@ -1,6 +1,6 @@
 # ![Puma Icon](doc/puma_icon_32px.png) Puma - CityEngine Plugin for Rhino3D and Grasshopper
 
-<span style="color:red">TODO: insert teaser pic here</span>
+<div align="center"><img src="doc/img/puma_street_segment_scene.jpg" width="90%" alt="Puma Street Segment Example" /></div>
 
 Puma is a plugin for [Rhino3D and Grasshopper](https://www.rhino3d.com). It provides a Rhino command and Grasshopper components which enable the execution of [CityEngine](https://www.esri.com/software/cityengine) ‘rules’ within a Rhino scene. Therefore, a Rhino artist or designer does not have to leave their familiar Rhino environment anymore to make use of CityEngine’s procedural modeling power. Complicated export-import steps are no longer needed, which also means that the procedural models do not need to be “baked” anymore. The building or street models stay procedural during the entire design or planning workflow. Consequently, the user can change any attributes of the building or street models easily by connecting them to other Grasshopper components.
 
@@ -15,7 +15,9 @@ Puma requires so-called rule packages (RPK) as input, which are authored in City
 1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
 1. Connect the "File Path" component to the "RPK" input of Puma and "Surface" to the "Shape" input. Now Puma will generate the model in the Rhino viewport.
 
-<span style="color:red">TODO: insert quick start video here</span>
+<div align="center"><a href="https://youtu.be/JHMathmLBY8" target="_blank">
+    <img src="https://img.youtube.com/vi/JHMathmLBY8/0.jpg" alt="Puma Demo Video on Youtube" width="640" />
+</a></div>
 
 ## Table of Contents
 
