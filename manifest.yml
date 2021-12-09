@@ -2,8 +2,7 @@
 name: Puma
 version: 1.0.0.0
 authors:
-  - Loris Aiulfi
-  - Simon Haegler
+  - Esri RnD Center Zurich
 description: >
   Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.
 url: https://esri.github.io/cityengine/puma
