@@ -8,12 +8,15 @@ Puma requires so-called rule packages (RPK) as input, which are authored in City
 
 ## Quick Start
 
+Download and open the ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0/puma_street_segment_example_v1.zip) or create a scene from scratch:
+
+1. In CityEngine, download e.g. [Tutorial 9](https://doc.arcgis.com/en/cityengine/latest/tutorials/tutorial-9-advanced-shape-grammar.htm) and export the "Parthenon" CGA rules to a RPK (see [Creating a Rule Package](https://doc.arcgis.com/en/cityengine/latest/help/help-rule-package.htm)).
 1. Install Puma from the [Puma market place at food4rhino](https://www.food4rhino.com/app/puma).
-1. Start Rhino and open Grasshopper
-1. In Grasshopper go to the "Esri" tab and find the "Puma" section, drag the Puma component into the sheet.
-1. Create a "File Path" component and use the "Select one existing file" context menu entry to locate an RPK file from the examples directory.
+1. Start Rhino and open Grasshopper.
+1. In Grasshopper go to the "Esri" tab and find the "Puma" section, drag the Puma component into the document.
+1. Right-click on the RPK input parameter to select the "Parthenon" RPK created above. Puma will ask you to save the document, so it can store the path to the RPK relative to the document. It is best practice to put RPKs next to the Grasshopper document or in a subdirectory.
 1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
-1. Connect the "File Path" component to the "RPK" input of Puma and "Surface" to the "Shape" input. Now Puma will generate the model in the Rhino viewport.
+1. Connect the "Surface" to the "Shapes" input. Now Puma will generate the model in the Rhino viewport.
 
 <div align="center"><a href="https://youtu.be/JHMathmLBY8" target="_blank">
     <img src="https://img.youtube.com/vi/JHMathmLBY8/0.jpg" alt="Puma Demo Video on Youtube" width="640" />
