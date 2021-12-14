@@ -1,21 +1,28 @@
 # ![Puma Icon](doc/puma_icon_32px.png) Puma - CityEngine Plugin for Rhino3D and Grasshopper
 
-<span style="color:red">TODO: insert teaser pic here</span>
+<div align="center"><img src="doc/img/puma_street_segment_scene.jpg" width="90%" alt="Puma Street Segment Example" /></div>
 
 Puma is a plugin for [Rhino3D and Grasshopper](https://www.rhino3d.com). It provides a Rhino command and Grasshopper components which enable the execution of [CityEngine](https://www.esri.com/software/cityengine) ‘rules’ within a Rhino scene. Therefore, a Rhino artist or designer does not have to leave their familiar Rhino environment anymore to make use of CityEngine’s procedural modeling power. Complicated export-import steps are no longer needed, which also means that the procedural models do not need to be “baked” anymore. The building or street models stay procedural during the entire design or planning workflow. Consequently, the user can change any attributes of the building or street models easily by connecting them to other Grasshopper components.
 
 Puma requires so-called rule packages (RPK) as input, which are authored in CityEngine. An RPK includes assets and a CGA rule file which encodes an architectural style. Comprehensive RPK examples are available below.
 
+_Puma is free for personal, educational, and non-commercial use._ Commercial use requires at least one commercial license of the latest CityEngine version installed in the organization. Redistribution or web service offerings are not allowed unless expressly permitted.
+
 ## Quick Start
 
-1. Install Puma from the [Puma market place at food4rhino](https://www.food4rhino.com/app/puma).
-1. Start Rhino and open Grasshopper
-1. In Grasshopper go to the "Esri" tab and find the "Puma" section, drag the Puma component into the sheet.
-1. Create a "File Path" component and use the "Select one existing file" context menu entry to locate an RPK file from the examples directory.
-1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
-1. Connect the "File Path" component to the "RPK" input of Puma and "Surface" to the "Shape" input. Now Puma will generate the model in the Rhino viewport.
+Download and open the ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0/puma_street_segment_example_v1.zip) or create a scene from scratch:
 
-<span style="color:red">TODO: insert quick start video here</span>
+1. In CityEngine, download e.g. [Tutorial 9](https://doc.arcgis.com/en/cityengine/latest/tutorials/tutorial-9-advanced-shape-grammar.htm) and export the "Parthenon" CGA rules to a RPK (see [Creating a Rule Package](https://doc.arcgis.com/en/cityengine/latest/help/help-rule-package.htm)).
+1. Install Puma from the [Puma market place at food4rhino](https://www.food4rhino.com/app/puma).
+1. Start Rhino and open Grasshopper.
+1. In Grasshopper go to the "Esri" tab and find the "Puma" section, drag the Puma component into the document.
+1. Right-click on the RPK input parameter to select the "Parthenon" RPK created above. Puma will ask you to save the document, so it can store the path to the RPK relative to the document. It is best practice to put RPKs next to the Grasshopper document or in a subdirectory.
+1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
+1. Connect the "Surface" to the "Shapes" input. Now Puma will generate the model in the Rhino viewport.
+
+<div align="center"><a href="https://youtu.be/JHMathmLBY8" target="_blank">
+    <img src="https://img.youtube.com/vi/JHMathmLBY8/0.jpg" alt="Puma Demo Video on Youtube" width="640" />
+</a></div>
 
 ## Table of Contents
 
@@ -199,22 +206,22 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
-#### Known Limitations
-- Depending on the location of the system temp directory, complex Rule Packages (RPK) might trigger the maximum Windows path length limitation. As a workaround, please change the TEMP environment variable to a shorter path and/or shorten the asset directories within the Rule Package.
-
-### Puma 1.0.0 (2021-11-XX)
-* First public release.
-* Supports Rhino 6 and 7.
-* Supports Rule Packages from CityEngine 2021.0 and older.
-* Limitation: no support for PBR material properties in Rhino 7
+### Puma 1.0.0 (2021-12-10)
+* Corresponds to v0.9.4 with updated documentation.
+* Published ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0/puma_street_segment_example_v1.zip) (for Rhino 7) to show-case the main features of Puma.
+* Puma supports Rhino 6 and 7.
+* Supports Rule Packages from CityEngine 2021.1 and older.
+* Limitation: no support yet for PBR materials in Rhino 7.
 
 ### Puma 0.9.4 (2021-11-15)
-* Supports Rhino 6 and 7.
+* Public Beta.
 * Updated to PRT 2.5: Supports Rule Packages (RPK) from CityEngine 2021.1 and older.
 * Fixed use of wrong rule attribute values in a GH document with multiple Puma nodes.
 * Fixed group assignment of extracted parameters.
+* Supports Rhino 6 and 7.
 
 ### Puma 0.9.3 (2021-09-22)
+* Internal test build.
 * Supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.0 and older.
 * Improved portability of Grasshopper documents by storing relative paths to Rule Packages (introduces a "RPK" custom parameter).
@@ -225,6 +232,7 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 * Various code cleanups.
 
 ### Puma 0.9.2 (2021-08-09)
+* Internal test build.
 * Supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.0 and older.
 * Improved conversion of non-Mesh input shapes. Rhino Rectangles now have a consistent winding order.
@@ -270,7 +278,5 @@ Esri welcomes contributions from anyone and everyone. Please see our [guidelines
 Puma is free for personal, educational, and non-commercial use. Commercial use requires at least one commercial license of the latest CityEngine version installed in the organization. Redistribution or web service offerings are not allowed unless expressly permitted.
 
 Puma is under the same license as the included [CityEngine SDK](https://github.com/Esri/esri-cityengine-sdk#licensing). An exception is the Puma source code (without CityEngine SDK, binaries, or object code), which is licensed under the Apache License, Version 2.0 (the “License”); you may not use this work except in compliance with the License. You may obtain a copy of the License at <https://www.apache.org/licenses/LICENSE-2.0>.
-
-All content in the "Examples" directory/section is licensed under the APACHE 2.0 license as well.
 
 For questions or enquiries, please contact the Esri CityEngine team (cityengine-info@esri.com).
