@@ -10,7 +10,7 @@ _Puma is free for personal, educational, and non-commercial use._ Commercial use
 
 ## Quick Start
 
-Download and open the ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0/puma_street_segment_example_v1.zip) or create a scene from scratch:
+Download and open the ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0) (attached asset files) or create a scene from scratch:
 
 1. In CityEngine, download e.g. [Tutorial 9](https://doc.arcgis.com/en/cityengine/latest/tutorials/tutorial-9-advanced-shape-grammar.htm) and export the "Parthenon" CGA rules to a RPK (see [Creating a Rule Package](https://doc.arcgis.com/en/cityengine/latest/help/help-rule-package.htm)).
 1. Install Puma from the [Puma market place at food4rhino](https://www.food4rhino.com/app/puma).
