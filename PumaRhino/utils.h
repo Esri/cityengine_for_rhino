@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when
                  // using /permissive-
@@ -62,9 +63,13 @@ struct ShapeAttributes {
 	std::wstring ruleFile;
 	std::wstring startRule;
 	std::wstring shapeName;
+	pcu::RuleFileInfoPtr ruleFileInfo;
+	int seed;
 
-	ShapeAttributes(const std::wstring rulef = L"bin/rule.cgb", const std::wstring startRl = L"Default$Lot",
-	                const std::wstring shapeN = L"Lot");
+	ShapeAttributes(pcu::RuleFileInfoPtr ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
+	                const std::wstring startRl = L"Default$Lot",
+	                const std::wstring shapeN = L"Lot",
+					const int seed = 0);
 };
 
 /**
@@ -133,6 +138,41 @@ std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std:
 	        str.begin(), str.end(), [&range](C c) { return (range.find(c) == std::basic_string<C>::npos); },
 	        replacement);
 	return str;
+}
+
+/**
+ * Interop helpers
+ */
+
+template<typename T>
+void fillMapBuilder(const std::wstring& key, const T& value, AttributeMapBuilderPtr& aBuilder) {
+	throw std::invalid_argument("Received type is not supported");
+}
+
+template<>
+void fillMapBuilder<bool>(const std::wstring& key, const bool& value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setBool(key.c_str(), value);
+}
+
+template<>
+void fillMapBuilder<double>(const std::wstring& key, const double& value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setFloat(key.c_str(), value);
+}
+
+template<>
+void fillMapBuilder<std::wstring>(const std::wstring& key, const std::wstring& value,
+	AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setString(key.c_str(), value.c_str());
+}
+
+template<typename T>
+void unpackAttributes(int start, int count, const wchar_t* keys, const T* values, AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys[i]);
+		const T value(values[i]);
+
+		pcu::fillMapBuilder<T>(key, value, aBuilder);
+	}
 }
 
 /**

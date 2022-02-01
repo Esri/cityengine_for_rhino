@@ -55,7 +55,9 @@ public:
 	void SetInitialShapes(const std::vector<RawInitialShape>& shapes);
 	void ClearInitialShapes();
 
-	size_t GenerateGeometry();
+	std::vector<GeneratedModelPtr> GenerateGeometry(const std::wstring& rpk_path,
+	                                                       std::vector<RawInitialShape> rawInitialShapes,
+	                                                       pcu::AttributeMapBuilderVector& aBuilders);
 
 	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, double value, size_t /*count*/);
 	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, int value, size_t /*count*/);

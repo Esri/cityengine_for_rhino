@@ -84,16 +84,11 @@ void RhinoPRTAPI::SetInitialShapes(const std::vector<RawInitialShape>& shapes) {
 	mAttributes.reserve(shapes.size());
 
 	mShapes.insert(mShapes.end(), shapes.begin(), shapes.end());
-	mAttributes.resize(mShapes.size(), pcu::ShapeAttributes(rulef, ruleN, shapeN));
+	//mAttributes.resize(mShapes.size(), pcu::ShapeAttributes(rulef, ruleN, shapeN));
 
 	// compute the default values of rule attributes for each initial shape
 	mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
 
-	// Initialise the attribute map builders for each initial shape.
-	mAttrBuilders.resize(shapes.size());
-	for (auto& it : mAttrBuilders) {
-		it.reset(prt::AttributeMapBuilder::create());
-	}
 }
 
 void RhinoPRTAPI::ClearInitialShapes() {
@@ -104,10 +99,16 @@ void RhinoPRTAPI::ClearInitialShapes() {
 	mAttrBuilders.clear();
 }
 
-size_t RhinoPRTAPI::GenerateGeometry() {
-	mGeneratedModels = mModelGenerator->generateModel(mShapes, mAttributes, mAttrBuilders);
-	assert(mGeneratedModels.size() == mShapes.size());
-	return mShapes.size();
+std::vector<GeneratedModelPtr> RhinoPRTAPI::GenerateGeometry(const std::wstring& rpk_path,
+                                                             std::vector<RawInitialShape> rawInitialShapes,
+                                                             pcu::AttributeMapBuilderVector& aBuilders) {
+	//Build ShapeAttributes
+	pcu::ShapeAttributes attribute = mModelGenerator->getShapeAttributes(rpk_path);
+	std::vector<pcu::ShapeAttributes> attributes(rawInitialShapes.size(), attribute);
+	
+	std::vector<GeneratedModelPtr> generatedModels = mModelGenerator->generateModel(rawInitialShapes, attributes, aBuilders);
+	assert(generatedModels.size() == rawInitialShapes.size());
+	return generatedModels;
 }
 
 const std::vector<GeneratedModelPtr>& RhinoPRTAPI::getGenModels() const {

@@ -61,6 +61,7 @@ RHINOPRT_API void ShutdownRhinoPRT() {
 	RhinoPRT::get().ShutdownRhinoPRT();
 }
 
+/*
 RHINOPRT_API void SetPackage(const wchar_t* rpk_path, ON_wString* errorMsg) {
 	assert(rpk_path != nullptr); // guaranteed by managed call site
 	try {
@@ -96,19 +97,87 @@ inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh) {
 	RhinoPRT::get().SetInitialShapes(rawInitialShapes);
 	return true;
 }
+*/
 
-RHINOPRT_API void ClearInitialShapes() {
-	RhinoPRT::get().ClearInitialShapes();
-}
+RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
+						   // rule attributes
+						   const int shapeCount,
+						   const int* pBoolStarts, const int boolCount,
+						   const wchar_t* pBoolKeys, const bool* pBoolVals,
 
-RHINOPRT_API bool Generate(ON_SimpleArray<int>* pMeshCounts, ON_SimpleArray<ON_Mesh*>* pMeshArray) {
-	RhinoPRT::get().GenerateGeometry();
-	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
+						   const int* pDoubleStarts, const int doubleCount,
+						   const wchar_t* pDoubleKeys, const double* pDoubleVals,
 
-	for (size_t initialShapeIndex = 0; initialShapeIndex < models.size(); initialShapeIndex++) {
-		if (models[initialShapeIndex]) {
+						   const int* pStringStarts, const int stringCount,
+						   const wchar_t* pStringKeys, const wchar_t* pStringVals,
+
+						   const int* pBoolArrayStarts, const int boolArrayCount,
+						   const wchar_t* pBoolArrayKeys, const bool** pBoolArrayVals,
+
+						   const int* pDoubleArrayStarts, const int doubleArrayCount,
+						   const wchar_t* pDoubleArrayKeys, const float** pDoubleArrayVals,
+
+						   const int* pStringArrayStarts, const int stringArrayCount,
+						   const wchar_t* pStringArrayKeys, const wchar_t** pStringArrayVals,
+
+						   // Initial geometry
+                           ON_SimpleArray<const ON_Mesh*>* pMesh,
+
+						   // Resulting geometry
+						   ON_SimpleArray<int>* pMeshCounts,
+                           ON_SimpleArray<ON_Mesh*>* pMeshArray) {
+
+	if (pMesh == nullptr)
+		return false;
+
+	std::vector<RawInitialShape> rawInitialShapes;
+	rawInitialShapes.reserve(pMesh->Count());
+	for (int i = 0; i < pMesh->Count(); ++i) {
+		rawInitialShapes.emplace_back(**pMesh->At(i));
+	}
+
+	// Initialise the attribute map builders for each initial shape.
+	pcu::AttributeMapBuilderVector aBuilders(shapeCount);
+	for (auto& it : aBuilders) {
+		it.reset(prt::AttributeMapBuilder::create());
+	}
+
+	for (int i = 0; i < shapeCount; ++i) {
+		// by initial shape
+		int indexStartBool = pBoolStarts[i];
+		int indexStartDouble = pDoubleStarts[i];
+		int indexStartString = pStringStarts[i];
+		int indexStartBoolArray = pBoolArrayStarts[i];
+		int indexStartDoubleArray = pDoubleArrayStarts[i];
+		int indexStartStringArray = pStringArrayStarts[i];
+
+		int boolAttrCount = i < boolCount - 1 ? pBoolStarts[i + 1] : boolCount - indexStartBool;
+		int doubleAttrCount = i < doubleCount - 1 ? pDoubleStarts[i + 1]: doubleCount - indexStartDouble;
+		int stringAttrCount = i < stringCount - 1 ? pStringStarts[i + 1]: stringCount - indexStartString;
+		int boolAttrArrayCount = i < boolArrayCount - 1 ? pBoolArrayStarts[i + 1]: boolArrayCount - indexStartBoolArray;
+		int doubleAttrArrayCount = i < doubleArrayCount - 1 ? pDoubleArrayStarts[i + 1]: doubleArrayCount - indexStartDoubleArray;
+		int stringAttrArrayCount = i < stringArrayCount - 1 ? pStringArrayStarts[i + 1]: stringArrayCount - indexStartStringArray;
+
+		pcu::unpackAttributes(indexStartBool, boolAttrCount, pBoolKeys, pBoolVals, aBuilders[i]);
+		pcu::unpackAttributes(indexStartDouble, doubleAttrCount, pDoubleKeys, pDoubleVals, aBuilders[i]);
+		pcu::unpackAttributes(indexStartString, stringAttrCount, pStringKeys, pStringVals,
+		                      aBuilders[i]);
+		//TODO: Add array unpacking
+
+		indexStartBool += boolAttrCount;
+		indexStartDouble += doubleAttrCount;
+		indexStartString += stringAttrCount;
+		indexStartBoolArray += boolAttrArrayCount;
+		indexStartDoubleArray += doubleAttrArrayCount;
+		indexStartStringArray += stringAttrArrayCount;
+	}
+
+	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().GenerateGeometry(rpk_path, rawInitialShapes, aBuilders);
+
+	for (size_t i = 0; i < models.size(); i++) {
+		if (models[i]) {
 			const GeneratedModel::MeshBundle meshBundle =
-			        models[initialShapeIndex]->createRhinoMeshes(initialShapeIndex);
+			        models[i]->createRhinoMeshes(i);
 			pMeshCounts->Append(static_cast<int>(meshBundle.size()));
 			for (const auto& meshPart : meshBundle) {
 				pMeshArray->Append(new ON_Mesh(meshPart));
@@ -122,6 +191,7 @@ RHINOPRT_API bool Generate(ON_SimpleArray<int>* pMeshCounts, ON_SimpleArray<ON_M
 	return !models.empty();
 }
 
+/*
 RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 	const auto& models = RhinoPRT::get().getGenModels();
 
@@ -130,6 +200,7 @@ RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
 
 	return models[initialShapeIndex]->getMeshPartCount();
 }
+*/
 
 RHINOPRT_API int GetRuleAttributesCount() {
 	return RhinoPRT::get().GetRuleAttributeCount();
@@ -154,6 +225,7 @@ RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* p
 	return true;
 }
 
+/*
 RHINOPRT_API void SetRuleAttributeDouble(const int initialShapeIndex, const wchar_t* fullName, double value) {
 	if (!fullName)
 		return;
@@ -220,6 +292,7 @@ RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const
 
 	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, strVector, size);
 }
+*/
 
 RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* pKeysArray,
                              ON_SimpleArray<double>* pDoubleReports, ON_SimpleArray<bool>* pBoolReports,
