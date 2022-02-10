@@ -124,6 +124,7 @@ std::wstring filename(const std::wstring& path);
 constexpr const wchar_t IMPORT_DELIMITER = L'.';
 constexpr const wchar_t STYLE_DELIMITER = L'$';
 constexpr const wchar_t* DEFAULT_STYLE_PREFIX = L"Default$";
+constexpr const wchar_t* CE_ARRAY_DELIMITER = L":";
 
 bool isDefaultStyle(const std::wstring& attrName);
 std::wstring removePrefix(const std::wstring& attrName, wchar_t delim);
@@ -140,38 +141,97 @@ std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std:
 	return str;
 }
 
+std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim) {
+	std::vector<const wchar_t*> result;
+
+	size_t found = i_str.find(i_delim);
+	size_t startIndex = 0;
+
+	while (found != std::wstring::npos) {
+		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.begin() + found).c_str());
+		startIndex = found + i_delim.size();
+		found = i_str.find(i_delim, startIndex);
+	}
+	if (startIndex != i_str.size())
+		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.end()).c_str());
+	return result;
+}
+
+std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray) {
+	return pcu::split(stringArray, CE_ARRAY_DELIMITER);
+}
+
 /**
  * Interop helpers
  */
 
 template<typename T>
-void fillMapBuilder(const std::wstring& key, const T& value, AttributeMapBuilderPtr& aBuilder) {
+void fillMapBuilder(const std::wstring& key, T value, AttributeMapBuilderPtr& aBuilder) {
 	throw std::invalid_argument("Received type is not supported");
 }
 
 template<>
-void fillMapBuilder<bool>(const std::wstring& key, const bool& value, AttributeMapBuilderPtr& aBuilder) {
+void fillMapBuilder<bool>(const std::wstring& key, bool value, AttributeMapBuilderPtr& aBuilder) {
 	aBuilder->setBool(key.c_str(), value);
 }
 
 template<>
-void fillMapBuilder<double>(const std::wstring& key, const double& value, AttributeMapBuilderPtr& aBuilder) {
+void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapBuilderPtr& aBuilder) {
 	aBuilder->setFloat(key.c_str(), value);
 }
 
+template<typename T>
+void fillArrayMapBuilder(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder) {
+	throw std::invalid_argument("Received type is not supported");
+}
+
 template<>
-void fillMapBuilder<std::wstring>(const std::wstring& key, const std::wstring& value,
-	AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setString(key.c_str(), value.c_str());
+void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder) {
+	bool* bArray = new bool[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		bArray[i] = values[i] == L"true";
+	}
+	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
+}
+
+template<>
+void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder) {
+	double* dArray = new double[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		dArray[i] = std::stod(values[i]);
+	}
+	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
 }
 
 template<typename T>
-void unpackAttributes(int start, int count, const wchar_t* keys, const T* values, AttributeMapBuilderPtr& aBuilder) {
+void unpackAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<T>* values, AttributeMapBuilderPtr& aBuilder) {
 	for (int i = start; i < start + count; ++i) {
-		const std::wstring key(keys[i]);
-		const T value(values[i]);
+		const std::wstring key(keys->At(i)->Array());
 
-		pcu::fillMapBuilder<T>(key, value, aBuilder);
+		const T value(values->At(i));
+		pcu::fillMapBuilder(key, value, aBuilder);
+	}
+}
+
+template<typename T>
+void unpackArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+	AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+		auto vArray = fromCeArray(values->At(i)->Array());
+		pcu::fillArrayMapBuilder<T>(key, vArray, aBuilder);
+	}
+}
+
+void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder, bool isArray) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+
+		if (isArray) {
+			auto strings = fromCeArray(values->At(i)->Array());
+			aBuilder->setStringArray(key.c_str(), strings.data(), strings.size());
+		} else 
+			aBuilder->setString(key.c_str(), values->At(i)->Array());
 	}
 }
 

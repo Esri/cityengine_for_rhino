@@ -103,22 +103,22 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 						   // rule attributes
 						   const int shapeCount,
 						   const int* pBoolStarts, const int boolCount,
-						   const wchar_t* pBoolKeys, const bool* pBoolVals,
+						   ON_ClassArray<ON_wString>* pBoolKeys, ON_SimpleArray<int>* pBoolVals,
 
 						   const int* pDoubleStarts, const int doubleCount,
-						   const wchar_t* pDoubleKeys, const double* pDoubleVals,
+						   ON_ClassArray<ON_wString>* pDoubleKeys, ON_SimpleArray<double>* pDoubleVals,
 
-						   const int* pStringStarts, const int stringCount,
-						   const wchar_t* pStringKeys, const wchar_t* pStringVals,
+						   const int* pStringStarts, const int stringCount, 
+						   ON_ClassArray<ON_wString>* pStringKeys, ON_ClassArray<ON_wString>* pStringVals,
 
 						   const int* pBoolArrayStarts, const int boolArrayCount,
-						   const wchar_t* pBoolArrayKeys, const bool** pBoolArrayVals,
+                           ON_ClassArray<ON_wString>* pBoolArrayKeys, ON_ClassArray<ON_wString>* pBoolArrayVals,
 
 						   const int* pDoubleArrayStarts, const int doubleArrayCount,
-						   const wchar_t* pDoubleArrayKeys, const float** pDoubleArrayVals,
+                           ON_ClassArray<ON_wString>* pDoubleArrayKeys, ON_ClassArray<ON_wString>* pDoubleArrayVals,
 
 						   const int* pStringArrayStarts, const int stringArrayCount,
-						   const wchar_t* pStringArrayKeys, const wchar_t** pStringArrayVals,
+                           ON_ClassArray<ON_wString>* pStringArrayKeys, ON_ClassArray<ON_wString>* pStringArrayVals,
 
 						   // Initial geometry
                            ON_SimpleArray<const ON_Mesh*>* pMesh,
@@ -160,9 +160,13 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 
 		pcu::unpackAttributes(indexStartBool, boolAttrCount, pBoolKeys, pBoolVals, aBuilders[i]);
 		pcu::unpackAttributes(indexStartDouble, doubleAttrCount, pDoubleKeys, pDoubleVals, aBuilders[i]);
-		pcu::unpackAttributes(indexStartString, stringAttrCount, pStringKeys, pStringVals,
-		                      aBuilders[i]);
-		//TODO: Add array unpacking
+		pcu::unpackStringAttributes(indexStartString, stringAttrCount, pStringKeys, pStringVals,
+		                      aBuilders[i], false);
+		pcu::unpackArrayAttributes<bool>(indexStartBoolArray, boolAttrArrayCount, pBoolArrayKeys, pBoolArrayVals,
+		                           aBuilders[i]);
+		pcu::unpackArrayAttributes<double>(indexStartDoubleArray, doubleAttrArrayCount, pDoubleArrayKeys, pDoubleArrayVals, aBuilders[i]);
+		pcu::unpackStringAttributes(indexStartStringArray, stringAttrArrayCount, pStringArrayKeys, pStringArrayVals,
+		                            aBuilders[i], true);
 
 		indexStartBool += boolAttrCount;
 		indexStartDouble += doubleAttrCount;

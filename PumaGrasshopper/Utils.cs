@@ -77,6 +77,11 @@ namespace PumaGrasshopper
             return array;
         }
 
+        public static string ToCeArray<T>(T[] values)
+        {
+            return values.Aggregate("", (acc, x) => acc + x.ToString()) + ":";
+        }
+
         public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
         {
             GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();

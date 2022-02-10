@@ -144,8 +144,6 @@ namespace PumaGrasshopper
             }
         };
 
-        RulePackage mCurrentRPK;
-
         public ComponentPuma()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Puma runs CityEngine CGA rules on input shapes and returns the generated models. (Version " + PRTWrapper.GetVersion() + ")",
@@ -205,20 +203,15 @@ namespace PumaGrasshopper
             if (!rpk.IsValid())
                 return;
 
-            if (!CheckAndUpdateRulePackage(rpk))
-                return;
-
             List<Mesh> inputMeshes = CreateInputMeshes(DA);
             if (inputMeshes == null || inputMeshes.Count == 0)
                 return;
 
-            PRTWrapper.ClearInitialShapes();
-            if (!PRTWrapper.AddMesh(inputMeshes))
-                return;
+            // TODO: Add default value evaluation
 
-            FillAttributesFromNode(DA, inputMeshes.Count);
+            RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
 
-            var generatedMeshes = PRTWrapper.GenerateMesh();
+            var generatedMeshes = PRTWrapper.GenerateMesh(rpk.path, ref MM, inputMeshes);
             OutputGeometry(DA, generatedMeshes);
             OutputMaterials(DA, generatedMeshes);
             OutputReports(DA, generatedMeshes);
@@ -250,44 +243,6 @@ namespace PumaGrasshopper
             return result;
         }
 
-        public void RefreshRpk()
-        {
-            if (string.Compare(mCurrentRPK.path, PRTWrapper.GetPackagePath())
-                != 0)
-            {
-                ExpireSolution(true);
-            }
-        }
-
-        private bool SetRulePackage(RulePackage rulePackage)
-        {
-            var errorMsg = new StringWrapper();
-            var pErrorMsg = errorMsg.NonConstPointer;
-            PRTWrapper.SetPackage(rulePackage.path, pErrorMsg);
-            if (errorMsg.ToString().Length > 0)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to set Rule Package: " + errorMsg);
-                return false;
-            }
-            return true;
-        }
-
-        private bool CheckAndUpdateRulePackage(RulePackage potentiallyNewRulePackage)
-        {
-            string currentPrtRpk = PRTWrapper.GetPackagePath();
-
-            if (mCurrentRPK == null
-                || !mCurrentRPK.IsSame(potentiallyNewRulePackage)
-                || string.Compare(potentiallyNewRulePackage.path, currentPrtRpk) != 0)
-            {
-                mCurrentRPK = potentiallyNewRulePackage;
-                if (!SetRulePackage(mCurrentRPK))
-                    return false;
-                mRuleAttributes = PRTWrapper.GetRuleAttributes();
-            }
-            return true;
-        }
-
         private List<Mesh> CreateInputMeshes(IGH_DataAccess dataAccess)
         {
             if (!dataAccess.GetDataTree<IGH_GeometricGoo>(GEOM_INPUT_NAME, out GH_Structure<IGH_GeometricGoo> inputShapes))
@@ -310,20 +265,29 @@ namespace PumaGrasshopper
             return meshes;
         }
 
-        private void FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
+        private RuleAttributesMap FillAttributesFromNode(IGH_DataAccess DA, int shapeCount)
         {
+            RuleAttributesMap MM = new RuleAttributesMap();
+
             List<RuleAttribute> attributeList = mRuleAttributes.ToList();
 
-            for (int idx = (int)InputParams.SEEDS; idx < Params.Input.Count; ++idx)
+            for(int shapeId = 0; shapeId < shapeCount; ++shapeId)
             {
-                var param = Params.Input[idx];
+                MM.StartShape();
 
-                RuleAttribute attribute = attributeList.Find(x => x.mFullName == param.Name);
+                for (int idx = (int)InputParams.SEEDS; idx < Params.Input.Count; ++idx)
+                {
+                    var param = Params.Input[idx];
 
-                bool expectArray = attribute != null && attribute.IsArray();
+                    RuleAttribute attribute = attributeList.Find(x => x.mFullName == param.Name);
 
-                SetAttributeOfShapes(DA, shapeCount, param, expectArray);
+                    bool expectArray = attribute != null && attribute.IsArray();
+
+                    SetAttributeOfShapes(DA, shapeCount, shapeId, param, expectArray, ref MM);
+                }
             }
+
+            return MM;
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
@@ -441,88 +405,74 @@ namespace PumaGrasshopper
             return mesh;
         }
 
-        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, IGH_Param attributeParam, bool expectArray)
+        private void SetAttributeOfShapes(IGH_DataAccess DA, int shapeCount, int shapeId, IGH_Param attributeParam, bool expectArray, ref RuleAttributesMap MM)
         {
             if (attributeParam.Type == typeof(GH_Number))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Number> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, shapeId, expectArray, ref MM);
             }
             else if (attributeParam.Type == typeof(GH_Integer))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Integer> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, shapeId, expectArray, ref MM);
             }
             else if (attributeParam.Type == typeof(GH_Boolean))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Boolean> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, shapeId, expectArray, ref MM);
             }
             else if (attributeParam.Type == typeof(GH_String))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_String> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, shapeId, expectArray, ref MM);
             }
             else if (attributeParam.Type == typeof(GH_Colour))
             {
                 if (DA.GetDataTree(attributeParam.Name, out GH_Structure<GH_Colour> tree))
-                    ExtractTreeValues(tree, attributeParam, shapeCount, expectArray);
+                    ExtractTreeValues(tree, attributeParam, shapeCount, shapeId, expectArray, ref MM);
             }
         }
 
-        private void ExtractTreeValues<T>(GH_Structure<T> tree, IGH_Param attributeParam, int shapeCount, bool expectArray) where T : IGH_Goo
+        private void ExtractTreeValues<T>(GH_Structure<T> tree, IGH_Param attributeParam ,int shapeCount, int shapeId, bool expectArray, ref RuleAttributesMap MM) where T : IGH_Goo
         {
-            if (tree.IsEmpty)
+            if (tree.IsEmpty || shapeId >= shapeCount)
                 return;
-
-            int shapeId = 0;
 
             if (expectArray)
             {
-                foreach (List<T> branch in tree.Branches)
-                {
-                    if (shapeId >= shapeCount) return;
-
-                    SetRuleAttributeArray(shapeId, attributeParam, branch);
-                    shapeId++;
-                }
+                List<T> branch;
 
                 // Grasshopper behaviour: repeat last item to compensate mismatched list lengths
-                while(shapeId < shapeCount)
-                {
-                    SetRuleAttributeArray(shapeId, attributeParam, tree.Branches.Last());
-                    shapeId++;
-                }
+                if (shapeId > tree.Branches.Count) branch = tree.Branches.Last();
+                else branch = tree.Branches[shapeId];
+              
+                SetRuleAttributeArray(attributeParam, branch, ref MM);
             }
             else
             {
                 List<T> values = tree.ToList();
+                T value;
 
                 // Grasshopper behaviour: repeat last item to compensate mismatched list lengths
-                while (shapeCount > values.Count)
+                if (shapeId >= values.Count) value = values.Last();
+                else value = values[shapeId];
+                
+                if (value.IsValid)
                 {
-                    values.Add(values.Last());
-                }
-
-                foreach (T value in values)
-                {
-                    if (value.IsValid)
-                    {
-                        if (shapeId >= shapeCount) return;
-
-                        SetRuleAttribute(shapeId, attributeParam, value);
-                    }
-                    shapeId++;
+                    SetRuleAttribute(attributeParam, value, ref MM);
                 }
             }
         }
 
-        private void SetRuleAttributeArray<T>(int shapeId, IGH_Param attributeParam, List<T> values) where T : IGH_Goo
+        private void SetRuleAttributeArray<T>(IGH_Param attributeParam, List<T> values, ref RuleAttributesMap MM) where T : IGH_Goo
         {
+            var name = attributeParam.Name;
+
             if (attributeParam.Type == typeof(GH_Number))
             {
-                List<double> doubleList = values.ConvertAll((x) => { x.CastTo<double>(out double d); return d; });
-                PRTWrapper.SetRuleAttributeDoubleArray(shapeId, attributeParam.Name, doubleList);
+                double[] doubleList = values.ConvertAll((x) => { x.CastTo<double>(out double d); return d; }).ToArray();
+                MM.AddDoubleArray(name, doubleList);
             }
             else if (attributeParam.Type == typeof(GH_Integer))
             {
@@ -530,44 +480,44 @@ namespace PumaGrasshopper
             }
             else if (attributeParam.Type == typeof(GH_Boolean))
             {
-                List<bool> boolList = values.ConvertAll((x) => { x.CastTo<bool>(out bool b); return b; });
-                PRTWrapper.SetRuleAttributeBoolArray(shapeId, attributeParam.Name, boolList);
+                bool[] boolList = values.ConvertAll((x) => { x.CastTo<bool>(out bool b); return b; }).ToArray();
+                MM.AddBoolArray(name, boolList);
             }
             else if (attributeParam.Type == typeof(GH_String))
             {
-                List<string> stringList = values.ConvertAll((x) => { x.CastTo<string>(out string s); return s; });
-                PRTWrapper.SetRuleAttributeStringArray(shapeId, attributeParam.Name, stringList);
+                string[] stringList = values.ConvertAll((x) => { x.CastTo<string>(out string s); return s; }).ToArray();
+                MM.AddStringArray(name, stringList);
             }
         }
 
-        private void SetRuleAttribute<T>(int shapeId, IGH_Param attributeParam, T value) where T : IGH_Goo
+        private void SetRuleAttribute<T>(IGH_Param attributeParam, T value, ref RuleAttributesMap MM) where T : IGH_Goo
         {
             var name = attributeParam.Name;
             if (attributeParam.Type == typeof(GH_Number))
             {
                 if (value.CastTo(out double number))
-                    PRTWrapper.SetRuleAttributeDouble(shapeId, name, number);
+                    MM.AddDouble(name, number);
                 else
                     throw new Exception(Utils.GetCastErrorMessage(name, "double"));
             }
             else if (attributeParam.Type == typeof(GH_Integer))
             {
                 if (value.CastTo(out int integer))
-                    PRTWrapper.SetRuleAttributeInteger(shapeId, name, integer);
+                    MM.AddDouble(name, integer);
                 else
                     throw new Exception(Utils.GetCastErrorMessage(name, "integer"));
             }
             else if (attributeParam.Type == typeof(GH_Boolean))
             {
                 if (value.CastTo(out bool boolean))
-                    PRTWrapper.SetRuleAttributeBoolean(shapeId, name, boolean);
+                    MM.AddBoolean(name, boolean);
                 else
                     throw new Exception(Utils.GetCastErrorMessage(name, "bool"));
             }
             else if (attributeParam.Type == typeof(GH_String))
             {
                 if (value.CastTo(out string text))
-                    PRTWrapper.SetRuleAttributeString(shapeId, name, text);
+                    MM.AddString(name, text);
                 else
                     throw new Exception(Utils.GetCastErrorMessage(name, "string"));
             }
@@ -576,7 +526,7 @@ namespace PumaGrasshopper
                 if (value.CastTo(out Color color))
                 {
                     string text = Utils.HexColor(color);
-                    PRTWrapper.SetRuleAttributeString(shapeId, name, text);
+                    MM.AddString(name, text);
                 }
                 else
                     throw new Exception(Utils.GetCastErrorMessage(name, "Colour"));

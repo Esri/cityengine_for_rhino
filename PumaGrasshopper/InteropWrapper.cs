@@ -31,15 +31,16 @@ namespace PumaGrasshopper
     {
         private ClassArrayString Values;
 
-        public InteropWrapperString(int[] starts, Dictionary<string, string> attributes) : base(starts, attributes.Count)
+        public InteropWrapperString(int[] starts, ref List<string> keys, ref List<string> values) : base(starts, keys.Count)
         {
             Keys = new ClassArrayString();
             Values = new ClassArrayString();
 
-            foreach (var attribute in attributes)
+            
+            for (int i = 0; i < keys.Count; ++i)
             {
-                Keys.Add(attribute.Key);
-                Values.Add(attribute.Value);
+                Keys.Add(keys[i]);
+                Values.Add(values[i]);
             }
         }
 
@@ -56,16 +57,17 @@ namespace PumaGrasshopper
     {
         private SimpleArrayDouble Values;
 
-        public InteropWrapperDouble(int[] starts, Dictionary<string, double> attributes): base(starts, attributes.Count)
+        public InteropWrapperDouble(int[] starts, ref List<string> keys, ref List<double> values): base(starts, keys.Count)
         {
             Keys = new ClassArrayString();
-            Values = new SimpleArrayDouble(attributes.Values);
+            Values = new SimpleArrayDouble(values);
 
-            foreach(var key in attributes.Keys)
+            foreach(var key in keys)
             {
                 Keys.Add(key);
             }
         }
+
         public new void Dispose()
         {
             base.Dispose();
@@ -79,14 +81,14 @@ namespace PumaGrasshopper
     {
         private SimpleArrayInt Values;
 
-        public InteropWrapperBoolean(int[] starts, Dictionary<string, bool> attributes): base(starts, attributes.Count)
+        public InteropWrapperBoolean(int[] starts, ref List<string> keys, ref List<bool> values): base(starts, keys.Count)
         {
             Keys = new ClassArrayString();
-            Values = new SimpleArrayInt(Array.ConvertAll<bool, int>(attributes.Values.ToArray(), x => Convert.ToInt32(x)));
+            Values = new SimpleArrayInt(Array.ConvertAll<bool, int>(values.ToArray(), x => Convert.ToInt32(x)));
 
-            foreach (var attribute in attributes)
+            foreach (var key in keys)
             {
-                Keys.Add(attribute.Key);
+                Keys.Add(key);
             }
         }
 

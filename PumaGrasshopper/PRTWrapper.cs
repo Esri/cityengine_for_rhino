@@ -47,20 +47,11 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetPackage(string rpk_path, [In, Out] IntPtr errorMsg);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetPackagePath([In, Out] IntPtr pRpk);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool AddInitialMesh([In] IntPtr pMesh);
-
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int Generate([In] IntPtr rpk_path, [Out] IntPtr errorMsg,
+        public static extern int Generate(string rpk_path, [Out] IntPtr errorMsg,
             int shapeCount,
             [In] IntPtr pBoolStarts, int boolCount,
             [In] IntPtr pBoolKeys, [In] IntPtr pBoolVals,
@@ -70,9 +61,9 @@ namespace PumaGrasshopper
             [In] IntPtr pStringKeys, [In] IntPtr pStringVals,
             [In] IntPtr pBoolArrayStarts, int boolArrayCount,
             [In] IntPtr pBoolArrayKeys, [In] IntPtr pBoolArrayVals,
-            [In] IntPtr pDoubleArrayStarts, [In] IntPtr doubleArrayCount,
+            [In] IntPtr pDoubleArrayStarts, int doubleArrayCount,
             [In] IntPtr pDoubleArrayKeys, [In] IntPtr pDoubleArrayVals,
-            [In] IntPtr pStringArrayStarts, [In] IntPtr stringArrayCount,
+            [In] IntPtr pStringArrayStarts, int stringArrayCount,
             [In] IntPtr pStringArrayKeys, [In] IntPtr pStringArrayVals,
             [In] IntPtr pInitialMeshes, [Out] IntPtr pMeshCounts, [Out] IntPtr pMeshArray);
 
@@ -87,27 +78,6 @@ namespace PumaGrasshopper
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetRuleAttribute(int attrIdx, [In, Out] IntPtr pRule, [In, Out] IntPtr pName, [In, Out] IntPtr pNickname, ref Annotations.AnnotationArgumentType type, [In, Out] IntPtr pGroup);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDouble(int initialShapeIndex, string fullName, double value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string fullName, bool value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeInteger(int initialShapeIndex, string fullName, int value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeString(int initialShapeIndex, string fullName, string value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, [In, Out] IntPtr pValueArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, [In, Out] IntPtr pValueArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, [In, Out] IntPtr pValueArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out] IntPtr pAnnotTypeArray);
@@ -150,15 +120,6 @@ namespace PumaGrasshopper
         public static extern void SetMaterialGenerationOption(bool doGenerate);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesBoolean(string key, [In, Out] IntPtr pValues);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesNumber(string key, [In, Out] IntPtr pValues);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesText(string key, [In, Out] IntPtr pTexts);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValuesBooleanArray(string key, [In, Out] IntPtr pValues, [In, Out] IntPtr pSizes);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
@@ -167,51 +128,8 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValuesTextArray(string key, [In, Out] IntPtr pTexts, [In, Out] IntPtr pSizes);
 
-
-        public static string GetPackagePath()
-        {
-            string currentRpk = null;
-
-            StringWrapper rpk = new StringWrapper();
-            var rpkPtr = rpk.NonConstPointer;
-            bool success = GetPackagePath(rpkPtr);
-            if (success)
-            {
-                currentRpk = rpk.ToString();
-            }
-            rpk.Dispose();
-
-            return currentRpk;
-        }
-
-        public static bool AddMesh(List<Mesh> meshes)
-        {
-            bool status;
-
-            using (var arr = new SimpleArrayMeshPointer())
-            {
-                foreach (var mesh in meshes)
-                {
-                    arr.Add(mesh, true);
-                }
-
-                var ptr_array = arr.ConstPointer();
-                status = AddInitialMesh(ptr_array);
-            }
-
-            return status;
-        }
-
         public static List<Mesh[]> GenerateMesh(string rpkPath,
-            int[] stringStarts,
-            int[] doubleStarts,
-            int[] boolStarts,
-            Dictionary<string, bool> boolAttributes, 
-            Dictionary<string, double> doubleAttributes, 
-            Dictionary<string, string> stringAttributes,
-            Dictionary<string, bool[]> boolArrayAttributes,
-            Dictionary<string, double[]> doubleArrayAttributes,
-            Dictionary<string, string[]> stringArrayAttributes,
+            ref RuleAttributesMap MM,
             List<Mesh> initialMeshes)
         {
             SimpleArrayMeshPointer initialMeshesArray = new SimpleArrayMeshPointer();
@@ -228,9 +146,12 @@ namespace PumaGrasshopper
             var meshes = new SimpleArrayMeshPointer();
             var pMeshes = meshes.NonConstPointer();
 
-            var stringWrapper = new InteropWrapperString(stringStarts, stringAttributes);
-            var boolWrapper = new InteropWrapperBoolean(boolStarts, boolAttributes);
-            var doubleWrapper = new InteropWrapperDouble(doubleStarts, doubleAttributes);
+            var stringWrapper = new InteropWrapperString(MM.GetStringStarts(), ref MM.stringKeys, ref MM.stringValues);
+            var boolWrapper = new InteropWrapperBoolean(MM.GetBoolStarts(), ref MM.boolKeys, ref MM.boolValues);
+            var doubleWrapper = new InteropWrapperDouble(MM.GetDoubleStarts(), ref MM.doubleKeys, ref MM.doubleValues);
+            var stringArrayWrapper = new InteropWrapperString(MM.GetStringArrayStarts(), ref MM.stringArrayKeys, ref MM.stringArrayValues);
+            var boolArrayWrapper = new InteropWrapperString(MM.GetBoolArrayStarts(), ref MM.boolArrayKeys, ref MM.boolArrayValues);
+            var doubleArrayWrapper = new InteropWrapperString(MM.GetDoubleArrayStarts(), ref MM.doubleArrayKeys, ref MM.doubleArrayValues);
 
             StringWrapper errorMsg = new StringWrapper("");
             IntPtr pErrorMsg = errorMsg.NonConstPointer;
@@ -250,6 +171,18 @@ namespace PumaGrasshopper
                      stringWrapper.Count,
                      stringWrapper.KeysPtr(),
                      stringWrapper.ValuesPtr(),
+                     boolArrayWrapper.StartsPtr(),
+                     boolArrayWrapper.Count,
+                     boolArrayWrapper.KeysPtr(),
+                     boolArrayWrapper.ValuesPtr(),
+                     doubleArrayWrapper.StartsPtr(),
+                     doubleArrayWrapper.Count,
+                     doubleArrayWrapper.KeysPtr(),
+                     doubleArrayWrapper.ValuesPtr(),
+                     stringArrayWrapper.StartsPtr(),
+                     stringArrayWrapper.Count,
+                     stringArrayWrapper.KeysPtr(),
+                     stringArrayWrapper.ValuesPtr(),
                      pMeshesArray,
                      pMeshCounts,
                      pMeshes);
@@ -678,41 +611,6 @@ namespace PumaGrasshopper
                 return new Annotations.Range(min, max, stepsize, restricted);
             }
             return null;
-        }
-
-        public static void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, List<double> doubleList)
-        {
-            if (doubleList.Count == 0) return;
-
-            using (SimpleArrayDouble array = new SimpleArrayDouble(doubleList))
-            {
-                var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeDoubleArray(initialShapeIndex, fullName, pArray);
-            }
-        }
-
-        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, List<Boolean> boolList)
-        {
-            if (boolList.Count == 0) return;
-
-            using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
-            {
-                var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, fullName, pArray);
-            }
-        }
-
-        public static void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, List<string> stringList)
-        {
-            if (stringList.Count == 0) return;
-
-            using(ClassArrayString array = new ClassArrayString())
-            {
-                stringList.ForEach(x => array.Add(x));
-
-                var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeStringArray(initialShapeIndex, fullName, pArray);
-            }
         }
 
         public static List<bool> GetDefaultValuesBoolean(string key)
