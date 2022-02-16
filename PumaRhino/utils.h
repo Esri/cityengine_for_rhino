@@ -59,19 +59,6 @@ char getDirSeparator();
 template <>
 wchar_t getDirSeparator();
 
-struct ShapeAttributes {
-	std::wstring ruleFile;
-	std::wstring startRule;
-	std::wstring shapeName;
-	pcu::RuleFileInfoPtr ruleFileInfo;
-	int seed;
-
-	ShapeAttributes(pcu::RuleFileInfoPtr ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
-	                const std::wstring startRl = L"Default$Lot",
-	                const std::wstring shapeN = L"Lot",
-					const int seed = 0);
-};
-
 /**
  * helpers for prt object management
  */
@@ -96,10 +83,23 @@ using FileOutputCallbacksPtr = std::unique_ptr<prt::FileOutputCallbacks, PRTDest
 using ConsoleLogHandlerPtr = std::unique_ptr<prt::ConsoleLogHandler, PRTDestroyer>;
 using FileLogHandlerPtr = std::unique_ptr<prt::FileLogHandler, PRTDestroyer>;
 using RuleFileInfoPtr = std::unique_ptr<const prt::RuleFileInfo, PRTDestroyer>;
+using RuleFileInfoSPtr = std::unique_ptr<const prt::RuleFileInfo, PRTDestroyer>;
 using EncoderInfoPtr = std::unique_ptr<const prt::EncoderInfo, PRTDestroyer>;
 using DecoderInfoPtr = std::unique_ptr<const prt::DecoderInfo, PRTDestroyer>;
 using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRTDestroyer>;
 using RhinoCallbacksPtr = std::unique_ptr<RhinoCallbacks>;
+
+struct ShapeAttributes {
+	std::wstring ruleFile;
+	std::wstring startRule;
+	std::wstring shapeName;
+	RuleFileInfoPtr ruleFileInfo;
+	int seed;
+
+	ShapeAttributes(RuleFileInfoPtr& ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
+	                const std::wstring startRl = L"Default$Lot", const std::wstring shapeN = L"Lot",
+	                const int seed = 0);
+};
 
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
 AttributeMapPtr createValidatedOptions(const wchar_t* encID, const prt::AttributeMap* unvalidatedOptions = nullptr);
@@ -208,7 +208,7 @@ void unpackAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_
 	for (int i = start; i < start + count; ++i) {
 		const std::wstring key(keys->At(i)->Array());
 
-		const T value(values->At(i));
+		const T value(*values->At(i));
 		pcu::fillMapBuilder(key, value, aBuilder);
 	}
 }

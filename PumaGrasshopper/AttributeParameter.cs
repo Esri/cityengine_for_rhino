@@ -93,13 +93,6 @@ namespace PumaGrasshopper.AttributeParameter
             return base.Read(reader);
         }
 
-        protected void RefreshRpk()
-        {
-            var pumaAttributes = (GH_ComponentAttributes)Attributes.GetTopLevel;
-            ComponentPuma puma = (ComponentPuma)pumaAttributes.Owner;
-            puma.RefreshRpk();
-        }
-
         protected void DisplayExtractedParam(IGH_Param param)
         {
             param.CreateAttributes();
@@ -147,10 +140,9 @@ namespace PumaGrasshopper.AttributeParameter
         {
             if (PersistentDataCount > 0) return PersistentData;
 
-            RefreshRpk();
-
             if (mExpectsArray)
             {
+                //TODO refactor -> get value from local attribute list
                 List<List<bool>> defaultValues = PRTWrapper.GetDefaultValuesBooleanArray(Name);
                 if (defaultValues != null)
                 {
@@ -216,10 +208,9 @@ namespace PumaGrasshopper.AttributeParameter
         {
             if (PersistentDataCount > 0) return PersistentData;
 
-            RefreshRpk();
-
             if (mExpectsArray)
             {
+                //TODO refactor -> get value from local attribute list
                 List<List<double>> defaultValues = PRTWrapper.GetDefaultValuesNumberArray(Name);
                 if (defaultValues != null)
                 {
@@ -228,6 +219,7 @@ namespace PumaGrasshopper.AttributeParameter
             }
             else
             {
+                //TODO refactor -> get value from local attribute list
                 List<double> defaultValues = PRTWrapper.GetDefaultValuesNumber(Name);
                 if(defaultValues != null)
                 {
@@ -293,10 +285,9 @@ namespace PumaGrasshopper.AttributeParameter
         {
             if (PersistentDataCount > 0) return PersistentData;
 
-            RefreshRpk();
-
             if (mExpectsArray)
             {
+                //TODO refactor -> get value from local attribute list
                 List<List<string>> defaultValues = PRTWrapper.GetDefaultValuesTextArray(Name);
                 if (defaultValues != null)
                 {
@@ -305,6 +296,7 @@ namespace PumaGrasshopper.AttributeParameter
             }
             else
             {
+                //TODO refactor -> get value from local attribute list
                 List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
                 if (defaultValues != null)
                 {
@@ -379,8 +371,7 @@ namespace PumaGrasshopper.AttributeParameter
         {
             if (PersistentDataCount > 0) return PersistentData;
 
-            RefreshRpk();
-
+            //TODO refactor -> get value from local attribute list
             List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
             if (defaultValues != null)
             {

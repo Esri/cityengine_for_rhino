@@ -34,14 +34,15 @@ class ModelGenerator {
 public:
 	ModelGenerator();
 
-	std::vector<GeneratedModelPtr> generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
+	pcu::ResolveMapSPtr getResolveMap(const std::wstring& rulePkg);
+
+	std::vector<GeneratedModelPtr> generateModel(const std::wstring& rulePkg,
+	                                             const std::vector<RawInitialShape>& rawInitialShapes,
 	                                             const std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
-	bool evalDefaultAttributes(const std::vector<RawInitialShape>& rawInitialShapes,
+	bool evalDefaultAttributes(pcu::ResolveMapSPtr& resolveMap, const std::vector<RawInitialShape>& rawInitialShapes,
 	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
-
-	void updateRuleFiles(const std::wstring& rulePkg);
 
 	pcu::ShapeAttributes getShapeAttributes(const std::wstring& rulePkg);
 
@@ -54,16 +55,10 @@ public:
 	std::wstring getRuleFile();
 	std::wstring getStartingRule();
 	std::wstring getDefaultShapeName();
-	/* inline const prt::ResolveMap* getResolveMap() {
-		return mResolveMap.get();
-	};*/
+
 	const pcu::AttributeMapPtrVector& getDefaultValueAttributeMap() {
 		return mDefaultValuesMap;
 	};
-
-	/* const std::wstring getPackagePath() const {
-		return mCurrentRPK;
-	}*/
 
 	bool getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues);
 	bool getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues);
@@ -76,9 +71,7 @@ public:
 	                               ON_SimpleArray<int>* pSizes);
 
 private:
-	//pcu::RuleFileInfoPtr mRuleFileInfo;
-	//pcu::ResolveMapSPtr mResolveMap;
-	RuleAttributes mRuleAttributes;
+	RuleAttributes mRuleAttributes; // TODO remove
 
 	pcu::AttributeMapPtr mRhinoEncoderOptions;
 	pcu::AttributeMapPtr mCGAErrorOptions;
@@ -87,14 +80,8 @@ private:
 	// contains the rule attributes evaluated
 	pcu::AttributeMapPtrVector mDefaultValuesMap;
 
-	//std::wstring mRulePkg;
-	//std::wstring mRuleFile = L"bin/rule.cgb";
-	//std::wstring mStartRule = L"default$Lot";
-	//int32_t mSeed = 0;
-	//std::wstring mShapeName = L"Lot";
-	//std::wstring mCurrentRPK;
-
-	bool createInitialShapes(const std::vector<RawInitialShape>& rawInitialShapes,
+	bool createInitialShapes(pcu::ResolveMapSPtr& resolveMap,
+							 const std::vector<RawInitialShape>& rawInitialShapes,
 	                         const std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	                         pcu::AttributeMapBuilderVector& aBuilders,
 	                         std::vector<pcu::InitialShapePtr>& initialShapes,

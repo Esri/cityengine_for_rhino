@@ -29,7 +29,14 @@ namespace PumaGrasshopper
         public List<string> doubleArrayValues;
         public List<string> stringArrayValues;
 
-        public RuleAttributesMap() { }
+        public RuleAttributesMap() {
+            boolStarts = new List<int>();
+            doubleStarts = new List<int>();
+            stringStarts = new List<int>();
+            boolArrayStarts = new List<int>();
+            doubleArrayStarts = new List<int>();
+            stringArrayStarts = new List<int>();
+        }
 
         public void StartShape()
         {

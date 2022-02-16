@@ -175,7 +175,7 @@ ModelGenerator::ModelGenerator() {
 	mCGAPrintOptions = pcu::createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions.get());
 }
 
-pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rulePkg) {
+pcu::ResolveMapSPtr ModelGenerator::getResolveMap(const std::wstring& rulePkg) {
 	pcu::ResolveMapSPtr resolveMap;
 	try {
 		const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
@@ -184,19 +184,30 @@ pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rule
 	catch (std::exception&) {
 		throw;
 	}
+	return resolveMap;
+}
+
+pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rulePkg) {
+	pcu::ResolveMapSPtr resolveMap;
+	try {
+		resolveMap = getResolveMap(rulePkg);
+	}
+	catch (std::exception&) {
+		throw;
+	}
 
 	// Extract the rule package info.
 	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
 	if (ruleFile.empty()) {
-		LOG_ERR << "Could not find rule file in rule package " << rulePkg;
-		return;
+		LOG_ERR << "Could not find rule file in rule package" << rulePkg;
+		throw std::exception("Could not find rule file in rule package ");
 	}
 
 	// To create the ruleFileInfo, we first need the ruleFileURI
 	const wchar_t* ruleFileURI = resolveMap->getString(ruleFile.c_str());
 	if (ruleFileURI == nullptr) {
-		LOG_ERR << "Could not find rule file URI in resolve map of rule package " << rulePkg;
-		return;
+		LOG_ERR << "Could not find rule file URI in resolve map of rule package." << rulePkg;
+		throw std::exception("Could not find rule file URI in resolve map of rule package.");
 	}
 
 	// Create RuleFileInfo
@@ -205,7 +216,7 @@ pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rule
 	        pcu::RuleFileInfoPtr(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
 	if (!ruleFileInfo || infoStatus != prt::STATUS_OK) {
 		LOG_ERR << "could not get rule file info from rule file " << ruleFile;
-		return;
+		throw std::exception("Could not get rule file info from rule file.");
 	}
 
 	std::wstring startRule = pcu::detectStartRule(ruleFileInfo);
@@ -213,62 +224,8 @@ pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rule
 	return pcu::ShapeAttributes(ruleFileInfo, ruleFile, startRule);
 }
 
-void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
-	mCurrentRPK = rulePkg;
-
-	try {
-		const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
-		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::HIT && rulePkg == mRulePkg) {
-			// resolvemap already exists and the rule file was not changed, no need to update.
-			return;
-		}
-		mResolveMap = lookup.first;
-	}
-	catch (std::exception&) {
-		mResolveMap.reset();
-		mRuleFile.clear();
-		mStartRule.clear();
-		mRuleAttributes.clear();
-		throw;
-	}
-
-	// Cache miss -> initialize everything
-	// Reset the rule infos
-	mRuleAttributes.clear();
-	mRuleFile.clear();
-	mStartRule.clear();
-	mRulePkg = rulePkg;
-
-	// Extract the rule package info.
-	mRuleFile = pcu::getRuleFileEntry(mResolveMap);
-	if (mRuleFile.empty()) {
-		LOG_ERR << "Could not find rule file in rule package " << mRulePkg;
-		return;
-	}
-
-	// To create the ruleFileInfo, we first need the ruleFileURI
-	const wchar_t* ruleFileURI = mResolveMap->getString(mRuleFile.c_str());
-	if (ruleFileURI == nullptr) {
-		LOG_ERR << "Could not find rule file URI in resolve map of rule package " << mRulePkg;
-		return;
-	}
-
-	// Create RuleFileInfo
-	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
-	mRuleFileInfo =
-	        pcu::RuleFileInfoPtr(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
-	if (!mRuleFileInfo || infoStatus != prt::STATUS_OK) {
-		LOG_ERR << "could not get rule file info from rule file " << mRuleFile;
-		return;
-	}
-
-	mStartRule = pcu::detectStartRule(mRuleFileInfo);
-
-	// Fill the list of rule attributes
-	createRuleAttributes(mRuleFile, *mRuleFileInfo.get(), mRuleAttributes);
-}
-
-bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& rawInitialShapes,
+bool ModelGenerator::evalDefaultAttributes(pcu::ResolveMapSPtr& resolveMap,
+										   const std::vector<RawInitialShape>& rawInitialShapes,
                                            std::vector<pcu::ShapeAttributes>& shapeAttributes) {
 	// setup encoder options for attribute evaluation encoder
 	constexpr const wchar_t* encs[] = {ENCODER_ID_CGA_EVALATTR};
@@ -288,12 +245,12 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& r
 
 	std::vector<pcu::InitialShapePtr> initialShapes;
 	std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
-	if (!createInitialShapes(rawInitialShapes, shapeAttributes, attribMapBuilders, initialShapes,
+	if (!createInitialShapes(resolveMap, rawInitialShapes, shapeAttributes, attribMapBuilders, initialShapes,
 	                         initialShapeAttributes))
 		return false;
 
 	// run generate
-	AttrEvalCallbacks aec(attribMapBuilders, mRuleFileInfo);
+	AttrEvalCallbacks aec(attribMapBuilders, shapeAttributes.front().ruleFileInfo); // TODO: What if rule file info is not the same for all shapes?
 	const std::vector<prt::InitialShape const*> rawInitialShapePtrs = toRawPtrs<const prt::InitialShape>(initialShapes);
 	const prt::Status status = prt::generate(rawInitialShapePtrs.data(), rawInitialShapePtrs.size(), nullptr, encs,
 	                                         encsCount, encsOpts, &aec, PRTContext::get()->mPRTCache.get(), nullptr);
@@ -304,11 +261,13 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& r
 	}
 
 	mDefaultValuesMap = createAttributeMaps(attribMapBuilders);
-
+	// TODO: return the default values back to Puma component.
 	return true;
 }
 
-bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& rawInitialShapes,
+bool ModelGenerator::createInitialShapes(
+	pcu::ResolveMapSPtr& resolveMap,
+	const std::vector<RawInitialShape>& rawInitialShapes,
                                          const std::vector<pcu::ShapeAttributes>& shapeAttributes,
                                          pcu::AttributeMapBuilderVector& aBuilders,
                                          std::vector<pcu::InitialShapePtr>& initialShapes,
@@ -329,20 +288,17 @@ bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& raw
 			return false;
 		}
 
-		// TODO: is this check necessary?
-		pcu::ShapeAttributes shapeAttr = (shapeAttributes.size() > i) ? shapeAttributes[0] : shapeAttributes[i];
-
 		// Set to default values
-		std::wstring ruleF = shapeAttr.ruleFile;
-		std::wstring startR = shapeAttr.startRule;
-		int32_t randomS = shapeAttr.seed;
-		std::wstring shapeN = shapeAttr.shapeName;
+		std::wstring ruleF = shapeAttributes[i].ruleFile;
+		std::wstring startR = shapeAttributes[i].startRule;
+		int32_t randomS = shapeAttributes[i].seed;
+		std::wstring shapeN = shapeAttributes[i].shapeName;
 
 		pcu::AttributeMapPtr initialShapeAttributes;
-		extractMainShapeAttributes(aBuilders[i], shapeAttr, ruleF, startR, randomS, shapeN, initialShapeAttributes);
+		extractMainShapeAttributes(aBuilders[i], shapeAttributes[i], ruleF, startR, randomS, shapeN, initialShapeAttributes);
 
 		const prt::Status attributeStatus = isb->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(),
-		                                                       initialShapeAttributes.get(), mResolveMap.get());
+		                                                       initialShapeAttributes.get(), resolveMap.get());
 		if (attributeStatus != prt::STATUS_OK) {
 			LOG_ERR << "Failed to set initial shape attributes: " << prt::getStatusDescription(attributeStatus);
 			return false;
@@ -362,7 +318,8 @@ bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& raw
 	return true;
 }
 
-std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
+std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::wstring& rulePkg,
+															 const std::vector<RawInitialShape>& rawInitialShapes,
                                                              const std::vector<pcu::ShapeAttributes>& shapeAttributes,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
 	if ((shapeAttributes.size() != 1) && (shapeAttributes.size() < rawInitialShapes.size())) {
@@ -373,10 +330,12 @@ std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<R
 		LOG_WRN << "Number of shape attributes dictionaries defined greater than number of initial shapes given.";
 	}
 
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
+
 	try {
 		std::vector<pcu::InitialShapePtr> initialShapes;
 		std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
-		if (!createInitialShapes(rawInitialShapes, shapeAttributes, aBuilders, initialShapes, initialShapeAttributes))
+		if (!createInitialShapes(resolveMap, rawInitialShapes, shapeAttributes, aBuilders, initialShapes, initialShapeAttributes))
 			return {};
 
 		const std::vector<const prt::AttributeMap*> encoderOptions = {mRhinoEncoderOptions.get(),

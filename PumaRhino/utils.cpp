@@ -56,7 +56,7 @@ void checkLastError(const std::string& exceptionPrefix) {
 
 namespace pcu {
 
-ShapeAttributes::ShapeAttributes(pcu::RuleFileInfoPtr ruleFileInfo, const std::wstring rulef, const std::wstring startRl,
+ShapeAttributes::ShapeAttributes(pcu::RuleFileInfoPtr& ruleFileInfo, const std::wstring rulef, const std::wstring startRl,
                                  const std::wstring shapeN, int seed)
     : ruleFileInfo(ruleFileInfo.get()), ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(seed) {}
 
