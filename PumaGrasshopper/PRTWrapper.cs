@@ -33,6 +33,13 @@ using System.Linq;
 
 namespace PumaGrasshopper
 {
+    public class GenerationResult
+    {
+        public List<Mesh[]> meshes = new List<Mesh[]>();
+        public List<GH_Material[]> materials = new List<GH_Material[]>();
+        public List<ReportAttribute[]> reports = new List<ReportAttribute[]>();
+    }
+
     /// <summary>
     /// Encapsulate PumaRhino library.
     /// </summary>
@@ -65,7 +72,10 @@ namespace PumaGrasshopper
             [In] IntPtr pDoubleArrayKeys, [In] IntPtr pDoubleArrayVals,
             [In] IntPtr pStringArrayStarts, int stringArrayCount,
             [In] IntPtr pStringArrayKeys, [In] IntPtr pStringArrayVals,
-            [In] IntPtr pInitialMeshes, [Out] IntPtr pMeshCounts, [Out] IntPtr pMeshArray);
+            [In] IntPtr pInitialMeshes, [Out] IntPtr pMeshCounts, [Out] IntPtr pMeshArray,
+            [Out] IntPtr pColorsArray, [Out] IntPtr pTexIndices, [Out] IntPtr pTexKeys, [Out] IntPtr pTexPaths,
+            [Out] IntPtr pReportCountArray, [Out] IntPtr pReportKeyArray, [Out] IntPtr pReportDoubleArray,
+            [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out] IntPtr pMeshArray);
@@ -128,7 +138,7 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValuesTextArray(string key, [In, Out] IntPtr pTexts, [In, Out] IntPtr pSizes);
 
-        public static List<Mesh[]> GenerateMesh(string rpkPath,
+        public static GenerationResult GenerateMesh(string rpkPath,
             ref RuleAttributesMap MM,
             List<Mesh> initialMeshes)
         {
@@ -155,6 +165,28 @@ namespace PumaGrasshopper
 
             StringWrapper errorMsg = new StringWrapper("");
             IntPtr pErrorMsg = errorMsg.NonConstPointer;
+
+            // Materials
+            var colorsArray = new SimpleArrayInt();
+            IntPtr pColorsArray = colorsArray.NonConstPointer();
+            var matIndices = new SimpleArrayInt();
+            IntPtr pMatIndices = matIndices.NonConstPointer();
+            var texKeys = new ClassArrayString();
+            IntPtr pTexKeys = texKeys.NonConstPointer();
+            var texPaths = new ClassArrayString();
+            IntPtr pTexPaths = texPaths.NonConstPointer();
+
+            // Reports
+            var reportCountArray = new SimpleArrayInt();
+            IntPtr pReportCountArray = reportCountArray.NonConstPointer();
+            var reportKeyArray = new ClassArrayString();
+            IntPtr pReportKeyArray = reportKeyArray.NonConstPointer();
+            var reportDoubleArray = new SimpleArrayDouble();
+            IntPtr pReportDoubleArray = reportDoubleArray.NonConstPointer();
+            var reportBoolArray = new SimpleArrayInt();
+            IntPtr pReportBoolArray = reportBoolArray.NonConstPointer();
+            var reportStringArray = new ClassArrayString();
+            IntPtr pReportStringArray = reportStringArray.NonConstPointer();
 
             Generate(rpkPath,
                      pErrorMsg,
@@ -185,7 +217,16 @@ namespace PumaGrasshopper
                      stringArrayWrapper.ValuesPtr(),
                      pMeshesArray,
                      pMeshCounts,
-                     pMeshes);
+                     pMeshes,
+                     pColorsArray,
+                     pMatIndices,
+                     pTexKeys,
+                     pTexPaths,
+                     pReportCountArray,
+                     pReportKeyArray,
+                     pReportDoubleArray,
+                     pReportBoolArray,
+                     pReportStringArray);
 
             initialMeshesArray.Dispose();
             boolWrapper.Dispose();
@@ -194,238 +235,171 @@ namespace PumaGrasshopper
 
             var meshCountsArray = meshCounts.ToArray();
             var meshesArray = meshes.ToNonConstArray();
-            var generatedMeshes = new List<Mesh[]>();
+            // Materials
+            int[] colors = colorsArray.ToArray();
+            int[] materialIndices = matIndices.ToArray();
+            string[] textureKeys = texKeys.ToArray();
+            string[] texturePaths = texPaths.ToArray();
+
+            GenerationResult generationResult = new GenerationResult();
+
             int indexOffset = 0;
+            int colorsOffset = 0;
+            int textureOffset = 0;
+
+            // Geometry
             for (int id = 0; id < meshCountsArray.Length; id++)
             {
                 if (meshCountsArray[id] > 0)
                 {
                     var meshesForShape = meshesArray.Skip(indexOffset).Take(meshCountsArray[id]).ToArray();
-                    generatedMeshes.Add(meshesForShape);
+                    generationResult.meshes.Add(meshesForShape);
                 }
                 else
-                    generatedMeshes.Add(null);
+                    generationResult.meshes.Add(null);
 
                 indexOffset += meshCountsArray[id];
             }
 
-            return generatedMeshes;
-        }
-
-        public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
-        {
-            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
-            // thus a conversion is necessary when adding Meshes.
-            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
-
-            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            // Materials
+            for (int id = 0; id < materialIndices.Length;)
             {
-                if (generatedMeshes[shapeId] == null)
-                    continue;
+                int meshCount = materialIndices[id];
 
-                GH_Path path = new GH_Path(shapeId);
-                var meshBundle = generatedMeshes[shapeId];
-                foreach (var mesh in meshBundle)
+                GH_Material[] materials = new GH_Material[meshCount];
+
+                for(int meshId = 0; meshId < meshCount; meshId++)
                 {
-                    GH_Mesh gh_mesh = null;
-                    var status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
-                    if (status)
+                    int texCount = materialIndices[id + meshId + 1];
+
+                    var diffuse = colors.Skip(colorsOffset).Take(3).ToArray();
+                    var ambient = colors.Skip(colorsOffset + 3).Take(3).ToArray();
+                    var specular = colors.Skip(colorsOffset + 6).Take(3).ToArray();
+                    var opacity = colors[colorsOffset + 9];
+                    var shininess = colors[colorsOffset + 10];
+
+                    colorsOffset += 11;
+
+                    Material mat = new Material()
                     {
-                        mesh_struct.Append(gh_mesh, path);
-                    }
-                }
-            }
+                        DiffuseColor = Color.FromArgb(diffuse[0], diffuse[1], diffuse[2]),
+                        AmbientColor = Color.FromArgb(ambient[0], ambient[1],ambient[2]),
+                        SpecularColor = Color.FromArgb(specular[0], specular[1], specular[2]),
+                        Transparency = 1.0 - opacity,
+                        Shine = shininess,
+                        FresnelReflections = true,
+                    };
 
-            return mesh_struct;
-        }
+                    string coloMap = "";
 
-        public static GH_Material GetMaterialOfPartMesh(int initialShapeIndex, int meshID)
-        {
-            int uvSet = 0;
+                    for (int texId = 0; texId < texCount; ++texId)
+                    {
+                        string texKey = textureKeys[textureOffset + texId];
+                        string texPath = texturePaths[textureOffset + texId];
 
-            ClassArrayString texKeys = new ClassArrayString();
-            var pTexKeys = texKeys.NonConstPointer();
-
-            ClassArrayString texPaths = new ClassArrayString();
-            var pTexPaths = texPaths.NonConstPointer();
-
-            SimpleArrayInt diffuseArray = new SimpleArrayInt();
-            var pDiffuseArray = diffuseArray.NonConstPointer();
-
-            SimpleArrayInt ambientArray = new SimpleArrayInt();
-            var pAmbientArray = ambientArray.NonConstPointer();
-
-            SimpleArrayInt specularArray = new SimpleArrayInt();
-            var pSpecularArray = specularArray.NonConstPointer();
-
-            double opacity = 1;
-            double shininess = 1;
-
-            bool status = PRTWrapper.GetMaterial(initialShapeIndex, meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray, ref opacity, ref shininess);
-            if (!status) return null;
-
-            var texKeysArray = texKeys.ToArray();
-            var texPathsArray = texPaths.ToArray();
-
-            string coloMap = "";
-
-            Material mat = new Material();
-            
-            for (int i = 0; i < texKeysArray.Length; ++i)
-            {
-                string texKey = texKeysArray[i];
-                string texPath = texPathsArray[i];
-
-                Texture tex = new Texture
-                {
-                    FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(texPath),
-                    TextureCombineMode = TextureCombineMode.Modulate,
-                    TextureType = TextureType.Bitmap
-                };
-
-                switch (texKey)
-                {
-                    case "diffuseMap":
-                    case "colorMap":
-                        mat.SetBitmapTexture(tex);
-                        coloMap = tex.FileReference.FullPath;
-                        break;
-                    case "opacityMap":
-                        // if the color and opacity textures are the same, no need to set it again, it is only needed to activate alpha transparency.
-                        if(coloMap != tex.FileReference.FullPath)
+                        Texture tex = new Texture
                         {
-                            tex.TextureCombineMode = TextureCombineMode.Modulate;
-                            tex.TextureType = TextureType.Transparency;
-                            mat.SetTransparencyTexture(tex);
+                            FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(texPath),
+                            TextureCombineMode = TextureCombineMode.Modulate,
+                            TextureType = TextureType.Bitmap
+                        };
+
+                        switch (texKey)
+                        {
+                            case "diffuseMap":
+                            case "colorMap":
+                                mat.SetBitmapTexture(tex);
+                                coloMap = tex.FileReference.FullPath;
+                                break;
+                            case "opacityMap":
+                                // if the color and opacity textures are the same, no need to set it again, it is only needed to activate alpha transparency.
+                                if (coloMap != tex.FileReference.FullPath)
+                                {
+                                    tex.TextureCombineMode = TextureCombineMode.Modulate;
+                                    tex.TextureType = TextureType.Transparency;
+                                    mat.SetTransparencyTexture(tex);
+                                }
+
+                                mat.AlphaTransparency = true;
+
+                                break;
+                            case "bumpMap":
+                                tex.TextureCombineMode = TextureCombineMode.None;
+                                tex.TextureType = TextureType.Bump;
+                                mat.SetBumpTexture(tex);
+                                break;
+                            default:
+                                break;
                         }
-                        
-                        mat.AlphaTransparency = true;
-                        
-                        break;
-                    case "bumpMap":
-                        tex.TextureCombineMode = TextureCombineMode.None;
-                        tex.TextureType = TextureType.Bump;
-                        mat.SetBumpTexture(tex);
-                        break;
-                    default:
-                        break;
+                    }
+
+                    textureOffset += texCount;
+
+                    materials[meshId] = new GH_Material(Rhino.Render.RenderMaterial.CreateBasicMaterial(mat));
                 }
+
+                id += meshCount + 1;
+
+                generationResult.materials.Add(materials);
             }
 
-            var diffuseColor = diffuseArray.ToArray();
-            var ambientColor = ambientArray.ToArray();
-            var specularColor = specularArray.ToArray();
-            diffuseArray.Dispose();
-            ambientArray.Dispose();
-            specularArray.Dispose();
+            colorsArray.Dispose();
+            matIndices.Dispose();
+            texKeys.Dispose();
+            texPaths.Dispose();
 
-            if(diffuseColor.Length == 3)
+            // Reports
+            var reportCounts = reportCountArray.ToArray();
+            var reportKeys = reportKeyArray.ToArray();
+            var reportDouble = reportDoubleArray.ToArray();
+            var reportBool = reportBoolArray.ToArray();
+            var reportString = reportStringArray.ToArray();
+
+            reportCountArray.Dispose();
+            reportKeyArray.Dispose();
+            reportDoubleArray.Dispose();
+            reportBoolArray.Dispose();
+            reportStringArray.Dispose();
+
+            if (reportKeys.Length != reportDouble.Length + reportBool.Length + reportString.Length)
             {
-                mat.DiffuseColor = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);
+                // Something went wrong, don't output any reports.
+                return generationResult;
             }
 
-            if(ambientColor.Length == 3)
-            {
-                mat.AmbientColor = Color.FromArgb(ambientColor[0], ambientColor[1], ambientColor[2]);
+            int reportKeyOffset = 0;
+            int reportDoubleOffset = 0;
+            int reportBoolOffset = 0;
+            int reportStringOffset = 0;
+
+            for(int meshId = 0; meshId < reportCounts.Length; meshId+=3) {
+                int doubleReportCount = reportCounts[meshId];
+                int boolReportCount = reportCounts[meshId + 1];
+                int stringReportCount = reportCounts[meshId + 2];
+                List<ReportAttribute> reportAttributes = new List<ReportAttribute>();
+
+                var doubleKeys = reportKeys.Skip(reportKeyOffset).Take(doubleReportCount);
+                var d = reportDouble.Skip(reportDoubleOffset).Take(doubleReportCount).Zip(doubleKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_FLOAT, value));
+                reportAttributes.AddRange(d);
+                reportKeyOffset += doubleReportCount;
+                reportDoubleOffset += doubleReportCount;
+
+                var boolKeys = reportKeys.Skip(reportKeyOffset).Take(boolReportCount);
+                var b = reportBool.Skip(reportBoolOffset).Take(boolReportCount).Zip(boolKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_BOOL, Convert.ToBoolean(value)));
+                reportAttributes.AddRange(b);
+                reportKeyOffset += boolReportCount;
+                reportBoolOffset += boolReportCount;
+
+                var stringKeys = reportString.Skip(reportKeyOffset).Take(stringReportCount);
+                var s = reportString.Skip(reportStringOffset).Take(stringReportCount).Zip(stringKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_STRING, value));
+                reportAttributes.AddRange(s);
+                reportKeyOffset += stringReportCount;
+                reportStringOffset += stringReportCount;
+
+                generationResult.reports.Add(reportAttributes.ToArray());
             }
 
-            if(specularColor.Length == 3)
-            {
-                mat.SpecularColor = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
-            }
-
-            mat.Transparency = 1.0 - opacity;
-            mat.Shine = shininess;
-
-            mat.FresnelReflections = true;
-
-            mat.CommitChanges();
-
-            var renderMat = Rhino.Render.RenderMaterial.CreateBasicMaterial(mat);
-
-            return new GH_Material(renderMat);
-        }
-
-        public static List<GH_Material> GetMaterialsOfMesh(int initialShapeIndex)
-        {
-            List<GH_Material> materials = new List<GH_Material>();
-
-            int meshCount = GetMeshPartCount(initialShapeIndex);
-
-            for(int i = 0; i < meshCount; ++i)
-            {
-                materials.Add(GetMaterialOfPartMesh(initialShapeIndex, i));
-            }
-
-            return materials;
-        }
-
-        public static GH_Structure<GH_Material> GetAllMaterialIds(List<Mesh[]> generatedMeshes)
-        {
-            GH_Structure<GH_Material> material_struct = new GH_Structure<GH_Material>();
-
-            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
-            {
-                if (generatedMeshes[shapeId] == null)
-                    continue;
-                var mats = GetMaterialsOfMesh(shapeId);
-                GH_Path path = new GH_Path(shapeId);
-                material_struct.AppendRange(mats, path);
-            }
-
-            return material_struct;
-        }
-
-        public static List<ReportAttribute> GetAllReports(int initialShapeIndex)
-        {
-            var keys = new ClassArrayString();
-            var stringReports = new ClassArrayString();
-            var doubleReports = new SimpleArrayDouble();
-            var boolReports = new SimpleArrayInt();
-
-            var pKeys = keys.NonConstPointer();
-            var pStrReps = stringReports.NonConstPointer();
-            var pDblReps = doubleReports.NonConstPointer();
-            var pBoolReps = boolReports.NonConstPointer();
-
-            GetReports(initialShapeIndex, pKeys, pDblReps, pBoolReps, pStrReps);
-
-            var keysArray = keys.ToArray();
-            var stringReportsArray = stringReports.ToArray();
-            var doubleReportsArray = doubleReports.ToArray();
-            var boolReportsArray = boolReports.ToArray();
-
-            keys.Dispose();
-            stringReports.Dispose();
-            doubleReports.Dispose();
-            boolReports.Dispose();
-
-            if (keysArray.Length != stringReportsArray.Length + doubleReportsArray.Length + boolReportsArray.Length)
-            {
-                // Something went wrong, don't output anything.
-                return null;
-            }
-
-            List<ReportAttribute> ras = new List<ReportAttribute>(keysArray.Length);
-            int kId = 0;
-
-            for(int i = 0; i < doubleReportsArray.Length; ++i)
-            {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
-                kId++;
-            }
-            for(int i = 0; i < boolReportsArray.Length; ++i)
-            {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
-                kId++;    
-            }
-            for(int i = 0; i < stringReportsArray.Length; ++i)
-            {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
-                kId++;
-            }
-
-            return ras;
+            return generationResult;
         }
 
         public static List<String> GetCGAPrintOutput(int initialShapeIndex)

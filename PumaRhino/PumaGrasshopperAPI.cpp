@@ -125,7 +125,16 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 
 						   // Resulting geometry
 						   ON_SimpleArray<int>* pMeshCounts,
-                           ON_SimpleArray<ON_Mesh*>* pMeshArray) {
+                           ON_SimpleArray<ON_Mesh*>* pMeshArray,
+							
+						   // Materials,
+                           ON_SimpleArray<int>* pColorsArray, ON_SimpleArray<int>* pMatIndices,
+                           ON_ClassArray<ON_wString>* pTexKeys, ON_ClassArray<ON_wString>* pTexPaths,
+	
+						   // Reports
+						   ON_SimpleArray<int>* pReportsCountArray,
+                           ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<double>* pDoubleReports,
+                           ON_SimpleArray<bool>* pBoolReports, ON_ClassArray<ON_wString>* pStringReports) {
 
 	if (pMesh == nullptr)
 		return false;
@@ -176,7 +185,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 		indexStartStringArray += stringAttrArrayCount;
 	}
 
-	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().GenerateGeometry(rpk_path, rawInitialShapes, aBuilders);
+	const std::vector<GeneratedModelPtr> models = RhinoPRT::get().GenerateGeometry(rpk_path, rawInitialShapes, aBuilders);
 
 	for (size_t i = 0; i < models.size(); i++) {
 		if (models[i]) {
@@ -186,6 +195,89 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 			for (const auto& meshPart : meshBundle) {
 				pMeshArray->Append(new ON_Mesh(meshPart));
 			}
+
+			// Materials
+			pMatIndices->Append(meshBundle.size());
+
+			const auto& materials = models[i]->getMaterials();
+			for (const auto& material : materials) {
+				const auto& matAttributes = material.second;
+				pcu::appendColor(matAttributes.mDiffuseCol, pColorsArray);
+				pcu::appendColor(matAttributes.mAmbientCol, pColorsArray);
+				pcu::appendColor(matAttributes.mSpecularCol, pColorsArray);
+				pColorsArray->Append(matAttributes.mOpacity);
+				pColorsArray->Append(matAttributes.mShininess);
+
+				pMatIndices->Append(matAttributes.mTexturePaths.size());
+
+				for (auto& texture : matAttributes.mTexturePaths) {
+
+#ifdef DEBUG
+					LOG_DBG << L"texture: [ " << texture.first << " : " << texture.second << "]";
+#endif // DEBUG
+
+					pTexKeys->Append(ON_wString(texture.first.c_str()));
+					pTexPaths->Append(ON_wString(texture.second.c_str()));
+				}
+			}
+
+			// Reports
+			const auto reports = Reporting::ToReportsVector(models[i]->getReports());
+
+			/*
+			left.float	-> right.all OK
+			left.bool	-> right.float OK
+						-> right.bool OK
+						-> right.string OK
+			left.string -> right.all OK
+			*/
+			// Sort the reports by Type. The order is Double -> Bool -> String
+			std::sort(reports.begin(), reports.end(),
+			          [](Reporting::ReportAttribute& left, Reporting::ReportAttribute& right) -> bool {
+				          if (left.mType == right.mType)
+					          return left.mReportName.compare(right.mReportName) <
+					                 0; // assuming case sensitivity. assuming two reports can't have the same name.
+				          if (left.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT)
+					          return true;
+				          if (right.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT)
+					          return false;
+				          if (left.mType == prt::AttributeMap::PrimitiveType::PT_STRING)
+					          return false;
+				          if (left.mType == prt::AttributeMap::PrimitiveType::PT_BOOL &&
+				              right.mType == prt::AttributeMap::PrimitiveType::PT_STRING)
+					          return true;
+				          return false;
+			          });
+
+			int doubleReportsCount = 0;
+			int boolReportsCount = 0;
+			int stringReportsCount = 0;
+
+			for (const auto& report : reports) {
+				pKeysArray->Append(ON_wString(report.mReportName.c_str()));
+
+				switch (report.mType) {
+					case prt::AttributeMap::PrimitiveType::PT_FLOAT:
+						pDoubleReports->Append(report.mDoubleReport);
+						doubleReportsCount++;
+						break;
+					case prt::AttributeMap::PrimitiveType::PT_BOOL:
+						pBoolReports->Append(report.mBoolReport);
+						boolReportsCount++;
+						break;
+					case prt::AttributeMap::PrimitiveType::PT_STRING:
+						pStringReports->Append(ON_wString(report.mStringReport.c_str()));
+						stringReportsCount++;
+						break;
+					default:
+						// REMOVE LAST KEY
+						pKeysArray->Remove(pKeysArray->Count() - 1);
+				}
+			}
+
+			pReportsCountArray->Append(doubleReportsCount);
+			pReportsCountArray->Append(boolReportsCount);
+			pReportsCountArray->Append(stringReportsCount);
 		}
 		else {
 			pMeshCounts->Append(0);
@@ -194,17 +286,6 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 
 	return !models.empty();
 }
-
-/*
-RHINOPRT_API int GetMeshPartCount(int initialShapeIndex) {
-	const auto& models = RhinoPRT::get().getGenModels();
-
-	if (models.size() <= initialShapeIndex || !models[initialShapeIndex])
-		return 0;
-
-	return models[initialShapeIndex]->getMeshPartCount();
-}
-*/
 
 RHINOPRT_API int GetRuleAttributesCount() {
 	return RhinoPRT::get().GetRuleAttributeCount();
@@ -227,125 +308,6 @@ RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* p
 		*pGroup += ON_wString(ruleAttr->groups.front().c_str());
 
 	return true;
-}
-
-/*
-RHINOPRT_API void SetRuleAttributeDouble(const int initialShapeIndex, const wchar_t* fullName, double value) {
-	if (!fullName)
-		return;
-	fillAttributeFromNode<double>(RhinoPRT::get(), initialShapeIndex, fullName, value);
-}
-
-RHINOPRT_API void SetRuleAttributeBoolean(const int initialShapeIndex, const wchar_t* fullName, bool value) {
-	if (!fullName)
-		return;
-	fillAttributeFromNode<bool>(RhinoPRT::get(), initialShapeIndex, fullName, value);
-}
-
-RHINOPRT_API void SetRuleAttributeInteger(const int initialShapeIndex, const wchar_t* fullName, int value) {
-	if (!fullName)
-		return;
-	fillAttributeFromNode<int>(RhinoPRT::get(), initialShapeIndex, fullName, value);
-}
-
-RHINOPRT_API void SetRuleAttributeString(const int initialShapeIndex, const wchar_t* fullName, const wchar_t* value) {
-	if (!fullName || !value)
-		return;
-	fillAttributeFromNode<std::wstring>(RhinoPRT::get(), initialShapeIndex, fullName, value);
-}
-
-RHINOPRT_API void SetRuleAttributeDoubleArray(const int initialShapeIndex, const wchar_t* fullName,
-                                              ON_SimpleArray<double>* pValueArray) {
-	if (!fullName || !pValueArray)
-		return;
-
-	const double* valueArray = pValueArray->Array();
-	const size_t size = pValueArray->Count();
-
-	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, valueArray, size);
-}
-
-RHINOPRT_API void SetRuleAttributeBoolArray(const int initialShapeIndex, const wchar_t* fullName,
-                                            ON_SimpleArray<int>* pValueArray) {
-	if (!fullName || !pValueArray)
-		return;
-
-	const int* valueArray = pValueArray->Array();
-	const size_t size = pValueArray->Count();
-
-	// convert int array to boolean array
-	std::unique_ptr<bool[]> boolArray(new bool[size]);
-	std::transform(valueArray, valueArray + size, boolArray.get(), static_cast_fct<bool, int>);
-
-	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, boolArray.get(), size);
-}
-
-RHINOPRT_API void SetRuleAttributeStringArray(const int initialShapeIndex, const wchar_t* fullName,
-                                              ON_ClassArray<ON_wString>* pValueArray) {
-	if (!fullName || !pValueArray)
-		return;
-
-	const ON_wString* valueArray = pValueArray->Array();
-	const size_t size = pValueArray->Count();
-
-	// convert the array of ON_wString to a std::vector of wstring.
-	std::vector<const wchar_t*> strVector(size);
-	std::transform(valueArray, valueArray + size, strVector.begin(), [](const ON_wString& ws) {
-		return static_cast<const wchar_t*>(ws); // see ON_wString::operator const wchar_t*()
-	});
-
-	fillAttributeFromNode(RhinoPRT::get(), initialShapeIndex, fullName, strVector, size);
-}
-*/
-
-RHINOPRT_API void GetReports(int initialShapeIndex, ON_ClassArray<ON_wString>* pKeysArray,
-                             ON_SimpleArray<double>* pDoubleReports, ON_SimpleArray<bool>* pBoolReports,
-                             ON_ClassArray<ON_wString>* pStringReports) {
-	auto reports = RhinoPRT::get().getReportsOfModel(initialShapeIndex);
-
-	/*
-	left.float	-> right.all OK
-	left.bool	-> right.float OK
-	            -> right.bool OK
-	            -> right.string OK
-	left.string -> right.all OK
-	*/
-	// Sort the reports by Type. The order is Double -> Bool -> String
-	std::sort(reports.begin(), reports.end(),
-	          [](Reporting::ReportAttribute& left, Reporting::ReportAttribute& right) -> bool {
-		          if (left.mType == right.mType)
-			          return left.mReportName.compare(right.mReportName) <
-			                 0; // assuming case sensitivity. assuming two reports can't have the same name.
-		          if (left.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT)
-			          return true;
-		          if (right.mType == prt::AttributeMap::PrimitiveType::PT_FLOAT)
-			          return false;
-		          if (left.mType == prt::AttributeMap::PrimitiveType::PT_STRING)
-			          return false;
-		          if (left.mType == prt::AttributeMap::PrimitiveType::PT_BOOL &&
-		              right.mType == prt::AttributeMap::PrimitiveType::PT_STRING)
-			          return true;
-		          return false;
-	          });
-
-	for (const auto& report : reports) {
-		pKeysArray->Append(ON_wString(report.mReportName.c_str()));
-
-		switch (report.mType) {
-			case prt::AttributeMap::PrimitiveType::PT_FLOAT:
-				pDoubleReports->Append(report.mDoubleReport);
-				break;
-			case prt::AttributeMap::PrimitiveType::PT_BOOL:
-				pBoolReports->Append(report.mBoolReport);
-				break;
-			case prt::AttributeMap::PrimitiveType::PT_STRING:
-				pStringReports->Append(ON_wString(report.mStringReport.c_str()));
-				break;
-			default:
-				// REMOVE LAST KEY
-				pKeysArray->Remove(pKeysArray->Count() - 1);
-		}
-	}
 }
 
 RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
@@ -455,62 +417,6 @@ RHINOPRT_API bool GetAnnotationRange(int ruleIdx, int enumIdx, double* min, doub
 		}
 	}
 	return false;
-}
-
-RHINOPRT_API bool GetMaterial(int initialShapeIndex, int meshID, int* /*uvSet*/, ON_ClassArray<ON_wString>* pTexKeys,
-                              ON_ClassArray<ON_wString>* pTexPaths, ON_SimpleArray<int>* pDiffuseColor,
-                              ON_SimpleArray<int>* pAmbientColor, ON_SimpleArray<int>* pSpecularColor, double* opacity,
-                              double* shininess) {
-	const auto& genModels = RhinoPRT::get().getGenModels();
-
-	if (initialShapeIndex >= genModels.size()) {
-		LOG_ERR << L"Initial shape ID out of range";
-		return false;
-	}
-
-	if (!genModels[initialShapeIndex])
-		return false;
-
-	const GeneratedModelPtr& currModel = genModels[initialShapeIndex];
-	const Materials::MaterialsMap& material = currModel->getMaterials();
-
-	if (meshID >= material.size()) {
-		LOG_ERR << L"Mesh ID is out of range";
-		return false;
-	}
-	const Materials::MaterialAttribute& mat = material.at(meshID);
-
-	for (auto& texture : mat.mTexturePaths) {
-
-#ifdef DEBUG
-		LOG_DBG << L"texture: [ " << texture.first << " : " << texture.second << "]";
-#endif // DEBUG
-
-		const wchar_t* fullTexPath = texture.second.c_str();
-
-		pTexKeys->Append(ON_wString(texture.first.c_str()));
-		pTexPaths->Append(ON_wString(fullTexPath));
-	}
-
-	auto diffuse = mat.mDiffuseCol;
-	pDiffuseColor->Append(diffuse.Red());
-	pDiffuseColor->Append(diffuse.Green());
-	pDiffuseColor->Append(diffuse.Blue());
-
-	auto ambient = mat.mAmbientCol;
-	pAmbientColor->Append(ambient.Red());
-	pAmbientColor->Append(ambient.Green());
-	pAmbientColor->Append(ambient.Blue());
-
-	auto specular = mat.mSpecularCol;
-	pSpecularColor->Append(specular.Red());
-	pSpecularColor->Append(specular.Green());
-	pSpecularColor->Append(specular.Blue());
-
-	*opacity = mat.mOpacity;
-	*shininess = mat.mShininess;
-
-	return true;
 }
 
 RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate) {

@@ -46,9 +46,6 @@ public:
 	void ShutdownRhinoPRT();
 	bool IsPRTInitialized();
 
-	void SetRPKPath(const std::wstring& rpk_path); // might throw!
-	const std::wstring GetRPKPath() const; 
-
 	int GetRuleAttributeCount();
 	const RuleAttributes& GetRuleAttributes() const;
 
@@ -56,8 +53,8 @@ public:
 	void ClearInitialShapes();
 
 	std::vector<GeneratedModelPtr> GenerateGeometry(const std::wstring& rpk_path,
-	                                                       std::vector<RawInitialShape> rawInitialShapes,
-	                                                       pcu::AttributeMapBuilderVector& aBuilders);
+	                                                std::vector<RawInitialShape>& rawInitialShapes,
+	                                                pcu::AttributeMapBuilderVector& aBuilders);
 
 	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, double value, size_t /*count*/);
 	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, int value, size_t /*count*/);

@@ -212,11 +212,12 @@ namespace PumaGrasshopper
             RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
 
             var generatedMeshes = PRTWrapper.GenerateMesh(rpk.path, ref MM, inputMeshes);
-            OutputGeometry(DA, generatedMeshes);
-            OutputMaterials(DA, generatedMeshes);
-            OutputReports(DA, generatedMeshes);
-            OutputCGAPrint(DA, generatedMeshes);
-            OutputCGAErrors(DA, generatedMeshes);
+            OutputGeometry(DA, generatedMeshes.meshes);
+            OutputMaterials(DA, generatedMeshes.materials);
+            OutputReports(DA, generatedMeshes.reports);
+            // TODO: Add CGA print and errors to generate return.
+            // OutputCGAPrint(DA, generatedMeshes);
+            // OutputCGAErrors(DA, generatedMeshes);
         }
 
         private RulePackage GetRulePackage(IGH_DataAccess dataAccess)
@@ -309,34 +310,34 @@ namespace PumaGrasshopper
 
         private void OutputGeometry(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
         {
-            var meshStructure = PRTWrapper.CreateMeshStructure(generatedMeshes);
+            var meshStructure = Utils.CreateMeshStructure(generatedMeshes);
             dataAccess.SetDataTree((int)OutputParams.MODELS, meshStructure);
         }
 
-        private void OutputMaterials(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
+        private void OutputMaterials(IGH_DataAccess dataAccess, List<GH_Material[]> generatedMaterials)
         {
             if (!mDoGenerateMaterials)
                 return;
 
-            GH_Structure<GH_Material> materials = PRTWrapper.GetAllMaterialIds(generatedMeshes);
+            GH_Structure<GH_Material> materials = Utils.CreateMaterialStructure(generatedMaterials);
             dataAccess.SetDataTree((int)OutputParams.MATERIALS, materials);
         }
 
-        private void OutputReports(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
+        private void OutputReports(IGH_DataAccess dataAccess, List<ReportAttribute[]> generatedReports)
         {
-            GH_Structure<ReportAttribute> outputTree = new GH_Structure<ReportAttribute>();
+            GH_Structure<ReportAttribute> reports = new GH_Structure<ReportAttribute>();
 
-            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            for (int shapeId = 0; shapeId < generatedReports.Count; shapeId++)
             {
-                var reports = PRTWrapper.GetAllReports(shapeId);
-                if (reports.Count > 0)
+                
+                if (generatedReports[shapeId].Length > 0)
                 {
                     GH_Path path = new GH_Path(shapeId);
-                    reports.ForEach(x => outputTree.Append(x, path));
+                    reports.AppendRange(generatedReports[shapeId], path);
                 }
             }
 
-            dataAccess.SetDataTree((int)OutputParams.REPORTS, outputTree);
+            dataAccess.SetDataTree((int)OutputParams.REPORTS, reports);
         }
 
         private void OutputCGAPrint(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)

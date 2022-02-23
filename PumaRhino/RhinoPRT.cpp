@@ -71,7 +71,7 @@ void RhinoPRTAPI::SetInitialShapes(const std::vector<RawInitialShape>& shapes) {
 	//mAttributes.resize(mShapes.size(), pcu::ShapeAttributes(rulef, ruleN, shapeN));
 
 	// compute the default values of rule attributes for each initial shape
-	mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
+	// mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
 
 }
 
@@ -84,7 +84,7 @@ void RhinoPRTAPI::ClearInitialShapes() {
 }
 
 std::vector<GeneratedModelPtr> RhinoPRTAPI::GenerateGeometry(const std::wstring& rpk_path,
-                                                             std::vector<RawInitialShape> rawInitialShapes,
+                                                             std::vector<RawInitialShape>& rawInitialShapes,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
 	//Build ShapeAttributes
 	pcu::ShapeAttributes attribute = mModelGenerator->getShapeAttributes(rpk_path);

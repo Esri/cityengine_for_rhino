@@ -114,6 +114,7 @@ std::string toUTF8FromUTF16(const std::wstring& utf16String);
 std::string toUTF8FromOSNarrow(const std::string& osString);
 
 void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee);
+void appendColor(const ON_Color& color, ON_SimpleArray<int>* pArray);
 
 std::string percentEncode(const std::string& utf8String);
 std::string toFileURI(const std::string& osNarrowPath);
@@ -166,7 +167,7 @@ std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray) {
  */
 
 template<typename T>
-void fillMapBuilder(const std::wstring& key, T value, AttributeMapBuilderPtr& aBuilder) {
+void fillMapBuilder(const std::wstring& /* key */, T value, AttributeMapBuilderPtr& aBuilder) {
 	throw std::invalid_argument("Received type is not supported");
 }
 
@@ -181,24 +182,24 @@ void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapB
 }
 
 template<typename T>
-void fillArrayMapBuilder(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder) {
+void fillArrayMapBuilder(const std::wstring& key, const std::vector<const wchar_t*>& values, AttributeMapBuilderPtr& aBuilder) {
 	throw std::invalid_argument("Received type is not supported");
 }
 
 template<>
-void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder) {
+void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<const wchar_t*>& values, AttributeMapBuilderPtr& aBuilder) {
 	bool* bArray = new bool[values.size()];
 	for (int i = 0; i < values.size(); ++i) {
-		bArray[i] = values[i] == L"true";
+		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
 	}
 	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
 }
 
 template<>
-void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder) {
+void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values, AttributeMapBuilderPtr& aBuilder) {
 	double* dArray = new double[values.size()];
 	for (int i = 0; i < values.size(); ++i) {
-		dArray[i] = std::stod(values[i]);
+		dArray[i] = (double)std::stod(std::wstring(values[i]));
 	}
 	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
 }
@@ -218,7 +219,7 @@ void unpackArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys
 	AttributeMapBuilderPtr& aBuilder) {
 	for (int i = start; i < start + count; ++i) {
 		const std::wstring key(keys->At(i)->Array());
-		auto vArray = fromCeArray(values->At(i)->Array());
+		const auto vArray = fromCeArray(values->At(i)->Array());
 		pcu::fillArrayMapBuilder<T>(key, vArray, aBuilder);
 	}
 }
