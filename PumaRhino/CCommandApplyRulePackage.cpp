@@ -141,13 +141,10 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 		return failure;
 	}
 
-	RhinoPRT::get().ClearInitialShapes();
-
 	std::vector<RawInitialShape> rawInitialShapes;
 	rawInitialShapes.reserve(mesh_array.Count());
 	for (int i = 0; i < mesh_array.Count(); ++i)
 		rawInitialShapes.emplace_back(*mesh_array[i]);
-	RhinoPRT::get().SetInitialShapes(rawInitialShapes);
 
 	// Initialise the attribute map builders for each initial shape.
 	pcu::AttributeMapBuilderVector aBuilders(mesh_array.Count());

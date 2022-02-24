@@ -49,30 +49,9 @@ public:
 	int GetRuleAttributeCount();
 	const RuleAttributes& GetRuleAttributes() const;
 
-	void SetInitialShapes(const std::vector<RawInitialShape>& shapes);
-	void ClearInitialShapes();
-
 	std::vector<GeneratedModelPtr> GenerateGeometry(const std::wstring& rpk_path,
 	                                                std::vector<RawInitialShape>& rawInitialShapes,
 	                                                pcu::AttributeMapBuilderVector& aBuilders);
-
-	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, double value, size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, int value, size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, bool value, size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, std::wstring& value,
-	                           size_t /*count*/);
-	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, const double* value,
-	                           const size_t count);
-	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, bool* value, const size_t count);
-	void setRuleAttributeValue(const int initialShapeIndex, const std::wstring& rule, std::vector<const wchar_t*> value,
-	                           const size_t /*count*/);
-
-	const Reporting::GroupedReports& getReports() const {
-		return mGroupedReports;
-	}
-	Reporting::ReportsVector getReportsOfModel(int initialShapeIndex);
-
-	const std::vector<GeneratedModelPtr>& getGenModels() const;
 
 	void setMaterialGeneration(bool emitMaterial);
 
@@ -90,9 +69,6 @@ private:
 	pcu::AttributeMapBuilderVector mAttrBuilders;
 
 	std::unique_ptr<ModelGenerator> mModelGenerator;
-	std::vector<GeneratedModelPtr> mGeneratedModels;
-
-	Reporting::GroupedReports mGroupedReports;
 };
 
 // Global PRT handle

@@ -83,7 +83,7 @@ using FileOutputCallbacksPtr = std::unique_ptr<prt::FileOutputCallbacks, PRTDest
 using ConsoleLogHandlerPtr = std::unique_ptr<prt::ConsoleLogHandler, PRTDestroyer>;
 using FileLogHandlerPtr = std::unique_ptr<prt::FileLogHandler, PRTDestroyer>;
 using RuleFileInfoPtr = std::unique_ptr<const prt::RuleFileInfo, PRTDestroyer>;
-using RuleFileInfoSPtr = std::unique_ptr<const prt::RuleFileInfo, PRTDestroyer>;
+// using RuleFileInfoSPtr = std::shared_ptr<const prt::RuleFileInfo>;
 using EncoderInfoPtr = std::unique_ptr<const prt::EncoderInfo, PRTDestroyer>;
 using DecoderInfoPtr = std::unique_ptr<const prt::DecoderInfo, PRTDestroyer>;
 using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRTDestroyer>;
@@ -96,9 +96,11 @@ struct ShapeAttributes {
 	RuleFileInfoPtr ruleFileInfo;
 	int seed;
 
-	ShapeAttributes(RuleFileInfoPtr& ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
+	ShapeAttributes(RuleFileInfoPtr ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
 	                const std::wstring startRl = L"Default$Lot", const std::wstring shapeN = L"Lot",
 	                const int seed = 0);
+
+	ShapeAttributes(const pcu::ShapeAttributes& attributes);
 };
 
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
@@ -142,99 +144,36 @@ std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std:
 	return str;
 }
 
-std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim) {
-	std::vector<const wchar_t*> result;
+std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim);
 
-	size_t found = i_str.find(i_delim);
-	size_t startIndex = 0;
-
-	while (found != std::wstring::npos) {
-		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.begin() + found).c_str());
-		startIndex = found + i_delim.size();
-		found = i_str.find(i_delim, startIndex);
-	}
-	if (startIndex != i_str.size())
-		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.end()).c_str());
-	return result;
-}
-
-std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray) {
-	return pcu::split(stringArray, CE_ARRAY_DELIMITER);
-}
+std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray);
 
 /**
  * Interop helpers
  */
 
 template<typename T>
-void fillMapBuilder(const std::wstring& /* key */, T value, AttributeMapBuilderPtr& aBuilder) {
-	throw std::invalid_argument("Received type is not supported");
-}
-
-template<>
-void fillMapBuilder<bool>(const std::wstring& key, bool value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setBool(key.c_str(), value);
-}
-
-template<>
-void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setFloat(key.c_str(), value);
-}
+void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBuilderPtr& /* aBuilder */);
 
 template<typename T>
-void fillArrayMapBuilder(const std::wstring& key, const std::vector<const wchar_t*>& values, AttributeMapBuilderPtr& aBuilder) {
-	throw std::invalid_argument("Received type is not supported");
-}
+void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const wchar_t*>& /* values */,
+                         AttributeMapBuilderPtr& /* aBuilder */);
 
-template<>
-void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<const wchar_t*>& values, AttributeMapBuilderPtr& aBuilder) {
-	bool* bArray = new bool[values.size()];
-	for (int i = 0; i < values.size(); ++i) {
-		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
-	}
-	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
-}
 
-template<>
-void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values, AttributeMapBuilderPtr& aBuilder) {
-	double* dArray = new double[values.size()];
-	for (int i = 0; i < values.size(); ++i) {
-		dArray[i] = (double)std::stod(std::wstring(values[i]));
-	}
-	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
-}
+void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
+                      AttributeMapBuilderPtr& aBuilder);
 
-template<typename T>
-void unpackAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<T>* values, AttributeMapBuilderPtr& aBuilder) {
-	for (int i = start; i < start + count; ++i) {
-		const std::wstring key(keys->At(i)->Array());
+void unpackDoubleAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<double>* values,
+                          AttributeMapBuilderPtr& aBuilder);
 
-		const T value(*values->At(i));
-		pcu::fillMapBuilder(key, value, aBuilder);
-	}
-}
+void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                               AttributeMapBuilderPtr& aBuilder);
 
-template<typename T>
-void unpackArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
-	AttributeMapBuilderPtr& aBuilder) {
-	for (int i = start; i < start + count; ++i) {
-		const std::wstring key(keys->At(i)->Array());
-		const auto vArray = fromCeArray(values->At(i)->Array());
-		pcu::fillArrayMapBuilder<T>(key, vArray, aBuilder);
-	}
-}
+void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                           AttributeMapBuilderPtr& aBuilder);
 
-void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder, bool isArray) {
-	for (int i = start; i < start + count; ++i) {
-		const std::wstring key(keys->At(i)->Array());
-
-		if (isArray) {
-			auto strings = fromCeArray(values->At(i)->Array());
-			aBuilder->setStringArray(key.c_str(), strings.data(), strings.size());
-		} else 
-			aBuilder->setString(key.c_str(), values->At(i)->Array());
-	}
-}
+void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                            AttributeMapBuilderPtr& aBuilder, bool isArray);
 
 /**
  * Resolve map helpers

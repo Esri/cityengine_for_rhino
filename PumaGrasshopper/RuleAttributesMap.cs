@@ -8,35 +8,28 @@ namespace PumaGrasshopper
 {
     public class RuleAttributesMap
     {
-        private List<int> boolStarts;
-        private List<int> doubleStarts;
-        private List<int> stringStarts;
-        private List<int> boolArrayStarts;
-        private List<int> doubleArrayStarts;
-        private List<int> stringArrayStarts;
+        private List<int> boolStarts = new List<int>();
+        private List<int> doubleStarts = new List<int>();
+        private List<int> stringStarts = new List<int>();
+        private List<int> boolArrayStarts = new List<int>();
+        private List<int> doubleArrayStarts = new List<int>();
+        private List<int> stringArrayStarts = new List<int>();
 
-        public List<string> boolKeys;
-        public List<string> doubleKeys;
-        public List<string> stringKeys;
-        public List<string> boolArrayKeys;
-        public List<string> doubleArrayKeys;
-        public List<string> stringArrayKeys;
+        public List<string> boolKeys = new List<string>();
+        public List<string> doubleKeys = new List<string>();
+        public List<string> stringKeys = new List<string>();
+        public List<string> boolArrayKeys = new List<string>();
+        public List<string> doubleArrayKeys = new List<string>();
+        public List<string> stringArrayKeys = new List<string>();
 
-        public List<bool> boolValues;
-        public List<double> doubleValues;
-        public List<string> stringValues;
-        public List<string> boolArrayValues;
-        public List<string> doubleArrayValues;
-        public List<string> stringArrayValues;
+        public List<bool> boolValues = new List<bool>();
+        public List<double> doubleValues = new List<double>();
+        public List<string> stringValues = new List<string>();
+        public List<string> boolArrayValues = new List<string>();
+        public List<string> doubleArrayValues = new List<string>();
+        public List<string> stringArrayValues = new List<string>();
 
-        public RuleAttributesMap() {
-            boolStarts = new List<int>();
-            doubleStarts = new List<int>();
-            stringStarts = new List<int>();
-            boolArrayStarts = new List<int>();
-            doubleArrayStarts = new List<int>();
-            stringArrayStarts = new List<int>();
-        }
+        public RuleAttributesMap() { }
 
         public void StartShape()
         {

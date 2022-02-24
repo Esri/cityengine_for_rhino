@@ -38,11 +38,11 @@ public:
 
 	std::vector<GeneratedModelPtr> generateModel(const std::wstring& rulePkg,
 	                                             const std::vector<RawInitialShape>& rawInitialShapes,
-	                                             const std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	                                             const pcu::ShapeAttributes& shapeAttributes,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
 	bool evalDefaultAttributes(pcu::ResolveMapSPtr& resolveMap, const std::vector<RawInitialShape>& rawInitialShapes,
-	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
+	                           pcu::ShapeAttributes& shapeAttributes);
 
 	pcu::ShapeAttributes getShapeAttributes(const std::wstring& rulePkg);
 
@@ -82,7 +82,7 @@ private:
 
 	bool createInitialShapes(pcu::ResolveMapSPtr& resolveMap,
 							 const std::vector<RawInitialShape>& rawInitialShapes,
-	                         const std::vector<pcu::ShapeAttributes>& shapeAttributes,
+	                         const pcu::ShapeAttributes& shapeAttributes,
 	                         pcu::AttributeMapBuilderVector& aBuilders,
 	                         std::vector<pcu::InitialShapePtr>& initialShapes,
 	                         std::vector<pcu::AttributeMapPtr>& initialShapeAttributes) const;

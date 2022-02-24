@@ -57,89 +57,18 @@ const RuleAttributes& RhinoPRTAPI::GetRuleAttributes() const {
 	return mModelGenerator->getRuleAttributes();
 }
 
-void RhinoPRTAPI::SetInitialShapes(const std::vector<RawInitialShape>& shapes) {
-
-	// get the shape attributes data from ModelGenerator
-	std::wstring rulef = mModelGenerator->getRuleFile();
-	std::wstring ruleN = mModelGenerator->getStartingRule();
-	std::wstring shapeN = mModelGenerator->getDefaultShapeName();
-
-	mShapes.reserve(shapes.size());
-	mAttributes.reserve(shapes.size());
-
-	mShapes.insert(mShapes.end(), shapes.begin(), shapes.end());
-	//mAttributes.resize(mShapes.size(), pcu::ShapeAttributes(rulef, ruleN, shapeN));
-
-	// compute the default values of rule attributes for each initial shape
-	// mModelGenerator->evalDefaultAttributes(mShapes, mAttributes);
-
-}
-
-void RhinoPRTAPI::ClearInitialShapes() {
-	mShapes.clear();
-	mGeneratedModels.clear();
-	mAttributes.clear();
-	mGroupedReports.clear();
-	mAttrBuilders.clear();
-}
-
 std::vector<GeneratedModelPtr> RhinoPRTAPI::GenerateGeometry(const std::wstring& rpk_path,
                                                              std::vector<RawInitialShape>& rawInitialShapes,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
+	if (!mModelGenerator)
+		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
+
 	//Build ShapeAttributes
 	pcu::ShapeAttributes attribute = mModelGenerator->getShapeAttributes(rpk_path);
-	std::vector<pcu::ShapeAttributes> attributes(rawInitialShapes.size(), attribute);
 	
-	std::vector<GeneratedModelPtr> generatedModels = mModelGenerator->generateModel(rpk_path, rawInitialShapes, attributes, aBuilders);
+	std::vector<GeneratedModelPtr> generatedModels = mModelGenerator->generateModel(rpk_path, rawInitialShapes, attribute, aBuilders);
 	assert(generatedModels.size() == rawInitialShapes.size());
 	return generatedModels;
-}
-
-const std::vector<GeneratedModelPtr>& RhinoPRTAPI::getGenModels() const {
-	return mGeneratedModels;
-}
-
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, double value,
-                                        size_t /*count*/) {
-	mAttrBuilders[initialShapeIndex]->setFloat(name.c_str(), value);
-}
-
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, int value,
-                                        size_t /*count*/) {
-	mAttrBuilders[initialShapeIndex]->setInt(name.c_str(), value);
-}
-
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, bool value,
-                                        size_t /*count*/) {
-	mAttrBuilders[initialShapeIndex]->setBool(name.c_str(), value);
-}
-
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, std::wstring& value,
-                                        size_t /*count*/) {
-	mAttrBuilders[initialShapeIndex]->setString(name.c_str(), value.c_str());
-}
-
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, const double* value,
-                                        const size_t count) {
-	mAttrBuilders[initialShapeIndex]->setFloatArray(name.c_str(), value, count);
-}
-
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name, bool* value,
-                                        const size_t count) {
-	mAttrBuilders[initialShapeIndex]->setBoolArray(name.c_str(), value, count);
-}
-
-void RhinoPRTAPI::setRuleAttributeValue(const int initialShapeIndex, const std::wstring& name,
-                                        std::vector<const wchar_t*> value, const size_t /*count*/) {
-	mAttrBuilders[initialShapeIndex]->setStringArray(name.c_str(), value.data(), value.size());
-}
-
-Reporting::ReportsVector RhinoPRTAPI::getReportsOfModel(int initialShapeIndex) {
-	if ((mGeneratedModels.size() <= initialShapeIndex) || !mGeneratedModels[initialShapeIndex])
-		return Reporting::EMPTY_REPORTS;
-
-	const auto& reports = mGeneratedModels[initialShapeIndex]->getReports();
-	return Reporting::ToReportsVector(reports);
 }
 
 void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {

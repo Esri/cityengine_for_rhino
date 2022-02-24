@@ -29,6 +29,7 @@
 
 #include "RhinoPRT.h"
 #include "version.h"
+#include "utils.h"
 
 #define RHINOPRT_API __declspec(dllexport)
 
@@ -37,12 +38,6 @@ namespace {
 template <typename T, typename T1>
 T static_cast_fct(const T1& x) {
 	return static_cast<T>(x);
-}
-
-template <typename T>
-void fillAttributeFromNode(RhinoPRT::RhinoPRTAPI& prtApi, const int initialShapeIndex, const std::wstring& attrFullName,
-                           T value, size_t count = 1) {
-	prtApi.setRuleAttributeValue(initialShapeIndex, attrFullName, value, count);
 }
 
 } // namespace
@@ -102,22 +97,22 @@ inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh) {
 RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 						   // rule attributes
 						   const int shapeCount,
-						   const int* pBoolStarts, const int boolCount,
+						   ON_SimpleArray<int>* pBoolStarts, const int boolCount,
 						   ON_ClassArray<ON_wString>* pBoolKeys, ON_SimpleArray<int>* pBoolVals,
 
-						   const int* pDoubleStarts, const int doubleCount,
+						   ON_SimpleArray<int>* pDoubleStarts, const int doubleCount,
 						   ON_ClassArray<ON_wString>* pDoubleKeys, ON_SimpleArray<double>* pDoubleVals,
 
-						   const int* pStringStarts, const int stringCount, 
+						   ON_SimpleArray<int>* pStringStarts, const int stringCount, 
 						   ON_ClassArray<ON_wString>* pStringKeys, ON_ClassArray<ON_wString>* pStringVals,
 
-						   const int* pBoolArrayStarts, const int boolArrayCount,
+						   ON_SimpleArray<int>* pBoolArrayStarts, const int boolArrayCount,
                            ON_ClassArray<ON_wString>* pBoolArrayKeys, ON_ClassArray<ON_wString>* pBoolArrayVals,
 
-						   const int* pDoubleArrayStarts, const int doubleArrayCount,
+						   ON_SimpleArray<int>* pDoubleArrayStarts, const int doubleArrayCount,
                            ON_ClassArray<ON_wString>* pDoubleArrayKeys, ON_ClassArray<ON_wString>* pDoubleArrayVals,
 
-						   const int* pStringArrayStarts, const int stringArrayCount,
+						   ON_SimpleArray<int>* pStringArrayStarts, const int stringArrayCount,
                            ON_ClassArray<ON_wString>* pStringArrayKeys, ON_ClassArray<ON_wString>* pStringArrayVals,
 
 						   // Initial geometry
@@ -150,30 +145,30 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 	for (auto& it : aBuilders) {
 		it.reset(prt::AttributeMapBuilder::create());
 	}
-
+	
 	for (int i = 0; i < shapeCount; ++i) {
 		// by initial shape
-		int indexStartBool = pBoolStarts[i];
-		int indexStartDouble = pDoubleStarts[i];
-		int indexStartString = pStringStarts[i];
-		int indexStartBoolArray = pBoolArrayStarts[i];
-		int indexStartDoubleArray = pDoubleArrayStarts[i];
-		int indexStartStringArray = pStringArrayStarts[i];
+		int indexStartBool = *pBoolStarts->At(i);
+		int indexStartDouble = *pDoubleStarts->At(i);
+		int indexStartString = *pStringStarts->At(i);
+		int indexStartBoolArray = *pBoolArrayStarts->At(i);
+		int indexStartDoubleArray = *pDoubleArrayStarts->At(i);
+		int indexStartStringArray = *pStringArrayStarts->At(i);
 
-		int boolAttrCount = i < boolCount - 1 ? pBoolStarts[i + 1] : boolCount - indexStartBool;
-		int doubleAttrCount = i < doubleCount - 1 ? pDoubleStarts[i + 1]: doubleCount - indexStartDouble;
-		int stringAttrCount = i < stringCount - 1 ? pStringStarts[i + 1]: stringCount - indexStartString;
-		int boolAttrArrayCount = i < boolArrayCount - 1 ? pBoolArrayStarts[i + 1]: boolArrayCount - indexStartBoolArray;
-		int doubleAttrArrayCount = i < doubleArrayCount - 1 ? pDoubleArrayStarts[i + 1]: doubleArrayCount - indexStartDoubleArray;
-		int stringAttrArrayCount = i < stringArrayCount - 1 ? pStringArrayStarts[i + 1]: stringArrayCount - indexStartStringArray;
+		int boolAttrCount = (i < boolCount - 1 ? *pBoolStarts->At(i + 1) : boolCount) - indexStartBool;
+		int doubleAttrCount = (i < doubleCount - 1 ? *pDoubleStarts->At(i + 1): doubleCount) - indexStartDouble;
+		int stringAttrCount = (i < stringCount - 1 ? *pStringStarts->At(i + 1): stringCount) - indexStartString;
+		int boolAttrArrayCount = (i < boolArrayCount - 1 ? *pBoolArrayStarts->At(i + 1): boolArrayCount) - indexStartBoolArray;
+		int doubleAttrArrayCount = (i < doubleArrayCount - 1 ? *pDoubleArrayStarts->At(i + 1): doubleArrayCount) - indexStartDoubleArray;
+		int stringAttrArrayCount = (i < stringArrayCount - 1 ? *pStringArrayStarts->At(i + 1): stringArrayCount) - indexStartStringArray;
 
-		pcu::unpackAttributes(indexStartBool, boolAttrCount, pBoolKeys, pBoolVals, aBuilders[i]);
-		pcu::unpackAttributes(indexStartDouble, doubleAttrCount, pDoubleKeys, pDoubleVals, aBuilders[i]);
+		pcu::unpackBoolAttributes(indexStartBool, boolAttrCount, pBoolKeys, pBoolVals, aBuilders[i]);
+		pcu::unpackDoubleAttributes(indexStartDouble, doubleAttrCount, pDoubleKeys, pDoubleVals, aBuilders[i]);
 		pcu::unpackStringAttributes(indexStartString, stringAttrCount, pStringKeys, pStringVals,
 		                      aBuilders[i], false);
-		pcu::unpackArrayAttributes<bool>(indexStartBoolArray, boolAttrArrayCount, pBoolArrayKeys, pBoolArrayVals,
+		pcu::unpackBoolArrayAttributes(indexStartBoolArray, boolAttrArrayCount, pBoolArrayKeys, pBoolArrayVals,
 		                           aBuilders[i]);
-		pcu::unpackArrayAttributes<double>(indexStartDoubleArray, doubleAttrArrayCount, pDoubleArrayKeys, pDoubleArrayVals, aBuilders[i]);
+		pcu::unpackDoubleArrayAttributes(indexStartDoubleArray, doubleAttrArrayCount, pDoubleArrayKeys, pDoubleArrayVals, aBuilders[i]);
 		pcu::unpackStringAttributes(indexStartStringArray, stringAttrArrayCount, pStringArrayKeys, pStringArrayVals,
 		                            aBuilders[i], true);
 
@@ -185,7 +180,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 		indexStartStringArray += stringAttrArrayCount;
 	}
 
-	const std::vector<GeneratedModelPtr> models = RhinoPRT::get().GenerateGeometry(rpk_path, rawInitialShapes, aBuilders);
+	const auto& models = RhinoPRT::get().GenerateGeometry(std::wstring(rpk_path), rawInitialShapes, aBuilders);
 
 	for (size_t i = 0; i < models.size(); i++) {
 		if (models[i]) {
@@ -222,7 +217,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 			}
 
 			// Reports
-			const auto reports = Reporting::ToReportsVector(models[i]->getReports());
+			auto reports = Reporting::ToReportsVector(models[i]->getReports());
 
 			/*
 			left.float	-> right.all OK
@@ -233,7 +228,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 			*/
 			// Sort the reports by Type. The order is Double -> Bool -> String
 			std::sort(reports.begin(), reports.end(),
-			          [](Reporting::ReportAttribute& left, Reporting::ReportAttribute& right) -> bool {
+			          [](Reporting::ReportAttribute left, Reporting::ReportAttribute right) -> bool {
 				          if (left.mType == right.mType)
 					          return left.mReportName.compare(right.mReportName) <
 					                 0; // assuming case sensitivity. assuming two reports can't have the same name.
@@ -311,7 +306,7 @@ RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* p
 }
 
 RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
-	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
+	const std::vector<GeneratedModelPtr> models; // = RhinoPRT::get().getGenModels();
 
 	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
 		return;
@@ -322,7 +317,7 @@ RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wStr
 }
 
 RHINOPRT_API void GetCGAErrorOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pErrorOutput) {
-	const std::vector<GeneratedModelPtr>& models = RhinoPRT::get().getGenModels();
+	const std::vector<GeneratedModelPtr> models; // = RhinoPRT::get().getGenModels();
 
 	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
 		return;

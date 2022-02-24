@@ -57,7 +57,7 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void ClearInitialShapes();
 
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern int Generate(string rpk_path, [Out] IntPtr errorMsg,
             int shapeCount,
             [In] IntPtr pBoolStarts, int boolCount,
@@ -228,10 +228,11 @@ namespace PumaGrasshopper
                      pReportBoolArray,
                      pReportStringArray);
 
-            initialMeshesArray.Dispose();
+            // initialMeshesArray.Dispose();
             boolWrapper.Dispose();
             doubleWrapper.Dispose();
             stringWrapper.Dispose();
+            initialMeshesArray.Dispose();
 
             var meshCountsArray = meshCounts.ToArray();
             var meshesArray = meshes.ToNonConstArray();
@@ -591,7 +592,7 @@ namespace PumaGrasshopper
         {
             SimpleArrayInt boolArray = new SimpleArrayInt();
             var pBoolArray = boolArray.NonConstPointer();
-            bool hasDefault = GetDefaultValuesBoolean(key, pBoolArray);
+            bool hasDefault = false; //  GetDefaultValuesBoolean(key, pBoolArray);
 
             if (!hasDefault) return null;
 
@@ -605,7 +606,7 @@ namespace PumaGrasshopper
         {
             SimpleArrayDouble doubleArray = new SimpleArrayDouble();
             var pDoubleArray = doubleArray.NonConstPointer();
-            bool hasDefault = GetDefaultValuesNumber(key, pDoubleArray);
+            bool hasDefault = false; //GetDefaultValuesNumber(key, pDoubleArray);
 
             if (!hasDefault) return null;
 
@@ -619,7 +620,7 @@ namespace PumaGrasshopper
         {
             ClassArrayString stringArray = new ClassArrayString();
             var pStringArray = stringArray.NonConstPointer();
-            bool hasDefault = GetDefaultValuesText(key, pStringArray);
+            bool hasDefault = false; // GetDefaultValuesText(key, pStringArray);
 
             if (!hasDefault) return null;
 
