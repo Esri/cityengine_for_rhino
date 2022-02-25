@@ -187,6 +187,44 @@ pcu::ResolveMapSPtr ModelGenerator::getResolveMap(const std::wstring& rulePkg) {
 	return resolveMap;
 }
 
+const RuleAttributes ModelGenerator::getRuleAttributes(const std::wstring& rulePkg) {
+	pcu::ResolveMapSPtr resolveMap;
+	try {
+		resolveMap = getResolveMap(rulePkg);
+	}
+	catch (std::exception&) {
+		throw;
+	}
+
+	// Extract the rule package info.
+	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
+	if (ruleFile.empty()) {
+		LOG_ERR << "Could not find rule file in rule package" << rulePkg;
+		throw std::exception("Could not find rule file in rule package ");
+	}
+
+	// To create the ruleFileInfo, we first need the ruleFileURI
+	const wchar_t* ruleFileURI = resolveMap->getString(ruleFile.c_str());
+	if (ruleFileURI == nullptr) {
+		LOG_ERR << "Could not find rule file URI in resolve map of rule package." << rulePkg;
+		throw std::exception("Could not find rule file URI in resolve map of rule package.");
+	}
+
+	// Create RuleFileInfo
+	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
+	pcu::RuleFileInfoPtr ruleFileInfo(
+	        prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
+
+	if (!ruleFileInfo || infoStatus != prt::STATUS_OK) {
+		LOG_ERR << "could not get rule file info from rule file " << ruleFile;
+		throw std::exception("Could not get rule file info from rule file.");
+	}
+
+	RuleAttributes attributes;
+	createRuleAttributes(ruleFile, *ruleFileInfo.get(), attributes);
+	return attributes;
+}
+
 pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rulePkg) {
 	pcu::ResolveMapSPtr resolveMap;
 	try {
@@ -224,9 +262,11 @@ pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rule
 	return pcu::ShapeAttributes(std::move(ruleFileInfo), ruleFile, startRule);
 }
 
-bool ModelGenerator::evalDefaultAttributes(pcu::ResolveMapSPtr& resolveMap,
+bool ModelGenerator::evalDefaultAttributes(const std::wstring& rulePkg,
 										   const std::vector<RawInitialShape>& rawInitialShapes,
                                            pcu::ShapeAttributes& shapeAttributes) {
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
+
 	// setup encoder options for attribute evaluation encoder
 	constexpr const wchar_t* encs[] = {ENCODER_ID_CGA_EVALATTR};
 	constexpr size_t encsCount = sizeof(encs) / sizeof(encs[0]);

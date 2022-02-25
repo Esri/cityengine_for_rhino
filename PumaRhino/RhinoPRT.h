@@ -47,7 +47,8 @@ public:
 	bool IsPRTInitialized();
 
 	int GetRuleAttributeCount();
-	const RuleAttributes& GetRuleAttributes() const;
+	const RuleAttributes& GetRuleAttributes();
+	const RuleAttributes GetRuleAttributes(const std::wstring& rulePkg);
 
 	std::vector<GeneratedModelPtr> GenerateGeometry(const std::wstring& rpk_path,
 	                                                std::vector<RawInitialShape>& rawInitialShapes,

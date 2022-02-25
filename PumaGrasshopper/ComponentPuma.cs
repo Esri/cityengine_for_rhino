@@ -121,6 +121,8 @@ namespace PumaGrasshopper
             new ParameterDescriptor{ type = ParamType.GENERIC, name = CGA_ERROR_OUTPUT_NAME, nickName = CGA_ERROR_OUTPUT_NICK_NAME, desc = CGA_ERROR_OUTPUT_DESC },
         };
 
+        RulePackage mCurrentRpk;
+
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
 
@@ -156,6 +158,8 @@ namespace PumaGrasshopper
             mRuleAttributes = new RuleAttribute[0];
 
             mDoGenerateMaterials = true;
+
+            mCurrentRpk = null;
         }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
@@ -207,7 +211,11 @@ namespace PumaGrasshopper
             if (inputMeshes == null || inputMeshes.Count == 0)
                 return;
 
-            // TODO: Add default value evaluation
+            if(mCurrentRpk == null || !mCurrentRpk.IsSame(rpk))
+            {
+                mCurrentRpk = rpk;
+                mRuleAttributes = PRTWrapper.GetRuleAttributes(rpk.path);
+            }
 
             RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
 

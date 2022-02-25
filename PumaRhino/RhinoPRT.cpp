@@ -50,11 +50,23 @@ bool RhinoPRTAPI::IsPRTInitialized() {
 }
 
 int RhinoPRTAPI::GetRuleAttributeCount() {
+	if (!mModelGenerator)
+		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
+
 	return static_cast<int>(mModelGenerator->getRuleAttributes().size());
 }
 
-const RuleAttributes& RhinoPRTAPI::GetRuleAttributes() const {
+const RuleAttributes& RhinoPRTAPI::GetRuleAttributes() {
+	if (!mModelGenerator)
+		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
+
 	return mModelGenerator->getRuleAttributes();
+}
+
+const RuleAttributes RhinoPRTAPI::GetRuleAttributes(const std::wstring& rulePkg) {
+	if (!mModelGenerator)
+		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
+	return mModelGenerator->getRuleAttributes(rulePkg);
 }
 
 std::vector<GeneratedModelPtr> RhinoPRTAPI::GenerateGeometry(const std::wstring& rpk_path,

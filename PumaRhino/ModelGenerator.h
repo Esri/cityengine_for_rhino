@@ -41,7 +41,7 @@ public:
 	                                             const pcu::ShapeAttributes& shapeAttributes,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
-	bool evalDefaultAttributes(pcu::ResolveMapSPtr& resolveMap, const std::vector<RawInitialShape>& rawInitialShapes,
+	bool evalDefaultAttributes(const std::wstring& rulePkg, const std::vector<RawInitialShape>& rawInitialShapes,
 	                           pcu::ShapeAttributes& shapeAttributes);
 
 	pcu::ShapeAttributes getShapeAttributes(const std::wstring& rulePkg);
@@ -51,6 +51,7 @@ public:
 	const RuleAttributes& getRuleAttributes() const {
 		return mRuleAttributes;
 	}
+	const RuleAttributes getRuleAttributes(const std::wstring& rulePkg);
 
 	std::wstring getRuleFile();
 	std::wstring getStartingRule();

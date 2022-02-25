@@ -80,6 +80,9 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetRuleAttribute(int attrIdx, [In, Out] IntPtr pRule, [In, Out] IntPtr pName, [In, Out] IntPtr pNickname, ref Annotations.AnnotationArgumentType type, [In, Out] IntPtr pGroup);
 
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern int GetRuleAttributes(string rpk_path, [Out] IntPtr pAttributesBuffer, [Out] IntPtr pAttributesTypes);
+
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetAnnotationTypes(int ruleIdx, [In, Out] IntPtr pAnnotTypeArray);
 
@@ -403,37 +406,37 @@ namespace PumaGrasshopper
             return new List<String>(errorOutputArray);
         }
 
-        public static RuleAttribute[] GetRuleAttributes()
+        public static RuleAttribute[] GetRuleAttributes(string rpk)
         {
-            int attribCount = GetRuleAttributesCount();
+            ClassArrayString attributesBuffer = new ClassArrayString();
+            ClassArrayString annotationsBuffer = new ClassArrayString();
+            SimpleArrayInt attributesTypes = new SimpleArrayInt();
+
+            int attribCount = GetRuleAttributes(rpk, attributesBuffer.NonConstPointer(), attributesTypes.NonConstPointer());
 
             if (attribCount == 0) return new RuleAttribute[0]{};
 
+            var attributesArray = attributesBuffer.ToArray();
+            var attributesTypesArray = attributesTypes.ToArray();
+
             RuleAttribute[] attributes = new RuleAttribute[attribCount];
 
-            for(int i = 0; i < attribCount; ++i)
+            for(int i = 0; i < attribCount; i++)
             {
-                StringWrapper ruleBuilder = new StringWrapper();
-                StringWrapper nameBuilder = new StringWrapper();
-                StringWrapper nicknameBuilder = new StringWrapper();
-                StringWrapper group = new StringWrapper();
+                string rule = attributesArray[i*4];
+                string name = attributesArray[i*4 + 1];
+                string nickname = attributesArray[i*4 + 2];
+                string group = attributesArray[i*4 + 3];
+                Annotations.AnnotationArgumentType type = (Annotations.AnnotationArgumentType)attributesTypesArray[i];
+                attributes[i] = new RuleAttribute(name, nickname, rule, type, group == null ? "" : group);
 
-                var pRuleBuilder = ruleBuilder.NonConstPointer;
-                var pNameBuilder = nameBuilder.NonConstPointer;
-                var pNickNameBuilder = nicknameBuilder.NonConstPointer;
-                var pGroup = group.NonConstPointer;
-
-                Annotations.AnnotationArgumentType type = Annotations.AnnotationArgumentType.AAT_INT;
-
-                bool status = GetRuleAttribute(i, pRuleBuilder, pNameBuilder, pNickNameBuilder, ref type, pGroup);
-                if (!status) return new RuleAttribute[0] {};
-
-                attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());
-
-                // get the potential annotations
-                List<Annotations.Base> annotations = GetAnnotations(i);
-                attributes[i].mAnnotations.AddRange(annotations);
+                // TODO: Add annotations
+                //List<Annotations.Base> annotations = GetAnnotations(i);
+                //attributes[i].mAnnotations.AddRange(annotations);
             }
+
+            attributesBuffer.Dispose();
+            attributesTypes.Dispose();
             
             return attributes;
         }

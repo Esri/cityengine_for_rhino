@@ -117,12 +117,15 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 		int indexStartDoubleArray = *pDoubleArrayStarts->At(i);
 		int indexStartStringArray = *pStringArrayStarts->At(i);
 
-		int boolAttrCount = (i < boolCount - 1 ? *pBoolStarts->At(i + 1) : boolCount) - indexStartBool;
-		int doubleAttrCount = (i < doubleCount - 1 ? *pDoubleStarts->At(i + 1): doubleCount) - indexStartDouble;
-		int stringAttrCount = (i < stringCount - 1 ? *pStringStarts->At(i + 1): stringCount) - indexStartString;
-		int boolAttrArrayCount = (i < boolArrayCount - 1 ? *pBoolArrayStarts->At(i + 1): boolArrayCount) - indexStartBoolArray;
-		int doubleAttrArrayCount = (i < doubleArrayCount - 1 ? *pDoubleArrayStarts->At(i + 1): doubleArrayCount) - indexStartDoubleArray;
-		int stringAttrArrayCount = (i < stringArrayCount - 1 ? *pStringArrayStarts->At(i + 1): stringArrayCount) - indexStartStringArray;
+		int boolAttrCount = (i < shapeCount - 1 ? *pBoolStarts->At(i + 1) : boolCount) - indexStartBool;
+		int doubleAttrCount = (i < shapeCount - 1 ? *pDoubleStarts->At(i + 1): doubleCount) - indexStartDouble;
+		int stringAttrCount = (i < shapeCount - 1 ? *pStringStarts->At(i + 1) : stringCount) - indexStartString;
+		int boolAttrArrayCount =
+		        (i < shapeCount - 1 ? *pBoolArrayStarts->At(i + 1) : boolArrayCount) - indexStartBoolArray;
+		int doubleAttrArrayCount =
+		        (i < shapeCount - 1 ? *pDoubleArrayStarts->At(i + 1) : doubleArrayCount) - indexStartDoubleArray;
+		int stringAttrArrayCount =
+		        (i < shapeCount - 1 ? *pStringArrayStarts->At(i + 1) : stringArrayCount) - indexStartStringArray;
 
 		pcu::unpackBoolAttributes(indexStartBool, boolAttrCount, pBoolKeys, pBoolVals, aBuilders[i]);
 		pcu::unpackDoubleAttributes(indexStartDouble, doubleAttrCount, pDoubleKeys, pDoubleVals, aBuilders[i]);
@@ -250,6 +253,7 @@ RHINOPRT_API int GetRuleAttributesCount() {
 
 RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname,
                                    prt::AnnotationArgumentType* type, ON_wString* pGroup) {
+
 	const RuleAttributes& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
 
 	if (attrIdx >= ruleAttributes.size())
@@ -265,6 +269,25 @@ RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* p
 		*pGroup += ON_wString(ruleAttr->groups.front().c_str());
 
 	return true;
+}
+
+RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wString>* pAttributesBuffer, ON_SimpleArray<int>* pAttributesTypes) {
+
+	RuleAttributes ruleAttributes = RhinoPRT::get().GetRuleAttributes(rpk_path);
+
+	for (const RuleAttributeUPtr& attribute : ruleAttributes) {
+		pAttributesBuffer->Append(ON_wString(attribute->mRuleFile.c_str()));
+		pAttributesBuffer->Append(ON_wString(attribute->mFullName.c_str()));
+		pAttributesBuffer->Append(ON_wString(attribute->mNickname.c_str()));
+		if (attribute->groups.size() > 0)
+			pAttributesBuffer->Append(ON_wString(attribute->groups.front().c_str()));
+		else
+			pAttributesBuffer->Append(ON_wString(L""));
+
+		pAttributesTypes->Append(attribute->mType);
+	}
+
+	return static_cast<int>(ruleAttributes.size());
 }
 
 RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
