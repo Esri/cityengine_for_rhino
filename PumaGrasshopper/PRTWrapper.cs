@@ -54,9 +54,6 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ClearInitialShapes();
-
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern int Generate(string rpk_path, [Out] IntPtr errorMsg,
             int shapeCount,
@@ -76,12 +73,6 @@ namespace PumaGrasshopper
             [Out] IntPtr pColorsArray, [Out] IntPtr pTexIndices, [Out] IntPtr pTexKeys, [Out] IntPtr pTexPaths,
             [Out] IntPtr pReportCountArray, [Out] IntPtr pReportKeyArray, [Out] IntPtr pReportDoubleArray,
             [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out] IntPtr pMeshArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetMeshPartCount(int initialShapeIndex);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern int GetRuleAttributesCount();
@@ -105,26 +96,10 @@ namespace PumaGrasshopper
         public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void GetReports(int initialShapeIndex, [In, Out] IntPtr pKeysArray,
-        [In, Out] IntPtr pDoubleReports,
-        [In, Out] IntPtr pBoolReports,
-        [In, Out] IntPtr pStringReports);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetCGAPrintOutput(int initialShapeIndex, [In, Out] IntPtr pPrintOutput);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetCGAErrorOutput(int initialShapeIndex, [In, Out] IntPtr pErrorOutput);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetMaterial(int initialShapeIndex, int shapeID, ref int pUvSet,
-                                                [In, Out] IntPtr pTexKeys,
-                                                [In, Out] IntPtr pTexPaths,
-                                                [In, Out] IntPtr pDiffuseColor,
-                                                [In, Out] IntPtr pAmbientColor,
-                                                [In, Out] IntPtr pSpecularColor,
-                                                ref double opacity,
-                                                ref double shininess);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetMaterialGenerationOption(bool doGenerate);
@@ -228,11 +203,10 @@ namespace PumaGrasshopper
                      pReportBoolArray,
                      pReportStringArray);
 
-            // initialMeshesArray.Dispose();
+            initialMeshesArray.Dispose();
             boolWrapper.Dispose();
             doubleWrapper.Dispose();
             stringWrapper.Dispose();
-            initialMeshesArray.Dispose();
 
             var meshCountsArray = meshCounts.ToArray();
             var meshesArray = meshes.ToNonConstArray();

@@ -83,7 +83,6 @@ using FileOutputCallbacksPtr = std::unique_ptr<prt::FileOutputCallbacks, PRTDest
 using ConsoleLogHandlerPtr = std::unique_ptr<prt::ConsoleLogHandler, PRTDestroyer>;
 using FileLogHandlerPtr = std::unique_ptr<prt::FileLogHandler, PRTDestroyer>;
 using RuleFileInfoPtr = std::unique_ptr<const prt::RuleFileInfo, PRTDestroyer>;
-// using RuleFileInfoSPtr = std::shared_ptr<const prt::RuleFileInfo>;
 using EncoderInfoPtr = std::unique_ptr<const prt::EncoderInfo, PRTDestroyer>;
 using DecoderInfoPtr = std::unique_ptr<const prt::DecoderInfo, PRTDestroyer>;
 using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRTDestroyer>;
@@ -99,8 +98,6 @@ struct ShapeAttributes {
 	ShapeAttributes(RuleFileInfoPtr ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
 	                const std::wstring startRl = L"Default$Lot", const std::wstring shapeN = L"Lot",
 	                const int seed = 0);
-
-	ShapeAttributes(const pcu::ShapeAttributes& attributes);
 };
 
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);

@@ -56,44 +56,6 @@ RHINOPRT_API void ShutdownRhinoPRT() {
 	RhinoPRT::get().ShutdownRhinoPRT();
 }
 
-/*
-RHINOPRT_API void SetPackage(const wchar_t* rpk_path, ON_wString* errorMsg) {
-	assert(rpk_path != nullptr); // guaranteed by managed call site
-	try {
-		RhinoPRT::get().SetRPKPath(rpk_path);
-	}
-	catch (std::exception& e) {
-		*errorMsg += pcu::toUTF16FromOSNarrow(e.what()).c_str();
-	}
-}
-
-RHINOPRT_API bool GetPackagePath(ON_wString* pRpk) {
-	if (pRpk == nullptr)
-		return false;
-
-	const std::wstring rpk = RhinoPRT::get().GetRPKPath();
-	if (rpk.empty())
-		return false;
-
-	*pRpk += rpk.c_str();
-	return true;
-}
-
-inline RHINOPRT_API bool AddInitialMesh(ON_SimpleArray<const ON_Mesh*>* pMesh) {
-	if (pMesh == nullptr)
-		return false;
-
-	std::vector<RawInitialShape> rawInitialShapes;
-	rawInitialShapes.reserve(pMesh->Count());
-	for (int i = 0; i < pMesh->Count(); ++i) {
-		rawInitialShapes.emplace_back(**pMesh->At(i));
-	}
-
-	RhinoPRT::get().SetInitialShapes(rawInitialShapes);
-	return true;
-}
-*/
-
 RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 						   // rule attributes
 						   const int shapeCount,
