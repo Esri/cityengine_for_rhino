@@ -49,20 +49,6 @@ bool RhinoPRTAPI::IsPRTInitialized() {
 	return !!PRTContext::get() && PRTContext::get()->isAlive();
 }
 
-int RhinoPRTAPI::GetRuleAttributeCount() {
-	if (!mModelGenerator)
-		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
-
-	return static_cast<int>(mModelGenerator->getRuleAttributes().size());
-}
-
-const RuleAttributes& RhinoPRTAPI::GetRuleAttributes() {
-	if (!mModelGenerator)
-		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
-
-	return mModelGenerator->getRuleAttributes();
-}
-
 const RuleAttributes RhinoPRTAPI::GetRuleAttributes(const std::wstring& rulePkg) {
 	if (!mModelGenerator)
 		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());

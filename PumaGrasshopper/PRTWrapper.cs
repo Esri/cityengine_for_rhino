@@ -74,29 +74,8 @@ namespace PumaGrasshopper
             [Out] IntPtr pReportCountArray, [Out] IntPtr pReportKeyArray, [Out] IntPtr pReportDoubleArray,
             [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray);
 
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetRuleAttributesCount();
-
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetRuleAttribute(int attrIdx, [In, Out] IntPtr pRule, [In, Out] IntPtr pName, [In, Out] IntPtr pNickname, ref Annotations.AnnotationArgumentType type, [In, Out] IntPtr pGroup);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern int GetRuleAttributes(string rpk_path, [Out] IntPtr pAttributesBuffer, [Out] IntPtr pAttributesTypes);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void GetAnnotationTypes(int ruleIdx, [In, Out] IntPtr pAnnotTypeArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref Annotations.EnumAnnotationType type);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In, Out] IntPtr pArray, ref bool restricted);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetAnnotationEnumString(int ruleIdx, int enumIdx, [In, Out] IntPtr pArray, ref bool restricted);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
+        public static extern int GetRuleAttributes(string rpk_path, [Out] IntPtr pAttributesBuffer, [Out] IntPtr pAttributesTypes, [Out] IntPtr pBaseAnnotations, [Out] IntPtr pDoubleAnnotations, [Out] IntPtr pStringAnnotations);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetCGAPrintOutput(int initialShapeIndex, [In, Out] IntPtr pPrintOutput);
@@ -409,34 +388,104 @@ namespace PumaGrasshopper
         public static RuleAttribute[] GetRuleAttributes(string rpk)
         {
             ClassArrayString attributesBuffer = new ClassArrayString();
-            ClassArrayString annotationsBuffer = new ClassArrayString();
             SimpleArrayInt attributesTypes = new SimpleArrayInt();
+            SimpleArrayInt baseAnnotations = new SimpleArrayInt();
+            SimpleArrayDouble doubleAnnotations = new SimpleArrayDouble();
+            ClassArrayString stringAnnotations = new ClassArrayString();
 
-            int attribCount = GetRuleAttributes(rpk, attributesBuffer.NonConstPointer(), attributesTypes.NonConstPointer());
+            int attribCount = GetRuleAttributes(rpk, attributesBuffer.NonConstPointer(),
+                                                attributesTypes.NonConstPointer(), baseAnnotations.NonConstPointer(),
+                                                doubleAnnotations.NonConstPointer(), stringAnnotations.NonConstPointer());
 
             if (attribCount == 0) return new RuleAttribute[0]{};
 
             var attributesArray = attributesBuffer.ToArray();
             var attributesTypesArray = attributesTypes.ToArray();
+            var baseAnnotationsArray = baseAnnotations.ToArray();
+            var doubleAnnotationsArray = doubleAnnotations.ToArray();
+            var stringAnnotationsArray = stringAnnotations.ToArray();
 
             RuleAttribute[] attributes = new RuleAttribute[attribCount];
 
+            int baseAnnotationOffset = 0;
+            int doubleAnnotationOffset = 0;
+            int stringAnnotationOffset = 0;
+
             for(int i = 0; i < attribCount; i++)
             {
-                string rule = attributesArray[i*4];
-                string name = attributesArray[i*4 + 1];
-                string nickname = attributesArray[i*4 + 2];
-                string group = attributesArray[i*4 + 3];
-                Annotations.AnnotationArgumentType type = (Annotations.AnnotationArgumentType)attributesTypesArray[i];
-                attributes[i] = new RuleAttribute(name, nickname, rule, type, group == null ? "" : group);
+                string[] attributeInfo = attributesArray.Skip(i * 4).Take(4).ToArray();
+                Annotations.AnnotationArgumentType type = (Annotations.AnnotationArgumentType)attributesTypesArray[i * 2];
+                int annotCount = attributesTypesArray[i * 2 + 1];
+                attributes[i] = new RuleAttribute(attributeInfo[1], attributeInfo[2], attributeInfo[0], type, attributeInfo[3] == null ? "" : attributeInfo[3]);
 
-                // TODO: Add annotations
-                //List<Annotations.Base> annotations = GetAnnotations(i);
-                //attributes[i].mAnnotations.AddRange(annotations);
+                List<Annotations.Base> annotations = new List<Annotations.Base>();
+
+                for(int j = 0; j < annotCount; ++j)
+                {
+                    Annotations.AttributeAnnotation annotType = (Annotations.AttributeAnnotation)baseAnnotationsArray[baseAnnotationOffset];
+                    switch(annotType)
+                    {
+                        case Annotations.AttributeAnnotation.A_COLOR:
+                            annotations.Add(new Annotations.Color());
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_FILE:
+                            annotations.Add(new Annotations.File());
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_DIR:
+                            annotations.Add(new Annotations.Directory());
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_RANGE:
+                            double[] range = doubleAnnotationsArray.Skip(doubleAnnotationOffset).Take(3).ToArray();
+                            annotations.Add(new Annotations.Range(range[0], range[1], range[2]));
+                            doubleAnnotationOffset += 3;
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_ENUM:
+                            Annotations.EnumAnnotationType enumType = (Annotations.EnumAnnotationType)baseAnnotationsArray[baseAnnotationOffset + 1];
+                            switch (enumType)
+                            {
+                                case Annotations.EnumAnnotationType.ENUM_BOOL:
+                                    bool[] items = { true, false };
+                                    annotations.Add(new Annotations.Enum<bool>(items, enumType, true));
+                                    baseAnnotationOffset += 2;
+                                    break;
+                                case Annotations.EnumAnnotationType.ENUM_DOUBLE: {
+                                    int enumCount = baseAnnotationsArray[baseAnnotationOffset + 2];
+                                    double[] enumItems = doubleAnnotationsArray.Skip(doubleAnnotationOffset).Take(enumCount).ToArray();
+                                    annotations.Add(new Annotations.Enum<double>(enumItems, enumType, true));
+                                    baseAnnotationOffset += 3;
+                                    doubleAnnotationOffset += enumCount;
+                                    break;
+                                }    
+                                case Annotations.EnumAnnotationType.ENUM_STRING: {
+                                    int enumCount = baseAnnotationsArray[baseAnnotationOffset + 2];
+                                    string[] enumItems = stringAnnotationsArray.Skip(stringAnnotationOffset).Take(enumCount).ToArray();
+                                    annotations.Add(new Annotations.Enum<string>(enumItems, enumType, true));
+                                    baseAnnotationOffset += 3;
+                                    stringAnnotationOffset += enumCount;
+                                    break;
+                                }
+                                    
+                            }
+                            break;
+                        default:
+                            // Unknown annotation type
+                            baseAnnotationOffset++;
+                            break;
+                    }
+                }
+
+                attributes[i].mAnnotations.AddRange(annotations);
             }
 
             attributesBuffer.Dispose();
             attributesTypes.Dispose();
+            baseAnnotations.Dispose();
+            doubleAnnotations.Dispose();
+            stringAnnotations.Dispose();
             
             return attributes;
         }
@@ -454,115 +503,6 @@ namespace PumaGrasshopper
             }
 
             return version;
-        }
-
-        public static List<Annotations.Base> GetAnnotations(int ruleIdx)
-        {
-            int[] intArray = null;
-            using(var array = new SimpleArrayInt())
-            {
-                var pArray = array.NonConstPointer();
-
-                PRTWrapper.GetAnnotationTypes(ruleIdx, pArray);
-
-                intArray = array.ToArray();
-            }
-
-            var annots = new List<Annotations.Base>();
-
-            for(int enumIdx = 0; enumIdx < intArray.Length; ++enumIdx)
-            {
-                Annotations.AttributeAnnotation type = (Annotations.AttributeAnnotation)intArray[enumIdx];
-                switch (type)
-                {
-                    case Annotations.AttributeAnnotation.A_COLOR:
-                        annots.Add(new Annotations.Color());
-                        break;
-                    case Annotations.AttributeAnnotation.A_ENUM:
-                        Annotations.EnumAnnotationType enumType = Annotations.EnumAnnotationType.ENUM_DOUBLE;
-                        bool status = GetEnumType(ruleIdx, enumIdx, ref enumType);
-                        if (!status) break;
-
-                        switch (enumType)
-                        {
-                            case Annotations.EnumAnnotationType.ENUM_BOOL:
-                                bool[] boolArray = { true, false };
-                                annots.Add(new Annotations.Enum<bool>(boolArray, enumType, true));
-                                break;
-                            case Annotations.EnumAnnotationType.ENUM_DOUBLE:
-                                annots.Add(GetAnnotationEnumDouble(ruleIdx, enumIdx));
-                                break;
-                            case Annotations.EnumAnnotationType.ENUM_STRING:
-                                annots.Add(GetAnnotationEnumString(ruleIdx, enumIdx));
-                                break;
-                            default:
-                                break;
-                        }
-                        
-                        break;
-                    case Annotations.AttributeAnnotation.A_RANGE:
-                        annots.Add(GetAnnotationRange(ruleIdx, enumIdx));
-                        break;
-                    case Annotations.AttributeAnnotation.A_DIR:
-                        annots.Add(new Annotations.Directory());
-                        break;
-                    case Annotations.AttributeAnnotation.A_FILE:
-                        annots.Add(new Annotations.File());
-                        break;
-                    default:
-                        continue;
-                }
-            }
-
-            return annots;
-        }
-
-        public static Annotations.Enum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
-        {
-            double[] enumArray = null;
-            bool restricted = true;
-            using (var array = new SimpleArrayDouble())
-            {
-                var pArray = array.NonConstPointer();
-                
-                bool status = GetAnnotationEnumDouble(ruleIdx, enumIdx, pArray, ref restricted);
-                if (!status) return null;
-
-                enumArray = array.ToArray();
-            }
-
-            return new Annotations.Enum<double>(enumArray, Annotations.EnumAnnotationType.ENUM_DOUBLE, restricted);
-        }
-
-        public static Annotations.Enum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
-        {
-            string[] enumArray = null;
-            bool restricted = true;
-            using (var array = new ClassArrayString())
-            {
-                var pArray = array.NonConstPointer();
-                bool status = GetAnnotationEnumString(ruleIdx, enumIdx, pArray, ref restricted);
-                if (!status) return null;
-
-                enumArray = array.ToArray();
-            }
-
-            return new Annotations.Enum<string>(enumArray, Annotations.EnumAnnotationType.ENUM_STRING, restricted);
-        }
-
-        public static Annotations.Range GetAnnotationRange(int ruleIdx, int enumIdx)
-        {
-            double min = 0;
-            double max = 0;
-            double stepsize = 0;
-            bool restricted = true;
-
-            bool status = GetAnnotationRange(ruleIdx, enumIdx, ref min, ref max, ref stepsize, ref restricted);
-            if (status)
-            {
-                return new Annotations.Range(min, max, stepsize, restricted);
-            }
-            return null;
         }
 
         public static List<bool> GetDefaultValuesBoolean(string key)

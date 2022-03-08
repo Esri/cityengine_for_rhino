@@ -247,31 +247,9 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 	return !models.empty();
 }
 
-RHINOPRT_API int GetRuleAttributesCount() {
-	return RhinoPRT::get().GetRuleAttributeCount();
-}
-
-RHINOPRT_API bool GetRuleAttribute(int attrIdx, ON_wString* pRule, ON_wString* pName, ON_wString* pNickname,
-                                   prt::AnnotationArgumentType* type, ON_wString* pGroup) {
-
-	const RuleAttributes& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
-
-	if (attrIdx >= ruleAttributes.size())
-		return false;
-
-	const RuleAttributeUPtr& ruleAttr = ruleAttributes[attrIdx];
-	pcu::appendToRhinoString(*pRule, ruleAttr->mRuleFile);
-	pcu::appendToRhinoString(*pName, ruleAttr->mFullName);
-	pcu::appendToRhinoString(*pNickname, ruleAttr->mNickname);
-	*type = ruleAttr->mType;
-
-	if (ruleAttr->groups.size() > 0)
-		*pGroup += ON_wString(ruleAttr->groups.front().c_str());
-
-	return true;
-}
-
-RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wString>* pAttributesBuffer, ON_SimpleArray<int>* pAttributesTypes) {
+RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wString>* pAttributesBuffer, 
+	ON_SimpleArray<int>* pAttributesTypes, ON_SimpleArray<int>* pBaseAnnotations, ON_SimpleArray<double>* pDoubleAnnotations,
+	ON_ClassArray<ON_wString>* pStringAnnotations) {
 
 	RuleAttributes ruleAttributes = RhinoPRT::get().GetRuleAttributes(rpk_path);
 
@@ -285,6 +263,50 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 			pAttributesBuffer->Append(ON_wString(L""));
 
 		pAttributesTypes->Append(attribute->mType);
+		pAttributesTypes->Append(attribute->mAnnotations.size());
+
+		for (const auto& annot : attribute->mAnnotations) {
+			pBaseAnnotations->Append((int)annot->getType());
+			
+
+			switch (annot->getType()) { 
+				case AttributeAnnotation::RANGE:
+					RangeAttributes range = dynamic_cast<AnnotationRange*>(annot.get())->getAnnotArguments();
+					pDoubleAnnotations->Append(range.mMin);
+					pDoubleAnnotations->Append(range.mMax);
+					pDoubleAnnotations->Append(range.mStepSize);
+					break;
+				case AttributeAnnotation::ENUM:
+					pBaseAnnotations->Append((int)annot->getEnumType());
+
+					switch (annot->getEnumType()) {
+						case EnumAnnotationType::DOUBLE: {
+
+							const std::vector<double> annotEnum =
+							        dynamic_cast<AnnotationEnum<double>*>(annot.get())->getAnnotArguments();
+							pBaseAnnotations->Append(annotEnum.size());
+							std::for_each(annotEnum.begin(), annotEnum.end(),
+							              [pDoubleAnnotations](double value) { pDoubleAnnotations->Append(value); });
+							break;	
+						}
+						case EnumAnnotationType::STRING: {
+
+							const std::vector<std::wstring> annotEnum =
+							        dynamic_cast<AnnotationEnum<std::wstring>*>(annot.get())->getAnnotArguments();
+							pBaseAnnotations->Append(annotEnum.size());
+							std::for_each(annotEnum.begin(), annotEnum.end(), [pStringAnnotations](std::wstring value) {
+								pStringAnnotations->Append(ON_wString(value.c_str()));
+							});
+							break;
+						}
+						default:
+							break;
+					}
+					break;
+				default:
+					break;
+			}
+		}
 	}
 
 	return static_cast<int>(ruleAttributes.size());
@@ -310,93 +332,6 @@ RHINOPRT_API void GetCGAErrorOutput(int initialShapeIndex, ON_ClassArray<ON_wStr
 	const std::vector<std::wstring>& errorOutput = models[initialShapeIndex]->getErrorOutput();
 	for (const std::wstring& item : errorOutput)
 		pErrorOutput->Append(ON_wString(item.c_str()));
-}
-
-RHINOPRT_API void GetAnnotationTypes(int ruleIdx, ON_SimpleArray<AttributeAnnotation>* pAnnotTypeArray) {
-	auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
-	if (ruleIdx < ruleAttributes.size()) {
-		const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
-		std::for_each(attrib->mAnnotations.begin(), attrib->mAnnotations.end(),
-		              [pAnnotTypeArray](const AnnotationUPtr& p) { pAnnotTypeArray->Append(p->getType()); });
-	}
-}
-
-RHINOPRT_API bool GetEnumType(int ruleIdx, int enumIdx, EnumAnnotationType* type) {
-	auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
-	if (ruleIdx < ruleAttributes.size()) {
-		const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
-		if (enumIdx < attrib->mAnnotations.size()) {
-			const AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
-			if (annot->getType() == AttributeAnnotation::ENUM) {
-				*type = annot->getEnumType();
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-RHINOPRT_API bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, ON_SimpleArray<double>* pArray, bool* restricted) {
-	const auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
-	if (ruleIdx < ruleAttributes.size()) {
-		const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
-		if (enumIdx < attrib->mAnnotations.size()) {
-			const AnnotationBase& annot = *attrib->mAnnotations[enumIdx];
-			if (annot.getType() == AttributeAnnotation::ENUM && annot.getEnumType() == EnumAnnotationType::DOUBLE) {
-				const AnnotationEnum<double>& annotEnum = static_cast<const AnnotationEnum<double>&>(annot);
-				for (const double& v : annotEnum.getAnnotArguments())
-					pArray->Append(v);
-				*restricted = annotEnum.isRestricted();
-
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-RHINOPRT_API bool GetAnnotationEnumString(int ruleIdx, int enumIdx, ON_ClassArray<ON_wString>* pArray,
-                                          bool* restricted) {
-	auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
-	if (ruleIdx < ruleAttributes.size()) {
-		const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
-		if (enumIdx < attrib->mAnnotations.size()) {
-			AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
-			if (annot->getType() == AttributeAnnotation::ENUM && annot->getEnumType() == EnumAnnotationType::STRING) {
-				*restricted = dynamic_cast<AnnotationEnum<std::wstring>*>(annot.get())->isRestricted();
-				std::vector<std::wstring> enumList =
-				        dynamic_cast<AnnotationEnum<std::wstring>*>(annot.get())->getAnnotArguments();
-
-				std::for_each(enumList.begin(), enumList.end(),
-				              [&pArray](std::wstring& v) { pArray->Append(ON_wString(v.c_str())); });
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-RHINOPRT_API bool GetAnnotationRange(int ruleIdx, int enumIdx, double* min, double* max, double* stepsize,
-                                     bool* restricted) {
-	auto& ruleAttributes = RhinoPRT::get().GetRuleAttributes();
-	if (ruleIdx < ruleAttributes.size()) {
-		const RuleAttributeUPtr& attrib = ruleAttributes[ruleIdx];
-		if (enumIdx < attrib->mAnnotations.size()) {
-			AnnotationUPtr& annot = attrib->mAnnotations[enumIdx];
-			if (annot->getType() == AttributeAnnotation::RANGE) {
-				RangeAttributes range = dynamic_cast<AnnotationRange*>(annot.get())->getAnnotArguments();
-				*min = range.mMin;
-				*max = range.mMax;
-				*stepsize = range.mStepSize;
-				*restricted = range.mRestricted;
-				return true;
-			}
-		}
-	}
-	return false;
 }
 
 RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate) {

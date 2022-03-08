@@ -48,9 +48,6 @@ public:
 
 	void updateEncoderOptions(bool emitMaterials);
 
-	const RuleAttributes& getRuleAttributes() const {
-		return mRuleAttributes;
-	}
 	const RuleAttributes getRuleAttributes(const std::wstring& rulePkg);
 
 	std::wstring getRuleFile();
@@ -72,14 +69,13 @@ public:
 	                               ON_SimpleArray<int>* pSizes);
 
 private:
-	RuleAttributes mRuleAttributes; // TODO remove
 
 	pcu::AttributeMapPtr mRhinoEncoderOptions;
 	pcu::AttributeMapPtr mCGAErrorOptions;
 	pcu::AttributeMapPtr mCGAPrintOptions;
 
 	// contains the rule attributes evaluated
-	pcu::AttributeMapPtrVector mDefaultValuesMap;
+	pcu::AttributeMapPtrVector mDefaultValuesMap; //TODO remove from state
 
 	bool createInitialShapes(pcu::ResolveMapSPtr& resolveMap,
 							 const std::vector<RawInitialShape>& rawInitialShapes,
