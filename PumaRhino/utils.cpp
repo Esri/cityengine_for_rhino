@@ -338,6 +338,38 @@ std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray) {
 	return pcu::split(stringArray, CE_ARRAY_DELIMITER);
 }
 
+const std::wstring toCeArray(const wchar_t* const* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray += std::wstring(values[i]) + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
+const std::wstring toCeArray(const bool* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray += std::wstring(values[i] ? L"true" : L"false") + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
+const std::wstring toCeArray(const double* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray +=  std::to_wstring(values[i]) + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
+const std::wstring toCeArray(const int* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray +=  std::to_wstring(values[i]) + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
 /**
  * Interop helpers
  */
@@ -434,5 +466,15 @@ void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* key
 		else
 			aBuilder->setString(key.c_str(), values->At(i)->Array());
 	}
+}
+
+void logAttributeTypeError(const std::wstring& key) {
+	LOG_ERR << "Impossible to get default value for rule attribute: " << key
+	        << " The expected type does not correspond to the actual type of this attribute.";
+}
+
+void logAttributeError(const std::wstring& key, prt::Status& status) {
+	LOG_ERR << "Impossible to get default value for rule attribute: " << key
+	        << " with error: " << prt::getStatusDescription(status);
 }
 } // namespace pcu

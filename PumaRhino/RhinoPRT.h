@@ -46,22 +46,16 @@ public:
 	void ShutdownRhinoPRT();
 	bool IsPRTInitialized();
 
-	int GetRuleAttributeCount();
-	const RuleAttributes& GetRuleAttributes();
 	const RuleAttributes GetRuleAttributes(const std::wstring& rulePkg);
+
+	const pcu::AttributeMapPtrVector getDefaultAttributes(const std::wstring& rpk_path,
+	                                                  std::vector<RawInitialShape>& rawInitialShapes);
 
 	std::vector<GeneratedModelPtr> GenerateGeometry(const std::wstring& rpk_path,
 	                                                std::vector<RawInitialShape>& rawInitialShapes,
 	                                                pcu::AttributeMapBuilderVector& aBuilders);
 
 	void setMaterialGeneration(bool emitMaterial);
-
-	bool getDefaultValuesBoolean(const std::wstring key, ON_SimpleArray<int>* pValues);
-	bool getDefaultValuesNumber(const std::wstring key, ON_SimpleArray<double>* pValues);
-	bool getDefaultValuesText(const std::wstring key, ON_ClassArray<ON_wString>* pTexts);
-	bool getDefaultValuesBooleanArray(const std::wstring key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes);
-	bool getDefaultValuesNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues, ON_SimpleArray<int>* pSizes);
-	bool getDefaultValuesTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts, ON_SimpleArray<int>* pSizes);
 
 private:
 	std::vector<RawInitialShape> mShapes;

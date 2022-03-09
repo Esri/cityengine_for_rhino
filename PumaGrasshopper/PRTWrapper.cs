@@ -78,6 +78,16 @@ namespace PumaGrasshopper
         public static extern int GetRuleAttributes(string rpk_path, [Out] IntPtr pAttributesBuffer, [Out] IntPtr pAttributesTypes, [Out] IntPtr pBaseAnnotations, [Out] IntPtr pDoubleAnnotations, [Out] IntPtr pStringAnnotations);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern bool GetDefaultAttributes(
+            string rpk_path, [In] IntPtr pMeshes, 
+            [Out] IntPtr pBoolStarts, [Out] IntPtr pBoolKeys, [Out] IntPtr pBoolVals, 
+            [Out] IntPtr pDoubleStarts, [Out] IntPtr pDoubleKeys, [Out] IntPtr pDoubleVals, 
+            [Out] IntPtr pStringStarts, [Out] IntPtr pStringKeys, [Out] IntPtr pStringVals,
+            [Out] IntPtr pBoolArrayStarts, [Out] IntPtr pBoolArrayKeys, [Out] IntPtr pBoolArrayVals,
+            [Out] IntPtr pDoubleArrayStarts, [Out] IntPtr pDoubleArrayKeys, [Out] IntPtr pDoubleArrayVals,
+            [Out] IntPtr pStringArrayStarts, [Out] IntPtr pStringArrayKeys, [Out] IntPtr pStringArrayVals);
+
+        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetCGAPrintOutput(int initialShapeIndex, [In, Out] IntPtr pPrintOutput);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
@@ -357,6 +367,58 @@ namespace PumaGrasshopper
             }
 
             return generationResult;
+        }
+
+        public static DefaultValuesMap[] GetDefaultValues(string rulePkg, List<Mesh> initialMeshes)
+        {
+            SimpleArrayMeshPointer initialMeshesArray = new SimpleArrayMeshPointer();
+            foreach (var mesh in initialMeshes)
+            {
+                initialMeshesArray.Add(mesh, true);
+            }
+
+            var stringWrapper = new InteropWrapperString();
+            var boolWrapper = new InteropWrapperBoolean();
+            var doubleWrapper = new InteropWrapperDouble();
+            var stringArrayWrapper = new InteropWrapperString();
+            var boolArrayWrapper = new InteropWrapperString();
+            var doubleArrayWrapper = new InteropWrapperString();
+
+
+            bool status = GetDefaultAttributes(rulePkg, initialMeshesArray.ConstPointer(), 
+                boolWrapper.StartsNonConstPtr(), boolWrapper.KeysNonConstPtr(), boolWrapper.ValuesNonConstPtr(),
+                doubleWrapper.StartsNonConstPtr(), doubleWrapper.KeysNonConstPtr(), doubleWrapper.ValuesNonConstPtr(),
+                stringWrapper.StartsNonConstPtr(), stringWrapper.KeysNonConstPtr(), stringWrapper.ValuesNonConstPtr(),
+                boolArrayWrapper.StartsNonConstPtr(), boolArrayWrapper.KeysNonConstPtr(), boolArrayWrapper.ValuesNonConstPtr(),
+                doubleArrayWrapper.StartsNonConstPtr(), doubleArrayWrapper.KeysNonConstPtr(), doubleArrayWrapper.ValuesNonConstPtr(),
+                stringArrayWrapper.StartsNonConstPtr(), stringArrayWrapper.KeysNonConstPtr(), stringArrayWrapper.ValuesNonConstPtr());
+
+            if (!status)
+            {
+                stringWrapper.Dispose();
+                boolWrapper.Dispose();
+                doubleWrapper.Dispose();
+                stringArrayWrapper.Dispose();
+                doubleArrayWrapper.Dispose();
+                boolArrayWrapper.Dispose();
+                return null;
+            }
+
+            var defaultValues = DefaultValuesMap.FromInteropWrappers(initialMeshes.Count, ref boolWrapper, ref stringWrapper, ref doubleWrapper, ref boolArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
+            
+            stringWrapper.Dispose();
+            boolWrapper.Dispose();
+            doubleWrapper.Dispose();
+            stringArrayWrapper.Dispose();
+            doubleArrayWrapper.Dispose();
+            boolArrayWrapper.Dispose();
+
+            return defaultValues;
+        }
+
+
+        public static void DecodeDefaultValues<T>(int[] starts, string[] keys, T[] values) {
+            
         }
 
         public static List<String> GetCGAPrintOutput(int initialShapeIndex)

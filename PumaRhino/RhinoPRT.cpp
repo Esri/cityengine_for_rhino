@@ -55,6 +55,15 @@ const RuleAttributes RhinoPRTAPI::GetRuleAttributes(const std::wstring& rulePkg)
 	return mModelGenerator->getRuleAttributes(rulePkg);
 }
 
+const pcu::AttributeMapPtrVector RhinoPRTAPI::getDefaultAttributes(const std::wstring& rpk_path, 
+																   std::vector<RawInitialShape>& rawInitialShapes) {
+	if (!mModelGenerator)
+		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
+
+	pcu::ShapeAttributes attributes = mModelGenerator->getShapeAttributes(rpk_path);
+	return mModelGenerator->evalDefaultAttributes(rpk_path, rawInitialShapes, attributes);
+}
+
 std::vector<GeneratedModelPtr> RhinoPRTAPI::GenerateGeometry(const std::wstring& rpk_path,
                                                              std::vector<RawInitialShape>& rawInitialShapes,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
@@ -62,40 +71,14 @@ std::vector<GeneratedModelPtr> RhinoPRTAPI::GenerateGeometry(const std::wstring&
 		mModelGenerator = std::unique_ptr<ModelGenerator>(new ModelGenerator());
 
 	//Build ShapeAttributes
-	pcu::ShapeAttributes attribute = mModelGenerator->getShapeAttributes(rpk_path);
+	pcu::ShapeAttributes attributes = mModelGenerator->getShapeAttributes(rpk_path);
 	
-	std::vector<GeneratedModelPtr> generatedModels = mModelGenerator->generateModel(rpk_path, rawInitialShapes, attribute, aBuilders);
+	std::vector<GeneratedModelPtr> generatedModels = mModelGenerator->generateModel(rpk_path, rawInitialShapes, attributes, aBuilders);
 	assert(generatedModels.size() == rawInitialShapes.size());
 	return generatedModels;
 }
 
 void RhinoPRTAPI::setMaterialGeneration(bool emitMaterial) {
 	mModelGenerator->updateEncoderOptions(emitMaterial);
-}
-
-bool RhinoPRTAPI::getDefaultValuesBoolean(const std::wstring key, ON_SimpleArray<int>* pValues) {
-	return mModelGenerator->getDefaultValuesBoolean(key, pValues);
-}
-
-bool RhinoPRTAPI::getDefaultValuesNumber(const std::wstring key, ON_SimpleArray<double>* pValues) {
-	return mModelGenerator->getDefaultValuesNumber(key, pValues);
-}
-
-bool RhinoPRTAPI::getDefaultValuesText(const std::wstring key, ON_ClassArray<ON_wString>* pTexts) {
-	return mModelGenerator->getDefaultValuesText(key, pTexts);
-}
-
-bool RhinoPRTAPI::getDefaultValuesBooleanArray(const std::wstring key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes) {
-	return mModelGenerator->getDefaultValuesBooleanArray(key, pValues, pSizes);
-}
-
-bool RhinoPRTAPI::getDefaultValuesNumberArray(const std::wstring key, ON_SimpleArray<double>* pValues,
-                                              ON_SimpleArray<int>* pSizes) {
-	return mModelGenerator->getDefaultValuesNumberArray(key, pValues, pSizes);
-}
-
-bool RhinoPRTAPI::getDefaultValuesTextArray(const std::wstring key, ON_ClassArray<ON_wString>* pTexts,
-                                            ON_SimpleArray<int>* pSizes) {
-	return mModelGenerator->getDefaultValuesTextArray(key, pTexts, pSizes);
 }
 } // namespace RhinoPRT

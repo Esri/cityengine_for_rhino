@@ -5,11 +5,17 @@ using System.Linq;
 
 namespace PumaGrasshopper
 {
-    class AttributeInterop
+    public class AttributeInterop
     {
         public int Count;
         protected SimpleArrayInt Starts;
         protected ClassArrayString Keys;
+
+        public AttributeInterop()
+        {
+            Starts = new SimpleArrayInt();
+            Count = 0;
+        }
 
         public AttributeInterop(int[] starts, int count)
         {
@@ -25,11 +31,23 @@ namespace PumaGrasshopper
 
         public IntPtr StartsPtr() => Starts.ConstPointer();
         public IntPtr KeysPtr() => Keys.ConstPointer();
+
+        public IntPtr StartsNonConstPtr() => Starts.NonConstPointer();
+        public IntPtr KeysNonConstPtr() => Keys.NonConstPointer();
+
+        public int[] StartsToArray() => Starts.ToArray();
+        public string[] KeysToArray() => Keys.ToArray();
     }
 
-    class InteropWrapperString : AttributeInterop
+    public class InteropWrapperString : AttributeInterop
     {
         private ClassArrayString Values;
+
+        public InteropWrapperString(): base()
+        {
+            Keys = new ClassArrayString();
+            Values = new ClassArrayString();
+        }
 
         public InteropWrapperString(int[] starts, ref List<string> keys, ref List<string> values) : base(starts, keys.Count)
         {
@@ -51,11 +69,20 @@ namespace PumaGrasshopper
         }
 
         public IntPtr ValuesPtr() => Values.ConstPointer();
+        public IntPtr ValuesNonConstPtr() => Values.NonConstPointer();
+
+        public string[] ValuesToArray() => Values.ToArray();
     }
 
-    class InteropWrapperDouble: AttributeInterop
+    public class InteropWrapperDouble: AttributeInterop
     {
         private SimpleArrayDouble Values;
+
+        public InteropWrapperDouble(): base()
+        {
+            Keys = new ClassArrayString();
+            Values = new SimpleArrayDouble();
+        }
 
         public InteropWrapperDouble(int[] starts, ref List<string> keys, ref List<double> values): base(starts, keys.Count)
         {
@@ -75,11 +102,20 @@ namespace PumaGrasshopper
         }
 
         public IntPtr ValuesPtr() => Values.ConstPointer();
+        public IntPtr ValuesNonConstPtr() => Values.NonConstPointer();
+
+        public double[] ValuesToArray() => Values.ToArray();
     }
 
-    class InteropWrapperBoolean: AttributeInterop
+    public class InteropWrapperBoolean: AttributeInterop
     {
         private SimpleArrayInt Values;
+
+        public InteropWrapperBoolean(): base()
+        {
+            Keys = new ClassArrayString();
+            Values = new SimpleArrayInt();
+        }
 
         public InteropWrapperBoolean(int[] starts, ref List<string> keys, ref List<bool> values): base(starts, keys.Count)
         {
@@ -99,5 +135,8 @@ namespace PumaGrasshopper
         }
 
         public IntPtr ValuesPtr() => Values.ConstPointer();
+        public IntPtr ValuesNonConstPtr() => Values.NonConstPointer();
+
+        public bool[] ValuesToArray() => Array.ConvertAll(Values.ToArray(), value => Convert.ToBoolean(value));
     }
 }

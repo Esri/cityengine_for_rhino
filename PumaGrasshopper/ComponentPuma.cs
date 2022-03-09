@@ -126,6 +126,8 @@ namespace PumaGrasshopper
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
 
+        DefaultValuesMap[] mDefaultValues;
+
         bool mDoGenerateMaterials;
 
         public class RulePackage
@@ -215,6 +217,7 @@ namespace PumaGrasshopper
             {
                 mCurrentRpk = rpk;
                 mRuleAttributes = PRTWrapper.GetRuleAttributes(rpk.path);
+                mDefaultValues = PRTWrapper.GetDefaultValues(rpk.path, inputMeshes);
             }
 
             RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
@@ -585,7 +588,7 @@ namespace PumaGrasshopper
                 if (form.SelectedIndex >= 0 && form.SelectedIndex < mRuleAttributes.Length)
                 {
                     var attr = eligibleAttributes[form.SelectedIndex];
-                    return attr.CreateInputParameter();
+                    return attr.CreateInputParameter(mDefaultValues);
                 }
             }
 

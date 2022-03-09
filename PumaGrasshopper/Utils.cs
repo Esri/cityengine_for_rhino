@@ -125,6 +125,10 @@ namespace PumaGrasshopper
             return values.Aggregate("", (acc, x) => acc + x.ToString()) + ":";
         }
 
+        public static string[] StringFromCeArray(string values) => values.Split(':');
+        public static bool[] BoolFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
+        public static double[] DoubleFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
+
         public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
         {
             GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();

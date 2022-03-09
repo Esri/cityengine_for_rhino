@@ -144,6 +144,10 @@ std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std:
 std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim);
 
 std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray);
+const std::wstring toCeArray(const wchar_t* const* values, size_t count);
+const std::wstring toCeArray(const bool* values, size_t count);
+const std::wstring toCeArray(const double* values, size_t count);
+const std::wstring toCeArray(const int* values, size_t count);
 
 /**
  * Interop helpers
@@ -186,5 +190,9 @@ struct PathRemover {
 };
 
 using ScopedPath = std::unique_ptr<std::filesystem::path, PathRemover>;
+
+void logAttributeTypeError(const std::wstring& key);
+
+void logAttributeError(const std::wstring& key, prt::Status& status);
 
 } // namespace pcu

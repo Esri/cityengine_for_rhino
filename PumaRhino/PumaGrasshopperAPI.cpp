@@ -312,6 +312,135 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 	return static_cast<int>(ruleAttributes.size());
 }
 
+RHINOPRT_API bool GetDefaultAttributes(	const wchar_t* rpk_path, ON_SimpleArray<const ON_Mesh*>* pMesh,
+										ON_SimpleArray<int>* pBoolStarts, ON_ClassArray<ON_wString>* pBoolKeys, ON_SimpleArray<int>* pBoolVals,
+										ON_SimpleArray<int>* pDoubleStarts, ON_ClassArray<ON_wString>* pDoubleKeys, ON_SimpleArray<double>* pDoubleVals,
+										ON_SimpleArray<int>* pStringStarts, ON_ClassArray<ON_wString>* pStringKeys, ON_ClassArray<ON_wString>* pStringVals,
+										ON_SimpleArray<int>* pBoolArrayStarts, ON_ClassArray<ON_wString>* pBoolArrayKeys, ON_ClassArray<ON_wString>* pBoolArrayVals,
+										ON_SimpleArray<int>* pDoubleArrayStarts, ON_ClassArray<ON_wString>* pDoubleArrayKeys, ON_ClassArray<ON_wString>* pDoubleArrayVals,
+										ON_SimpleArray<int>* pStringArrayStarts, ON_ClassArray<ON_wString>* pStringArrayKeys, ON_ClassArray<ON_wString>* pStringArrayVals) {
+	if (rpk_path == nullptr || pMesh == nullptr || pMesh->Count() == 0)
+		return false;
+
+	std::vector<RawInitialShape> rawInitialShapes;
+	rawInitialShapes.reserve(pMesh->Count());
+	for (int i = 0; i < pMesh->Count(); ++i) {
+		rawInitialShapes.emplace_back(**pMesh->At(i));
+	}
+
+	const pcu::AttributeMapPtrVector defaultValues = RhinoPRT::get().getDefaultAttributes(rpk_path, rawInitialShapes);
+
+	if (defaultValues.empty())
+		return false;
+
+	for (const auto& shapeDefaultValues : defaultValues) {
+		// Group attributes by type: bool -> double/int -> string -> boolArray -> double/int array -> stringArray
+		size_t keysCount(0);
+		prt::Status status = prt::Status::STATUS_UNSPECIFIED_ERROR;
+		const auto keys = shapeDefaultValues->getKeys(&keysCount, &status);
+		if (status != prt::Status::STATUS_OK)
+			return false;
+
+		// Set starting indices for current shape
+		pBoolStarts->Append(pBoolKeys->Count());
+		pDoubleStarts->Append(pDoubleKeys->Count());
+		pStringStarts->Append(pStringKeys->Count());
+		pBoolArrayStarts->Append(pBoolArrayKeys->Count());
+		pDoubleArrayStarts->Append(pDoubleArrayKeys->Count());
+		pStringArrayStarts->Append(pStringArrayKeys->Count());
+
+		for (size_t keyIdx = 0; keyIdx < keysCount; keyIdx++) {
+			const wchar_t* key = keys[keyIdx];
+			const prt::AttributeMap::PrimitiveType type = shapeDefaultValues->getType(key, &status);
+			if (status != prt::Status::STATUS_OK) {
+				pcu::logAttributeTypeError(key);
+				return false;
+			}
+
+			switch (type) { 
+			case prt::AttributeMap::PrimitiveType::PT_BOOL: {
+				const bool value = shapeDefaultValues->getBool(key, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pBoolKeys->Append(key);
+					pBoolVals->Append(value);
+				}
+				break;
+			}
+			case prt::AttributeMap::PrimitiveType::PT_FLOAT: {
+				const double value = shapeDefaultValues->getFloat(key, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pDoubleKeys->Append(key);
+					pDoubleVals->Append(value);
+				}
+				break;
+			}
+			case prt::AttributeMap::PrimitiveType::PT_INT: {
+				const int value = shapeDefaultValues->getInt(key, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pDoubleKeys->Append(key);
+					pDoubleVals->Append(value);
+				}
+				break;
+			}
+			case prt::AttributeMap::PrimitiveType::PT_STRING: {
+				const wchar_t* const value = shapeDefaultValues->getString(key, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pStringKeys->Append(key);
+					pStringVals->Append(value);
+				}
+				break;
+			}
+			case prt::AttributeMap::PrimitiveType::PT_BOOL_ARRAY: {
+				size_t count(0);
+				const bool* const value = shapeDefaultValues->getBoolArray(key, &count, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pBoolArrayKeys->Append(key);
+					pBoolArrayVals->Append(pcu::toCeArray(value, count).c_str());
+				}
+				break;
+			}	
+			case prt::AttributeMap::PrimitiveType::PT_FLOAT_ARRAY: {
+				size_t count(0);
+				const double* const value = shapeDefaultValues->getFloatArray(key, &count, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pDoubleArrayKeys->Append(key);
+					pDoubleArrayVals->Append(pcu::toCeArray(value, count).c_str());
+				}
+				break;
+			}
+			case prt::AttributeMap::PrimitiveType::PT_INT_ARRAY: {
+				size_t count(0);
+				const int* const value = shapeDefaultValues->getIntArray(key, &count, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pDoubleArrayKeys->Append(key);
+					pDoubleArrayVals->Append(pcu::toCeArray(value, count).c_str());
+				}
+				break;
+			}
+			case prt::AttributeMap::PrimitiveType::PT_STRING_ARRAY: {
+				size_t count(0);
+				const wchar_t* const* value = shapeDefaultValues->getStringArray(key, &count, &status);
+				if (status == prt::Status::STATUS_OK) {
+					pStringArrayKeys->Append(key);
+					pStringArrayVals->Append(pcu::toCeArray(value, count).c_str());
+				}
+				break;
+			}
+			default:
+				// Ignore unknown types
+				break;
+			}
+
+			if (status != prt::Status::STATUS_OK) {
+				pcu::logAttributeError(key, status);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
 	const std::vector<GeneratedModelPtr> models; // = RhinoPRT::get().getGenModels();
 
@@ -336,29 +465,5 @@ RHINOPRT_API void GetCGAErrorOutput(int initialShapeIndex, ON_ClassArray<ON_wStr
 
 RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate) {
 	RhinoPRT::get().setMaterialGeneration(doGenerate);
-}
-
-RHINOPRT_API bool GetDefaultValuesBoolean(const wchar_t* key, ON_SimpleArray<int>* pValue) {
-	return RhinoPRT::get().getDefaultValuesBoolean(key, pValue);
-}
-
-RHINOPRT_API bool GetDefaultValuesNumber(const wchar_t* key, ON_SimpleArray<double>* pValue) {
-	return RhinoPRT::get().getDefaultValuesNumber(key, pValue);
-}
-
-RHINOPRT_API bool GetDefaultValuesText(const wchar_t* key, ON_ClassArray<ON_wString>* pTexts) {
-	return RhinoPRT::get().getDefaultValuesText(key, pTexts);
-}
-
-RHINOPRT_API bool GetDefaultValuesBooleanArray(const wchar_t* key, ON_SimpleArray<int>* pValues, ON_SimpleArray<int>* pSizes) {
-	return RhinoPRT::get().getDefaultValuesBooleanArray(key, pValues, pSizes);
-}
-
-RHINOPRT_API bool GetDefaultValuesNumberArray(const wchar_t* key, ON_SimpleArray<double>* pValues, ON_SimpleArray<int>* pSizes) {
-	return RhinoPRT::get().getDefaultValuesNumberArray(key, pValues, pSizes);
-}
-
-RHINOPRT_API bool GetDefaultValuesTextArray(const wchar_t* key, ON_ClassArray<ON_wString>* pTexts, ON_SimpleArray<int>* pSizes) {
-	return RhinoPRT::get().getDefaultValuesTextArray(key, pTexts, pSizes);
 }
 }

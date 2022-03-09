@@ -262,7 +262,7 @@ pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rule
 	return pcu::ShapeAttributes(std::move(ruleFileInfo), ruleFile, startRule);
 }
 
-bool ModelGenerator::evalDefaultAttributes(const std::wstring& rulePkg,
+pcu::AttributeMapPtrVector ModelGenerator::evalDefaultAttributes(const std::wstring& rulePkg,
 										   const std::vector<RawInitialShape>& rawInitialShapes,
                                            pcu::ShapeAttributes& shapeAttributes) {
 	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
@@ -287,7 +287,7 @@ bool ModelGenerator::evalDefaultAttributes(const std::wstring& rulePkg,
 	std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
 	if (!createInitialShapes(resolveMap, rawInitialShapes, shapeAttributes, attribMapBuilders, initialShapes,
 	                         initialShapeAttributes))
-		return false;
+		return {};
 
 	// run generate
 	AttrEvalCallbacks aec(attribMapBuilders, shapeAttributes.ruleFileInfo); // TODO: What if rule file info is not the same for all shapes?
@@ -297,12 +297,12 @@ bool ModelGenerator::evalDefaultAttributes(const std::wstring& rulePkg,
 	if (status != prt::STATUS_OK) {
 		LOG_ERR << "Failed to get default rule attributes: '" << prt::getStatusDescription(status) << "' (" << status
 		        << ")";
-		return false;
+		return {};
 	}
 
-	mDefaultValuesMap = createAttributeMaps(attribMapBuilders);
-	// TODO: return the default values back to Puma component.
-	return true;
+	pcu::AttributeMapPtrVector defaultValuesMap = createAttributeMaps(attribMapBuilders);
+	
+	return defaultValuesMap;
 }
 
 bool ModelGenerator::createInitialShapes(
@@ -415,215 +415,4 @@ void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBu
 		    convertShapeAttr->getType(L"shapeName") == prt::AttributeMap::PT_STRING)
 			shapeName = convertShapeAttr->getString(L"shapeName");
 	}
-}
-
-bool ModelGenerator::getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-			case prt::AttributeMap::PrimitiveType::PT_BOOL: {
-				prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-				bool value = am->getBool(key.c_str(), &status);
-				if (status != prt::STATUS_OK) {
-					logAttributeError(key, status);
-					return false;
-				}
-
-				pValues->Append(value);
-				break;
-			}
-			default:
-				logAttributeTypeError(key);
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			prt::Status status = prt::STATUS_OK;
-
-			switch (am->getType(key.c_str())) {
-			case prt::AttributeMap::PrimitiveType::PT_FLOAT: {
-				double value = am->getFloat(key.c_str(), &status);
-				if (status == prt::STATUS_OK)
-					pValues->Append(value);
-				break;
-			}
-			case prt::AttributeMap::PrimitiveType::PT_INT: {
-				int32_t value = am->getInt(key.c_str(), &status);
-				if (status == prt::STATUS_OK)
-					pValues->Append(value);
-				break;
-			}
-			default:
-				logAttributeTypeError(key);
-				return false;
-			}
-
-			if (status != prt::STATUS_OK) {
-				logAttributeError(key, status);
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesText(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-				case prt::AttributeMap::PrimitiveType::PT_STRING: {
-
-					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-					std::wstring valueStr(am->getString(key.c_str(), &status));
-
-					if (status != prt::STATUS_OK) {
-						logAttributeError(key, status);
-						return false;
-					}
-
-					ON_wString onString;
-					pcu::appendToRhinoString(onString, valueStr);
-					pTexts->Append(onString);
-					break;
-				}
-				default:
-					logAttributeTypeError(key);
-					return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<int>* pValues,
-                                                  ON_SimpleArray<int>* pSizes) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-				case prt::AttributeMap::PrimitiveType::PT_BOOL_ARRAY: {
-					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-					size_t count = 0;
-					const bool* pBoolArray = am->getBoolArray(key.c_str(), &count, &status);
-					if (status != prt::STATUS_OK) {
-						logAttributeError(key, status);
-						return false;
-					}
-
-					for (size_t i = 0; i < count; ++i) {
-						pValues->Append(pBoolArray[i]);
-					}
-					pSizes->Append(static_cast<int>(count));
-					break;
-				}
-				default:
-					logAttributeTypeError(key);
-					return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesNumberArray(const std::wstring& key, ON_SimpleArray<double>* pValues,
-                                                ON_SimpleArray<int>* pSizes) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-			size_t count = 0;
-
-			switch (am->getType(key.c_str())) {
-			case prt::AttributeMap::PrimitiveType::PT_FLOAT_ARRAY: {
-				const double* pDoubleArray = am->getFloatArray(key.c_str(), &count, &status);
-				if (status == prt::STATUS_OK) {
-					for (int i = 0; i < count; ++i) {
-						pValues->Append(pDoubleArray[i]);
-					}
-
-					pSizes->Append(static_cast<int>(count));
-				}
-				break;
-			}
-			case prt::AttributeMap::PrimitiveType::PT_INT_ARRAY: {
-				const int32_t* pIntArray = am->getIntArray(key.c_str(), &count, &status);
-				if (status == prt::STATUS_OK) {
-					for (size_t i = 0; i < count; ++i) {
-						pValues->Append(pIntArray[i]);
-					}
-
-					pSizes->Append(static_cast<int>(count));
-				}
-				break;
-			}
-			default:
-				logAttributeTypeError(key);
-				return false;
-			}
-
-			if(status != prt::STATUS_OK) {
-				logAttributeError(key, status);
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesTextArray(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts,
-                                               ON_SimpleArray<int>* pSizes) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-				case prt::AttributeMap::PrimitiveType::PT_STRING_ARRAY: {
-					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-					size_t count = 0;
-					const wchar_t* const* pStringArray = am->getStringArray(key.c_str(), &count, &status);
-					if (status != prt::STATUS_OK) {
-						logAttributeError(key, status);
-						return false;
-					}
-
-					for (size_t i = 0; i < count; ++i) {
-						pTexts->Append(ON_wString(pStringArray[i]));
-					}
-
-					pSizes->Append(static_cast<int>(count));
-					break;
-				}
-				default:
-					logAttributeTypeError(key);
-					return false;
-			}
-		}
-	}
-
-	return true;
 }

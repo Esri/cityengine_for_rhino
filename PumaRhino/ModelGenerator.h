@@ -41,7 +41,8 @@ public:
 	                                             const pcu::ShapeAttributes& shapeAttributes,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
-	bool evalDefaultAttributes(const std::wstring& rulePkg, const std::vector<RawInitialShape>& rawInitialShapes,
+	pcu::AttributeMapPtrVector evalDefaultAttributes(const std::wstring& rulePkg,
+	                                                 const std::vector<RawInitialShape>& rawInitialShapes,
 	                           pcu::ShapeAttributes& shapeAttributes);
 
 	pcu::ShapeAttributes getShapeAttributes(const std::wstring& rulePkg);
@@ -50,32 +51,11 @@ public:
 
 	const RuleAttributes getRuleAttributes(const std::wstring& rulePkg);
 
-	std::wstring getRuleFile();
-	std::wstring getStartingRule();
-	std::wstring getDefaultShapeName();
-
-	const pcu::AttributeMapPtrVector& getDefaultValueAttributeMap() {
-		return mDefaultValuesMap;
-	};
-
-	bool getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues);
-	bool getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues);
-	bool getDefaultValuesText(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts);
-	bool getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<int>* pValues,
-	                                  ON_SimpleArray<int>* pSizes);
-	bool getDefaultValuesNumberArray(const std::wstring& key, ON_SimpleArray<double>* pValues,
-	                                 ON_SimpleArray<int>* pSizes);
-	bool getDefaultValuesTextArray(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts,
-	                               ON_SimpleArray<int>* pSizes);
-
 private:
 
 	pcu::AttributeMapPtr mRhinoEncoderOptions;
 	pcu::AttributeMapPtr mCGAErrorOptions;
 	pcu::AttributeMapPtr mCGAPrintOptions;
-
-	// contains the rule attributes evaluated
-	pcu::AttributeMapPtrVector mDefaultValuesMap; //TODO remove from state
 
 	bool createInitialShapes(pcu::ResolveMapSPtr& resolveMap,
 							 const std::vector<RawInitialShape>& rawInitialShapes,
