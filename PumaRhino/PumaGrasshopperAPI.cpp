@@ -260,7 +260,7 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 		if (attribute->groups.size() > 0)
 			pAttributesBuffer->Append(ON_wString(attribute->groups.front().c_str()));
 		else
-			pAttributesBuffer->Append(ON_wString(L""));
+			pAttributesBuffer->Append({});
 
 		pAttributesTypes->Append(attribute->mType);
 		pAttributesTypes->Append(attribute->mAnnotations.size());
