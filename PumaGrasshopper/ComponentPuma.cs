@@ -126,7 +126,7 @@ namespace PumaGrasshopper
         /// Stores the optional input parameters
         RuleAttribute[] mRuleAttributes;
 
-        DefaultValuesMap[] mDefaultValues;
+        AttributesValuesMap[] mDefaultValues;
 
         bool mDoGenerateMaterials;
 

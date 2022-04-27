@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PumaGrasshopper
 {
-    public class DefaultValuesMap
+    public class AttributesValuesMap
     {
         private Dictionary<string, bool> mDefaultBooleans;
         private Dictionary<string, string> mDefaultStrings;
@@ -17,7 +17,7 @@ namespace PumaGrasshopper
         private Dictionary<string, string[]> mDefaultStringArrays;
         private Dictionary<string, double[]> mDefaultDoubleArrays;
 
-        public DefaultValuesMap(string[] boolKeys, bool[] boolValues, string[] stringKeys, string[] stringValues,
+        public AttributesValuesMap(string[] boolKeys, bool[] boolValues, string[] stringKeys, string[] stringValues,
                                 string[] doubleKeys, double[] doubleValues, string[] boolArrayKeys, string[] boolArrayValues,
                                 string[] stringArrayKeys, string[] stringArrayValues, string[] doubleArrayKeys, string[] doubleArrayValues)
         {
@@ -89,7 +89,7 @@ namespace PumaGrasshopper
             return mDefaultDoubleArrays.TryGetValue(key, out values);
         }
 
-        public static DefaultValuesMap[] FromInteropWrappers(int shapeCount, ref InteropWrapperBoolean boolWrapper,
+        public static AttributesValuesMap[] FromInteropWrappers(int shapeCount, ref InteropWrapperBoolean boolWrapper,
                                                            ref InteropWrapperString stringWrapper,
                                                            ref InteropWrapperDouble doubleWrapper,
                                                            ref InteropWrapperString boolArrayWrapper,
@@ -115,7 +115,7 @@ namespace PumaGrasshopper
             string[] doubleArrayKeys = doubleArrayWrapper.KeysToArray();
             string[] doubleArrayValues = doubleArrayWrapper.ValuesToArray();
 
-            DefaultValuesMap[] defaultValues = new DefaultValuesMap[shapeCount];
+            AttributesValuesMap[] defaultValues = new AttributesValuesMap[shapeCount];
             for (int i = 0; i < shapeCount; ++i)
             {
                 int boolStart = boolStarts[i];
@@ -131,7 +131,7 @@ namespace PumaGrasshopper
                 int stringArrayCount = GetIntervalCount(i, shapeCount, stringArrayStarts, stringArrayKeys.Length);
                 int doubleArrayCount = GetIntervalCount(i, shapeCount, doubleArrayStarts, doubleArrayKeys.Length);
 
-                defaultValues[i] = new DefaultValuesMap(boolKeys.Skip(boolStart).Take(boolCount).ToArray(),
+                defaultValues[i] = new AttributesValuesMap(boolKeys.Skip(boolStart).Take(boolCount).ToArray(),
                     boolValues.Skip(boolStart).Take(boolCount).ToArray(),
                     stringKeys.Skip(stringStart).Take(stringCount).ToArray(), 
                     stringValues.Skip(stringStart).Take(stringCount).ToArray(),
@@ -152,7 +152,7 @@ namespace PumaGrasshopper
             return (currentIndex < shapeCount - 1 ? starts[currentIndex + 1] : itemCount) - starts[currentIndex];
         }
 
-        public static GH_Structure<GH_Boolean> GetDefaultBooleans(string key, DefaultValuesMap[] defaultValues, bool isArray)
+        public static GH_Structure<GH_Boolean> GetDefaultBooleans(string key, AttributesValuesMap[] defaultValues, bool isArray)
         {
             if (isArray)
             {
@@ -177,7 +177,7 @@ namespace PumaGrasshopper
             }
         }
 
-        public static GH_Structure<GH_String> GetDefaultStrings(string key, DefaultValuesMap[] defaultValues, bool isArray)
+        public static GH_Structure<GH_String> GetDefaultStrings(string key, AttributesValuesMap[] defaultValues, bool isArray)
         {
             if (isArray)
             {
@@ -202,7 +202,7 @@ namespace PumaGrasshopper
             }
         }
 
-        public static GH_Structure<GH_Number> GetDefaultDoubles(string key, DefaultValuesMap[] defaultValues, bool isArray)
+        public static GH_Structure<GH_Number> GetDefaultDoubles(string key, AttributesValuesMap[] defaultValues, bool isArray)
         {
             if (isArray)
             {
@@ -229,7 +229,7 @@ namespace PumaGrasshopper
             }
         }
 
-        public static GH_Structure<GH_Colour> GetDefaultColors(string key, DefaultValuesMap[] defaultValues)
+        public static GH_Structure<GH_Colour> GetDefaultColors(string key, AttributesValuesMap[] defaultValues)
         {
             List<string> values = new List<string>(defaultValues.Length);
             for (int i = 0; i < defaultValues.Length; ++i)

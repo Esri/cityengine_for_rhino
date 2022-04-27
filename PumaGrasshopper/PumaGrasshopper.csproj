@@ -58,7 +58,7 @@
   <ItemGroup>
     <Compile Include="Annotations.cs" />
     <Compile Include="AnnotationSerialization.cs" />
-    <Compile Include="DefaultValuesMap.cs" />
+    <Compile Include="AttributesValuesMap.cs" />
     <Compile Include="ComponentPuma.cs" />
     <Compile Include="ComponentLibraryInfo.cs" />
     <Compile Include="ComponentReportsDisplay.cs" />

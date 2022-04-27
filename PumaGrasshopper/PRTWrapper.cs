@@ -369,7 +369,7 @@ namespace PumaGrasshopper
             return generationResult;
         }
 
-        public static DefaultValuesMap[] GetDefaultValues(string rulePkg, List<Mesh> initialMeshes)
+        public static AttributesValuesMap[] GetDefaultValues(string rulePkg, List<Mesh> initialMeshes)
         {
             SimpleArrayMeshPointer initialMeshesArray = new SimpleArrayMeshPointer();
             foreach (var mesh in initialMeshes)
@@ -404,7 +404,7 @@ namespace PumaGrasshopper
                 return null;
             }
 
-            var defaultValues = DefaultValuesMap.FromInteropWrappers(initialMeshes.Count, ref boolWrapper, ref stringWrapper, ref doubleWrapper, ref boolArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
+            var defaultValues = AttributesValuesMap.FromInteropWrappers(initialMeshes.Count, ref boolWrapper, ref stringWrapper, ref doubleWrapper, ref boolArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
             
             stringWrapper.Dispose();
             boolWrapper.Dispose();
