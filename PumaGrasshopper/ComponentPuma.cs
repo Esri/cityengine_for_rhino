@@ -285,7 +285,7 @@ namespace PumaGrasshopper
 
             for(int shapeId = 0; shapeId < shapeCount; ++shapeId)
             {
-                MM.StartShape();
+                MM.StartNewSection();
 
                 for (int idx = (int)InputParams.SEEDS; idx < Params.Input.Count; ++idx)
                 {

@@ -31,7 +31,7 @@ namespace PumaGrasshopper
 
         public RuleAttributesMap() { }
 
-        public void StartShape()
+        public void StartNewSection()
         {
             boolStarts.Add(boolKeys.Count);
             doubleStarts.Add(doubleKeys.Count);
