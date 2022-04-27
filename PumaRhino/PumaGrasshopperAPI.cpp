@@ -117,15 +117,19 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 		int indexStartDoubleArray = *pDoubleArrayStarts->At(i);
 		int indexStartStringArray = *pStringArrayStarts->At(i);
 
-		int boolAttrCount = (i < shapeCount - 1 ? *pBoolStarts->At(i + 1) : boolCount) - indexStartBool;
-		int doubleAttrCount = (i < shapeCount - 1 ? *pDoubleStarts->At(i + 1): doubleCount) - indexStartDouble;
-		int stringAttrCount = (i < shapeCount - 1 ? *pStringStarts->At(i + 1) : stringCount) - indexStartString;
-		int boolAttrArrayCount =
-		        (i < shapeCount - 1 ? *pBoolArrayStarts->At(i + 1) : boolArrayCount) - indexStartBoolArray;
-		int doubleAttrArrayCount =
-		        (i < shapeCount - 1 ? *pDoubleArrayStarts->At(i + 1) : doubleArrayCount) - indexStartDoubleArray;
-		int stringAttrArrayCount =
-		        (i < shapeCount - 1 ? *pStringArrayStarts->At(i + 1) : stringArrayCount) - indexStartStringArray;
+		int nextIndexStartBool = i < shapeCount - 1 ? *pBoolStarts->At(i + 1) : boolCount;
+		int nextIndexStartDouble = i < shapeCount - 1 ? *pDoubleStarts->At(i + 1) : doubleCount;
+		int nextIndexStartString = i < shapeCount - 1 ? *pStringStarts->At(i + 1) : stringCount;
+		int nextIndexStartBoolArray = i < shapeCount - 1 ? *pBoolArrayStarts->At(i + 1) : boolArrayCount;
+		int nextIndexStartDoubleArray = i < shapeCount - 1 ? *pDoubleArrayStarts->At(i + 1) : doubleArrayCount;
+		int nextIndexStartStringArray = i < shapeCount - 1 ? *pStringArrayStarts->At(i + 1) : stringArrayCount;
+
+		int boolAttrCount = nextIndexStartBool - indexStartBool;
+		int doubleAttrCount = nextIndexStartDouble - indexStartDouble;
+		int stringAttrCount = nextIndexStartString - indexStartString;
+		int boolAttrArrayCount = nextIndexStartBoolArray - indexStartBoolArray;
+		int doubleAttrArrayCount = nextIndexStartDoubleArray - indexStartDoubleArray;
+		int stringAttrArrayCount = nextIndexStartStringArray - indexStartStringArray;
 
 		pcu::unpackBoolAttributes(indexStartBool, boolAttrCount, pBoolKeys, pBoolVals, aBuilders[i]);
 		pcu::unpackDoubleAttributes(indexStartDouble, doubleAttrCount, pDoubleKeys, pDoubleVals, aBuilders[i]);
