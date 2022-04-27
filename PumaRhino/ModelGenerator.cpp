@@ -176,25 +176,12 @@ ModelGenerator::ModelGenerator() {
 }
 
 pcu::ResolveMapSPtr ModelGenerator::getResolveMap(const std::wstring& rulePkg) {
-	pcu::ResolveMapSPtr resolveMap;
-	try {
-		const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
-		resolveMap = lookup.first;
-	}
-	catch (std::exception&) {
-		throw;
-	}
-	return resolveMap;
+	const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
+	return lookup.first;
 }
 
 const RuleAttributes ModelGenerator::getRuleAttributes(const std::wstring& rulePkg) {
-	pcu::ResolveMapSPtr resolveMap;
-	try {
-		resolveMap = getResolveMap(rulePkg);
-	}
-	catch (std::exception&) {
-		throw;
-	}
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
 
 	// Extract the rule package info.
 	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
