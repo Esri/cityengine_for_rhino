@@ -154,11 +154,47 @@ const std::wstring toCeArray(const int* values, size_t count);
  */
 
 template<typename T>
-void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBuilderPtr& /* aBuilder */);
+void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBuilderPtr& /* aBuilder */) {
+	static_assert(std::is_same<T, int>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
+	              "Type T must be one of int, double or bool");
+}
 
 template<typename T>
 void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const wchar_t*>& /* values */,
-                         AttributeMapBuilderPtr& /* aBuilder */);
+	AttributeMapBuilderPtr& /* aBuilder */) {
+	static_assert(std::is_same<T, int>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
+	              "Type T must be one of int, double or bool");
+}
+
+template <>
+inline void fillMapBuilder<int>(const std::wstring& key, int value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setBool(key.c_str(), static_cast<bool>(value));
+}
+
+template <>
+inline void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setFloat(key.c_str(), value);
+}
+
+template <>
+inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+                               AttributeMapBuilderPtr& aBuilder) {
+	bool* bArray = new bool[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
+	}
+	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
+}
+
+template <>
+inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+                                 AttributeMapBuilderPtr& aBuilder) {
+	double* dArray = new double[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		dArray[i] = (double)std::stod(std::wstring(values[i]));
+	}
+	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
+}
 
 
 void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,

@@ -222,7 +222,7 @@ namespace PumaGrasshopper
 
             RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
 
-            var generatedMeshes = PRTWrapper.GenerateMesh(rpk.path, ref MM, inputMeshes);
+            var generatedMeshes = PRTWrapper.Generate(rpk.path, ref MM, inputMeshes);
             OutputGeometry(DA, generatedMeshes.meshes);
             OutputMaterials(DA, generatedMeshes.materials);
             OutputReports(DA, generatedMeshes.reports);

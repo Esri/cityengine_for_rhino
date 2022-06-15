@@ -33,6 +33,8 @@
 
 #define RHINOPRT_API __declspec(dllexport)
 
+constexpr bool DBG = false;
+
 namespace {
 
 template <typename T, typename T1>
@@ -117,12 +119,14 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 		int indexStartDoubleArray = *pDoubleArrayStarts->At(i);
 		int indexStartStringArray = *pStringArrayStarts->At(i);
 
-		int nextIndexStartBool = i < shapeCount - 1 ? *pBoolStarts->At(i + 1) : boolCount;
-		int nextIndexStartDouble = i < shapeCount - 1 ? *pDoubleStarts->At(i + 1) : doubleCount;
-		int nextIndexStartString = i < shapeCount - 1 ? *pStringStarts->At(i + 1) : stringCount;
-		int nextIndexStartBoolArray = i < shapeCount - 1 ? *pBoolArrayStarts->At(i + 1) : boolArrayCount;
-		int nextIndexStartDoubleArray = i < shapeCount - 1 ? *pDoubleArrayStarts->At(i + 1) : doubleArrayCount;
-		int nextIndexStartStringArray = i < shapeCount - 1 ? *pStringArrayStarts->At(i + 1) : stringArrayCount;
+		bool notLastShape = i < shapeCount - 1;
+
+		int nextIndexStartBool = notLastShape ? *pBoolStarts->At(i + 1) : boolCount;
+		int nextIndexStartDouble = notLastShape ? *pDoubleStarts->At(i + 1) : doubleCount;
+		int nextIndexStartString = notLastShape ? *pStringStarts->At(i + 1) : stringCount;
+		int nextIndexStartBoolArray = notLastShape ? *pBoolArrayStarts->At(i + 1) : boolArrayCount;
+		int nextIndexStartDoubleArray = notLastShape ? *pDoubleArrayStarts->At(i + 1) : doubleArrayCount;
+		int nextIndexStartStringArray = notLastShape ? *pStringArrayStarts->At(i + 1) : stringArrayCount;
 
 		int boolAttrCount = nextIndexStartBool - indexStartBool;
 		int doubleAttrCount = nextIndexStartDouble - indexStartDouble;
@@ -176,9 +180,9 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 
 				for (auto& texture : matAttributes.mTexturePaths) {
 
-#ifdef DEBUG
-					LOG_DBG << L"texture: [ " << texture.first << " : " << texture.second << "]";
-#endif // DEBUG
+					if constexpr (DBG) {
+						LOG_DBG << L"texture: [ " << texture.first << " : " << texture.second << "]";
+					}
 
 					pTexKeys->Append(ON_wString(texture.first.c_str()));
 					pTexPaths->Append(ON_wString(texture.second.c_str()));

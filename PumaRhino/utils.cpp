@@ -374,47 +374,6 @@ const std::wstring toCeArray(const int* values, size_t count) {
  * Interop helpers
  */
 
-template <typename T>
-void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBuilderPtr& /* aBuilder */) {
-	throw std::invalid_argument("Received type is not supported");
-}
-
-template <>
-void fillMapBuilder<int>(const std::wstring& key, int value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setBool(key.c_str(), static_cast<bool>(value));
-}
-
-template <>
-void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setFloat(key.c_str(), value);
-}
-
-template <typename T>
-void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const wchar_t*>& /* values */,
-                         AttributeMapBuilderPtr& /* aBuilder */) {
-	throw std::invalid_argument("Received type is not supported");
-}
-
-template <>
-void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<const wchar_t*>& values,
-                               AttributeMapBuilderPtr& aBuilder) {
-	bool* bArray = new bool[values.size()];
-	for (int i = 0; i < values.size(); ++i) {
-		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
-	}
-	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
-}
-
-template <>
-void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values,
-                                 AttributeMapBuilderPtr& aBuilder) {
-	double* dArray = new double[values.size()];
-	for (int i = 0; i < values.size(); ++i) {
-		dArray[i] = (double)std::stod(std::wstring(values[i]));
-	}
-	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
-}
-
 void unpackDoubleAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<double>* values,
                       AttributeMapBuilderPtr& aBuilder) {
 	for (int i = start; i < start + count; ++i) {

@@ -105,7 +105,7 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValuesTextArray(string key, [In, Out] IntPtr pTexts, [In, Out] IntPtr pSizes);
 
-        public static GenerationResult GenerateMesh(string rpkPath,
+        public static GenerationResult Generate(string rpkPath,
             ref RuleAttributesMap MM,
             List<Mesh> initialMeshes)
         {
