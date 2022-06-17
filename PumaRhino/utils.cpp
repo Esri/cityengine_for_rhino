@@ -56,8 +56,9 @@ void checkLastError(const std::string& exceptionPrefix) {
 
 namespace pcu {
 
-ShapeAttributes::ShapeAttributes(const std::wstring rulef, const std::wstring startRl, const std::wstring shapeN)
-    : ruleFile(rulef), startRule(startRl), shapeName(shapeN) {}
+ShapeAttributes::ShapeAttributes(pcu::RuleFileInfoPtr ruleFileInfo, const std::wstring rulef, const std::wstring startRl,
+                                 const std::wstring shapeN, int seed)
+    : ruleFileInfo(std::move(ruleFileInfo)), ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(seed) {}
 
 // location of RhinoPRT shared library
 std::filesystem::path getDllLocation() {
@@ -213,6 +214,12 @@ void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee) 
 	rhinoString += appendee.c_str();
 }
 
+void appendColor(const ON_Color& color, ON_SimpleArray<int>* pArray){
+	pArray->Append(color.Red());
+	pArray->Append(color.Green());
+	pArray->Append(color.Blue());
+}
+
 std::string percentEncode(const std::string& utf8String) {
 	return callAPI<char, char>(prt::StringUtils::percentEncode, utf8String);
 }
@@ -309,5 +316,124 @@ void PathRemover::operator()(std::filesystem::path const* p) {
 			LOG_DBG << "Removed path at " << *p;
 		delete p;
 	}
+}
+
+std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim) {
+	std::vector<const wchar_t*> result;
+
+	size_t found = i_str.find(i_delim);
+	size_t startIndex = 0;
+
+	while (found != std::wstring::npos) {
+		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.begin() + found).c_str());
+		startIndex = found + i_delim.size();
+		found = i_str.find(i_delim, startIndex);
+	}
+	if (startIndex != i_str.size())
+		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.end()).c_str());
+	return result;
+}
+
+std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray) {
+	return pcu::split(stringArray, CE_ARRAY_DELIMITER);
+}
+
+const std::wstring toCeArray(const wchar_t* const* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray += std::wstring(values[i]) + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
+const std::wstring toCeArray(const bool* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray += std::wstring(values[i] ? L"true" : L"false") + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
+const std::wstring toCeArray(const double* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray +=  std::to_wstring(values[i]) + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
+const std::wstring toCeArray(const int* values, size_t count) {
+	std::wstring serializedArray;
+	for (size_t i = 0; i < count; ++i) {
+		serializedArray +=  std::to_wstring(values[i]) + CE_ARRAY_DELIMITER;
+	}
+	return serializedArray;
+}
+
+/**
+ * Interop helpers
+ */
+
+void unpackDoubleAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<double>* values,
+                      AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+
+		const double value(*values->At(i));
+		pcu::fillMapBuilder(key, value, aBuilder);
+	}
+}
+
+void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
+	AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+
+		const int value(*values->At(i));
+		pcu::fillMapBuilder<bool>(key, static_cast<bool>(value), aBuilder);
+	}
+}
+
+void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                           AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+		const auto vArray = pcu::fromCeArray(values->At(i)->Array());
+		pcu::fillArrayMapBuilder<double>(key, vArray, aBuilder);
+	}
+}
+
+
+void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                              AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+		const auto vArray = pcu::fromCeArray(values->At(i)->Array());
+		pcu::fillArrayMapBuilder<bool>(key, vArray, aBuilder);
+	}
+}
+
+void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                            AttributeMapBuilderPtr& aBuilder, bool isArray) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+
+		if (isArray) {
+			auto strings = pcu::fromCeArray(values->At(i)->Array());
+			aBuilder->setStringArray(key.c_str(), strings.data(), strings.size());
+		}
+		else
+			aBuilder->setString(key.c_str(), values->At(i)->Array());
+	}
+}
+
+void logAttributeTypeError(const std::wstring& key) {
+	LOG_ERR << "Impossible to get default value for rule attribute: " << key
+	        << " The expected type does not correspond to the actual type of this attribute.";
+}
+
+void logAttributeError(const std::wstring& key, prt::Status& status) {
+	LOG_ERR << "Impossible to get default value for rule attribute: " << key
+	        << " with error: " << prt::getStatusDescription(status);
 }
 } // namespace pcu
