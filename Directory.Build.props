@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <RhinoTargetVersion>6</RhinoTargetVersion>
+  </PropertyGroup>
+</Project>
