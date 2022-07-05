@@ -86,7 +86,7 @@ def taskBuildPuma(cfg) {
 	unstash(name: SOURCE_STASH)
 
 	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}"
-    final String image = "zrh-dreg-sp-1.esri.com/puma/puma-toolchain:${tag}"
+	final String image = "zrh-dreg-sp-1.esri.com/puma/puma-toolchain:${tag}"
 
 	final String buildCmd = "ci_build.cmd"
 	final String containerName = "puma-build-rh${cfg.rh}-${env.BRANCH_NAME.replaceAll('/', '_')}-b${BUILD_ID}"
