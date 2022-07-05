@@ -47,13 +47,6 @@
 
 
   <Target Name="Build">
-    <Message Importance="High" Text="Starting Build" />
-    <MSBuild Projects="$(SolutionDir)PumaCodecs\PumaCodecs.vcxproj" Targets="Build" />
-    <MSBuild Projects="$(SolutionDir)PumaRhino\PumaRhino.vcxproj" Targets="Build" />
-    <MSBuild Projects="$(SolutionDir)PumaGrasshopper\PumaGrasshopper.csproj" Targets="Build" Properties="Configuration=Release;Platform=AnyCPU" />
-    <Message Importance="High" Text="Build finished" />
-  </Target>
-  <Target Name="CopyPRT" AfterTargets="Build">
     <ItemGroup>
       <!-- whitelisting core PRT components -->
       <PRT_CORE_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\bin\*.dll" />
@@ -87,4 +80,12 @@
   <Target Name="Rebuild">
     <CallTarget Targets="Clean;Build" />
   </Target>
+
+  <Target Name="GetProjectInfoForReference"
+          Returns="@(ProjectInfoForReference)">
+    <ItemGroup>
+      <ProjectInfoForReference Include="@(LibFullPath)" />
+    </ItemGroup>
+  </Target>
+
 </Project>

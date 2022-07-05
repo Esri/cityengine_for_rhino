@@ -93,7 +93,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <RhinoSdkPath>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\SDK\6.0', 'InstallPath', null, RegistryView.Registry64))</RhinoSdkPath>
+    <RhinoSdkPath>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\McNeel\Rhinoceros\SDK\$(RhinoTargetVersion).0', 'InstallPath', null, RegistryView.Registry64))</RhinoSdkPath>
   </PropertyGroup>
   <PropertyGroup>
     <RhinoPRTPropertySheets>$(SolutionDir)\PropertySheets\</RhinoPRTPropertySheets>
