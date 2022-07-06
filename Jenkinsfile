@@ -36,8 +36,8 @@ properties([ disableConcurrentBuilds() ])
 @Field final Map WINDOWS_DOCKER_CONFIG = [ ba: DOCKER_AGENT_WINDOWS, ws: DOCKER_WS_WINDOWS ]
 @Field final Map WINDOWS_NATIVE_CONFIG = [ os: cepl.CFG_OS_WIN10, bc: cepl.CFG_BC_REL, tc: cepl.CFG_TC_VC1427, cc: cepl.CFG_CC_OPT, arch: cepl.CFG_ARCH_X86_64 ]
 
-@Field final Map RHINO6_CONFIG = [ rh: '6.35.21222.17001', rhsdk: '6.35.21222.17001' ]
-@Field final Map RHINO7_CONFIG = [ rh: '7.17.22102.5001',  rhsdk: '7.19.22165.13001' ]
+@Field final Map RHINO6_CONFIG = [ rh: '6.35.21222.17001', rhsdk: '6.35.21222.17001', py: '3.9.13' ]
+@Field final Map RHINO7_CONFIG = [ rh: '7.17.22102.5001',  rhsdk: '7.19.22165.13001', py: '3.9.13' ]
 
 @Field final List CONFIGS_PREPARE = [
     WINDOWS_NATIVE_CONFIG
@@ -85,7 +85,7 @@ def taskBuildPuma(cfg) {
 	cepl.cleanCurrentDir()
 	unstash(name: SOURCE_STASH)
 
-	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}"
+	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}-py${cfg.py}"
 	final String image = "zrh-dreg-sp-1.esri.com/puma/puma-toolchain:${tag}"
 
 	final String buildCmd = "ci_build.cmd"
