@@ -19,7 +19,7 @@ import groovy.transform.Field
 
 // -- PIPELINE SETUP
 
-psl.runsHere('testing')
+psl.runsHere('production')
 env.PIPELINE_ARCHIVING_ALLOWED = "true"
 properties([ disableConcurrentBuilds() ])
 
