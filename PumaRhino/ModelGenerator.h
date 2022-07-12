@@ -34,32 +34,66 @@ class ModelGenerator {
 public:
 	ModelGenerator();
 
-	pcu::ResolveMapSPtr getResolveMap(const std::wstring& rulePkg);
-
-	std::vector<GeneratedModelPtr> generateModel(const std::wstring& rulePkg,
-	                                             const std::vector<RawInitialShape>& rawInitialShapes,
-	                                             const pcu::ShapeAttributes& shapeAttributes,
+	std::vector<GeneratedModelPtr> generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
+	                                             const std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	                                             pcu::AttributeMapBuilderVector& aBuilders);
 
-	pcu::AttributeMapPtrVector evalDefaultAttributes(const std::wstring& rulePkg,
-	                                                 const std::vector<RawInitialShape>& rawInitialShapes,
-	                           pcu::ShapeAttributes& shapeAttributes);
+	bool evalDefaultAttributes(const std::vector<RawInitialShape>& rawInitialShapes,
+	                           std::vector<pcu::ShapeAttributes>& shapeAttributes);
 
-	pcu::ShapeAttributes getShapeAttributes(const std::wstring& rulePkg);
+	void updateRuleFiles(const std::wstring& rulePkg);
 
 	void updateEncoderOptions(bool emitMaterials);
 
-	const RuleAttributes getRuleAttributes(const std::wstring& rulePkg);
+	const RuleAttributes& getRuleAttributes() const {
+		return mRuleAttributes;
+	}
+
+	std::wstring getRuleFile();
+	std::wstring getStartingRule();
+	std::wstring getDefaultShapeName();
+	inline const prt::ResolveMap* getResolveMap() {
+		return mResolveMap.get();
+	};
+	const pcu::AttributeMapPtrVector& getDefaultValueAttributeMap() {
+		return mDefaultValuesMap;
+	};
+
+	const std::wstring getPackagePath() const {
+		return mCurrentRPK;
+	}
+
+	bool getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues);
+	bool getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues);
+	bool getDefaultValuesText(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts);
+	bool getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<int>* pValues,
+	                                  ON_SimpleArray<int>* pSizes);
+	bool getDefaultValuesNumberArray(const std::wstring& key, ON_SimpleArray<double>* pValues,
+	                                 ON_SimpleArray<int>* pSizes);
+	bool getDefaultValuesTextArray(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts,
+	                               ON_SimpleArray<int>* pSizes);
 
 private:
+	pcu::RuleFileInfoPtr mRuleFileInfo;
+	pcu::ResolveMapSPtr mResolveMap;
+	RuleAttributes mRuleAttributes;
 
 	pcu::AttributeMapPtr mRhinoEncoderOptions;
 	pcu::AttributeMapPtr mCGAErrorOptions;
 	pcu::AttributeMapPtr mCGAPrintOptions;
 
-	bool createInitialShapes(pcu::ResolveMapSPtr& resolveMap,
-							 const std::vector<RawInitialShape>& rawInitialShapes,
-	                         const pcu::ShapeAttributes& shapeAttributes,
+	// contains the rule attributes evaluated
+	pcu::AttributeMapPtrVector mDefaultValuesMap;
+
+	std::wstring mRulePkg;
+	std::wstring mRuleFile = L"bin/rule.cgb";
+	std::wstring mStartRule = L"default$Lot";
+	int32_t mSeed = 0;
+	std::wstring mShapeName = L"Lot";
+	std::wstring mCurrentRPK;
+
+	bool createInitialShapes(const std::vector<RawInitialShape>& rawInitialShapes,
+	                         const std::vector<pcu::ShapeAttributes>& shapeAttributes,
 	                         pcu::AttributeMapBuilderVector& aBuilders,
 	                         std::vector<pcu::InitialShapePtr>& initialShapes,
 	                         std::vector<pcu::AttributeMapPtr>& initialShapeAttributes) const;
