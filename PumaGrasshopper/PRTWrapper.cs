@@ -33,88 +33,59 @@ using System.Linq;
 
 namespace PumaGrasshopper
 {
+    public class GenerationResult
+    {
+        public List<Mesh[]> meshes = new List<Mesh[]>();
+        public List<GH_Material[]> materials = new List<GH_Material[]>();
+        public List<ReportAttribute[]> reports = new List<ReportAttribute[]>();
+    }
+
     /// <summary>
     /// Encapsulate PumaRhino library.
     /// </summary>
-    class PRTWrapper
+    public static class PRTWrapper
     {
         public static String INIT_SHAPE_IDX_KEY = "InitShapeIdx";
         private const String PUMA_RHINO_LIBRARY = "PumaRhino.rhp";
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern void GetProductVersion([In, Out]IntPtr version_Str);
+        public static extern void GetProductVersion([In, Out] IntPtr version_Str);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool InitializeRhinoPRT();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetPackage(string rpk_path, [In, Out] IntPtr errorMsg);
+        public static extern int Generate(string rpk_path, [Out] IntPtr errorMsg,
+            int shapeCount,
+            [In] IntPtr pBoolStarts, int boolCount,
+            [In] IntPtr pBoolKeys, [In] IntPtr pBoolVals,
+            [In] IntPtr pDoubleStarts, int doubleCount,
+            [In] IntPtr pDoubleKeys, [In] IntPtr pDoubleVals,
+            [In] IntPtr pStringStarts, int stringCount,
+            [In] IntPtr pStringKeys, [In] IntPtr pStringVals,
+            [In] IntPtr pBoolArrayStarts, int boolArrayCount,
+            [In] IntPtr pBoolArrayKeys, [In] IntPtr pBoolArrayVals,
+            [In] IntPtr pDoubleArrayStarts, int doubleArrayCount,
+            [In] IntPtr pDoubleArrayKeys, [In] IntPtr pDoubleArrayVals,
+            [In] IntPtr pStringArrayStarts, int stringArrayCount,
+            [In] IntPtr pStringArrayKeys, [In] IntPtr pStringArrayVals,
+            [In] IntPtr pInitialMeshes, [Out] IntPtr pMeshCounts, [Out] IntPtr pMeshArray,
+            [Out] IntPtr pColorsArray, [Out] IntPtr pTexIndices, [Out] IntPtr pTexKeys, [Out] IntPtr pTexPaths,
+            [Out] IntPtr pReportCountArray, [Out] IntPtr pReportKeyArray, [Out] IntPtr pReportDoubleArray,
+            [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetPackagePath([In, Out] IntPtr pRpk);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool AddInitialMesh([In]IntPtr pMesh);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ClearInitialShapes();
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int Generate([In, Out] IntPtr pMeshCounts, [In, Out] IntPtr pMeshArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetMeshBundle(int initialShapeIndex, [In, Out]IntPtr pMeshArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetMeshPartCount(int initialShapeIndex);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetRuleAttributesCount();
+        public static extern int GetRuleAttributes(string rpk_path, [Out] IntPtr pAttributesBuffer, [Out] IntPtr pAttributesTypes, [Out] IntPtr pBaseAnnotations, [Out] IntPtr pDoubleAnnotations, [Out] IntPtr pStringAnnotations);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetRuleAttribute(int attrIdx, [In, Out]IntPtr pRule, [In, Out]IntPtr pName, [In, Out]IntPtr pNickname, ref Annotations.AnnotationArgumentType type, [In,Out]IntPtr pGroup);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDouble(int initialShapeIndex, string fullName, double value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolean(int initialShapeIndex, string fullName, bool value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeInteger(int initialShapeIndex, string fullName, int value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeString(int initialShapeIndex, string fullName, string value);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, [In, Out]IntPtr pValueArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void GetAnnotationTypes(int ruleIdx, [In, Out]IntPtr pAnnotTypeArray);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetEnumType(int ruleIdx, int enumIdx, ref Annotations.EnumAnnotationType type);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetAnnotationEnumDouble(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetAnnotationEnumString(int ruleIdx, int enumIdx, [In,Out]IntPtr pArray, ref bool restricted);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetAnnotationRange(int ruleIdx, int enumIdx, ref double min, ref double max, ref double stepsize, ref bool restricted);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern void GetReports(int initialShapeIndex, [In, Out] IntPtr pKeysArray,
-        [In, Out] IntPtr pDoubleReports,
-        [In, Out] IntPtr pBoolReports,
-        [In, Out] IntPtr pStringReports);
+        public static extern bool GetDefaultAttributes(
+            string rpk_path, [In] IntPtr pMeshes, 
+            [Out] IntPtr pBoolStarts, [Out] IntPtr pBoolKeys, [Out] IntPtr pBoolVals, 
+            [Out] IntPtr pDoubleStarts, [Out] IntPtr pDoubleKeys, [Out] IntPtr pDoubleVals, 
+            [Out] IntPtr pStringStarts, [Out] IntPtr pStringKeys, [Out] IntPtr pStringVals,
+            [Out] IntPtr pBoolArrayStarts, [Out] IntPtr pBoolArrayKeys, [Out] IntPtr pBoolArrayVals,
+            [Out] IntPtr pDoubleArrayStarts, [Out] IntPtr pDoubleArrayKeys, [Out] IntPtr pDoubleArrayVals,
+            [Out] IntPtr pStringArrayStarts, [Out] IntPtr pStringArrayKeys, [Out] IntPtr pStringArrayVals);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetCGAPrintOutput(int initialShapeIndex, [In, Out] IntPtr pPrintOutput);
@@ -122,27 +93,8 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern void GetCGAErrorOutput(int initialShapeIndex, [In, Out] IntPtr pErrorOutput);
 
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetMaterial(int initialShapeIndex, int shapeID, ref int pUvSet,
-                                                [In, Out] IntPtr pTexKeys,
-                                                [In, Out] IntPtr pTexPaths,
-                                                [In, Out] IntPtr pDiffuseColor,
-                                                [In, Out] IntPtr pAmbientColor,
-                                                [In, Out] IntPtr pSpecularColor,
-                                                ref double opacity,
-                                                ref double shininess);
-
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetMaterialGenerationOption(bool doGenerate);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesBoolean(string key, [In, Out] IntPtr pValues);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesNumber(string key, [In, Out] IntPtr pValues);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesText(string key, [In, Out] IntPtr pTexts);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValuesBooleanArray(string key, [In, Out] IntPtr pValues, [In, Out] IntPtr pSizes);
@@ -153,285 +105,320 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultValuesTextArray(string key, [In, Out] IntPtr pTexts, [In, Out] IntPtr pSizes);
 
-
-        public static string GetPackagePath()
+        public static GenerationResult Generate(string rpkPath,
+            ref RuleAttributesMap MM,
+            List<Mesh> initialMeshes)
         {
-            string currentRpk = null;
-
-            StringWrapper rpk = new StringWrapper();
-            var rpkPtr = rpk.NonConstPointer;
-            bool success = GetPackagePath(rpkPtr);
-            if(success)
+            SimpleArrayMeshPointer initialMeshesArray = new SimpleArrayMeshPointer();
+            foreach(var mesh in initialMeshes)
             {
-                currentRpk = rpk.ToString();
+                initialMeshesArray.Add(mesh, true);
             }
-            rpk.Dispose();
+            var pMeshesArray = initialMeshesArray.ConstPointer();
 
-            return currentRpk;
-        }
 
-        public static bool AddMesh(List<Mesh> meshes)
-        {
-            bool status;
-
-            using (var arr = new SimpleArrayMeshPointer())
-            {
-                foreach (var mesh in meshes)
-                {
-                    arr.Add(mesh, true);
-                }
-
-                var ptr_array = arr.ConstPointer();
-                status = AddInitialMesh(ptr_array);
-            }
-
-            return status;
-        }
-
-        public static List<Mesh[]> GenerateMesh()
-        {
             var meshCounts = new SimpleArrayInt();
             var pMeshCounts = meshCounts.NonConstPointer();
 
             var meshes = new SimpleArrayMeshPointer();
             var pMeshes = meshes.NonConstPointer();
 
-            Generate(pMeshCounts, pMeshes);
+            var stringWrapper = new InteropWrapperString(MM.GetStringStarts(), ref MM.stringKeys, ref MM.stringValues);
+            var boolWrapper = new InteropWrapperBoolean(MM.GetBoolStarts(), ref MM.boolKeys, ref MM.boolValues);
+            var doubleWrapper = new InteropWrapperDouble(MM.GetDoubleStarts(), ref MM.doubleKeys, ref MM.doubleValues);
+            var stringArrayWrapper = new InteropWrapperString(MM.GetStringArrayStarts(), ref MM.stringArrayKeys, ref MM.stringArrayValues);
+            var boolArrayWrapper = new InteropWrapperString(MM.GetBoolArrayStarts(), ref MM.boolArrayKeys, ref MM.boolArrayValues);
+            var doubleArrayWrapper = new InteropWrapperString(MM.GetDoubleArrayStarts(), ref MM.doubleArrayKeys, ref MM.doubleArrayValues);
+
+            StringWrapper errorMsg = new StringWrapper("");
+            IntPtr pErrorMsg = errorMsg.NonConstPointer;
+
+            // Materials
+            var colorsArray = new SimpleArrayInt();
+            IntPtr pColorsArray = colorsArray.NonConstPointer();
+            var matIndices = new SimpleArrayInt();
+            IntPtr pMatIndices = matIndices.NonConstPointer();
+            var texKeys = new ClassArrayString();
+            IntPtr pTexKeys = texKeys.NonConstPointer();
+            var texPaths = new ClassArrayString();
+            IntPtr pTexPaths = texPaths.NonConstPointer();
+
+            // Reports
+            var reportCountArray = new SimpleArrayInt();
+            IntPtr pReportCountArray = reportCountArray.NonConstPointer();
+            var reportKeyArray = new ClassArrayString();
+            IntPtr pReportKeyArray = reportKeyArray.NonConstPointer();
+            var reportDoubleArray = new SimpleArrayDouble();
+            IntPtr pReportDoubleArray = reportDoubleArray.NonConstPointer();
+            var reportBoolArray = new SimpleArrayInt();
+            IntPtr pReportBoolArray = reportBoolArray.NonConstPointer();
+            var reportStringArray = new ClassArrayString();
+            IntPtr pReportStringArray = reportStringArray.NonConstPointer();
+
+            Generate(rpkPath,
+                     pErrorMsg,
+                     initialMeshes.Count,
+                     boolWrapper.StartsPtr(),
+                     boolWrapper.Count,
+                     boolWrapper.KeysPtr(),
+                     boolWrapper.ValuesPtr(),
+                     doubleWrapper.StartsPtr(),
+                     doubleWrapper.Count,
+                     doubleWrapper.KeysPtr(),
+                     doubleWrapper.ValuesPtr(),
+                     stringWrapper.StartsPtr(),
+                     stringWrapper.Count,
+                     stringWrapper.KeysPtr(),
+                     stringWrapper.ValuesPtr(),
+                     boolArrayWrapper.StartsPtr(),
+                     boolArrayWrapper.Count,
+                     boolArrayWrapper.KeysPtr(),
+                     boolArrayWrapper.ValuesPtr(),
+                     doubleArrayWrapper.StartsPtr(),
+                     doubleArrayWrapper.Count,
+                     doubleArrayWrapper.KeysPtr(),
+                     doubleArrayWrapper.ValuesPtr(),
+                     stringArrayWrapper.StartsPtr(),
+                     stringArrayWrapper.Count,
+                     stringArrayWrapper.KeysPtr(),
+                     stringArrayWrapper.ValuesPtr(),
+                     pMeshesArray,
+                     pMeshCounts,
+                     pMeshes,
+                     pColorsArray,
+                     pMatIndices,
+                     pTexKeys,
+                     pTexPaths,
+                     pReportCountArray,
+                     pReportKeyArray,
+                     pReportDoubleArray,
+                     pReportBoolArray,
+                     pReportStringArray);
+
+            initialMeshesArray.Dispose();
+            boolWrapper.Dispose();
+            doubleWrapper.Dispose();
+            stringWrapper.Dispose();
 
             var meshCountsArray = meshCounts.ToArray();
             var meshesArray = meshes.ToNonConstArray();
-            var generatedMeshes = new List<Mesh[]>();
+            // Materials
+            int[] colors = colorsArray.ToArray();
+            int[] materialIndices = matIndices.ToArray();
+            string[] textureKeys = texKeys.ToArray();
+            string[] texturePaths = texPaths.ToArray();
+
+            GenerationResult generationResult = new GenerationResult();
+
             int indexOffset = 0;
+            int colorsOffset = 0;
+            int textureOffset = 0;
+
+            // Geometry
             for (int id = 0; id < meshCountsArray.Length; id++)
             {
                 if (meshCountsArray[id] > 0)
                 {
                     var meshesForShape = meshesArray.Skip(indexOffset).Take(meshCountsArray[id]).ToArray();
-                    generatedMeshes.Add(meshesForShape);
+                    generationResult.meshes.Add(meshesForShape);
                 }
                 else
-                    generatedMeshes.Add(null);
+                    generationResult.meshes.Add(null);
 
                 indexOffset += meshCountsArray[id];
             }
 
-            return generatedMeshes;
-        }
-
-        public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
-        {
-            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
-            // thus a conversion is necessary when adding Meshes.
-            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
-
-            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            // Materials
+            for (int id = 0; id < materialIndices.Length;)
             {
-                if (generatedMeshes[shapeId] == null)
-                    continue;
+                int meshCount = materialIndices[id];
 
-                GH_Path path = new GH_Path(shapeId);
-                var meshBundle = generatedMeshes[shapeId];
-                foreach (var mesh in meshBundle)
+                GH_Material[] materials = new GH_Material[meshCount];
+
+                for(int meshId = 0; meshId < meshCount; meshId++)
                 {
-                    GH_Mesh gh_mesh = null;
-                    var status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
-                    if (status)
+                    int texCount = materialIndices[id + meshId + 1];
+
+                    var diffuse = colors.Skip(colorsOffset).Take(3).ToArray();
+                    var ambient = colors.Skip(colorsOffset + 3).Take(3).ToArray();
+                    var specular = colors.Skip(colorsOffset + 6).Take(3).ToArray();
+                    var opacity = colors[colorsOffset + 9];
+                    var shininess = colors[colorsOffset + 10];
+
+                    colorsOffset += 11;
+
+                    Material mat = new Material()
                     {
-                        mesh_struct.Append(gh_mesh, path);
-                    }
-                }
-            }
+                        DiffuseColor = Color.FromArgb(diffuse[0], diffuse[1], diffuse[2]),
+                        AmbientColor = Color.FromArgb(ambient[0], ambient[1],ambient[2]),
+                        SpecularColor = Color.FromArgb(specular[0], specular[1], specular[2]),
+                        Transparency = 1.0 - opacity,
+                        Shine = shininess,
+                        FresnelReflections = true,
+                    };
 
-            return mesh_struct;
-        }
+                    string coloMap = "";
 
-        public static GH_Material GetMaterialOfPartMesh(int initialShapeIndex, int meshID)
-        {
-            int uvSet = 0;
+                    for (int texId = 0; texId < texCount; ++texId)
+                    {
+                        string texKey = textureKeys[textureOffset + texId];
+                        string texPath = texturePaths[textureOffset + texId];
 
-            ClassArrayString texKeys = new ClassArrayString();
-            var pTexKeys = texKeys.NonConstPointer();
-
-            ClassArrayString texPaths = new ClassArrayString();
-            var pTexPaths = texPaths.NonConstPointer();
-
-            SimpleArrayInt diffuseArray = new SimpleArrayInt();
-            var pDiffuseArray = diffuseArray.NonConstPointer();
-
-            SimpleArrayInt ambientArray = new SimpleArrayInt();
-            var pAmbientArray = ambientArray.NonConstPointer();
-
-            SimpleArrayInt specularArray = new SimpleArrayInt();
-            var pSpecularArray = specularArray.NonConstPointer();
-
-            double opacity = 1;
-            double shininess = 1;
-
-            bool status = PRTWrapper.GetMaterial(initialShapeIndex, meshID, ref uvSet, pTexKeys, pTexPaths, pDiffuseArray, pAmbientArray, pSpecularArray, ref opacity, ref shininess);
-            if (!status) return null;
-
-            var texKeysArray = texKeys.ToArray();
-            var texPathsArray = texPaths.ToArray();
-
-            string coloMap = "";
-
-            Material mat = new Material();
-            
-            for (int i = 0; i < texKeysArray.Length; ++i)
-            {
-                string texKey = texKeysArray[i];
-                string texPath = texPathsArray[i];
-
-                Texture tex = new Texture
-                {
-                    FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(texPath),
-                    TextureCombineMode = TextureCombineMode.Modulate,
-                    TextureType = TextureType.Bitmap
-                };
-
-                switch (texKey)
-                {
-                    case "diffuseMap":
-                    case "colorMap":
-                        mat.SetBitmapTexture(tex);
-                        coloMap = tex.FileReference.FullPath;
-                        break;
-                    case "opacityMap":
-                        // if the color and opacity textures are the same, no need to set it again, it is only needed to activate alpha transparency.
-                        if(coloMap != tex.FileReference.FullPath)
+                        Texture tex = new Texture
                         {
-                            tex.TextureCombineMode = TextureCombineMode.Modulate;
-                            tex.TextureType = TextureType.Transparency;
-                            mat.SetTransparencyTexture(tex);
+                            FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(texPath),
+                            TextureCombineMode = TextureCombineMode.Modulate,
+                            TextureType = TextureType.Bitmap
+                        };
+
+                        switch (texKey)
+                        {
+                            case "diffuseMap":
+                            case "colorMap":
+                                mat.SetBitmapTexture(tex);
+                                coloMap = tex.FileReference.FullPath;
+                                break;
+                            case "opacityMap":
+                                // if the color and opacity textures are the same, no need to set it again, it is only needed to activate alpha transparency.
+                                if (coloMap != tex.FileReference.FullPath)
+                                {
+                                    tex.TextureCombineMode = TextureCombineMode.Modulate;
+                                    tex.TextureType = TextureType.Transparency;
+                                    mat.SetTransparencyTexture(tex);
+                                }
+
+                                mat.AlphaTransparency = true;
+
+                                break;
+                            case "bumpMap":
+                                tex.TextureCombineMode = TextureCombineMode.None;
+                                tex.TextureType = TextureType.Bump;
+                                mat.SetBumpTexture(tex);
+                                break;
+                            default:
+                                break;
                         }
-                        
-                        mat.AlphaTransparency = true;
-                        
-                        break;
-                    case "bumpMap":
-                        tex.TextureCombineMode = TextureCombineMode.None;
-                        tex.TextureType = TextureType.Bump;
-                        mat.SetBumpTexture(tex);
-                        break;
-                    default:
-                        break;
+                    }
+
+                    textureOffset += texCount;
+
+                    materials[meshId] = new GH_Material(Rhino.Render.RenderMaterial.CreateBasicMaterial(mat));
                 }
+
+                id += meshCount + 1;
+
+                generationResult.materials.Add(materials);
             }
 
-            var diffuseColor = diffuseArray.ToArray();
-            var ambientColor = ambientArray.ToArray();
-            var specularColor = specularArray.ToArray();
-            diffuseArray.Dispose();
-            ambientArray.Dispose();
-            specularArray.Dispose();
+            colorsArray.Dispose();
+            matIndices.Dispose();
+            texKeys.Dispose();
+            texPaths.Dispose();
 
-            if(diffuseColor.Length == 3)
+            // Reports
+            var reportCounts = reportCountArray.ToArray();
+            var reportKeys = reportKeyArray.ToArray();
+            var reportDouble = reportDoubleArray.ToArray();
+            var reportBool = reportBoolArray.ToArray();
+            var reportString = reportStringArray.ToArray();
+
+            reportCountArray.Dispose();
+            reportKeyArray.Dispose();
+            reportDoubleArray.Dispose();
+            reportBoolArray.Dispose();
+            reportStringArray.Dispose();
+
+            if (reportKeys.Length != reportDouble.Length + reportBool.Length + reportString.Length)
             {
-                mat.DiffuseColor = Color.FromArgb(diffuseColor[0], diffuseColor[1], diffuseColor[2]);
+                // Something went wrong, don't output any reports.
+                return generationResult;
             }
 
-            if(ambientColor.Length == 3)
-            {
-                mat.AmbientColor = Color.FromArgb(ambientColor[0], ambientColor[1], ambientColor[2]);
+            int reportKeyOffset = 0;
+            int reportDoubleOffset = 0;
+            int reportBoolOffset = 0;
+            int reportStringOffset = 0;
+
+            for(int meshId = 0; meshId < reportCounts.Length; meshId+=3) {
+                int doubleReportCount = reportCounts[meshId];
+                int boolReportCount = reportCounts[meshId + 1];
+                int stringReportCount = reportCounts[meshId + 2];
+                List<ReportAttribute> reportAttributes = new List<ReportAttribute>();
+
+                var doubleKeys = reportKeys.Skip(reportKeyOffset).Take(doubleReportCount);
+                var d = reportDouble.Skip(reportDoubleOffset).Take(doubleReportCount).Zip(doubleKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_FLOAT, value));
+                reportAttributes.AddRange(d);
+                reportKeyOffset += doubleReportCount;
+                reportDoubleOffset += doubleReportCount;
+
+                var boolKeys = reportKeys.Skip(reportKeyOffset).Take(boolReportCount);
+                var b = reportBool.Skip(reportBoolOffset).Take(boolReportCount).Zip(boolKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_BOOL, Convert.ToBoolean(value)));
+                reportAttributes.AddRange(b);
+                reportKeyOffset += boolReportCount;
+                reportBoolOffset += boolReportCount;
+
+                var stringKeys = reportString.Skip(reportKeyOffset).Take(stringReportCount);
+                var s = reportString.Skip(reportStringOffset).Take(stringReportCount).Zip(stringKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_STRING, value));
+                reportAttributes.AddRange(s);
+                reportKeyOffset += stringReportCount;
+                reportStringOffset += stringReportCount;
+
+                generationResult.reports.Add(reportAttributes.ToArray());
             }
 
-            if(specularColor.Length == 3)
-            {
-                mat.SpecularColor = Color.FromArgb(specularColor[0], specularColor[1], specularColor[2]);
-            }
-
-            mat.Transparency = 1.0 - opacity;
-            mat.Shine = shininess;
-
-            mat.FresnelReflections = true;
-
-            mat.CommitChanges();
-
-            var renderMat = Rhino.Render.RenderMaterial.CreateBasicMaterial(mat);
-
-            return new GH_Material(renderMat);
+            return generationResult;
         }
 
-        public static List<GH_Material> GetMaterialsOfMesh(int initialShapeIndex)
+        public static AttributesValuesMap[] GetDefaultValues(string rulePkg, List<Mesh> initialMeshes)
         {
-            List<GH_Material> materials = new List<GH_Material>();
-
-            int meshCount = GetMeshPartCount(initialShapeIndex);
-
-            for(int i = 0; i < meshCount; ++i)
+            SimpleArrayMeshPointer initialMeshesArray = new SimpleArrayMeshPointer();
+            foreach (var mesh in initialMeshes)
             {
-                materials.Add(GetMaterialOfPartMesh(initialShapeIndex, i));
+                initialMeshesArray.Add(mesh, true);
             }
 
-            return materials;
-        }
+            var stringWrapper = new InteropWrapperString();
+            var boolWrapper = new InteropWrapperBoolean();
+            var doubleWrapper = new InteropWrapperDouble();
+            var stringArrayWrapper = new InteropWrapperString();
+            var boolArrayWrapper = new InteropWrapperString();
+            var doubleArrayWrapper = new InteropWrapperString();
 
-        public static GH_Structure<GH_Material> GetAllMaterialIds(List<Mesh[]> generatedMeshes)
-        {
-            GH_Structure<GH_Material> material_struct = new GH_Structure<GH_Material>();
 
-            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            bool status = GetDefaultAttributes(rulePkg, initialMeshesArray.ConstPointer(), 
+                boolWrapper.StartsNonConstPtr(), boolWrapper.KeysNonConstPtr(), boolWrapper.ValuesNonConstPtr(),
+                doubleWrapper.StartsNonConstPtr(), doubleWrapper.KeysNonConstPtr(), doubleWrapper.ValuesNonConstPtr(),
+                stringWrapper.StartsNonConstPtr(), stringWrapper.KeysNonConstPtr(), stringWrapper.ValuesNonConstPtr(),
+                boolArrayWrapper.StartsNonConstPtr(), boolArrayWrapper.KeysNonConstPtr(), boolArrayWrapper.ValuesNonConstPtr(),
+                doubleArrayWrapper.StartsNonConstPtr(), doubleArrayWrapper.KeysNonConstPtr(), doubleArrayWrapper.ValuesNonConstPtr(),
+                stringArrayWrapper.StartsNonConstPtr(), stringArrayWrapper.KeysNonConstPtr(), stringArrayWrapper.ValuesNonConstPtr());
+
+            if (!status)
             {
-                if (generatedMeshes[shapeId] == null)
-                    continue;
-                var mats = GetMaterialsOfMesh(shapeId);
-                GH_Path path = new GH_Path(shapeId);
-                material_struct.AppendRange(mats, path);
-            }
-
-            return material_struct;
-        }
-
-        public static List<ReportAttribute> GetAllReports(int initialShapeIndex)
-        {
-            var keys = new ClassArrayString();
-            var stringReports = new ClassArrayString();
-            var doubleReports = new SimpleArrayDouble();
-            var boolReports = new SimpleArrayInt();
-
-            var pKeys = keys.NonConstPointer();
-            var pStrReps = stringReports.NonConstPointer();
-            var pDblReps = doubleReports.NonConstPointer();
-            var pBoolReps = boolReports.NonConstPointer();
-
-            GetReports(initialShapeIndex, pKeys, pDblReps, pBoolReps, pStrReps);
-
-            var keysArray = keys.ToArray();
-            var stringReportsArray = stringReports.ToArray();
-            var doubleReportsArray = doubleReports.ToArray();
-            var boolReportsArray = boolReports.ToArray();
-
-            keys.Dispose();
-            stringReports.Dispose();
-            doubleReports.Dispose();
-            boolReports.Dispose();
-
-            if (keysArray.Length != stringReportsArray.Length + doubleReportsArray.Length + boolReportsArray.Length)
-            {
-                // Something went wrong, don't output anything.
+                stringWrapper.Dispose();
+                boolWrapper.Dispose();
+                doubleWrapper.Dispose();
+                stringArrayWrapper.Dispose();
+                doubleArrayWrapper.Dispose();
+                boolArrayWrapper.Dispose();
                 return null;
             }
 
-            List<ReportAttribute> ras = new List<ReportAttribute>(keysArray.Length);
-            int kId = 0;
+            var defaultValues = AttributesValuesMap.FromInteropWrappers(initialMeshes.Count, ref boolWrapper, ref stringWrapper, ref doubleWrapper, ref boolArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
+            
+            stringWrapper.Dispose();
+            boolWrapper.Dispose();
+            doubleWrapper.Dispose();
+            stringArrayWrapper.Dispose();
+            doubleArrayWrapper.Dispose();
+            boolArrayWrapper.Dispose();
 
-            for(int i = 0; i < doubleReportsArray.Length; ++i)
-            {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_FLOAT, doubleReportsArray[i]));
-                kId++;
-            }
-            for(int i = 0; i < boolReportsArray.Length; ++i)
-            {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_BOOL, Convert.ToBoolean(boolReportsArray[i])));
-                kId++;    
-            }
-            for(int i = 0; i < stringReportsArray.Length; ++i)
-            {
-                ras.Add(ReportAttribute.CreateReportAttribute(initialShapeIndex, keysArray[kId], ReportTypes.PT_STRING, stringReportsArray[i]));
-                kId++;
-            }
+            return defaultValues;
+        }
 
-            return ras;
+
+        public static void DecodeDefaultValues<T>(int[] starts, string[] keys, T[] values) {
+            
         }
 
         public static List<String> GetCGAPrintOutput(int initialShapeIndex)
@@ -460,37 +447,107 @@ namespace PumaGrasshopper
             return new List<String>(errorOutputArray);
         }
 
-        public static RuleAttribute[] GetRuleAttributes()
+        public static RuleAttribute[] GetRuleAttributes(string rpk)
         {
-            int attribCount = GetRuleAttributesCount();
+            ClassArrayString attributesBuffer = new ClassArrayString();
+            SimpleArrayInt attributesTypes = new SimpleArrayInt();
+            SimpleArrayInt baseAnnotations = new SimpleArrayInt();
+            SimpleArrayDouble doubleAnnotations = new SimpleArrayDouble();
+            ClassArrayString stringAnnotations = new ClassArrayString();
+
+            int attribCount = GetRuleAttributes(rpk, attributesBuffer.NonConstPointer(),
+                                                attributesTypes.NonConstPointer(), baseAnnotations.NonConstPointer(),
+                                                doubleAnnotations.NonConstPointer(), stringAnnotations.NonConstPointer());
 
             if (attribCount == 0) return new RuleAttribute[0]{};
 
+            var attributesArray = attributesBuffer.ToArray();
+            var attributesTypesArray = attributesTypes.ToArray();
+            var baseAnnotationsArray = baseAnnotations.ToArray();
+            var doubleAnnotationsArray = doubleAnnotations.ToArray();
+            var stringAnnotationsArray = stringAnnotations.ToArray();
+
             RuleAttribute[] attributes = new RuleAttribute[attribCount];
 
-            for(int i = 0; i < attribCount; ++i)
+            int baseAnnotationOffset = 0;
+            int doubleAnnotationOffset = 0;
+            int stringAnnotationOffset = 0;
+
+            for(int i = 0; i < attribCount; i++)
             {
-                StringWrapper ruleBuilder = new StringWrapper();
-                StringWrapper nameBuilder = new StringWrapper();
-                StringWrapper nicknameBuilder = new StringWrapper();
-                StringWrapper group = new StringWrapper();
+                string[] attributeInfo = attributesArray.Skip(i * 4).Take(4).ToArray();
+                Annotations.AnnotationArgumentType type = (Annotations.AnnotationArgumentType)attributesTypesArray[i * 2];
+                int annotCount = attributesTypesArray[i * 2 + 1];
+                attributes[i] = new RuleAttribute(attributeInfo[1], attributeInfo[2], attributeInfo[0], type, attributeInfo[3] == null ? "" : attributeInfo[3]);
 
-                var pRuleBuilder = ruleBuilder.NonConstPointer;
-                var pNameBuilder = nameBuilder.NonConstPointer;
-                var pNickNameBuilder = nicknameBuilder.NonConstPointer;
-                var pGroup = group.NonConstPointer;
+                List<Annotations.Base> annotations = new List<Annotations.Base>();
 
-                Annotations.AnnotationArgumentType type = Annotations.AnnotationArgumentType.AAT_INT;
+                for(int j = 0; j < annotCount; ++j)
+                {
+                    Annotations.AttributeAnnotation annotType = (Annotations.AttributeAnnotation)baseAnnotationsArray[baseAnnotationOffset];
+                    switch(annotType)
+                    {
+                        case Annotations.AttributeAnnotation.A_COLOR:
+                            annotations.Add(new Annotations.Color());
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_FILE:
+                            annotations.Add(new Annotations.File());
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_DIR:
+                            annotations.Add(new Annotations.Directory());
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_RANGE:
+                            double[] range = doubleAnnotationsArray.Skip(doubleAnnotationOffset).Take(3).ToArray();
+                            annotations.Add(new Annotations.Range(range[0], range[1], range[2]));
+                            doubleAnnotationOffset += 3;
+                            baseAnnotationOffset++;
+                            break;
+                        case Annotations.AttributeAnnotation.A_ENUM:
+                            Annotations.EnumAnnotationType enumType = (Annotations.EnumAnnotationType)baseAnnotationsArray[baseAnnotationOffset + 1];
+                            switch (enumType)
+                            {
+                                case Annotations.EnumAnnotationType.ENUM_BOOL:
+                                    bool[] items = { true, false };
+                                    annotations.Add(new Annotations.Enum<bool>(items, enumType, true));
+                                    baseAnnotationOffset += 2;
+                                    break;
+                                case Annotations.EnumAnnotationType.ENUM_DOUBLE: {
+                                    int enumCount = baseAnnotationsArray[baseAnnotationOffset + 2];
+                                    double[] enumItems = doubleAnnotationsArray.Skip(doubleAnnotationOffset).Take(enumCount).ToArray();
+                                    annotations.Add(new Annotations.Enum<double>(enumItems, enumType, true));
+                                    baseAnnotationOffset += 3;
+                                    doubleAnnotationOffset += enumCount;
+                                    break;
+                                }    
+                                case Annotations.EnumAnnotationType.ENUM_STRING: {
+                                    int enumCount = baseAnnotationsArray[baseAnnotationOffset + 2];
+                                    string[] enumItems = stringAnnotationsArray.Skip(stringAnnotationOffset).Take(enumCount).ToArray();
+                                    annotations.Add(new Annotations.Enum<string>(enumItems, enumType, true));
+                                    baseAnnotationOffset += 3;
+                                    stringAnnotationOffset += enumCount;
+                                    break;
+                                }
+                                    
+                            }
+                            break;
+                        default:
+                            // Unknown annotation type
+                            baseAnnotationOffset++;
+                            break;
+                    }
+                }
 
-                bool status = GetRuleAttribute(i, pRuleBuilder, pNameBuilder, pNickNameBuilder, ref type, pGroup);
-                if (!status) return new RuleAttribute[0] {};
-
-                attributes[i] = new RuleAttribute(nameBuilder.ToString(), nicknameBuilder.ToString(), ruleBuilder.ToString(), type, group.ToString());
-
-                // get the potential annotations
-                List<Annotations.Base> annotations = GetAnnotations(i);
                 attributes[i].mAnnotations.AddRange(annotations);
             }
+
+            attributesBuffer.Dispose();
+            attributesTypes.Dispose();
+            baseAnnotations.Dispose();
+            doubleAnnotations.Dispose();
+            stringAnnotations.Dispose();
             
             return attributes;
         }
@@ -510,155 +567,11 @@ namespace PumaGrasshopper
             return version;
         }
 
-        public static List<Annotations.Base> GetAnnotations(int ruleIdx)
-        {
-            int[] intArray = null;
-            using(var array = new SimpleArrayInt())
-            {
-                var pArray = array.NonConstPointer();
-
-                PRTWrapper.GetAnnotationTypes(ruleIdx, pArray);
-
-                intArray = array.ToArray();
-            }
-
-            var annots = new List<Annotations.Base>();
-
-            for(int enumIdx = 0; enumIdx < intArray.Length; ++enumIdx)
-            {
-                Annotations.AttributeAnnotation type = (Annotations.AttributeAnnotation)intArray[enumIdx];
-                switch (type)
-                {
-                    case Annotations.AttributeAnnotation.A_COLOR:
-                        annots.Add(new Annotations.Color());
-                        break;
-                    case Annotations.AttributeAnnotation.A_ENUM:
-                        Annotations.EnumAnnotationType enumType = Annotations.EnumAnnotationType.ENUM_DOUBLE;
-                        bool status = GetEnumType(ruleIdx, enumIdx, ref enumType);
-                        if (!status) break;
-
-                        switch (enumType)
-                        {
-                            case Annotations.EnumAnnotationType.ENUM_BOOL:
-                                bool[] boolArray = { true, false };
-                                annots.Add(new Annotations.Enum<bool>(boolArray, enumType, true));
-                                break;
-                            case Annotations.EnumAnnotationType.ENUM_DOUBLE:
-                                annots.Add(GetAnnotationEnumDouble(ruleIdx, enumIdx));
-                                break;
-                            case Annotations.EnumAnnotationType.ENUM_STRING:
-                                annots.Add(GetAnnotationEnumString(ruleIdx, enumIdx));
-                                break;
-                            default:
-                                break;
-                        }
-                        
-                        break;
-                    case Annotations.AttributeAnnotation.A_RANGE:
-                        annots.Add(GetAnnotationRange(ruleIdx, enumIdx));
-                        break;
-                    case Annotations.AttributeAnnotation.A_DIR:
-                        annots.Add(new Annotations.Directory());
-                        break;
-                    case Annotations.AttributeAnnotation.A_FILE:
-                        annots.Add(new Annotations.File());
-                        break;
-                    default:
-                        continue;
-                }
-            }
-
-            return annots;
-        }
-
-        public static Annotations.Enum<double> GetAnnotationEnumDouble(int ruleIdx, int enumIdx)
-        {
-            double[] enumArray = null;
-            bool restricted = true;
-            using (var array = new SimpleArrayDouble())
-            {
-                var pArray = array.NonConstPointer();
-                
-                bool status = GetAnnotationEnumDouble(ruleIdx, enumIdx, pArray, ref restricted);
-                if (!status) return null;
-
-                enumArray = array.ToArray();
-            }
-
-            return new Annotations.Enum<double>(enumArray, Annotations.EnumAnnotationType.ENUM_DOUBLE, restricted);
-        }
-
-        public static Annotations.Enum<string> GetAnnotationEnumString(int ruleIdx, int enumIdx)
-        {
-            string[] enumArray = null;
-            bool restricted = true;
-            using (var array = new ClassArrayString())
-            {
-                var pArray = array.NonConstPointer();
-                bool status = GetAnnotationEnumString(ruleIdx, enumIdx, pArray, ref restricted);
-                if (!status) return null;
-
-                enumArray = array.ToArray();
-            }
-
-            return new Annotations.Enum<string>(enumArray, Annotations.EnumAnnotationType.ENUM_STRING, restricted);
-        }
-
-        public static Annotations.Range GetAnnotationRange(int ruleIdx, int enumIdx)
-        {
-            double min = 0;
-            double max = 0;
-            double stepsize = 0;
-            bool restricted = true;
-
-            bool status = GetAnnotationRange(ruleIdx, enumIdx, ref min, ref max, ref stepsize, ref restricted);
-            if (status)
-            {
-                return new Annotations.Range(min, max, stepsize, restricted);
-            }
-            return null;
-        }
-
-        public static void SetRuleAttributeDoubleArray(int initialShapeIndex, string fullName, List<double> doubleList)
-        {
-            if (doubleList.Count == 0) return;
-
-            using (SimpleArrayDouble array = new SimpleArrayDouble(doubleList))
-            {
-                var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeDoubleArray(initialShapeIndex, fullName, pArray);
-            }
-        }
-
-        public static void SetRuleAttributeBoolArray(int initialShapeIndex, string fullName, List<Boolean> boolList)
-        {
-            if (boolList.Count == 0) return;
-
-            using(SimpleArrayInt array = new SimpleArrayInt(Array.ConvertAll<bool, int>(boolList.ToArray(), x => Convert.ToInt32(x))))
-            {
-                var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeBoolArray(initialShapeIndex, fullName, pArray);
-            }
-        }
-
-        public static void SetRuleAttributeStringArray(int initialShapeIndex, string fullName, List<string> stringList)
-        {
-            if (stringList.Count == 0) return;
-
-            using(ClassArrayString array = new ClassArrayString())
-            {
-                stringList.ForEach(x => array.Add(x));
-
-                var pArray = array.ConstPointer();
-                PRTWrapper.SetRuleAttributeStringArray(initialShapeIndex, fullName, pArray);
-            }
-        }
-
         public static List<bool> GetDefaultValuesBoolean(string key)
         {
             SimpleArrayInt boolArray = new SimpleArrayInt();
             var pBoolArray = boolArray.NonConstPointer();
-            bool hasDefault = GetDefaultValuesBoolean(key, pBoolArray);
+            bool hasDefault = false; //  GetDefaultValuesBoolean(key, pBoolArray);
 
             if (!hasDefault) return null;
 
@@ -672,7 +585,7 @@ namespace PumaGrasshopper
         {
             SimpleArrayDouble doubleArray = new SimpleArrayDouble();
             var pDoubleArray = doubleArray.NonConstPointer();
-            bool hasDefault = GetDefaultValuesNumber(key, pDoubleArray);
+            bool hasDefault = false; //GetDefaultValuesNumber(key, pDoubleArray);
 
             if (!hasDefault) return null;
 
@@ -686,7 +599,7 @@ namespace PumaGrasshopper
         {
             ClassArrayString stringArray = new ClassArrayString();
             var pStringArray = stringArray.NonConstPointer();
-            bool hasDefault = GetDefaultValuesText(key, pStringArray);
+            bool hasDefault = false; // GetDefaultValuesText(key, pStringArray);
 
             if (!hasDefault) return null;
 

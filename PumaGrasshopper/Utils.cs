@@ -31,12 +31,55 @@ using System.Drawing;
 using Grasshopper.Kernel.Data;
 using System.Xml.Serialization;
 using System.IO;
+using Rhino.Geometry;
 
 namespace PumaGrasshopper
 {
 
     class Utils
     {
+        public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
+        {
+            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
+            // thus a conversion is necessary when adding Meshes.
+            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
+
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            {
+                if (generatedMeshes[shapeId] == null)
+                    continue;
+
+                GH_Path path = new GH_Path(shapeId);
+                var meshBundle = generatedMeshes[shapeId];
+                foreach (var mesh in meshBundle)
+                {
+                    GH_Mesh gh_mesh = null;
+                    var status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+                    if (status)
+                    {
+                        mesh_struct.Append(gh_mesh, path);
+                    }
+                }
+            }
+
+            return mesh_struct;
+        }
+
+        public static GH_Structure<GH_Material> CreateMaterialStructure(List<GH_Material[]> materials)
+        {
+            GH_Structure<GH_Material> material_struct = new GH_Structure<GH_Material>();
+
+            int index = 0;
+            materials.ForEach((material) =>
+            {
+                GH_Path path = new GH_Path(index);
+                material_struct.AppendRange(material, path);
+                index++;
+            });
+
+            return material_struct;
+        }
+
         public static IntPtr CreateIntArrayPtr(int size)
         {
             return Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * size);
@@ -76,6 +119,15 @@ namespace PumaGrasshopper
             Marshal.FreeCoTaskMem(buffer);
             return array;
         }
+
+        public static string ToCeArray<T>(T[] values)
+        {
+            return values.Aggregate("", (acc, x) => acc + x.ToString()) + ":";
+        }
+
+        public static string[] StringFromCeArray(string values) => values.Split(':');
+        public static bool[] BoolFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
+        public static double[] DoubleFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
 
         public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
         {
