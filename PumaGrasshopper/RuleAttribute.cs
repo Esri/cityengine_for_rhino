@@ -44,7 +44,7 @@ namespace PumaGrasshopper
             this.mGroup = group;
         }
 
-        public IGH_Param CreateInputParameter(AttributesValuesMap[] defaultValuesMap)
+        public IGH_Param CreateInputParameter()
         {
             switch (this.mAttribType)
             {
@@ -59,7 +59,6 @@ namespace PumaGrasshopper
                             Optional = true,
                             Access = GetAccess()
                         };
-                        param_bool.SetPersistentData(AttributesValuesMap.GetDefaultBooleans(mFullName, defaultValuesMap, IsArray()));
 
                         return param_bool;
                     }
@@ -75,7 +74,6 @@ namespace PumaGrasshopper
                             Optional = true,
                             Access = GetAccess()
                         };
-                        param_number.SetPersistentData(AttributesValuesMap.GetDefaultDoubles(mFullName, defaultValuesMap, IsArray()));
                         
                         return param_number;
                     }
@@ -93,7 +91,6 @@ namespace PumaGrasshopper
                                 Optional = true,
                                 Access = GetAccess()
                             };
-                            param_color.SetPersistentData(AttributesValuesMap.GetDefaultColors(mFullName, defaultValuesMap));
                             return param_color;
                         }
                         else
@@ -106,7 +103,6 @@ namespace PumaGrasshopper
                                 Optional = true,
                                 Access = GetAccess()
                             };
-                            param_str.SetPersistentData(AttributesValuesMap.GetDefaultStrings(mFullName, defaultValuesMap, IsArray()));
                             return param_str;
                         }
                     }
