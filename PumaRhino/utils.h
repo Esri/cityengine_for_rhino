@@ -113,7 +113,7 @@ std::string toUTF8FromUTF16(const std::wstring& utf16String);
 std::string toUTF8FromOSNarrow(const std::string& osString);
 
 void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee);
-void appendColor(const ON_Color& color, ON_SimpleArray<int>* pArray);
+void appendColor(const ON_Color& color, ON_SimpleArray<double>* pArray);
 
 std::string percentEncode(const std::string& utf8String);
 std::string toFileURI(const std::string& osNarrowPath);

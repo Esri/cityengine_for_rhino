@@ -214,7 +214,7 @@ void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee) 
 	rhinoString += appendee.c_str();
 }
 
-void appendColor(const ON_Color& color, ON_SimpleArray<int>* pArray){
+void appendColor(const ON_Color& color, ON_SimpleArray<double>* pArray){
 	pArray->Append(color.Red());
 	pArray->Append(color.Green());
 	pArray->Append(color.Blue());
