@@ -199,6 +199,9 @@ namespace PumaGrasshopper
             boolWrapper.Dispose();
             doubleWrapper.Dispose();
             stringWrapper.Dispose();
+            boolArrayWrapper.Dispose();
+            doubleArrayWrapper.Dispose();
+            stringArrayWrapper.Dispose();
 
             var meshCountsArray = meshCounts.ToArray();
             var meshesArray = meshes.ToNonConstArray();
