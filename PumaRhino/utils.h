@@ -167,8 +167,8 @@ void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const 
 }
 
 template <>
-inline void fillMapBuilder<int>(const std::wstring& key, int value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setBool(key.c_str(), static_cast<bool>(value));
+inline void fillMapBuilder<bool>(const std::wstring& key, bool value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setBool(key.c_str(), value);
 }
 
 template <>

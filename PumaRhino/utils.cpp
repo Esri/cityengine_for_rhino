@@ -390,7 +390,7 @@ void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
 		const std::wstring key(keys->At(i)->Array());
 
 		const int value(*values->At(i));
-		pcu::fillMapBuilder<bool>(key, static_cast<bool>(value), aBuilder);
+		pcu::fillMapBuilder(key, static_cast<bool>(value), aBuilder);
 	}
 }
 
