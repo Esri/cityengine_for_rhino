@@ -9,23 +9,29 @@ namespace PumaGrasshopper
     public class RuleAttributesMap
     {
         private List<int> boolStarts = new List<int>();
+        private List<int> integerStarts = new List<int>();
         private List<int> doubleStarts = new List<int>();
         private List<int> stringStarts = new List<int>();
         private List<int> boolArrayStarts = new List<int>();
+        private List<int> integerArrayStarts = new List<int>();
         private List<int> doubleArrayStarts = new List<int>();
         private List<int> stringArrayStarts = new List<int>();
 
         public List<string> boolKeys = new List<string>();
+        public List<string> integerKeys = new List<string>();
         public List<string> doubleKeys = new List<string>();
         public List<string> stringKeys = new List<string>();
         public List<string> boolArrayKeys = new List<string>();
+        public List<string> integerArrayKeys = new List<string>();
         public List<string> doubleArrayKeys = new List<string>();
         public List<string> stringArrayKeys = new List<string>();
 
         public List<bool> boolValues = new List<bool>();
+        public List<int> integerValues = new List<int>();
         public List<double> doubleValues = new List<double>();
         public List<string> stringValues = new List<string>();
         public List<string> boolArrayValues = new List<string>();
+        public List<string> integerArrayValues = new List<string>();
         public List<string> doubleArrayValues = new List<string>();
         public List<string> stringArrayValues = new List<string>();
 
@@ -34,9 +40,11 @@ namespace PumaGrasshopper
         public void StartNewSection()
         {
             boolStarts.Add(boolKeys.Count);
+            integerStarts.Add(integerKeys.Count);
             doubleStarts.Add(doubleKeys.Count);
             stringStarts.Add(stringKeys.Count);
             boolArrayStarts.Add(boolArrayKeys.Count);
+            integerArrayStarts.Add(integerArrayKeys.Count);
             doubleArrayStarts.Add(doubleArrayKeys.Count);
             stringArrayStarts.Add(stringArrayKeys.Count);
         }
@@ -59,10 +67,22 @@ namespace PumaGrasshopper
             boolValues.Add(value);
         }
 
+        public void AddInteger(string key, int value)
+        {
+            integerKeys.Add(key);
+            integerValues.Add(value);
+        }
+
         public void AddBoolArray(string key, bool[] values)
         {
             boolArrayKeys.Add(key);
             boolArrayValues.Add(Utils.ToCeArray(values));
+        }
+
+        public void AddIntegerArray(string key, int[] values)
+        {
+            integerArrayKeys.Add(key);
+            integerArrayValues.Add(Utils.ToCeArray(values));
         }
 
         public void AddDoubleArray(string key, double[] values)
@@ -79,10 +99,12 @@ namespace PumaGrasshopper
 
         public int[] GetStringStarts() => stringStarts.ToArray();
         public int[] GetBoolStarts() => boolStarts.ToArray();
+        public int[] GetIntegerStarts() => integerStarts.ToArray();
         public int[] GetDoubleStarts() => doubleStarts.ToArray();
 
         public int[] GetStringArrayStarts() => stringArrayStarts.ToArray();
         public int[] GetDoubleArrayStarts() => doubleArrayStarts.ToArray();
         public int[] GetBoolArrayStarts() => boolArrayStarts.ToArray();
+        public int[] GetIntegerArrayStarts() => integerArrayStarts.ToArray();
     }
 }

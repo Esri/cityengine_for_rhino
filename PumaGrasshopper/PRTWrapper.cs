@@ -59,12 +59,16 @@ namespace PumaGrasshopper
             int shapeCount,
             [In] IntPtr pBoolStarts, int boolCount,
             [In] IntPtr pBoolKeys, [In] IntPtr pBoolVals,
+            [In] IntPtr pIntegerStarts, int integerCount,
+            [In] IntPtr pIntegerKeys, [In] IntPtr pIntegerVals,
             [In] IntPtr pDoubleStarts, int doubleCount,
             [In] IntPtr pDoubleKeys, [In] IntPtr pDoubleVals,
             [In] IntPtr pStringStarts, int stringCount,
             [In] IntPtr pStringKeys, [In] IntPtr pStringVals,
             [In] IntPtr pBoolArrayStarts, int boolArrayCount,
             [In] IntPtr pBoolArrayKeys, [In] IntPtr pBoolArrayVals,
+            [In] IntPtr pIntegerArrayStarts, int integerArrayCount,
+            [In] IntPtr pIntegerArrayKeys, [In] IntPtr pIntegerArrayVals,
             [In] IntPtr pDoubleArrayStarts, int doubleArrayCount,
             [In] IntPtr pDoubleArrayKeys, [In] IntPtr pDoubleArrayVals,
             [In] IntPtr pStringArrayStarts, int stringArrayCount,
@@ -80,10 +84,12 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultAttributes(
             string rpk_path, [In] IntPtr pMeshes, 
-            [Out] IntPtr pBoolStarts, [Out] IntPtr pBoolKeys, [Out] IntPtr pBoolVals, 
+            [Out] IntPtr pBoolStarts, [Out] IntPtr pBoolKeys, [Out] IntPtr pBoolVals,
+            [Out] IntPtr pIntegerStarts, [Out] IntPtr pIntegerKeys, [Out] IntPtr pIntegerVals,
             [Out] IntPtr pDoubleStarts, [Out] IntPtr pDoubleKeys, [Out] IntPtr pDoubleVals, 
             [Out] IntPtr pStringStarts, [Out] IntPtr pStringKeys, [Out] IntPtr pStringVals,
             [Out] IntPtr pBoolArrayStarts, [Out] IntPtr pBoolArrayKeys, [Out] IntPtr pBoolArrayVals,
+            [Out] IntPtr pIntegerArrayStarts, [Out] IntPtr pIntegerArrayKeys, [Out] IntPtr pIntegerArrayVals,
             [Out] IntPtr pDoubleArrayStarts, [Out] IntPtr pDoubleArrayKeys, [Out] IntPtr pDoubleArrayVals,
             [Out] IntPtr pStringArrayStarts, [Out] IntPtr pStringArrayKeys, [Out] IntPtr pStringArrayVals);
 
@@ -116,9 +122,11 @@ namespace PumaGrasshopper
 
             var stringWrapper = new InteropWrapperString(MM.GetStringStarts(), ref MM.stringKeys, ref MM.stringValues);
             var boolWrapper = new InteropWrapperBoolean(MM.GetBoolStarts(), ref MM.boolKeys, ref MM.boolValues);
+            var integerWrapper = new InteropWrapperInteger(MM.GetIntegerStarts(), ref MM.integerKeys, ref MM.integerValues);
             var doubleWrapper = new InteropWrapperDouble(MM.GetDoubleStarts(), ref MM.doubleKeys, ref MM.doubleValues);
             var stringArrayWrapper = new InteropWrapperString(MM.GetStringArrayStarts(), ref MM.stringArrayKeys, ref MM.stringArrayValues);
             var boolArrayWrapper = new InteropWrapperString(MM.GetBoolArrayStarts(), ref MM.boolArrayKeys, ref MM.boolArrayValues);
+            var integerArrayWrapper = new InteropWrapperString(MM.GetIntegerArrayStarts(), ref MM.integerArrayKeys, ref MM.integerArrayValues);
             var doubleArrayWrapper = new InteropWrapperString(MM.GetDoubleArrayStarts(), ref MM.doubleArrayKeys, ref MM.doubleArrayValues);
 
             StringWrapper errorMsg = new StringWrapper("");
@@ -153,6 +161,10 @@ namespace PumaGrasshopper
                      boolWrapper.Count,
                      boolWrapper.KeysPtr(),
                      boolWrapper.ValuesPtr(),
+                     integerWrapper.StartsPtr(),
+                     integerWrapper.Count,
+                     integerWrapper.KeysPtr(),
+                     integerWrapper.ValuesPtr(),
                      doubleWrapper.StartsPtr(),
                      doubleWrapper.Count,
                      doubleWrapper.KeysPtr(),
@@ -165,6 +177,10 @@ namespace PumaGrasshopper
                      boolArrayWrapper.Count,
                      boolArrayWrapper.KeysPtr(),
                      boolArrayWrapper.ValuesPtr(),
+                     integerArrayWrapper.StartsPtr(),
+                     integerArrayWrapper.Count,
+                     integerArrayWrapper.KeysPtr(),
+                     integerArrayWrapper.ValuesPtr(),
                      doubleArrayWrapper.StartsPtr(),
                      doubleArrayWrapper.Count,
                      doubleArrayWrapper.KeysPtr(),
@@ -188,9 +204,11 @@ namespace PumaGrasshopper
 
             initialMeshesArray.Dispose();
             boolWrapper.Dispose();
+            integerWrapper.Dispose();
             doubleWrapper.Dispose();
             stringWrapper.Dispose();
             boolArrayWrapper.Dispose();
+            integerArrayWrapper.Dispose();
             doubleArrayWrapper.Dispose();
             stringArrayWrapper.Dispose();
 
@@ -373,17 +391,20 @@ namespace PumaGrasshopper
 
             var stringWrapper = new InteropWrapperString();
             var boolWrapper = new InteropWrapperBoolean();
+            var integerWrapper = new InteropWrapperInteger();
             var doubleWrapper = new InteropWrapperDouble();
             var stringArrayWrapper = new InteropWrapperString();
             var boolArrayWrapper = new InteropWrapperString();
             var doubleArrayWrapper = new InteropWrapperString();
-
+            var integerArrayWrapper = new InteropWrapperString();
 
             bool status = GetDefaultAttributes(rulePkg, initialMeshesArray.ConstPointer(), 
                 boolWrapper.StartsNonConstPtr(), boolWrapper.KeysNonConstPtr(), boolWrapper.ValuesNonConstPtr(),
+                integerWrapper.StartsNonConstPtr(), integerWrapper.KeysNonConstPtr(), integerWrapper.ValuesNonConstPtr(),
                 doubleWrapper.StartsNonConstPtr(), doubleWrapper.KeysNonConstPtr(), doubleWrapper.ValuesNonConstPtr(),
                 stringWrapper.StartsNonConstPtr(), stringWrapper.KeysNonConstPtr(), stringWrapper.ValuesNonConstPtr(),
                 boolArrayWrapper.StartsNonConstPtr(), boolArrayWrapper.KeysNonConstPtr(), boolArrayWrapper.ValuesNonConstPtr(),
+                integerArrayWrapper.StartsNonConstPtr(), integerArrayWrapper.KeysNonConstPtr(), integerArrayWrapper.ValuesNonConstPtr(),
                 doubleArrayWrapper.StartsNonConstPtr(), doubleArrayWrapper.KeysNonConstPtr(), doubleArrayWrapper.ValuesNonConstPtr(),
                 stringArrayWrapper.StartsNonConstPtr(), stringArrayWrapper.KeysNonConstPtr(), stringArrayWrapper.ValuesNonConstPtr());
 
@@ -391,21 +412,27 @@ namespace PumaGrasshopper
             {
                 stringWrapper.Dispose();
                 boolWrapper.Dispose();
+                integerWrapper.Dispose();
                 doubleWrapper.Dispose();
                 stringArrayWrapper.Dispose();
                 doubleArrayWrapper.Dispose();
                 boolArrayWrapper.Dispose();
+                integerArrayWrapper.Dispose();
                 return null;
             }
 
-            var defaultValues = AttributesValuesMap.FromInteropWrappers(initialMeshes.Count, ref boolWrapper, ref stringWrapper, ref doubleWrapper, ref boolArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
+            AttributesValuesMap[] defaultValues = AttributesValuesMap.FromInteropWrappers(
+                initialMeshes.Count, ref boolWrapper, ref integerWrapper, ref stringWrapper, ref doubleWrapper,
+                ref boolArrayWrapper, ref integerArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
             
             stringWrapper.Dispose();
             boolWrapper.Dispose();
+            integerWrapper.Dispose();
             doubleWrapper.Dispose();
             stringArrayWrapper.Dispose();
             doubleArrayWrapper.Dispose();
             boolArrayWrapper.Dispose();
+            integerArrayWrapper.Dispose();
 
             return defaultValues;
         }

@@ -64,6 +64,9 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 						   ON_SimpleArray<int>* pBoolStarts, const int boolCount,
 						   ON_ClassArray<ON_wString>* pBoolKeys, ON_SimpleArray<int>* pBoolVals,
 
+						   ON_SimpleArray<int>* pIntegerStarts, const int integerCount,
+						   ON_ClassArray<ON_wString>* pIntegerKeys, ON_SimpleArray<int32_t>* pIntegerVals,
+
 						   ON_SimpleArray<int>* pDoubleStarts, const int doubleCount,
 						   ON_ClassArray<ON_wString>* pDoubleKeys, ON_SimpleArray<double>* pDoubleVals,
 
@@ -72,6 +75,9 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 
 						   ON_SimpleArray<int>* pBoolArrayStarts, const int boolArrayCount,
                            ON_ClassArray<ON_wString>* pBoolArrayKeys, ON_ClassArray<ON_wString>* pBoolArrayVals,
+
+						   ON_SimpleArray<int>* pIntegerArrayStarts, const int integerArrayCount,
+						   ON_ClassArray<ON_wString>* pIntegerArrayKeys, ON_ClassArray<ON_wString>* pIntegerArrayVals,
 
 						   ON_SimpleArray<int>* pDoubleArrayStarts, const int doubleArrayCount,
                            ON_ClassArray<ON_wString>* pDoubleArrayKeys, ON_ClassArray<ON_wString>* pDoubleArrayVals,
@@ -113,42 +119,52 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 	for (int i = 0; i < shapeCount; ++i) {
 		// by initial shape
 		int indexStartBool = *pBoolStarts->At(i);
+		int indexStartInteger = *pIntegerStarts->At(i);
 		int indexStartDouble = *pDoubleStarts->At(i);
 		int indexStartString = *pStringStarts->At(i);
 		int indexStartBoolArray = *pBoolArrayStarts->At(i);
+		int indexStartIntegerArray = *pIntegerArrayStarts->At(i);
 		int indexStartDoubleArray = *pDoubleArrayStarts->At(i);
 		int indexStartStringArray = *pStringArrayStarts->At(i);
 
 		bool notLastShape = i < shapeCount - 1;
 
 		int nextIndexStartBool = notLastShape ? *pBoolStarts->At(i + 1) : boolCount;
+		int nextIndexStartInteger = notLastShape ? *pIntegerStarts->At(i + 1) : integerCount;
 		int nextIndexStartDouble = notLastShape ? *pDoubleStarts->At(i + 1) : doubleCount;
 		int nextIndexStartString = notLastShape ? *pStringStarts->At(i + 1) : stringCount;
 		int nextIndexStartBoolArray = notLastShape ? *pBoolArrayStarts->At(i + 1) : boolArrayCount;
+		int nextIndexStartIntegerArray = notLastShape ? *pIntegerArrayStarts->At(i + 1) : integerArrayCount;
 		int nextIndexStartDoubleArray = notLastShape ? *pDoubleArrayStarts->At(i + 1) : doubleArrayCount;
 		int nextIndexStartStringArray = notLastShape ? *pStringArrayStarts->At(i + 1) : stringArrayCount;
 
 		int boolAttrCount = nextIndexStartBool - indexStartBool;
+		int integerAttrCount = nextIndexStartInteger - indexStartInteger;
 		int doubleAttrCount = nextIndexStartDouble - indexStartDouble;
 		int stringAttrCount = nextIndexStartString - indexStartString;
 		int boolAttrArrayCount = nextIndexStartBoolArray - indexStartBoolArray;
+		int integerAttrArrayCount = nextIndexStartIntegerArray - indexStartIntegerArray;
 		int doubleAttrArrayCount = nextIndexStartDoubleArray - indexStartDoubleArray;
 		int stringAttrArrayCount = nextIndexStartStringArray - indexStartStringArray;
 
 		pcu::unpackBoolAttributes(indexStartBool, boolAttrCount, pBoolKeys, pBoolVals, aBuilders[i]);
+		pcu::unpackIntegerAttributes(indexStartInteger, integerAttrCount, pIntegerKeys, pIntegerVals, aBuilders[i]);
 		pcu::unpackDoubleAttributes(indexStartDouble, doubleAttrCount, pDoubleKeys, pDoubleVals, aBuilders[i]);
 		pcu::unpackStringAttributes(indexStartString, stringAttrCount, pStringKeys, pStringVals,
 		                      aBuilders[i], false);
 		pcu::unpackBoolArrayAttributes(indexStartBoolArray, boolAttrArrayCount, pBoolArrayKeys, pBoolArrayVals,
 		                           aBuilders[i]);
+		pcu::unpackIntegerArrayAttributes(indexStartIntegerArray, integerAttrArrayCount, pIntegerArrayKeys, pIntegerArrayVals, aBuilders[i]);
 		pcu::unpackDoubleArrayAttributes(indexStartDoubleArray, doubleAttrArrayCount, pDoubleArrayKeys, pDoubleArrayVals, aBuilders[i]);
 		pcu::unpackStringAttributes(indexStartStringArray, stringAttrArrayCount, pStringArrayKeys, pStringArrayVals,
 		                            aBuilders[i], true);
 
 		indexStartBool += boolAttrCount;
+		indexStartInteger += integerAttrCount;
 		indexStartDouble += doubleAttrCount;
 		indexStartString += stringAttrCount;
 		indexStartBoolArray += boolAttrArrayCount;
+		indexStartIntegerArray += integerAttrArrayCount;
 		indexStartDoubleArray += doubleAttrArrayCount;
 		indexStartStringArray += stringAttrArrayCount;
 	}
@@ -270,7 +286,7 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 		else
 			pAttributesBuffer->Append({});
 
-		pAttributesTypes->Append(attribute->mType);
+		pAttributesTypes->Append((int)attribute->mType);
 		pAttributesTypes->Append(attribute->mAnnotations.size());
 
 		for (const auto& annot : attribute->mAnnotations) {
@@ -322,9 +338,11 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 
 RHINOPRT_API bool GetDefaultAttributes(	const wchar_t* rpk_path, ON_SimpleArray<const ON_Mesh*>* pMesh,
 										ON_SimpleArray<int>* pBoolStarts, ON_ClassArray<ON_wString>* pBoolKeys, ON_SimpleArray<int>* pBoolVals,
+										ON_SimpleArray<int>* pIntegerStarts, ON_ClassArray<ON_wString>* pIntegerKeys, ON_SimpleArray<int32_t>* pIntegerVals,
 										ON_SimpleArray<int>* pDoubleStarts, ON_ClassArray<ON_wString>* pDoubleKeys, ON_SimpleArray<double>* pDoubleVals,
 										ON_SimpleArray<int>* pStringStarts, ON_ClassArray<ON_wString>* pStringKeys, ON_ClassArray<ON_wString>* pStringVals,
 										ON_SimpleArray<int>* pBoolArrayStarts, ON_ClassArray<ON_wString>* pBoolArrayKeys, ON_ClassArray<ON_wString>* pBoolArrayVals,
+										ON_SimpleArray<int>* pIntegerArrayStarts, ON_ClassArray<ON_wString>* pIntegerArrayKeys, ON_ClassArray<ON_wString>* pIntegerArrayVals,
 										ON_SimpleArray<int>* pDoubleArrayStarts, ON_ClassArray<ON_wString>* pDoubleArrayKeys, ON_ClassArray<ON_wString>* pDoubleArrayVals,
 										ON_SimpleArray<int>* pStringArrayStarts, ON_ClassArray<ON_wString>* pStringArrayKeys, ON_ClassArray<ON_wString>* pStringArrayVals) {
 	if (rpk_path == nullptr || pMesh == nullptr || pMesh->Count() == 0)
@@ -351,9 +369,11 @@ RHINOPRT_API bool GetDefaultAttributes(	const wchar_t* rpk_path, ON_SimpleArray<
 
 		// Set starting indices for current shape
 		pBoolStarts->Append(pBoolKeys->Count());
+		pIntegerStarts->Append(pIntegerKeys->Count());
 		pDoubleStarts->Append(pDoubleKeys->Count());
 		pStringStarts->Append(pStringKeys->Count());
 		pBoolArrayStarts->Append(pBoolArrayKeys->Count());
+		pIntegerArrayStarts->Append(pIntegerArrayKeys->Count());
 		pDoubleArrayStarts->Append(pDoubleArrayKeys->Count());
 		pStringArrayStarts->Append(pStringArrayKeys->Count());
 
@@ -385,8 +405,8 @@ RHINOPRT_API bool GetDefaultAttributes(	const wchar_t* rpk_path, ON_SimpleArray<
 			case prt::AttributeMap::PrimitiveType::PT_INT: {
 				const int value = shapeDefaultValues->getInt(key, &status);
 				if (status == prt::Status::STATUS_OK) {
-					pDoubleKeys->Append(key);
-					pDoubleVals->Append(value);
+					pIntegerKeys->Append(key);
+					pIntegerVals->Append(value);
 				}
 				break;
 			}
@@ -418,10 +438,10 @@ RHINOPRT_API bool GetDefaultAttributes(	const wchar_t* rpk_path, ON_SimpleArray<
 			}
 			case prt::AttributeMap::PrimitiveType::PT_INT_ARRAY: {
 				size_t count(0);
-				const int* const value = shapeDefaultValues->getIntArray(key, &count, &status);
+				const int32_t* const value = shapeDefaultValues->getIntArray(key, &count, &status);
 				if (status == prt::Status::STATUS_OK) {
-					pDoubleArrayKeys->Append(key);
-					pDoubleArrayVals->Append(pcu::toCeArray(value, count).c_str());
+					pIntegerArrayKeys->Append(key);
+					pIntegerArrayVals->Append(pcu::toCeArray(value, count).c_str());
 				}
 				break;
 			}

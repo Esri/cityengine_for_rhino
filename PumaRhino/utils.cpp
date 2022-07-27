@@ -57,7 +57,7 @@ void checkLastError(const std::string& exceptionPrefix) {
 namespace pcu {
 
 ShapeAttributes::ShapeAttributes(pcu::RuleFileInfoPtr ruleFileInfo, const std::wstring rulef, const std::wstring startRl,
-                                 const std::wstring shapeN, int seed)
+                                 const std::wstring shapeN, int32_t seed)
     : ruleFileInfo(std::move(ruleFileInfo)), ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(seed) {}
 
 // location of RhinoPRT shared library
@@ -394,6 +394,15 @@ void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
 	}
 }
 
+void unpackIntegerAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int32_t>* values,
+	AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+		const int32_t value(*values->At(i));
+		pcu::fillMapBuilder(key, value, aBuilder);
+	}
+}
+
 void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
                            AttributeMapBuilderPtr& aBuilder) {
 	for (int i = start; i < start + count; ++i) {
@@ -410,6 +419,15 @@ void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* 
 		const std::wstring key(keys->At(i)->Array());
 		const auto vArray = pcu::fromCeArray(values->At(i)->Array());
 		pcu::fillArrayMapBuilder<bool>(key, vArray, aBuilder);
+	}
+}
+
+void unpackIntegerArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
+	ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+		const auto vArray = pcu::fromCeArray(values->At(i)->Array());
+		pcu::fillArrayMapBuilder<int>(key, vArray, aBuilder);
 	}
 }
 

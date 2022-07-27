@@ -127,6 +127,7 @@ namespace PumaGrasshopper
 
         public static string[] StringFromCeArray(string values) => values.Split(':');
         public static bool[] BoolFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
+        public static int[] IntegerFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToInt32(value));
         public static double[] DoubleFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
 
         public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
@@ -148,6 +149,17 @@ namespace PumaGrasshopper
             }
             return tree;
         }
+
+        public static GH_Structure<GH_Integer> FromListToTree(List<int> valueList)
+        {
+            GH_Structure<GH_Integer> tree = new GH_Structure<GH_Integer>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Integer(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+
         public static GH_Structure<GH_String> FromListToTree(List<string> valueList)
         {
             GH_Structure<GH_String> tree = new GH_Structure<GH_String>();
@@ -174,6 +186,16 @@ namespace PumaGrasshopper
             for (int i = 0; i < valueList.Count; ++i)
             {
                 tree.AppendRange(valueList[i].ConvertAll(val => new GH_Boolean(val)), new GH_Path(i));
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_Integer> FromListToTree(List<List<int>> valueList)
+        {
+            GH_Structure<GH_Integer> tree = new GH_Structure<GH_Integer>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.AppendRange(valueList[i].ConvertAll(val => new GH_Integer(val)), new GH_Path(i));
             }
             return tree;
         }

@@ -107,6 +107,39 @@ namespace PumaGrasshopper
         public double[] ValuesToArray() => Values.ToArray();
     }
 
+    public class InteropWrapperInteger: AttributeInterop
+    {
+        private SimpleArrayInt Values;
+
+        public InteropWrapperInteger(): base()
+        {
+            Keys = new ClassArrayString();
+            Values = new SimpleArrayInt();
+        }
+
+        public InteropWrapperInteger(int[] starts, ref List<string> keys, ref List<int> values): base(starts, keys.Count)
+        {
+            Keys = new ClassArrayString();
+            Values = new SimpleArrayInt(values);
+
+            foreach (var key in keys)
+            {
+                Keys.Add(key);
+            }
+        }
+
+        public new void Dispose()
+        {
+            base.Dispose();
+            Values.Dispose();
+        }
+
+        public IntPtr ValuesPtr() => Values.ConstPointer();
+        public IntPtr ValuesNonConstPtr() => Values.NonConstPointer();
+
+        public int[] ValuesToArray() => Values.ToArray();
+    }
+
     public class InteropWrapperBoolean: AttributeInterop
     {
         private SimpleArrayInt Values;
