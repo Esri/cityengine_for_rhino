@@ -252,9 +252,9 @@ namespace PumaGrasshopper
 
                     Material mat = new Material()
                     {
-                        DiffuseColor = Color.FromArgb((int)diffuse[0], (int)diffuse[1], (int)diffuse[2]),
-                        AmbientColor = Color.FromArgb((int)ambient[0], (int)ambient[1], (int)ambient[2]),
-                        SpecularColor = Color.FromArgb((int)specular[0], (int)specular[1], (int)specular[2]),
+                        DiffuseColor = Utils.ColorFromRGB(diffuse),
+                        AmbientColor = Utils.ColorFromRGB(ambient),
+                        SpecularColor = Utils.ColorFromRGB(specular),
                         Transparency = 1.0 - opacity,
                         Shine = shininess,
                         FresnelReflections = true,

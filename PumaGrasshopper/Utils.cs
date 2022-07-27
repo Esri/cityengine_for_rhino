@@ -229,6 +229,11 @@ namespace PumaGrasshopper
             return ColorTranslator.FromHtml(hexColor);
         }
 
+        public static Color ColorFromRGB(double[] colorArray)
+        {
+            return Color.FromArgb((int)(colorArray[0] * 255), (int)(colorArray[1] * 255), (int)(colorArray[2] * 255));
+        }
+
         public static bool IsInteger(double d)
         {
             return Math.Abs(d % 1) <= (Double.Epsilon * 100);

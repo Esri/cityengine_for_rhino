@@ -215,9 +215,9 @@ void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee) 
 }
 
 void appendColor(const ON_Color& color, ON_SimpleArray<double>* pArray){
-	pArray->Append(color.Red());
-	pArray->Append(color.Green());
-	pArray->Append(color.Blue());
+	pArray->Append(color.FractionRed());
+	pArray->Append(color.FractionGreen());
+	pArray->Append(color.FractionBlue());
 }
 
 std::string percentEncode(const std::string& utf8String) {
