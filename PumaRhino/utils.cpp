@@ -412,7 +412,6 @@ void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>
 	}
 }
 
-
 void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
                               AttributeMapBuilderPtr& aBuilder) {
 	for (int i = start; i < start + count; ++i) {
