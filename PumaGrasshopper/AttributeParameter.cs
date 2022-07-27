@@ -140,24 +140,6 @@ namespace PumaGrasshopper.AttributeParameter
         {
             if (PersistentDataCount > 0) return PersistentData;
 
-            if (mExpectsArray)
-            {
-                //TODO refactor -> get value from local attribute list
-                List<List<bool>> defaultValues = PRTWrapper.GetDefaultValuesBooleanArray(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
-            else
-            {
-                List<bool> defaultValues = PRTWrapper.GetDefaultValuesBoolean(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
-
             return new GH_Structure<GH_Boolean>();
         }
 
@@ -207,25 +189,6 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_Number> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
-
-            if (mExpectsArray)
-            {
-                //TODO refactor -> get value from local attribute list
-                List<List<double>> defaultValues = PRTWrapper.GetDefaultValuesNumberArray(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
-            else
-            {
-                //TODO refactor -> get value from local attribute list
-                List<double> defaultValues = PRTWrapper.GetDefaultValuesNumber(Name);
-                if(defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
 
             return new GH_Structure<GH_Number>();
         }
@@ -284,25 +247,6 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_String> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
-
-            if (mExpectsArray)
-            {
-                //TODO refactor -> get value from local attribute list
-                List<List<string>> defaultValues = PRTWrapper.GetDefaultValuesTextArray(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
-            else
-            {
-                //TODO refactor -> get value from local attribute list
-                List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
 
             return new GH_Structure<GH_String>();
         }
@@ -370,13 +314,6 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_Colour> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
-
-            //TODO refactor -> get value from local attribute list
-            List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
-            if (defaultValues != null)
-            {
-                return Utils.HexListToColorTree(defaultValues);
-            }
             
             return new GH_Structure<GH_Colour>();
         }

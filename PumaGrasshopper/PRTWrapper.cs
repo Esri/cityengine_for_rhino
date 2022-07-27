@@ -96,15 +96,6 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetMaterialGenerationOption(bool doGenerate);
 
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesBooleanArray(string key, [In, Out] IntPtr pValues, [In, Out] IntPtr pSizes);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesNumberArray(string key, [In, Out] IntPtr pValues, [In, Out] IntPtr pSizes);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesTextArray(string key, [In, Out] IntPtr pTexts, [In, Out] IntPtr pSizes);
-
         public static GenerationResult Generate(string rpkPath,
             ref RuleAttributesMap MM,
             List<Mesh> initialMeshes)
@@ -419,11 +410,6 @@ namespace PumaGrasshopper
             return defaultValues;
         }
 
-
-        public static void DecodeDefaultValues<T>(int[] starts, string[] keys, T[] values) {
-            
-        }
-
         public static List<String> GetCGAPrintOutput(int initialShapeIndex)
         {
             var printOutput = new ClassArrayString();
@@ -569,113 +555,5 @@ namespace PumaGrasshopper
 
             return version;
         }
-
-        public static List<bool> GetDefaultValuesBoolean(string key)
-        {
-            SimpleArrayInt boolArray = new SimpleArrayInt();
-            var pBoolArray = boolArray.NonConstPointer();
-            bool hasDefault = false; //  GetDefaultValuesBoolean(key, pBoolArray);
-
-            if (!hasDefault) return null;
-
-            List<bool> boolList = new List<int>(boolArray.ToArray()).ConvertAll(x => Convert.ToBoolean(x));
-            boolArray.Dispose();
-
-            return boolList;
-        }
-
-        public static List<double> GetDefaultValuesNumber(string key)
-        {
-            SimpleArrayDouble doubleArray = new SimpleArrayDouble();
-            var pDoubleArray = doubleArray.NonConstPointer();
-            bool hasDefault = false; //GetDefaultValuesNumber(key, pDoubleArray);
-
-            if (!hasDefault) return null;
-
-            List<double> doubleList = new List<double>(doubleArray.ToArray());
-            doubleArray.Dispose();
-
-            return doubleList;
-        }
-
-        public static List<string> GetDefaultValuesText(string key)
-        {
-            ClassArrayString stringArray = new ClassArrayString();
-            var pStringArray = stringArray.NonConstPointer();
-            bool hasDefault = false; // GetDefaultValuesText(key, pStringArray);
-
-            if (!hasDefault) return null;
-
-            List<string> stringList = new List<string>(stringArray.ToArray());
-            stringArray.Dispose();
-
-            return stringList;
-        }
-
-        public static List<List<bool>> GetDefaultValuesBooleanArray(string key)
-        {
-            // Use a single array to pass the data flattened,
-            // and a second array of int to pass the size of the sub-array of each initial shape.
-            SimpleArrayInt valueArray = new SimpleArrayInt();
-            SimpleArrayInt sizeArray = new SimpleArrayInt();
-
-            var pValueArray = valueArray.NonConstPointer();
-            var pSizeArray = sizeArray.NonConstPointer();
-
-            bool hasDefault = GetDefaultValuesBooleanArray(key, pValueArray, pSizeArray);
-
-            if (!hasDefault) return null;
-
-            List<bool> valueList = new List<int>(valueArray.ToArray()).ConvertAll(x => Convert.ToBoolean(x));
-            List<int> sizeList = new List<int>(sizeArray.ToArray());
-
-            valueArray.Dispose();
-            sizeArray.Dispose();
-
-            return Utils.UnflattenList(valueList, sizeList);
-        }
-
-        public static List<List<double>> GetDefaultValuesNumberArray(string key)
-        {
-            SimpleArrayDouble valueArray = new SimpleArrayDouble();
-            SimpleArrayInt sizeArray = new SimpleArrayInt();
-
-            var pValueArray = valueArray.NonConstPointer();
-            var pSizeArray = sizeArray.NonConstPointer();
-
-            bool hasDefault = GetDefaultValuesNumberArray(key, pValueArray, pSizeArray);
-
-            if (!hasDefault) return null;
-
-            List<double> valueList = new List<double>(valueArray.ToArray());
-            List<int> sizeList = new List<int>(sizeArray.ToArray());
-
-            valueArray.Dispose();
-            sizeArray.Dispose();
-
-            return Utils.UnflattenList(valueList, sizeList);
-        }
-
-        public static List<List<string>> GetDefaultValuesTextArray(string key)
-        {
-            ClassArrayString stringArray = new ClassArrayString();
-            SimpleArrayInt sizeArray = new SimpleArrayInt();
-
-            var pStringArray = stringArray.NonConstPointer();
-            var pSizeArray = sizeArray.NonConstPointer();
-
-            bool hasDefault = GetDefaultValuesTextArray(key, pStringArray, pSizeArray);
-
-            if (!hasDefault) return null;
-
-            List<string> stringList = new List<string>(stringArray.ToArray());
-            List<int> sizeList = new List<int>(sizeArray.ToArray());
-
-            stringArray.Dispose();
-            sizeArray.Dispose();
-
-            return Utils.UnflattenList(stringList, sizeList);
-        }
-  
     }
 }
