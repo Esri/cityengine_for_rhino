@@ -93,11 +93,11 @@ struct ShapeAttributes {
 	std::wstring startRule;
 	std::wstring shapeName;
 	RuleFileInfoPtr ruleFileInfo;
-	int seed;
+	int32_t seed;
 
 	ShapeAttributes(RuleFileInfoPtr ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
 	                const std::wstring startRl = L"Default$Lot", const std::wstring shapeN = L"Lot",
-	                const int seed = 0);
+	                const int32_t seed = 0);
 };
 
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);

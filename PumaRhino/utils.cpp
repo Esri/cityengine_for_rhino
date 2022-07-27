@@ -362,7 +362,7 @@ const std::wstring toCeArray(const double* values, size_t count) {
 	return serializedArray;
 }
 
-const std::wstring toCeArray(const int* values, size_t count) {
+const std::wstring toCeArray(const int32_t* values, size_t count) {
 	std::wstring serializedArray;
 	for (size_t i = 0; i < count; ++i) {
 		serializedArray +=  std::to_wstring(values[i]) + CE_ARRAY_DELIMITER;
