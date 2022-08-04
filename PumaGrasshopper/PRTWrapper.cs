@@ -55,16 +55,20 @@ namespace PumaGrasshopper
         public static extern bool InitializeRhinoPRT();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern int Generate(string rpk_path, [Out] IntPtr errorMsg,
+        public static extern int Generate(string rpk_path,
             int shapeCount,
             [In] IntPtr pBoolStarts, int boolCount,
             [In] IntPtr pBoolKeys, [In] IntPtr pBoolVals,
+            [In] IntPtr pIntegerStarts, int integerCount,
+            [In] IntPtr pIntegerKeys, [In] IntPtr pIntegerVals,
             [In] IntPtr pDoubleStarts, int doubleCount,
             [In] IntPtr pDoubleKeys, [In] IntPtr pDoubleVals,
             [In] IntPtr pStringStarts, int stringCount,
             [In] IntPtr pStringKeys, [In] IntPtr pStringVals,
             [In] IntPtr pBoolArrayStarts, int boolArrayCount,
             [In] IntPtr pBoolArrayKeys, [In] IntPtr pBoolArrayVals,
+            [In] IntPtr pIntegerArrayStarts, int integerArrayCount,
+            [In] IntPtr pIntegerArrayKeys, [In] IntPtr pIntegerArrayVals,
             [In] IntPtr pDoubleArrayStarts, int doubleArrayCount,
             [In] IntPtr pDoubleArrayKeys, [In] IntPtr pDoubleArrayVals,
             [In] IntPtr pStringArrayStarts, int stringArrayCount,
@@ -80,10 +84,12 @@ namespace PumaGrasshopper
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern bool GetDefaultAttributes(
             string rpk_path, [In] IntPtr pMeshes, 
-            [Out] IntPtr pBoolStarts, [Out] IntPtr pBoolKeys, [Out] IntPtr pBoolVals, 
+            [Out] IntPtr pBoolStarts, [Out] IntPtr pBoolKeys, [Out] IntPtr pBoolVals,
+            [Out] IntPtr pIntegerStarts, [Out] IntPtr pIntegerKeys, [Out] IntPtr pIntegerVals,
             [Out] IntPtr pDoubleStarts, [Out] IntPtr pDoubleKeys, [Out] IntPtr pDoubleVals, 
             [Out] IntPtr pStringStarts, [Out] IntPtr pStringKeys, [Out] IntPtr pStringVals,
             [Out] IntPtr pBoolArrayStarts, [Out] IntPtr pBoolArrayKeys, [Out] IntPtr pBoolArrayVals,
+            [Out] IntPtr pIntegerArrayStarts, [Out] IntPtr pIntegerArrayKeys, [Out] IntPtr pIntegerArrayVals,
             [Out] IntPtr pDoubleArrayStarts, [Out] IntPtr pDoubleArrayKeys, [Out] IntPtr pDoubleArrayVals,
             [Out] IntPtr pStringArrayStarts, [Out] IntPtr pStringArrayKeys, [Out] IntPtr pStringArrayVals);
 
@@ -95,15 +101,6 @@ namespace PumaGrasshopper
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SetMaterialGenerationOption(bool doGenerate);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesBooleanArray(string key, [In, Out] IntPtr pValues, [In, Out] IntPtr pSizes);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesNumberArray(string key, [In, Out] IntPtr pValues, [In, Out] IntPtr pSizes);
-
-        [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern bool GetDefaultValuesTextArray(string key, [In, Out] IntPtr pTexts, [In, Out] IntPtr pSizes);
 
         public static GenerationResult Generate(string rpkPath,
             ref RuleAttributesMap MM,
@@ -125,16 +122,15 @@ namespace PumaGrasshopper
 
             var stringWrapper = new InteropWrapperString(MM.GetStringStarts(), ref MM.stringKeys, ref MM.stringValues);
             var boolWrapper = new InteropWrapperBoolean(MM.GetBoolStarts(), ref MM.boolKeys, ref MM.boolValues);
+            var integerWrapper = new InteropWrapperInteger(MM.GetIntegerStarts(), ref MM.integerKeys, ref MM.integerValues);
             var doubleWrapper = new InteropWrapperDouble(MM.GetDoubleStarts(), ref MM.doubleKeys, ref MM.doubleValues);
             var stringArrayWrapper = new InteropWrapperString(MM.GetStringArrayStarts(), ref MM.stringArrayKeys, ref MM.stringArrayValues);
             var boolArrayWrapper = new InteropWrapperString(MM.GetBoolArrayStarts(), ref MM.boolArrayKeys, ref MM.boolArrayValues);
+            var integerArrayWrapper = new InteropWrapperString(MM.GetIntegerArrayStarts(), ref MM.integerArrayKeys, ref MM.integerArrayValues);
             var doubleArrayWrapper = new InteropWrapperString(MM.GetDoubleArrayStarts(), ref MM.doubleArrayKeys, ref MM.doubleArrayValues);
 
-            StringWrapper errorMsg = new StringWrapper("");
-            IntPtr pErrorMsg = errorMsg.NonConstPointer;
-
             // Materials
-            var colorsArray = new SimpleArrayInt();
+            var colorsArray = new SimpleArrayDouble();
             IntPtr pColorsArray = colorsArray.NonConstPointer();
             var matIndices = new SimpleArrayInt();
             IntPtr pMatIndices = matIndices.NonConstPointer();
@@ -156,12 +152,15 @@ namespace PumaGrasshopper
             IntPtr pReportStringArray = reportStringArray.NonConstPointer();
 
             Generate(rpkPath,
-                     pErrorMsg,
                      initialMeshes.Count,
                      boolWrapper.StartsPtr(),
                      boolWrapper.Count,
                      boolWrapper.KeysPtr(),
                      boolWrapper.ValuesPtr(),
+                     integerWrapper.StartsPtr(),
+                     integerWrapper.Count,
+                     integerWrapper.KeysPtr(),
+                     integerWrapper.ValuesPtr(),
                      doubleWrapper.StartsPtr(),
                      doubleWrapper.Count,
                      doubleWrapper.KeysPtr(),
@@ -174,6 +173,10 @@ namespace PumaGrasshopper
                      boolArrayWrapper.Count,
                      boolArrayWrapper.KeysPtr(),
                      boolArrayWrapper.ValuesPtr(),
+                     integerArrayWrapper.StartsPtr(),
+                     integerArrayWrapper.Count,
+                     integerArrayWrapper.KeysPtr(),
+                     integerArrayWrapper.ValuesPtr(),
                      doubleArrayWrapper.StartsPtr(),
                      doubleArrayWrapper.Count,
                      doubleArrayWrapper.KeysPtr(),
@@ -197,13 +200,18 @@ namespace PumaGrasshopper
 
             initialMeshesArray.Dispose();
             boolWrapper.Dispose();
+            integerWrapper.Dispose();
             doubleWrapper.Dispose();
             stringWrapper.Dispose();
+            boolArrayWrapper.Dispose();
+            integerArrayWrapper.Dispose();
+            doubleArrayWrapper.Dispose();
+            stringArrayWrapper.Dispose();
 
             var meshCountsArray = meshCounts.ToArray();
             var meshesArray = meshes.ToNonConstArray();
             // Materials
-            int[] colors = colorsArray.ToArray();
+            double[] colors = colorsArray.ToArray();
             int[] materialIndices = matIndices.ToArray();
             string[] textureKeys = texKeys.ToArray();
             string[] texturePaths = texPaths.ToArray();
@@ -249,9 +257,9 @@ namespace PumaGrasshopper
 
                     Material mat = new Material()
                     {
-                        DiffuseColor = Color.FromArgb(diffuse[0], diffuse[1], diffuse[2]),
-                        AmbientColor = Color.FromArgb(ambient[0], ambient[1],ambient[2]),
-                        SpecularColor = Color.FromArgb(specular[0], specular[1], specular[2]),
+                        DiffuseColor = Utils.ColorFromRGB(diffuse),
+                        AmbientColor = Utils.ColorFromRGB(ambient),
+                        SpecularColor = Utils.ColorFromRGB(specular),
                         Transparency = 1.0 - opacity,
                         Shine = shininess,
                         FresnelReflections = true,
@@ -302,7 +310,8 @@ namespace PumaGrasshopper
 
                     textureOffset += texCount;
 
-                    materials[meshId] = new GH_Material(Rhino.Render.RenderMaterial.CreateBasicMaterial(mat));
+                    materials[meshId] = new GH_Material(Rhino.Render.RenderMaterial.CreateBasicMaterial(mat, Rhino.RhinoDoc.ActiveDoc));
+                    
                 }
 
                 id += meshCount + 1;
@@ -379,17 +388,20 @@ namespace PumaGrasshopper
 
             var stringWrapper = new InteropWrapperString();
             var boolWrapper = new InteropWrapperBoolean();
+            var integerWrapper = new InteropWrapperInteger();
             var doubleWrapper = new InteropWrapperDouble();
             var stringArrayWrapper = new InteropWrapperString();
             var boolArrayWrapper = new InteropWrapperString();
             var doubleArrayWrapper = new InteropWrapperString();
-
+            var integerArrayWrapper = new InteropWrapperString();
 
             bool status = GetDefaultAttributes(rulePkg, initialMeshesArray.ConstPointer(), 
                 boolWrapper.StartsNonConstPtr(), boolWrapper.KeysNonConstPtr(), boolWrapper.ValuesNonConstPtr(),
+                integerWrapper.StartsNonConstPtr(), integerWrapper.KeysNonConstPtr(), integerWrapper.ValuesNonConstPtr(),
                 doubleWrapper.StartsNonConstPtr(), doubleWrapper.KeysNonConstPtr(), doubleWrapper.ValuesNonConstPtr(),
                 stringWrapper.StartsNonConstPtr(), stringWrapper.KeysNonConstPtr(), stringWrapper.ValuesNonConstPtr(),
                 boolArrayWrapper.StartsNonConstPtr(), boolArrayWrapper.KeysNonConstPtr(), boolArrayWrapper.ValuesNonConstPtr(),
+                integerArrayWrapper.StartsNonConstPtr(), integerArrayWrapper.KeysNonConstPtr(), integerArrayWrapper.ValuesNonConstPtr(),
                 doubleArrayWrapper.StartsNonConstPtr(), doubleArrayWrapper.KeysNonConstPtr(), doubleArrayWrapper.ValuesNonConstPtr(),
                 stringArrayWrapper.StartsNonConstPtr(), stringArrayWrapper.KeysNonConstPtr(), stringArrayWrapper.ValuesNonConstPtr());
 
@@ -397,28 +409,29 @@ namespace PumaGrasshopper
             {
                 stringWrapper.Dispose();
                 boolWrapper.Dispose();
+                integerWrapper.Dispose();
                 doubleWrapper.Dispose();
                 stringArrayWrapper.Dispose();
                 doubleArrayWrapper.Dispose();
                 boolArrayWrapper.Dispose();
+                integerArrayWrapper.Dispose();
                 return null;
             }
 
-            var defaultValues = AttributesValuesMap.FromInteropWrappers(initialMeshes.Count, ref boolWrapper, ref stringWrapper, ref doubleWrapper, ref boolArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
+            AttributesValuesMap[] defaultValues = AttributesValuesMap.FromInteropWrappers(
+                initialMeshes.Count, ref boolWrapper, ref integerWrapper, ref stringWrapper, ref doubleWrapper,
+                ref boolArrayWrapper, ref integerArrayWrapper, ref stringArrayWrapper, ref doubleArrayWrapper);
             
             stringWrapper.Dispose();
             boolWrapper.Dispose();
+            integerWrapper.Dispose();
             doubleWrapper.Dispose();
             stringArrayWrapper.Dispose();
             doubleArrayWrapper.Dispose();
             boolArrayWrapper.Dispose();
+            integerArrayWrapper.Dispose();
 
             return defaultValues;
-        }
-
-
-        public static void DecodeDefaultValues<T>(int[] starts, string[] keys, T[] values) {
-            
         }
 
         public static List<String> GetCGAPrintOutput(int initialShapeIndex)
@@ -566,113 +579,5 @@ namespace PumaGrasshopper
 
             return version;
         }
-
-        public static List<bool> GetDefaultValuesBoolean(string key)
-        {
-            SimpleArrayInt boolArray = new SimpleArrayInt();
-            var pBoolArray = boolArray.NonConstPointer();
-            bool hasDefault = false; //  GetDefaultValuesBoolean(key, pBoolArray);
-
-            if (!hasDefault) return null;
-
-            List<bool> boolList = new List<int>(boolArray.ToArray()).ConvertAll(x => Convert.ToBoolean(x));
-            boolArray.Dispose();
-
-            return boolList;
-        }
-
-        public static List<double> GetDefaultValuesNumber(string key)
-        {
-            SimpleArrayDouble doubleArray = new SimpleArrayDouble();
-            var pDoubleArray = doubleArray.NonConstPointer();
-            bool hasDefault = false; //GetDefaultValuesNumber(key, pDoubleArray);
-
-            if (!hasDefault) return null;
-
-            List<double> doubleList = new List<double>(doubleArray.ToArray());
-            doubleArray.Dispose();
-
-            return doubleList;
-        }
-
-        public static List<string> GetDefaultValuesText(string key)
-        {
-            ClassArrayString stringArray = new ClassArrayString();
-            var pStringArray = stringArray.NonConstPointer();
-            bool hasDefault = false; // GetDefaultValuesText(key, pStringArray);
-
-            if (!hasDefault) return null;
-
-            List<string> stringList = new List<string>(stringArray.ToArray());
-            stringArray.Dispose();
-
-            return stringList;
-        }
-
-        public static List<List<bool>> GetDefaultValuesBooleanArray(string key)
-        {
-            // Use a single array to pass the data flattened,
-            // and a second array of int to pass the size of the sub-array of each initial shape.
-            SimpleArrayInt valueArray = new SimpleArrayInt();
-            SimpleArrayInt sizeArray = new SimpleArrayInt();
-
-            var pValueArray = valueArray.NonConstPointer();
-            var pSizeArray = sizeArray.NonConstPointer();
-
-            bool hasDefault = GetDefaultValuesBooleanArray(key, pValueArray, pSizeArray);
-
-            if (!hasDefault) return null;
-
-            List<bool> valueList = new List<int>(valueArray.ToArray()).ConvertAll(x => Convert.ToBoolean(x));
-            List<int> sizeList = new List<int>(sizeArray.ToArray());
-
-            valueArray.Dispose();
-            sizeArray.Dispose();
-
-            return Utils.UnflattenList(valueList, sizeList);
-        }
-
-        public static List<List<double>> GetDefaultValuesNumberArray(string key)
-        {
-            SimpleArrayDouble valueArray = new SimpleArrayDouble();
-            SimpleArrayInt sizeArray = new SimpleArrayInt();
-
-            var pValueArray = valueArray.NonConstPointer();
-            var pSizeArray = sizeArray.NonConstPointer();
-
-            bool hasDefault = GetDefaultValuesNumberArray(key, pValueArray, pSizeArray);
-
-            if (!hasDefault) return null;
-
-            List<double> valueList = new List<double>(valueArray.ToArray());
-            List<int> sizeList = new List<int>(sizeArray.ToArray());
-
-            valueArray.Dispose();
-            sizeArray.Dispose();
-
-            return Utils.UnflattenList(valueList, sizeList);
-        }
-
-        public static List<List<string>> GetDefaultValuesTextArray(string key)
-        {
-            ClassArrayString stringArray = new ClassArrayString();
-            SimpleArrayInt sizeArray = new SimpleArrayInt();
-
-            var pStringArray = stringArray.NonConstPointer();
-            var pSizeArray = sizeArray.NonConstPointer();
-
-            bool hasDefault = GetDefaultValuesTextArray(key, pStringArray, pSizeArray);
-
-            if (!hasDefault) return null;
-
-            List<string> stringList = new List<string>(stringArray.ToArray());
-            List<int> sizeList = new List<int>(sizeArray.ToArray());
-
-            stringArray.Dispose();
-            sizeArray.Dispose();
-
-            return Utils.UnflattenList(stringList, sizeList);
-        }
-  
     }
 }

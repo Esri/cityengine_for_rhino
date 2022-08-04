@@ -488,7 +488,8 @@ namespace PumaGrasshopper
             }
             else if (attributeParam.Type == typeof(GH_Integer))
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Integer arrays are not supported as input parameters, please use Number arrays.");
+                int[] integerList = values.ConvertAll((x) => { x.CastTo<int>(out int i); return i; }).ToArray();
+                MM.AddIntegerArray(name, integerList);
             }
             else if (attributeParam.Type == typeof(GH_Boolean))
             {
@@ -515,7 +516,7 @@ namespace PumaGrasshopper
             else if (attributeParam.Type == typeof(GH_Integer))
             {
                 if (value.CastTo(out int integer))
-                    MM.AddDouble(name, integer);
+                    MM.AddInteger(name, integer);
                 else
                     throw new Exception(Utils.GetCastErrorMessage(name, "integer"));
             }

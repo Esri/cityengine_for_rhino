@@ -11,26 +11,36 @@ namespace PumaGrasshopper
     public class AttributesValuesMap
     {
         private Dictionary<string, bool> mDefaultBooleans;
+        private Dictionary<string, int> mDefaultIntegers;
         private Dictionary<string, string> mDefaultStrings;
         private Dictionary<string, double> mDefaultDoubles;
         private Dictionary<string, bool[]> mDefaultBoolArrays;
+        private Dictionary<string, int[]> mDefaultIntegerArrays;
         private Dictionary<string, string[]> mDefaultStringArrays;
         private Dictionary<string, double[]> mDefaultDoubleArrays;
 
-        public AttributesValuesMap(string[] boolKeys, bool[] boolValues, string[] stringKeys, string[] stringValues,
-                                string[] doubleKeys, double[] doubleValues, string[] boolArrayKeys, string[] boolArrayValues,
+        public AttributesValuesMap(string[] boolKeys, bool[] boolValues, string[] integerKeys, int[] integerValues,
+                                string[] stringKeys, string[] stringValues, string[] doubleKeys, double[] doubleValues,
+                                string[] boolArrayKeys, string[] boolArrayValues, string[] integerArrayKeys, string[] integerArrayValues,
                                 string[] stringArrayKeys, string[] stringArrayValues, string[] doubleArrayKeys, string[] doubleArrayValues)
         {
             mDefaultBooleans = new Dictionary<string, bool>();
+            mDefaultIntegers = new Dictionary<string, int>();
             mDefaultStrings = new Dictionary<string, string>();
             mDefaultDoubles = new Dictionary<string, double>();
             mDefaultBoolArrays = new Dictionary<string, bool[]>();
+            mDefaultIntegerArrays = new Dictionary<string, int[]>();
             mDefaultStringArrays = new Dictionary<string, string[]>();
             mDefaultDoubleArrays = new Dictionary<string, double[]>();
 
             for(int i = 0; i < boolKeys.Length; ++i)
             {
                 mDefaultBooleans.Add(boolKeys[i], boolValues[i]);
+            }
+
+            for(int i = 0; i < integerKeys.Length; ++i)
+            {
+                mDefaultIntegers.Add(integerKeys[i], integerValues[i]);
             }
 
             for(int i = 0; i < stringKeys.Length; ++i)
@@ -46,6 +56,11 @@ namespace PumaGrasshopper
             for(int i = 0; i < boolArrayKeys.Length; ++i)
             {
                 mDefaultBoolArrays.Add(boolArrayKeys[i], Utils.BoolFromCeArray(boolArrayValues[i]));
+            }
+
+            for(int i = 0; i < integerArrayKeys.Length; ++i)
+            {
+                mDefaultIntegerArrays.Add(integerArrayKeys[i], Utils.IntegerFromCeArray(integerArrayValues[i]));
             }
 
             for(int i = 0; i < stringArrayKeys.Length; ++i)
@@ -64,6 +79,11 @@ namespace PumaGrasshopper
             return mDefaultBooleans.TryGetValue(key, out value);
         }
 
+        public bool GetInteger(string key, out int value)
+        {
+            return mDefaultIntegers.TryGetValue(key, out value);
+        }
+
         public bool GetString(string key, out string value)
         {
             return mDefaultStrings.TryGetValue(key, out value);
@@ -79,6 +99,11 @@ namespace PumaGrasshopper
             return mDefaultBoolArrays.TryGetValue(key, out values);
         }
 
+        public bool GetIntegerArray(string key, out int[] values)
+        {
+            return mDefaultIntegerArrays.TryGetValue(key, out values);
+        }
+
         public bool GetStringArray(string key, out string[] values)
         {
             return mDefaultStringArrays.TryGetValue(key, out values);
@@ -90,15 +115,20 @@ namespace PumaGrasshopper
         }
 
         public static AttributesValuesMap[] FromInteropWrappers(int shapeCount, ref InteropWrapperBoolean boolWrapper,
+                                                           ref InteropWrapperInteger integerWrapper,
                                                            ref InteropWrapperString stringWrapper,
                                                            ref InteropWrapperDouble doubleWrapper,
                                                            ref InteropWrapperString boolArrayWrapper,
+                                                           ref InteropWrapperString integerArrayWrapper,
                                                            ref InteropWrapperString stringArrayWrapper,
                                                            ref InteropWrapperString doubleArrayWrapper)
         {
             int[] boolStarts = boolWrapper.StartsToArray();
             string[] boolKeys = boolWrapper.KeysToArray();
             bool[] boolValues = boolWrapper.ValuesToArray();
+            int[] integerStarts = integerWrapper.StartsToArray();
+            string[] integerKeys = integerWrapper.KeysToArray();
+            int[] integerValues = integerWrapper.ValuesToArray();
             int[] stringStarts = stringWrapper.StartsToArray();
             string[] stringKeys = stringWrapper.KeysToArray();
             string[] stringValues = stringWrapper.ValuesToArray();
@@ -108,6 +138,9 @@ namespace PumaGrasshopper
             int[] boolArrayStarts = boolArrayWrapper.StartsToArray();
             string[] boolArrayKeys = boolArrayWrapper.KeysToArray();
             string[] boolArrayValues = boolArrayWrapper.ValuesToArray();
+            int[] integerArrayStarts = integerArrayWrapper.StartsToArray();
+            string[] integerArrayKeys = integerArrayWrapper.KeysToArray();
+            string[] integerArrayValues = integerArrayWrapper.ValuesToArray();
             int[] stringArrayStarts = stringArrayWrapper.StartsToArray();
             string[] stringArrayKeys = stringArrayWrapper.KeysToArray();
             string[] stringArrayValues = stringArrayWrapper.ValuesToArray();
@@ -119,26 +152,34 @@ namespace PumaGrasshopper
             for (int i = 0; i < shapeCount; ++i)
             {
                 int boolStart = boolStarts[i];
+                int integerStart = integerStarts[i];
                 int stringStart = stringStarts[i];
                 int doubleStart = doubleStarts[i];
                 int boolArrayStart = boolArrayStarts[i];
+                int integerArrayStart = integerArrayStarts[i];
                 int stringArrayStart = stringArrayStarts[i];
                 int doubleArrayStart = doubleArrayStarts[i];
                 int boolCount = GetIntervalCount(i, shapeCount, boolStarts, boolKeys.Length);
+                int integerCount = GetIntervalCount(i, shapeCount, integerStarts, integerKeys.Length);
                 int stringCount = GetIntervalCount(i, shapeCount, stringStarts, stringKeys.Length);
                 int doubleCount = GetIntervalCount(i, shapeCount, doubleStarts, doubleKeys.Length);
                 int boolArrayCount = GetIntervalCount(i, shapeCount, boolArrayStarts, boolArrayKeys.Length);
+                int integerArrayCount = GetIntervalCount(i, shapeCount, integerArrayStarts, integerArrayKeys.Length);
                 int stringArrayCount = GetIntervalCount(i, shapeCount, stringArrayStarts, stringArrayKeys.Length);
                 int doubleArrayCount = GetIntervalCount(i, shapeCount, doubleArrayStarts, doubleArrayKeys.Length);
 
                 defaultValues[i] = new AttributesValuesMap(boolKeys.Skip(boolStart).Take(boolCount).ToArray(),
                     boolValues.Skip(boolStart).Take(boolCount).ToArray(),
+                    integerKeys.Skip(integerStart).Take(integerCount).ToArray(),
+                    integerValues.Skip(integerStart).Take(integerCount).ToArray(),
                     stringKeys.Skip(stringStart).Take(stringCount).ToArray(), 
                     stringValues.Skip(stringStart).Take(stringCount).ToArray(),
                     doubleKeys.Skip(doubleStart).Take(doubleCount).ToArray(),
                     doubleValues.Skip(doubleStart).Take(doubleCount).ToArray(),
                     boolArrayKeys.Skip(boolArrayStart).Take(boolArrayCount).ToArray(),
                     boolArrayValues.Skip(boolArrayStart).Take(boolArrayCount).ToArray(),
+                    integerArrayKeys.Skip(integerArrayStart).Take(integerArrayCount).ToArray(),
+                    integerArrayValues.Skip(integerArrayStart).Take(integerArrayCount).ToArray(),
                     stringArrayKeys.Skip(stringArrayStart).Take(stringArrayCount).ToArray(),
                     stringArrayValues.Skip(stringArrayStart).Take(stringArrayCount).ToArray(),
                     doubleArrayKeys.Skip(doubleArrayStart).Take(doubleArrayCount).ToArray(),
@@ -196,6 +237,33 @@ namespace PumaGrasshopper
                 {
                     if (defaultValues[i].GetString(key, out string value)) values.Add(value);
                     else values.Add("");
+                }
+
+                return Utils.FromListToTree(values);
+            }
+        }
+
+        public static GH_Structure<GH_Integer> GetDefaultIntegers(string key, AttributesValuesMap[] defaultValues, bool isArray)
+        {
+            if (isArray)
+            {
+                List<List<int>> values = new List<List<int>>(defaultValues.Length);
+
+                for (int i = 0; i < defaultValues.Length; ++i)
+                {
+                    if (defaultValues[i].GetIntegerArray(key, out int[] value)) values.Add(value.ToList());
+                    else values.Add(new List<int>());
+                }
+                return Utils.FromListToTree(values);
+            }
+            else
+            {
+                List<int> values = new List<int>(defaultValues.Length);
+
+                for (int i = 0; i < defaultValues.Length; ++i)
+                {
+                    if (defaultValues[i].GetInteger(key, out int value)) values.Add(value);
+                    else values.Add(0);
                 }
 
                 return Utils.FromListToTree(values);

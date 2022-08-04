@@ -64,7 +64,6 @@ namespace PumaGrasshopper
                         return param_bool;
                     }
                 case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                case Annotations.AnnotationArgumentType.AAT_INT:
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
                     {
                         var param_number = new AttributeParameter.Number(mAnnotations, mGroup, IsArray())
@@ -78,6 +77,21 @@ namespace PumaGrasshopper
                         param_number.SetPersistentData(AttributesValuesMap.GetDefaultDoubles(mFullName, defaultValuesMap, IsArray()));
                         
                         return param_number;
+                    }
+                case Annotations.AnnotationArgumentType.AAT_INT:
+                case Annotations.AnnotationArgumentType.AAT_INT_ARRAY:
+                    {
+                        var param_int = new AttributeParameter.Number(mAnnotations, mGroup, IsArray())
+                        {
+                            Name = mFullName,
+                            NickName = mNickname,
+                            Description = GetDescriptions(),
+                            Optional = true,
+                            Access = GetAccess()
+                        };
+                        param_int.SetPersistentData(AttributesValuesMap.GetDefaultIntegers(mFullName, defaultValuesMap, IsArray()));
+
+                        return param_int;
                     }
                 case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_STR:

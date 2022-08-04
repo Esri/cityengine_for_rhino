@@ -93,11 +93,11 @@ struct ShapeAttributes {
 	std::wstring startRule;
 	std::wstring shapeName;
 	RuleFileInfoPtr ruleFileInfo;
-	int seed;
+	int32_t seed;
 
 	ShapeAttributes(RuleFileInfoPtr ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
 	                const std::wstring startRl = L"Default$Lot", const std::wstring shapeN = L"Lot",
-	                const int seed = 0);
+	                const int32_t seed = 0);
 };
 
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
@@ -113,7 +113,7 @@ std::string toUTF8FromUTF16(const std::wstring& utf16String);
 std::string toUTF8FromOSNarrow(const std::string& osString);
 
 void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee);
-void appendColor(const ON_Color& color, ON_SimpleArray<int>* pArray);
+void appendColor(const ON_Color& color, ON_SimpleArray<double>* pArray);
 
 std::string percentEncode(const std::string& utf8String);
 std::string toFileURI(const std::string& osNarrowPath);
@@ -155,20 +155,25 @@ const std::wstring toCeArray(const int* values, size_t count);
 
 template<typename T>
 void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBuilderPtr& /* aBuilder */) {
-	static_assert(std::is_same<T, int>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
-	              "Type T must be one of int, double or bool");
+	static_assert(std::is_same<T, int32_t>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
+	              "Type T must be one of int32_t, double or bool");
 }
 
 template<typename T>
 void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const wchar_t*>& /* values */,
 	AttributeMapBuilderPtr& /* aBuilder */) {
-	static_assert(std::is_same<T, int>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
-	              "Type T must be one of int, double or bool");
+	static_assert(std::is_same<T, int32_t>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
+	              "Type T must be one of int32_t, double or bool");
 }
 
 template <>
-inline void fillMapBuilder<int>(const std::wstring& key, int value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setBool(key.c_str(), static_cast<bool>(value));
+inline void fillMapBuilder<bool>(const std::wstring& key, bool value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setBool(key.c_str(), value);
+}
+
+template <>
+inline void fillMapBuilder<int32_t>(const std::wstring& key, int32_t value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setInt(key.c_str(), value);
 }
 
 template <>
@@ -187,6 +192,16 @@ inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector
 }
 
 template <>
+inline void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+                                     AttributeMapBuilderPtr& aBuilder) {
+	int32_t* iArray = new int32_t[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		iArray[i] = (int32_t)std::stoi(std::wstring(values[i]));
+	}
+	aBuilder->setIntArray(key.c_str(), iArray, values.size());
+}
+
+template <>
 inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values,
                                  AttributeMapBuilderPtr& aBuilder) {
 	double* dArray = new double[values.size()];
@@ -200,6 +215,9 @@ inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vect
 void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
                       AttributeMapBuilderPtr& aBuilder);
 
+void unpackIntegerAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
+                             AttributeMapBuilderPtr& aBuilder);
+
 void unpackDoubleAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<double>* values,
                           AttributeMapBuilderPtr& aBuilder);
 
@@ -208,6 +226,9 @@ void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>
 
 void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
                            AttributeMapBuilderPtr& aBuilder);
+
+void unpackIntegerArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
+                                  ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder);
 
 void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
                             AttributeMapBuilderPtr& aBuilder, bool isArray);

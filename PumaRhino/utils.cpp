@@ -57,7 +57,7 @@ void checkLastError(const std::string& exceptionPrefix) {
 namespace pcu {
 
 ShapeAttributes::ShapeAttributes(pcu::RuleFileInfoPtr ruleFileInfo, const std::wstring rulef, const std::wstring startRl,
-                                 const std::wstring shapeN, int seed)
+                                 const std::wstring shapeN, int32_t seed)
     : ruleFileInfo(std::move(ruleFileInfo)), ruleFile(rulef), startRule(startRl), shapeName(shapeN), seed(seed) {}
 
 // location of RhinoPRT shared library
@@ -214,10 +214,10 @@ void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee) 
 	rhinoString += appendee.c_str();
 }
 
-void appendColor(const ON_Color& color, ON_SimpleArray<int>* pArray){
-	pArray->Append(color.Red());
-	pArray->Append(color.Green());
-	pArray->Append(color.Blue());
+void appendColor(const ON_Color& color, ON_SimpleArray<double>* pArray){
+	pArray->Append(color.FractionRed());
+	pArray->Append(color.FractionGreen());
+	pArray->Append(color.FractionBlue());
 }
 
 std::string percentEncode(const std::string& utf8String) {
@@ -362,7 +362,7 @@ const std::wstring toCeArray(const double* values, size_t count) {
 	return serializedArray;
 }
 
-const std::wstring toCeArray(const int* values, size_t count) {
+const std::wstring toCeArray(const int32_t* values, size_t count) {
 	std::wstring serializedArray;
 	for (size_t i = 0; i < count; ++i) {
 		serializedArray +=  std::to_wstring(values[i]) + CE_ARRAY_DELIMITER;
@@ -390,7 +390,16 @@ void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
 		const std::wstring key(keys->At(i)->Array());
 
 		const int value(*values->At(i));
-		pcu::fillMapBuilder<bool>(key, static_cast<bool>(value), aBuilder);
+		pcu::fillMapBuilder(key, static_cast<bool>(value), aBuilder);
+	}
+}
+
+void unpackIntegerAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int32_t>* values,
+	AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+		const int32_t value(*values->At(i));
+		pcu::fillMapBuilder(key, value, aBuilder);
 	}
 }
 
@@ -403,13 +412,21 @@ void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>
 	}
 }
 
-
 void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
                               AttributeMapBuilderPtr& aBuilder) {
 	for (int i = start; i < start + count; ++i) {
 		const std::wstring key(keys->At(i)->Array());
 		const auto vArray = pcu::fromCeArray(values->At(i)->Array());
 		pcu::fillArrayMapBuilder<bool>(key, vArray, aBuilder);
+	}
+}
+
+void unpackIntegerArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
+	ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder) {
+	for (int i = start; i < start + count; ++i) {
+		const std::wstring key(keys->At(i)->Array());
+		const auto vArray = pcu::fromCeArray(values->At(i)->Array());
+		pcu::fillArrayMapBuilder<int>(key, vArray, aBuilder);
 	}
 }
 
