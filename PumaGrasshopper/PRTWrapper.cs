@@ -55,7 +55,7 @@ namespace PumaGrasshopper
         public static extern bool InitializeRhinoPRT();
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern int Generate(string rpk_path, [Out] IntPtr errorMsg,
+        public static extern int Generate(string rpk_path,
             int shapeCount,
             [In] IntPtr pBoolStarts, int boolCount,
             [In] IntPtr pBoolKeys, [In] IntPtr pBoolVals,
@@ -129,9 +129,6 @@ namespace PumaGrasshopper
             var integerArrayWrapper = new InteropWrapperString(MM.GetIntegerArrayStarts(), ref MM.integerArrayKeys, ref MM.integerArrayValues);
             var doubleArrayWrapper = new InteropWrapperString(MM.GetDoubleArrayStarts(), ref MM.doubleArrayKeys, ref MM.doubleArrayValues);
 
-            StringWrapper errorMsg = new StringWrapper("");
-            IntPtr pErrorMsg = errorMsg.NonConstPointer;
-
             // Materials
             var colorsArray = new SimpleArrayDouble();
             IntPtr pColorsArray = colorsArray.NonConstPointer();
@@ -155,7 +152,6 @@ namespace PumaGrasshopper
             IntPtr pReportStringArray = reportStringArray.NonConstPointer();
 
             Generate(rpkPath,
-                     pErrorMsg,
                      initialMeshes.Count,
                      boolWrapper.StartsPtr(),
                      boolWrapper.Count,
@@ -314,7 +310,8 @@ namespace PumaGrasshopper
 
                     textureOffset += texCount;
 
-                    materials[meshId] = new GH_Material(Rhino.Render.RenderMaterial.CreateBasicMaterial(mat));
+                    materials[meshId] = new GH_Material(Rhino.Render.RenderMaterial.CreateBasicMaterial(mat, Rhino.RhinoDoc.ActiveDoc));
+                    
                 }
 
                 id += meshCount + 1;

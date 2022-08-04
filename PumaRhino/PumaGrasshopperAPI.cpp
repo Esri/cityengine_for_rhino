@@ -58,7 +58,7 @@ RHINOPRT_API void ShutdownRhinoPRT() {
 	RhinoPRT::get().ShutdownRhinoPRT();
 }
 
-RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
+RHINOPRT_API bool Generate(const wchar_t* rpk_path,
 						   // rule attributes
 						   const int shapeCount,
 						   ON_SimpleArray<int>* pBoolStarts, const int boolCount,
@@ -181,7 +181,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 			}
 
 			// Materials
-			pMatIndices->Append(meshBundle.size());
+			pMatIndices->Append((int)meshBundle.size());
 
 			const auto& materials = models[i]->getMaterials();
 			for (const auto& material : materials) {
@@ -192,7 +192,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path, ON_wString* errorMsg,
 				pColorsArray->Append(matAttributes.mOpacity);
 				pColorsArray->Append(matAttributes.mShininess);
 
-				pMatIndices->Append(matAttributes.mTexturePaths.size());
+				pMatIndices->Append((int)matAttributes.mTexturePaths.size());
 
 				for (auto& texture : matAttributes.mTexturePaths) {
 
@@ -287,7 +287,7 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 			pAttributesBuffer->Append({});
 
 		pAttributesTypes->Append((int)attribute->mType);
-		pAttributesTypes->Append(attribute->mAnnotations.size());
+		pAttributesTypes->Append((int)attribute->mAnnotations.size());
 
 		for (const auto& annot : attribute->mAnnotations) {
 			pBaseAnnotations->Append((int)annot->getType());
@@ -308,7 +308,7 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 
 							const std::vector<double> annotEnum =
 							        dynamic_cast<AnnotationEnum<double>*>(annot.get())->getAnnotArguments();
-							pBaseAnnotations->Append(annotEnum.size());
+							pBaseAnnotations->Append((int)annotEnum.size());
 							std::for_each(annotEnum.begin(), annotEnum.end(),
 							              [pDoubleAnnotations](double value) { pDoubleAnnotations->Append(value); });
 							break;	
@@ -317,7 +317,7 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 
 							const std::vector<std::wstring> annotEnum =
 							        dynamic_cast<AnnotationEnum<std::wstring>*>(annot.get())->getAnnotArguments();
-							pBaseAnnotations->Append(annotEnum.size());
+							pBaseAnnotations->Append((int)annotEnum.size());
 							std::for_each(annotEnum.begin(), annotEnum.end(), [pStringAnnotations](std::wstring value) {
 								pStringAnnotations->Append(ON_wString(value.c_str()));
 							});
