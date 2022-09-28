@@ -1,6 +1,8 @@
 import argparse
+import fileinput
 import os
 import zipfile
+import sys
 import re
 import shutil
 from pathlib import Path
@@ -40,7 +42,7 @@ def copy_to_dir(root_path: Path, src_path: Path, relative_file_paths: list, dst_
 
 # Parse file "version.h" to get major, minor, revision, build numbers
 def parse_version_file(version_file: Path) -> (int, int, int, int):
-    pattern = re.compile(r'^#define (?P<version>\w+)\s+(?P<number>\d+)$')
+    pattern = re.compile(r'^(?P<version>\w+)=(?P<number>\d+)$')
 
     v_major = 0
     v_minor = 0
@@ -118,6 +120,17 @@ def parse_args():
     return args
 
 
+def update_yml_manifest(root_path, v_major, v_minor, v_revision):
+    manifest = Path(root_path, "manifest.yml")
+
+    with fileinput.input(files=manifest, inplace=True) as file:
+        for line in file:
+            if "version" in line:
+                sys.stdout.write(f"version: {v_major}.{v_minor}.{v_revision}\n")
+            else:
+                sys.stdout.write(line)
+
+
 def main():
     args = parse_args()
 
@@ -126,8 +139,10 @@ def main():
     package_path = Path(root_path, 'packages')
     clean_package_output(package_path)
 
-    version_file = Path(root_path, "PumaRhino", "version.h")
+    version_file = Path(root_path, "version.properties")
     (v_major, v_minor, v_revision, v_build) = parse_version_file(version_file)
+
+    update_yml_manifest(root_path, v_major, v_minor, v_revision)
 
     build(args.rhino_target, args.build_module, build_path, package_path, v_major, v_minor, v_revision, v_build)
 
