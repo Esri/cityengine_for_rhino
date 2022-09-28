@@ -1,5 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" InitialTargets="ReadVersion" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ReadVersion" BeforeTargets="Build">
+    <ReadLinesFromFile File="..\version.properties">
+      <Output TaskParameter="Lines" ItemName="Versions"/>
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <PumaVersions>@(Versions-&gt;Split('=')-&gt;'%(FileName)')</PumaVersions>
+	  <PumaVersionString>$(PumaVersions.Split(';')[1]).$(PumaVersions.Split(';')[3]).$(PumaVersions.Split(';')[5])</PumaVersionString>
+    </PropertyGroup>
+	<Message Importance="high" Text="Building version $(PumaVersionString)"/>
+  </Target>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,6 +20,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PumaGrasshopper</RootNamespace>
     <AssemblyName>PumaGrasshopper</AssemblyName>
+	<AssemblyVersion>$(PumaVersionString)</AssemblyVersion>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
