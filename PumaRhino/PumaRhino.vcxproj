@@ -1,5 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" InitialTargets="ReadVersion" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ReadVersion">
+    <ReadLinesFromFile File="..\version.properties">
+      <Output TaskParameter="Lines" ItemName="PumaVersions" />
+    </ReadLinesFromFile>
+    <Message Importance="high" Text="Raw version: @(PumaVersions)" />
+    <PropertyGroup>
+      <Version>#pragma once;@(PumaVersions-&gt;Replace('=', ' ')-&gt;'#define %(FileName)')</Version>
+    </PropertyGroup>
+	  <Message Importance="high" Text="Wrote version: $(Version)" />
+	  <WriteLinesToFile File=".\generatedVersion.h" Lines="$(Version)" Overwrite="true"></WriteLinesToFile>
+  </Target>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -54,6 +65,7 @@
     <ClInclude Include="PRTContext.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="version.h" />
+	<ClInclude Include="generatedVersion.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\RhinoPRT.rc2" />

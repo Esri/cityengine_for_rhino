@@ -131,6 +131,9 @@
     <ClInclude Include="AssetCache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="generatedVersion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RhinoPRT.def">
