@@ -4,12 +4,10 @@
     <ReadLinesFromFile File="..\version.properties">
       <Output TaskParameter="Lines" ItemName="PumaVersions" />
     </ReadLinesFromFile>
-    <Message Importance="high" Text="Raw version: @(PumaVersions)" />
     <PropertyGroup>
       <Version>#pragma once;@(PumaVersions-&gt;Replace('=', ' ')-&gt;'#define %(FileName)')</Version>
     </PropertyGroup>
-	  <Message Importance="high" Text="Wrote version: $(Version)" />
-	  <WriteLinesToFile File=".\generatedVersion.h" Lines="$(Version)" Overwrite="true"></WriteLinesToFile>
+	<WriteLinesToFile File=".\generatedVersion.h" Lines="$(Version)" Overwrite="true"></WriteLinesToFile>
   </Target>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
