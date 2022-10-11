@@ -4,9 +4,11 @@
     <ReadLinesFromFile File="..\version.properties">
       <Output TaskParameter="Lines" ItemName="Versions"/>
     </ReadLinesFromFile>
+	<CreateItem Include="Versions" AdditionalMetadata="@(Versions)">
+		<Output TaskParameter="Include" ItemName="PumaVersions" />
+	</CreateItem>
     <PropertyGroup>
-      <PumaVersions>@(Versions-&gt;Split('=')-&gt;'%(FileName)')</PumaVersions>
-	  <PumaVersionString>$(PumaVersions.Split(';')[1]).$(PumaVersions.Split(';')[3]).$(PumaVersions.Split(';')[5])</PumaVersionString>
+	  <PumaVersionString>%(PumaVersions.VERSION_MAJOR).%(PumaVersions.VERSION_MINOR).%(PumaVersions.VERSION_REVISION)</PumaVersionString>
     </PropertyGroup>
 	<Message Importance="high" Text="Building version $(PumaVersionString)"/>
   </Target>
