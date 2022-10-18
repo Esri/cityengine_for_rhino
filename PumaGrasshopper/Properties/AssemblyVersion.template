@@ -1,0 +1,3 @@
+using System.Reflection;
+[assembly: AssemblyVersion("@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_REVISION@.@VERSION_BUILD@")]
+[assembly: AssemblyFileVersion("@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_REVISION@.@VERSION_BUILD@")]
