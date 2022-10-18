@@ -1,18 +1,16 @@
 import argparse
-import fileinput
-import os
 import zipfile
-import sys
 import re
 import shutil
 from pathlib import Path
 import subprocess
+from string import Template
 
 PACKAGE_WHITELIST = ["PumaGrasshopper.gha", "PumaRhino.rhp", "com.esri.prt.core.dll", "glutess.dll",
                      "lib/PumaCodecs.dll", "lib/com.esri.prt.adaptors.dll", "lib/com.esri.prt.codecs.dll",
                      "lib/com.esri.prt.usd.dll", "lib/usd_ms.dll", "lib/tbb.dll", "lib/usd",
                      "lib/com.esri.prt.oda.dll"]
-      
+
 
 def copy_to_zip(root_path: Path, src_path: Path, relative_file_paths: list, dst: zipfile.ZipFile):
     for rel_path in relative_file_paths:
@@ -121,14 +119,18 @@ def parse_args():
 
 
 def update_yml_manifest(root_path, v_major, v_minor, v_revision):
+    manifest_template = Path(root_path, "manifest.template")
     manifest = Path(root_path, "manifest.yml")
 
-    with fileinput.input(files=manifest, inplace=True) as file:
-        for line in file:
-            if "version" in line:
-                sys.stdout.write(f"version: {v_major}.{v_minor}.{v_revision}\n")
-            else:
-                sys.stdout.write(line)
+    template_file = open(manifest_template, mode='r')
+    template_string = template_file.read()
+    template_file.close()
+
+    template = Template(template_string)
+    generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor, VERSION_REVISION=v_revision)
+
+    with open(manifest, mode='w') as file:
+        file.write(generated_manifest)
 
 
 def main():
