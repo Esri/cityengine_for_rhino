@@ -1,5 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" InitialTargets="ReadVersion" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ReadVersion">
+    <ReadLinesFromFile File="..\version.properties">
+      <Output TaskParameter="Lines" ItemName="Versions" />
+    </ReadLinesFromFile>
+    <CreateItem Include="Versions" AdditionalMetadata="@(Versions)">
+      <Output TaskParameter="Include" ItemName="PumaVersions" />
+    </CreateItem>
+    <PropertyGroup>
+      <VersionMajor>%(PumaVersions.VERSION_MAJOR)</VersionMajor>
+      <VersionMinor>%(PumaVersions.VERSION_MINOR)</VersionMinor>
+      <VersionRevision>%(PumaVersions.VERSION_REVISION)</VersionRevision>
+      <VersionBuild>%(PumaVersions.VERSION_BUILD)</VersionBuild>
+    </PropertyGroup>
+    <ReadLinesFromFile File=".\generatedVersion.template">
+      <Output TaskParameter="Lines" ItemName="GeneratedVersions" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <Version>
+      @(GeneratedVersions-&gt;
+      Replace('@VERSION_MAJOR@',  $(VersionMajor))-&gt;
+      Replace('@VERSION_MINOR@', $(VersionMinor))-&gt;
+      Replace('@VERSION_REVISION@', $(VersionRevision))-&gt;
+      Replace('@VERSION_BUILD@', $(VersionBuild)))
+    </Version>
+    </PropertyGroup>
+    <WriteLinesToFile File=".\generatedVersion.h" Lines="$(Version)" Overwrite="true" />
+  </Target>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -54,8 +81,10 @@
     <ClInclude Include="PRTContext.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="version.h" />
+    <ClInclude Include="generatedVersion.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="generatedVersion.template" />
     <None Include="res\RhinoPRT.rc2" />
     <None Include="RhinoPRT.def" />
   </ItemGroup>

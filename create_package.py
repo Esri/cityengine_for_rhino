@@ -1,16 +1,16 @@
 import argparse
-import os
 import zipfile
 import re
 import shutil
 from pathlib import Path
 import subprocess
+from string import Template
 
 PACKAGE_WHITELIST = ["PumaGrasshopper.gha", "PumaRhino.rhp", "com.esri.prt.core.dll", "glutess.dll",
                      "lib/PumaCodecs.dll", "lib/com.esri.prt.adaptors.dll", "lib/com.esri.prt.codecs.dll",
                      "lib/com.esri.prt.usd.dll", "lib/usd_ms.dll", "lib/tbb.dll", "lib/usd",
                      "lib/com.esri.prt.oda.dll"]
-      
+
 
 def copy_to_zip(root_path: Path, src_path: Path, relative_file_paths: list, dst: zipfile.ZipFile):
     for rel_path in relative_file_paths:
@@ -40,7 +40,7 @@ def copy_to_dir(root_path: Path, src_path: Path, relative_file_paths: list, dst_
 
 # Parse file "version.h" to get major, minor, revision, build numbers
 def parse_version_file(version_file: Path) -> (int, int, int, int):
-    pattern = re.compile(r'^#define (?P<version>\w+)\s+(?P<number>\d+)$')
+    pattern = re.compile(r'^(?P<version>\w+)=(?P<number>\d+)$')
 
     v_major = 0
     v_minor = 0
@@ -118,6 +118,21 @@ def parse_args():
     return args
 
 
+def update_yml_manifest(root_path, v_major, v_minor, v_revision):
+    manifest_template = Path(root_path, "manifest.template")
+    manifest = Path(root_path, "manifest.yml")
+
+    template_file = open(manifest_template, mode='r')
+    template_string = template_file.read()
+    template_file.close()
+
+    template = Template(template_string)
+    generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor, VERSION_REVISION=v_revision)
+
+    with open(manifest, mode='w') as file:
+        file.write(generated_manifest)
+
+
 def main():
     args = parse_args()
 
@@ -126,8 +141,10 @@ def main():
     package_path = Path(root_path, 'packages')
     clean_package_output(package_path)
 
-    version_file = Path(root_path, "PumaRhino", "version.h")
+    version_file = Path(root_path, "version.properties")
     (v_major, v_minor, v_revision, v_build) = parse_version_file(version_file)
+
+    update_yml_manifest(root_path, v_major, v_minor, v_revision)
 
     build(args.rhino_target, args.build_module, build_path, package_path, v_major, v_minor, v_revision, v_build)
 

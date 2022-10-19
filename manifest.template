@@ -1,6 +1,6 @@
 ---
 name: Puma
-version: 1.6.0
+version: $VERSION_MAJOR.$VERSION_MINOR.$VERSION_REVISION
 authors:
   - Esri RnD Center Zurich
 description: >

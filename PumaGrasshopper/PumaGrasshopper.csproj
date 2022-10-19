@@ -1,5 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" InitialTargets="ReadVersion" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ReadVersion" BeforeTargets="Build">
+    <ReadLinesFromFile File="..\version.properties">
+      <Output TaskParameter="Lines" ItemName="Versions" />
+    </ReadLinesFromFile>
+    <CreateItem Include="Versions" AdditionalMetadata="@(Versions)">
+      <Output TaskParameter="Include" ItemName="PumaVersions" />
+    </CreateItem>
+    <PropertyGroup>
+      <VersionMajor>%(PumaVersions.VERSION_MAJOR)</VersionMajor>
+      <VersionMinor>%(PumaVersions.VERSION_MINOR)</VersionMinor>
+      <VersionBuild>%(PumaVersions.VERSION_BUILD)</VersionBuild>
+      <VersionRevision>%(PumaVersions.VERSION_REVISION)</VersionRevision>
+    </PropertyGroup>
+    <ReadLinesFromFile File=".\Properties\AssemblyVersion.template">
+      <Output TaskParameter="Lines" ItemName="TemplateVersionStrings" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <GeneratedVersionStrings>
+        @(TemplateVersionStrings-&gt;
+        Replace('@VERSION_MAJOR@', $(VersionMajor))-&gt;
+        Replace('@VERSION_MINOR@', $(VersionMinor))-&gt;
+        Replace('@VERSION_REVISION@', $(VersionRevision))-&gt;
+        Replace('@VERSION_BUILD@', $(VersionBuild)))
+      </GeneratedVersionStrings>
+    </PropertyGroup>
+    <WriteLinesToFile File=".\Properties\AssemblyVersion.cs" Lines="$(GeneratedVersionStrings)" Overwrite="true">
+    </WriteLinesToFile>
+  </Target>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -71,7 +99,10 @@
       <DependentUpon>AttributeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="InteropWrapper.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" >
+      <DependentUpon>Properties\AssemblyVersion.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -97,6 +128,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\AssemblyVersion.template" />
     <None Include="Resources\gh_prt_main_component.png" />
   </ItemGroup>
   <ItemGroup>
