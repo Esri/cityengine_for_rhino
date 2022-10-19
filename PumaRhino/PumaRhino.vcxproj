@@ -14,10 +14,10 @@
       <VersionBuild>%(PumaVersions.VERSION_BUILD)</VersionBuild>
     </PropertyGroup>
     <ReadLinesFromFile File=".\generatedVersion.template">
-    <Output TaskParameter="Lines" ItemName="GeneratedVersions"/>
+      <Output TaskParameter="Lines" ItemName="GeneratedVersions" />
     </ReadLinesFromFile>
     <PropertyGroup>
-    <Version>
+      <Version>
       @(GeneratedVersions-&gt;
       Replace('@VERSION_MAJOR@',  $(VersionMajor))-&gt;
       Replace('@VERSION_MINOR@', $(VersionMinor))-&gt;
@@ -25,7 +25,7 @@
       Replace('@VERSION_BUILD@', $(VersionBuild)))
     </Version>
     </PropertyGroup>
-    <WriteLinesToFile File=".\generatedVersion.h" Lines="$(Version)" Overwrite="true"></WriteLinesToFile>
+    <WriteLinesToFile File=".\generatedVersion.h" Lines="$(Version)" Overwrite="true" />
   </Target>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
