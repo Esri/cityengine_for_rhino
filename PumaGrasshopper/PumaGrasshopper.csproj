@@ -18,12 +18,12 @@
     </ReadLinesFromFile>
     <PropertyGroup>
       <GeneratedVersionStrings>
-			  @(TemplateVersionStrings-&gt;
-			  Replace('@VERSION_MAJOR@', $(VersionMajor))-&gt;
-			  Replace('@VERSION_MINOR@', $(VersionMinor))-&gt;
-			  Replace('@VERSION_REVISION@', $(VersionRevision))-&gt;
-			  Replace('@VERSION_BUILD@', $(VersionBuild)))
-		  </GeneratedVersionStrings>
+        @(TemplateVersionStrings-&gt;
+        Replace('@VERSION_MAJOR@', $(VersionMajor))-&gt;
+        Replace('@VERSION_MINOR@', $(VersionMinor))-&gt;
+        Replace('@VERSION_REVISION@', $(VersionRevision))-&gt;
+        Replace('@VERSION_BUILD@', $(VersionBuild)))
+      </GeneratedVersionStrings>
     </PropertyGroup>
     <WriteLinesToFile File=".\Properties\AssemblyVersion.cs" Lines="$(GeneratedVersionStrings)" Overwrite="true">
     </WriteLinesToFile>
@@ -42,6 +42,7 @@
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <TargetExt>.gha</TargetExt>
@@ -100,9 +101,9 @@
     </Compile>
     <Compile Include="InteropWrapper.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
-	<Compile Include="Properties\AssemblyInfo.cs" >
-		<DependentUpon>Properties\AssemblyVersion.cs</DependentUpon>
-	</Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" >
+      <DependentUpon>Properties\AssemblyVersion.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
