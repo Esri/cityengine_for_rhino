@@ -11,8 +11,7 @@
       <VersionMajor>%(PumaVersions.VERSION_MAJOR)</VersionMajor>
       <VersionMinor>%(PumaVersions.VERSION_MINOR)</VersionMinor>
       <VersionRevision>%(PumaVersions.VERSION_REVISION)</VersionRevision>
-	  <VersionBuild>$(PumaVersionBuild)</VersionBuild>
-      <VersionBuild Condition="'$(PumaVersionBuild)'==''">%(PumaVersions.VERSION_BUILD)</VersionBuild>
+      <VersionBuild>%(PumaVersions.VERSION_BUILD)</VersionBuild>
     </PropertyGroup>
     <ReadLinesFromFile File=".\generatedVersion.template">
       <Output TaskParameter="Lines" ItemName="GeneratedVersions" />

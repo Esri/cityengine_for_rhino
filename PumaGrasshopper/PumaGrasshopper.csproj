@@ -10,8 +10,7 @@
     <PropertyGroup>
       <VersionMajor>%(PumaVersions.VERSION_MAJOR)</VersionMajor>
       <VersionMinor>%(PumaVersions.VERSION_MINOR)</VersionMinor>
-      <VersionBuild>$(PumaVersionBuild)</VersionBuild>
-	  <VersionBuild Condition="'$(PumaVersionBuild)'==''">%(PumaVersions.VERSION_BUILD)</VersionBuild>
+      <VersionBuild>%(PumaVersions.VERSION_BUILD)</VersionBuild>
       <VersionRevision>%(PumaVersions.VERSION_REVISION)</VersionRevision>
     </PropertyGroup>
     <ReadLinesFromFile File=".\Properties\AssemblyVersion.template">

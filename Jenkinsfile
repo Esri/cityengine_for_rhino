@@ -95,7 +95,7 @@ def taskBuildPuma(cfg) {
 	Map dirMap = [ (env.WORKSPACE) : cfg.ws ]
 
 	final String rhinoMajorVersion = cfg.rh.tokenize('.')[0]
-	Map envMap = [ 'RHINO_VER_MAJOR' : rhinoMajorVersion, 'PUMA_VER_BUILD' : BUILD_ID ]
+	Map envMap = [ 'RHINO_VER_MAJOR' : rhinoMajorVersion ]
 
 	runDockerCmd(cfg, image, containerName, dirMap, envMap, workDir, buildCmd)
 
