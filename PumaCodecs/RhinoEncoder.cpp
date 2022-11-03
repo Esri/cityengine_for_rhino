@@ -67,7 +67,7 @@ const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
                 .cleanupVertexNormals(true)
                 .processVertexNormals(prtx::VertexNormalProcessor::SET_MISSING_TO_FACE_NORMALS)
                 .indexSharing(prtx::EncodePreparator::PreparationFlags::INDICES_SAME_FOR_ALL_VERTEX_ATTRIBUTES)
-                .mergeByMaterial(true)
+                .meshMerging(prtx::MeshMerging::ALL_OF_SAME_MATERIAL_AND_TYPE)
                 .processHoles(prtx::HoleProcessor::TRIANGULATE_FACES_WITH_HOLES);
 
 std::vector<const wchar_t*> toPtrVec(const prtx::WStringVector& wsv) {
