@@ -37,7 +37,10 @@ Puma technically consists of two plugins, (1) a command for Rhino and (2) compon
 
 ### Installation
 
-Note: Puma is currently only available for Windows 10 (Intel/AMD 64bit).
+#### System Requirements
+* Windows 10 or 11 (Intel/AMD 64bit).
+* Rhino 6.35 or Rhino 7.17 or later.
+* To author Rule Packages (RPK), a license for CityEngine is needed.
 
 #### Recommended Installation Method: Food4Rhino Marketplace
 
