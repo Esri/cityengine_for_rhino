@@ -101,9 +101,9 @@ def taskBuildPuma(cfg) {
 
 	manifest = readYaml(file: "${SOURCE}/manifest.yml") // called within publish, different cwd
 
-	// build final package version as <major>.<minor>.<build number>
+	// build final package version as <major>.<minor>.<revision>.<build number>
 	final List pkgVerComponents = manifest.version.tokenize('.')
-	pkgVerComponents[2] = BUILD_ID
+	pkgVerComponents[3] = BUILD_ID
 	final String pkgVer = pkgVerComponents.join('.')
 
 	def getVersion = { return pkgVer }

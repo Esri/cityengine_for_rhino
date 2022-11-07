@@ -379,3 +379,5 @@ Downloads/*
 /deps
 
 .vscode
+
+PumaRhino/version.h
