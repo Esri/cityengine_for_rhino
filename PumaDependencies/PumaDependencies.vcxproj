@@ -14,7 +14,7 @@
     <ProjectName>PumaDependencies</ProjectName>
   </PropertyGroup>
   <PropertyGroup>
-    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.6.8300/esri_ce_sdk-2.6.8300-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
+    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.7.8538/esri_ce_sdk-2.7.8538-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
     <OutputDirectory>$(SolutionDir)build\</OutputDirectory>
     <DependencyDir>$(SolutionDir)deps\</DependencyDir>
   </PropertyGroup>
@@ -48,20 +48,20 @@
 
   <Target Name="Build">
     <ItemGroup>
-      <!-- whitelisting core PRT components -->
+      <!-- allow-list core PRT components -->
       <PRT_CORE_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\bin\*.dll" />
 
-      <!-- whitelisting main PRT extension libraries -->
+      <!-- allow-list main PRT extension libraries -->
       <PRT_EXT_MAIN_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.adaptors.dll" />
       <PRT_EXT_MAIN_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.codecs.dll" />
 
-      <!-- whitelisting USD extension libraries -->
+      <!-- allow-list USD extension libraries -->
       <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.usd.dll" />
-      <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\usd_ms.dll" />
-      <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\tbb.dll" />
+      <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\prt_usd_ms.dll" />
+      <PRT_EXT_USD_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\prt_tbb.dll" />
       <PRT_EXT_USD_PLUGIN_FILES Include="$(SolutionDir)deps\ce_sdk\lib\usd\**\*.*" />
 
-      <!-- whitelisting DWG extension library -->
+      <!-- allow-list DWG extension library -->
       <PRT_EXT_DWG_LIBRARIES Include="$(SolutionDir)deps\ce_sdk\lib\com.esri.prt.oda.dll" />
     </ItemGroup>
     <Message Importance="High" Text="Copying PRT dependency..." />
