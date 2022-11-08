@@ -95,15 +95,15 @@ def taskBuildPuma(cfg) {
 	Map dirMap = [ (env.WORKSPACE) : cfg.ws ]
 
 	final String rhinoMajorVersion = cfg.rh.tokenize('.')[0]
-	Map envMap = [ 'RHINO_VER_MAJOR' : rhinoMajorVersion ]
+	Map envMap = [ 'RHINO_VER_MAJOR' : rhinoMajorVersion, 'PUMA_VER_BUILD' : BUILD_ID ]
 
 	runDockerCmd(cfg, image, containerName, dirMap, envMap, workDir, buildCmd)
 
 	manifest = readYaml(file: "${SOURCE}/manifest.yml") // called within publish, different cwd
 
-	// build final package version as <major>.<minor>.<build number>
+	// build final package version as <major>.<minor>.<revision>.<build number>
 	final List pkgVerComponents = manifest.version.tokenize('.')
-	pkgVerComponents[2] = BUILD_ID
+	pkgVerComponents[3] = BUILD_ID
 	final String pkgVer = pkgVerComponents.join('.')
 
 	def getVersion = { return pkgVer }

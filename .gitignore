@@ -379,3 +379,6 @@ Downloads/*
 /deps
 
 .vscode
+
+PumaRhino/version.h
+PumaGrasshopper/Properties/AssemblyVersion.cs

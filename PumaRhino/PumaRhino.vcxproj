@@ -11,9 +11,10 @@
       <VersionMajor>%(PumaVersions.VERSION_MAJOR)</VersionMajor>
       <VersionMinor>%(PumaVersions.VERSION_MINOR)</VersionMinor>
       <VersionRevision>%(PumaVersions.VERSION_REVISION)</VersionRevision>
-      <VersionBuild>%(PumaVersions.VERSION_BUILD)</VersionBuild>
+      <VersionBuild>$(PumaVersionBuild)</VersionBuild>
+      <VersionBuild Condition="'$(PumaVersionBuild)'==''">%(PumaVersions.VERSION_BUILD)</VersionBuild>
     </PropertyGroup>
-    <ReadLinesFromFile File=".\generatedVersion.template">
+    <ReadLinesFromFile File=".\version.h.template">
       <Output TaskParameter="Lines" ItemName="GeneratedVersions" />
     </ReadLinesFromFile>
     <PropertyGroup>
@@ -25,7 +26,7 @@
       Replace('@VERSION_BUILD@', $(VersionBuild)))
     </Version>
     </PropertyGroup>
-    <WriteLinesToFile File=".\generatedVersion.h" Lines="$(Version)" Overwrite="true" />
+    <WriteLinesToFile File=".\version.h" Lines="$(Version)" Overwrite="true" />
   </Target>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -81,10 +82,9 @@
     <ClInclude Include="PRTContext.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="version.h" />
-    <ClInclude Include="generatedVersion.h" />
+    <ClInclude Include="version.h.template" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="generatedVersion.template" />
     <None Include="res\RhinoPRT.rc2" />
     <None Include="RhinoPRT.def" />
   </ItemGroup>
