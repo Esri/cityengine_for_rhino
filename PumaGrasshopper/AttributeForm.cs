@@ -13,6 +13,7 @@ namespace PumaGrasshopper
     public partial class AttributeForm : Form
     {
         List<RuleAttribute> RuleAttributes;
+        List<ListViewGroup> Groups;
         AttributesValuesMap[] DefaultValues;
         public Point InitialLocation;
         public string SearchText;
@@ -24,11 +25,26 @@ namespace PumaGrasshopper
             InitialLocation = loc;
             RuleAttributes = attributes;
             DefaultValues = defaultValues;
+            SearchText = String.Empty;
 
             var groups = getAllGroups(attributes);
+            Groups = groups.ToList();
             ruleAttributeList.Groups.AddRange(groups);
 
-            var attributeListItems = getAttributesListViewItems(groups.ToList());
+            UpdateListView();
+        }
+
+        private void UpdateListView()
+        {
+            ruleAttributeList.Items.Clear();
+
+            List<RuleAttribute> elligibleAttributes;
+            if (SearchText == String.Empty)
+                elligibleAttributes = RuleAttributes;
+            else
+                elligibleAttributes = RuleAttributes.FindAll(attribute => attribute.mFullName.Contains(SearchText));
+
+            var attributeListItems = getAttributesListViewItems(elligibleAttributes);
             ruleAttributeList.Items.AddRange(attributeListItems.ToArray());
         }
 
@@ -111,9 +127,9 @@ namespace PumaGrasshopper
             }
         }
 
-        private List<ListViewItem> getAttributesListViewItems(List<ListViewGroup> groups)
+        private List<ListViewItem> getAttributesListViewItems(List<RuleAttribute> ruleAttributes)
         {
-            List<ListViewItem> listViewItems = RuleAttributes.ConvertAll(
+            List<ListViewItem> listViewItems = ruleAttributes.ConvertAll(
                 attribute => {
                     return new ListViewItem(new string[] {
                             attribute.mNickname,
@@ -121,7 +137,7 @@ namespace PumaGrasshopper
                             attribute.GetDescriptions(),
                             GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
                         },
-                        group: groups.Find(group => group.Header == attribute.mGroup));
+                        group: Groups.Find(group => group.Header == attribute.mGroup));
                     }
                 );
 
@@ -161,7 +177,8 @@ namespace PumaGrasshopper
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-
+            SearchText = ((TextBox) sender).Text;
+            UpdateListView();
         }
     }
 }
