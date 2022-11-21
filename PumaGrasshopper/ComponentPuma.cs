@@ -217,7 +217,9 @@ namespace PumaGrasshopper
             {
                 mCurrentRpk = rpk;
                 mRuleAttributes = PRTWrapper.GetRuleAttributes(rpk.path);
-                mDefaultValues = PRTWrapper.GetDefaultValues(rpk.path, inputMeshes);
+
+                if(mDefaultValues == null || inputMeshes.Count != mDefaultValues.Length)
+                    mDefaultValues = PRTWrapper.GetDefaultValues(rpk.path, inputMeshes);
             }
 
             RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
@@ -578,11 +580,10 @@ namespace PumaGrasshopper
             Debug.Assert(mRuleAttributes.Length > 0); // ensured by CanInsertParameter
 
             List<RuleAttribute> eligibleAttributes = GetEligibleAttributes();
-            var attributeNames = new List<string>();
-            foreach (var attr in eligibleAttributes)
-                attributeNames.Add(attr.mNickname);
 
-            var form = new AttributeForm(attributeNames, new System.Drawing.Point(Cursor.Position.X, Cursor.Position.Y));
+            var form = new AttributeForm(eligibleAttributes,
+                                         mDefaultValues,
+                                         new System.Drawing.Point(Cursor.Position.X, Cursor.Position.Y));
             var result = form.ShowDialog();
             if (result == DialogResult.OK)
             {
