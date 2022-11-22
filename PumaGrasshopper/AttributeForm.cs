@@ -134,7 +134,6 @@ namespace PumaGrasshopper
                     return new ListViewItem(new string[] {
                             attribute.mNickname,
                             GetTypeString(attribute.mAttribType),
-                            attribute.GetDescriptions(),
                             GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
                         },
                         group: Groups.Find(group => group.Header == attribute.mGroup));

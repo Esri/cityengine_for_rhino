@@ -36,7 +36,6 @@ namespace PumaGrasshopper
             this.ruleAttributeList = new System.Windows.Forms.ListView();
             this.ruleAttributeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.attributeType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.description = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.defaultValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
@@ -90,22 +89,20 @@ namespace PumaGrasshopper
             // 
             // ruleAttributeList
             // 
-            this.ruleAttributeList.Alignment = System.Windows.Forms.ListViewAlignment.Default;
+            this.ruleAttributeList.Alignment = System.Windows.Forms.ListViewAlignment.Left;
             this.ruleAttributeList.AutoArrange = false;
             this.ruleAttributeList.BackgroundImageTiled = true;
             this.ruleAttributeList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.ruleAttributeColumn,
             this.attributeType,
-            this.description,
             this.defaultValue});
             this.ruleAttributeList.FullRowSelect = true;
-            this.ruleAttributeList.GridLines = true;
             this.ruleAttributeList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.ruleAttributeList.HideSelection = false;
-            this.ruleAttributeList.Location = new System.Drawing.Point(3, 56);
+            this.ruleAttributeList.Location = new System.Drawing.Point(3, 79);
             this.ruleAttributeList.MultiSelect = false;
             this.ruleAttributeList.Name = "ruleAttributeList";
-            this.ruleAttributeList.Size = new System.Drawing.Size(1324, 1379);
+            this.ruleAttributeList.Size = new System.Drawing.Size(1324, 1342);
             this.ruleAttributeList.TabIndex = 1;
             this.ruleAttributeList.UseCompatibleStateImageBehavior = false;
             this.ruleAttributeList.View = System.Windows.Forms.View.Details;
@@ -120,15 +117,10 @@ namespace PumaGrasshopper
             this.attributeType.Text = "Type";
             this.attributeType.Width = 255;
             // 
-            // description
-            // 
-            this.description.Text = "Description";
-            this.description.Width = 181;
-            // 
             // defaultValue
             // 
             this.defaultValue.Text = "Default value";
-            this.defaultValue.Width = 188;
+            this.defaultValue.Width = 250;
             // 
             // flowLayoutPanel1
             // 
@@ -138,7 +130,7 @@ namespace PumaGrasshopper
             this.flowLayoutPanel1.Controls.Add(this.ruleAttributeList);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(7, 12);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(1327, 1444);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(1327, 1431);
             this.flowLayoutPanel1.TabIndex = 5;
             // 
             // flowLayoutPanel2
@@ -186,7 +178,6 @@ namespace PumaGrasshopper
         private System.Windows.Forms.ListView ruleAttributeList;
         private System.Windows.Forms.ColumnHeader ruleAttributeColumn;
         private System.Windows.Forms.ColumnHeader attributeType;
-        private System.Windows.Forms.ColumnHeader description;
         private System.Windows.Forms.ColumnHeader defaultValue;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
