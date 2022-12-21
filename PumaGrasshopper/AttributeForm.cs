@@ -28,8 +28,8 @@ namespace PumaGrasshopper
             SearchText = String.Empty;
 
             var groups = getAllGroups(attributes);
-            Groups = groups.ToList();
-            ruleAttributeList.Groups.AddRange(groups);
+            Groups = groups;
+            ruleAttributeList.Groups.AddRange(groups.ToArray());
 
             UpdateListView();
         }
@@ -38,12 +38,10 @@ namespace PumaGrasshopper
         {
             ruleAttributeList.Items.Clear();
 
-            List<RuleAttribute> elligibleAttributes;
-            if (SearchText == String.Empty)
-                elligibleAttributes = RuleAttributes;
-            else
-                elligibleAttributes = RuleAttributes.FindAll(attribute => attribute.mFullName.Contains(SearchText));
-
+            List<RuleAttribute> elligibleAttributes = SearchText == string.Empty ?
+                RuleAttributes : 
+                RuleAttributes.FindAll(attribute => attribute.mFullName.Contains(SearchText));
+            
             var attributeListItems = getAttributesListViewItems(elligibleAttributes);
             ruleAttributeList.Items.AddRange(attributeListItems.ToArray());
         }
@@ -143,17 +141,15 @@ namespace PumaGrasshopper
             return listViewItems;
         }
 
-        private ListViewGroup[] getAllGroups(List<RuleAttribute> attributes)
+        private List<ListViewGroup> getAllGroups(List<RuleAttribute> attributes)
         {
             var groupNames = attributes.ConvertAll(attr => attr.mGroup);
-
-            HashSet<string> groups = new HashSet<string>();
-            groupNames.ForEach(groupName => groups.Add(groupName));
+            var groups = groupNames.Distinct().ToList();
 
             List<ListViewGroup> groupListView = new List<ListViewGroup>();
-            groups.ToList().ForEach((groupName) => groupListView.Add(new ListViewGroup(groupName)));
+            groups.ForEach((groupName) => groupListView.Add(new ListViewGroup(groupName)));
 
-            return groupListView.ToArray();
+            return groupListView;
         }
 
         private void AttributeForm_Load(object sender, EventArgs e)
@@ -163,8 +159,15 @@ namespace PumaGrasshopper
 
         private void Ok_Click(object sender, EventArgs e)
         {
-            SelectedIndex = ruleAttributeList.SelectedIndices[0];
-            DialogResult = DialogResult.OK;
+            if(ruleAttributeList.SelectedIndices.Count > 0)
+            {
+                SelectedIndex = ruleAttributeList.SelectedIndices[0];
+                DialogResult = DialogResult.OK;
+            } else
+            {
+                DialogResult = DialogResult.Cancel;
+            }
+            
             Close();
         }
 
@@ -174,7 +177,7 @@ namespace PumaGrasshopper
             Close();
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object sender, EventArgs e)
         {
             SearchText = ((TextBox) sender).Text;
             UpdateListView();

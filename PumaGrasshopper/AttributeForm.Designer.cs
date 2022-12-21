@@ -31,7 +31,7 @@ namespace PumaGrasshopper
         {
             this.CancelBtn = new System.Windows.Forms.Button();
             this.OkBtn = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.ruleAttributeList = new System.Windows.Forms.ListView();
             this.ruleAttributeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -66,16 +66,16 @@ namespace PumaGrasshopper
             this.OkBtn.UseVisualStyleBackColor = true;
             this.OkBtn.Click += new System.EventHandler(this.Ok_Click);
             // 
-            // textBox1
+            // searchTextBox
             // 
-            this.textBox1.AccessibleName = "ruleAttributeSearchField";
-            this.textBox1.AccessibleRole = System.Windows.Forms.AccessibleRole.Text;
-            this.textBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.textBox1.Location = new System.Drawing.Point(3, 35);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(1322, 38);
-            this.textBox1.TabIndex = 4;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            this.searchTextBox.AccessibleName = "ruleAttributeSearchField";
+            this.searchTextBox.AccessibleRole = System.Windows.Forms.AccessibleRole.Text;
+            this.searchTextBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.searchTextBox.Location = new System.Drawing.Point(3, 35);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(1322, 38);
+            this.searchTextBox.TabIndex = 4;
+            this.searchTextBox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
             // 
             // label1
             // 
@@ -126,7 +126,7 @@ namespace PumaGrasshopper
             // 
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel1.Controls.Add(this.label1);
-            this.flowLayoutPanel1.Controls.Add(this.textBox1);
+            this.flowLayoutPanel1.Controls.Add(this.searchTextBox);
             this.flowLayoutPanel1.Controls.Add(this.ruleAttributeList);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(7, 12);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -173,7 +173,7 @@ namespace PumaGrasshopper
 
         private System.Windows.Forms.Button CancelBtn;
         private System.Windows.Forms.Button OkBtn;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox searchTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ListView ruleAttributeList;
         private System.Windows.Forms.ColumnHeader ruleAttributeColumn;
