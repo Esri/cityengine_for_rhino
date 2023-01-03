@@ -155,7 +155,7 @@ namespace PumaGrasshopper
             return GH_ParamAccess.tree;
         }
 
-        private string GetDescriptions()
+        public string GetDescriptions()
         {
             string description = "";
             if(mGroup.Length > 0)
