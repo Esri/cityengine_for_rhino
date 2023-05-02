@@ -134,7 +134,7 @@ namespace PumaGrasshopper
                             GetTypeString(attribute.mAttribType),
                             GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
                         },
-                        group: Groups.Find(group => group.Header == attribute.mGroup));
+                        group: Groups.Find(group => group.Header == attribute.getFullGroup()));
                     }
                 );
 
@@ -143,7 +143,7 @@ namespace PumaGrasshopper
 
         private List<ListViewGroup> getAllGroups(List<RuleAttribute> attributes)
         {
-            var groupNames = attributes.ConvertAll(attr => attr.mGroup);
+            var groupNames = attributes.ConvertAll(attr => attr.getFullGroup());
             var groups = groupNames.Distinct().ToList();
 
             List<ListViewGroup> groupListView = new List<ListViewGroup>();

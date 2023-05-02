@@ -482,16 +482,23 @@ namespace PumaGrasshopper
 
             RuleAttribute[] attributes = new RuleAttribute[attribCount];
 
+            int attributesArrayOffset = 0;
             int baseAnnotationOffset = 0;
             int doubleAnnotationOffset = 0;
             int stringAnnotationOffset = 0;
 
             for(int i = 0; i < attribCount; i++)
             {
-                string[] attributeInfo = attributesArray.Skip(i * 4).Take(4).ToArray();
-                Annotations.AnnotationArgumentType type = (Annotations.AnnotationArgumentType)attributesTypesArray[i * 2];
-                int annotCount = attributesTypesArray[i * 2 + 1];
-                attributes[i] = new RuleAttribute(attributeInfo[1], attributeInfo[2], attributeInfo[0], type, attributeInfo[3] == null ? "" : attributeInfo[3]);
+                int groupCount = attributesTypesArray[i * 3];
+                string[] attributeInfo = attributesArray.Skip(attributesArrayOffset).Take(3 + groupCount).ToArray();
+                attributesArrayOffset += 3 + groupCount;
+                
+                Annotations.AnnotationArgumentType type = (Annotations.AnnotationArgumentType)attributesTypesArray[i * 3 + 1];
+                int annotCount = attributesTypesArray[i * 3 + 2];
+
+                string[] groups = attributeInfo.Skip(3).Take(groupCount).ToArray();
+
+                attributes[i] = new RuleAttribute(attributeInfo[1], attributeInfo[2], attributeInfo[0], type, groups);
 
                 List<Annotations.Base> annotations = new List<Annotations.Base>();
 

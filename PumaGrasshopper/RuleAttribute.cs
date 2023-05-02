@@ -32,16 +32,16 @@ namespace PumaGrasshopper
         public string mNickname;
         public Annotations.AnnotationArgumentType mAttribType;
         public List<Annotations.Base> mAnnotations;
-        public string mGroup;
+        public string[] mGroups;
 
-        public RuleAttribute(string name, string nickname, string ruleFile, Annotations.AnnotationArgumentType type, string group)
+        public RuleAttribute(string name, string nickname, string ruleFile, Annotations.AnnotationArgumentType type, string[] groups)
         {
             this.mRuleFile = ruleFile;
             this.mFullName = name;
             this.mNickname = nickname;
             this.mAttribType = type;
             this.mAnnotations = new List<Annotations.Base>();
-            this.mGroup = group;
+            this.mGroups = groups;
         }
 
         public IGH_Param CreateInputParameter(AttributesValuesMap[] defaultValuesMap)
@@ -51,7 +51,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_BOOL:
                     {
-                        var param_bool = new AttributeParameter.Boolean(mGroup, IsArray())
+                        var param_bool = new AttributeParameter.Boolean(mGroups.FirstOrDefault(), IsArray())
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -66,7 +66,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
                     {
-                        var param_number = new AttributeParameter.Number(mAnnotations, mGroup, IsArray())
+                        var param_number = new AttributeParameter.Number(mAnnotations, mGroups.FirstOrDefault(), IsArray())
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -81,7 +81,7 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_INT:
                 case Annotations.AnnotationArgumentType.AAT_INT_ARRAY:
                     {
-                        var param_int = new AttributeParameter.Number(mAnnotations, mGroup, IsArray())
+                        var param_int = new AttributeParameter.Number(mAnnotations, mGroups.FirstOrDefault(), IsArray())
                         {
                             Name = mFullName,
                             NickName = mNickname,
@@ -99,7 +99,7 @@ namespace PumaGrasshopper
                         // check for color parameter
                         if (mAnnotations.Any(x => x.IsColor()))
                         {
-                            var param_color = new AttributeParameter.Colour(mGroup)
+                            var param_color = new AttributeParameter.Colour(mGroups.FirstOrDefault())
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -112,7 +112,7 @@ namespace PumaGrasshopper
                         }
                         else
                         {
-                            var param_str = new AttributeParameter.String(mAnnotations, mGroup, IsArray())
+                            var param_str = new AttributeParameter.String(mAnnotations, mGroups.FirstOrDefault(), IsArray())
                             {
                                 Name = mFullName,
                                 NickName = mNickname,
@@ -155,12 +155,14 @@ namespace PumaGrasshopper
             return GH_ParamAccess.tree;
         }
 
+        public string getFullGroup() => mGroups.Aggregate((left, right) => left + " - " + right);
+
         public string GetDescriptions()
         {
             string description = "";
-            if(mGroup.Length > 0)
+            if(mGroups.Length > 0)
             {
-                description = "Group " + mGroup + "\n";
+                description = "Group: " + mGroups.Aggregate("", (left, right) => left + " " + right + "\n");
             }
 
             if(this.IsArray())
