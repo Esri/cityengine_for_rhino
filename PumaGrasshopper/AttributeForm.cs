@@ -53,19 +53,19 @@ namespace PumaGrasshopper
                 case Annotations.AnnotationArgumentType.AAT_BOOL:
                     return "Boolean";
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
-                    return "Floating point";
+                    return "Number";
                 case Annotations.AnnotationArgumentType.AAT_STR:
-                    return "Text";
+                    return "String";
                 case Annotations.AnnotationArgumentType.AAT_INT:
-                    return "Integer";
+                    return "Number";
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
-                    return "Boolean array";
+                    return "Boolean[]";
                 case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                    return "Floating point array";
+                    return "Number[]";
                 case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
-                    return "Text array";
+                    return "String[]";
                 case Annotations.AnnotationArgumentType.AAT_INT_ARRAY:
-                    return "Integer array";
+                    return "Number[]";
                 case Annotations.AnnotationArgumentType.AAT_VOID:
                     return "No type";
                 default:
