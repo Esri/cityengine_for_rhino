@@ -110,7 +110,7 @@ namespace PumaGrasshopper
             // ruleAttributeColumn
             // 
             this.ruleAttributeColumn.Text = "Rule attribute";
-            this.ruleAttributeColumn.Width = 301;
+            this.ruleAttributeColumn.Width = 400;
             // 
             // attributeType
             // 

@@ -130,7 +130,7 @@ namespace PumaGrasshopper
             List<ListViewItem> listViewItems = ruleAttributes.ConvertAll(
                 attribute => {
                     return new ListViewItem(new string[] {
-                            attribute.mNickname,
+                            "   " + attribute.mNickname,
                             GetTypeString(attribute.mAttribType),
                             GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
                         },
