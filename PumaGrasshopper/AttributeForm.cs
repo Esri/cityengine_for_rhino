@@ -56,7 +56,6 @@ namespace PumaGrasshopper
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.tabContainer.SuspendLayout();
-            this.mainFileTab.SuspendLayout();
             this.SuspendLayout();
 
             listViews.Keys.ToList().ForEach(import => tabs[import].Controls.Add(listViews[import]));
@@ -68,7 +67,6 @@ namespace PumaGrasshopper
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.tabContainer.ResumeLayout(false);
-            this.mainFileTab.ResumeLayout(false);
             this.ResumeLayout(false);
         }
 

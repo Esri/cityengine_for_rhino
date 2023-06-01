@@ -33,18 +33,15 @@ namespace PumaGrasshopper
             this.OkBtn = new System.Windows.Forms.Button();
             this.searchTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.ruleAttributeList = new System.Windows.Forms.ListView();
             this.ruleAttributeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.attributeType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.defaultValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.tabContainer = new System.Windows.Forms.TabControl();
-            this.mainFileTab = new System.Windows.Forms.TabPage();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.tabContainer.SuspendLayout();
-            this.mainFileTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // CancelBtn
@@ -90,27 +87,6 @@ namespace PumaGrasshopper
             this.label1.Size = new System.Drawing.Size(579, 32);
             this.label1.TabIndex = 3;
             this.label1.Text = "Available Attributes of current Rule Package:";
-            // 
-            // ruleAttributeList
-            // 
-            this.ruleAttributeList.Alignment = System.Windows.Forms.ListViewAlignment.Left;
-            this.ruleAttributeList.AutoArrange = false;
-            this.ruleAttributeList.BackgroundImageTiled = true;
-            this.ruleAttributeList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.ruleAttributeColumn,
-            this.attributeType,
-            this.defaultValue});
-            this.ruleAttributeList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ruleAttributeList.FullRowSelect = true;
-            this.ruleAttributeList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.ruleAttributeList.HideSelection = false;
-            this.ruleAttributeList.Location = new System.Drawing.Point(3, 3);
-            this.ruleAttributeList.MultiSelect = false;
-            this.ruleAttributeList.Name = "ruleAttributeList";
-            this.ruleAttributeList.Size = new System.Drawing.Size(1298, 1288);
-            this.ruleAttributeList.TabIndex = 1;
-            this.ruleAttributeList.UseCompatibleStateImageBehavior = false;
-            this.ruleAttributeList.View = System.Windows.Forms.View.Details;
             // 
             // ruleAttributeColumn
             // 
@@ -160,18 +136,6 @@ namespace PumaGrasshopper
             this.tabContainer.Size = new System.Drawing.Size(1324, 1352);
             this.tabContainer.TabIndex = 5;
             // 
-            // mainFileTab
-            // 
-            this.mainFileTab.AutoScroll = true;
-            this.mainFileTab.Controls.Add(this.ruleAttributeList);
-            this.mainFileTab.Location = new System.Drawing.Point(10, 48);
-            this.mainFileTab.Name = "mainFileTab";
-            this.mainFileTab.Padding = new System.Windows.Forms.Padding(3);
-            this.mainFileTab.Size = new System.Drawing.Size(1304, 1294);
-            this.mainFileTab.TabIndex = 0;
-            this.mainFileTab.Text = "Main file";
-            this.mainFileTab.UseVisualStyleBackColor = true;
-            // 
             // AttributeForm
             // 
             this.AcceptButton = this.OkBtn;
@@ -192,7 +156,6 @@ namespace PumaGrasshopper
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.tabContainer.ResumeLayout(false);
-            this.mainFileTab.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -203,13 +166,11 @@ namespace PumaGrasshopper
         private System.Windows.Forms.Button OkBtn;
         private System.Windows.Forms.TextBox searchTextBox;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ListView ruleAttributeList;
         private System.Windows.Forms.ColumnHeader ruleAttributeColumn;
         private System.Windows.Forms.ColumnHeader attributeType;
         private System.Windows.Forms.ColumnHeader defaultValue;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.TabControl tabContainer;
-        private System.Windows.Forms.TabPage mainFileTab;
     }
 }
