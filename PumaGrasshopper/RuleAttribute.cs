@@ -157,6 +157,8 @@ namespace PumaGrasshopper
 
         public string getFullGroup() => mGroups.Aggregate((left, right) => left + " - " + right);
 
+        public string getImport() => Utils.getImportPrefix(mFullName);
+
         public string GetDescriptions()
         {
             string description = "";
