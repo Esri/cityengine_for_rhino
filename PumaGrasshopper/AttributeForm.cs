@@ -14,10 +14,13 @@ namespace PumaGrasshopper
     {
         List<RuleAttribute> RuleAttributes;
         List<ListViewGroup> Groups;
+        List<string> Imports;
         AttributesValuesMap[] DefaultValues;
         public Point InitialLocation;
         public string SearchText;
         public int SelectedIndex;
+        private Dictionary<string, ListView> listViews;
+        private Dictionary<string, TabPage> tabs;
 
         public AttributeForm(List<RuleAttribute> attributes, AttributesValuesMap[] defaultValues, Point loc)
         {
@@ -27,23 +30,84 @@ namespace PumaGrasshopper
             DefaultValues = defaultValues;
             SearchText = String.Empty;
 
-            var groups = getAllGroups(attributes);
-            Groups = groups;
-            ruleAttributeList.Groups.AddRange(groups.ToArray());
+            Groups = getAllGroups(attributes);
+
+            tabs = new Dictionary<string, TabPage>();
+            var imports = getAllImports(attributes);
+            imports.RemoveAll(import => import == null);
+            Imports = new List<string>();
+            Imports.Add("Main file");
+            Imports.AddRange(imports);
+            Imports.ForEach(import => tabs.Add(import, new TabPage
+            {
+                AutoScroll = true,
+                Name = import,
+                Location = new System.Drawing.Point(10, 48),
+                Padding = new System.Windows.Forms.Padding(3),
+                Size = new System.Drawing.Size(1304, 1294),
+                TabIndex = 0,
+                Text = import,
+                UseVisualStyleBackColor = true,
+            }));
+
+            listViews = new Dictionary<string, ListView>();
+            Imports.ForEach(import => listViews.Add(import, getListView(import)));
+
+            this.flowLayoutPanel1.SuspendLayout();
+            this.flowLayoutPanel2.SuspendLayout();
+            this.tabContainer.SuspendLayout();
+            this.mainFileTab.SuspendLayout();
+            this.SuspendLayout();
+
+            listViews.Keys.ToList().ForEach(import => tabs[import].Controls.Add(listViews[import]));
+            tabContainer.TabPages.AddRange(tabs.Values.ToArray());
 
             UpdateListView();
+
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
+            this.flowLayoutPanel2.ResumeLayout(false);
+            this.tabContainer.ResumeLayout(false);
+            this.mainFileTab.ResumeLayout(false);
+            this.ResumeLayout(false);
         }
 
         private void UpdateListView()
         {
-            ruleAttributeList.Items.Clear();
+            listViews.Values.ToList().ForEach(l => l.Items.Clear());
 
             List<RuleAttribute> elligibleAttributes = SearchText == string.Empty ?
                 RuleAttributes : 
                 RuleAttributes.FindAll(attribute => attribute.mFullName.Contains(SearchText));
             
-            var attributeListItems = getAttributesListViewItems(elligibleAttributes);
-            ruleAttributeList.Items.AddRange(attributeListItems.ToArray());
+            getAttributesListViewItems(elligibleAttributes);
+        }
+
+        private ListView getListView(string importName)
+        { 
+            var ruleAttributeList = new ListView();
+            ruleAttributeList.Alignment = ListViewAlignment.Left;
+            ruleAttributeList.AutoArrange = false;
+            ruleAttributeList.BackgroundImageTiled = true;
+            ruleAttributeList.Columns.AddRange(new ColumnHeader[] {
+                (ColumnHeader)ruleAttributeColumn.Clone(),
+                (ColumnHeader)attributeType.Clone(),
+                (ColumnHeader)defaultValue.Clone()});
+            ruleAttributeList.Dock = DockStyle.Fill;
+            ruleAttributeList.FullRowSelect = true;
+            ruleAttributeList.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            ruleAttributeList.HideSelection = false;
+            ruleAttributeList.Location = new Point(3, 3);
+            ruleAttributeList.MultiSelect = false;
+            ruleAttributeList.Name = importName;
+            ruleAttributeList.Size = new Size(1298, 1288);
+            ruleAttributeList.TabIndex = 1;
+            ruleAttributeList.UseCompatibleStateImageBehavior = false;
+            ruleAttributeList.View = View.Details;
+
+            ruleAttributeList.Groups.AddRange(Groups.ToArray());
+
+            return ruleAttributeList;
         }
 
         private string GetTypeString(Annotations.AnnotationArgumentType type)
@@ -125,21 +189,29 @@ namespace PumaGrasshopper
             }
         }
 
-        private List<ListViewItem> getAttributesListViewItems(List<RuleAttribute> ruleAttributes)
+        private void getAttributesListViewItems(List<RuleAttribute> ruleAttributes)
         {
-            List<ListViewItem> listViewItems = ruleAttributes.ConvertAll(
+            ruleAttributes.ForEach(
                 attribute => {
-                    return new ListViewItem(new string[] {
-                            "   " + attribute.mNickname,
-                            GetTypeString(attribute.mAttribType),
-                            GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
-                        },
-                        group: Groups.Find(group => group.Header == attribute.getFullGroup()));
-                    }
-                );
+                    var item = new ListViewItem(new string[] {
+                        "   " + attribute.mNickname,
+                        GetTypeString(attribute.mAttribType),
+                        GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
+                    },
+                    group: Groups.Find(group => group.Header == attribute.getFullGroup()));
 
-            return listViewItems;
+                    item.Name = attribute.mFullName;
+                    
+                    var import = attribute.getImport();
+
+                    if (import == null) import = "Main file";
+
+                    listViews[import].Items.Add(item);
+                }
+            );
         }
+
+        private List<string> getAllImports(List<RuleAttribute> attributes) => attributes.ConvertAll(attr => attr.getImport()).Distinct().ToList();
 
         private List<ListViewGroup> getAllGroups(List<RuleAttribute> attributes)
         {
@@ -159,9 +231,13 @@ namespace PumaGrasshopper
 
         private void Ok_Click(object sender, EventArgs e)
         {
-            if(ruleAttributeList.SelectedIndices.Count > 0)
+            var selectedTabIndex = tabContainer.SelectedIndex;
+            
+            if(selectedTabIndex > -1 && listViews.ElementAt(selectedTabIndex).Value.SelectedIndices.Count > 0)
             {
-                SelectedIndex = ruleAttributeList.SelectedIndices[0];
+                var attributeName = listViews.ElementAt(selectedTabIndex).Value.SelectedItems[0].Name;
+
+                SelectedIndex = RuleAttributes.FindIndex(attribute => attribute.mFullName == attributeName);
                 DialogResult = DialogResult.OK;
             } else
             {

@@ -39,8 +39,12 @@ namespace PumaGrasshopper
             this.defaultValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.tabContainer = new System.Windows.Forms.TabControl();
+            this.mainFileTab = new System.Windows.Forms.TabPage();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
+            this.tabContainer.SuspendLayout();
+            this.mainFileTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // CancelBtn
@@ -96,13 +100,14 @@ namespace PumaGrasshopper
             this.ruleAttributeColumn,
             this.attributeType,
             this.defaultValue});
+            this.ruleAttributeList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ruleAttributeList.FullRowSelect = true;
             this.ruleAttributeList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.ruleAttributeList.HideSelection = false;
-            this.ruleAttributeList.Location = new System.Drawing.Point(3, 79);
+            this.ruleAttributeList.Location = new System.Drawing.Point(3, 3);
             this.ruleAttributeList.MultiSelect = false;
             this.ruleAttributeList.Name = "ruleAttributeList";
-            this.ruleAttributeList.Size = new System.Drawing.Size(1324, 1342);
+            this.ruleAttributeList.Size = new System.Drawing.Size(1298, 1288);
             this.ruleAttributeList.TabIndex = 1;
             this.ruleAttributeList.UseCompatibleStateImageBehavior = false;
             this.ruleAttributeList.View = System.Windows.Forms.View.Details;
@@ -127,7 +132,7 @@ namespace PumaGrasshopper
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel1.Controls.Add(this.label1);
             this.flowLayoutPanel1.Controls.Add(this.searchTextBox);
-            this.flowLayoutPanel1.Controls.Add(this.ruleAttributeList);
+            this.flowLayoutPanel1.Controls.Add(this.tabContainer);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(7, 12);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(1327, 1431);
@@ -145,6 +150,27 @@ namespace PumaGrasshopper
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(1327, 107);
             this.flowLayoutPanel2.TabIndex = 7;
+            // 
+            // tabContainer
+            // 
+            // this.tabContainer.Controls.Add(this.mainFileTab);
+            this.tabContainer.Location = new System.Drawing.Point(3, 79);
+            this.tabContainer.Name = "tabContainer";
+            this.tabContainer.SelectedIndex = 0;
+            this.tabContainer.Size = new System.Drawing.Size(1324, 1352);
+            this.tabContainer.TabIndex = 5;
+            // 
+            // mainFileTab
+            // 
+            this.mainFileTab.AutoScroll = true;
+            this.mainFileTab.Controls.Add(this.ruleAttributeList);
+            this.mainFileTab.Location = new System.Drawing.Point(10, 48);
+            this.mainFileTab.Name = "mainFileTab";
+            this.mainFileTab.Padding = new System.Windows.Forms.Padding(3);
+            this.mainFileTab.Size = new System.Drawing.Size(1304, 1294);
+            this.mainFileTab.TabIndex = 0;
+            this.mainFileTab.Text = "Main file";
+            this.mainFileTab.UseVisualStyleBackColor = true;
             // 
             // AttributeForm
             // 
@@ -165,6 +191,8 @@ namespace PumaGrasshopper
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
+            this.tabContainer.ResumeLayout(false);
+            this.mainFileTab.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -181,5 +209,7 @@ namespace PumaGrasshopper
         private System.Windows.Forms.ColumnHeader defaultValue;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
+        private System.Windows.Forms.TabControl tabContainer;
+        private System.Windows.Forms.TabPage mainFileTab;
     }
 }
