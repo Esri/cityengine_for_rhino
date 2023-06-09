@@ -164,6 +164,8 @@ namespace PumaGrasshopper
 
         public string getImport() => Utils.getImportPrefix(mFullName);
 
+        public string getImportWithoutStylePrefix() => Utils.getImportPrefix(mFullName, false);
+
         public string GetDescriptions()
         {
             string description = "";

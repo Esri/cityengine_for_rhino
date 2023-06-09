@@ -204,7 +204,7 @@ namespace PumaGrasshopper
 
                     item.Name = attribute.mFullName;
                     
-                    var import = attribute.getImport();
+                    var import = attribute.getImportWithoutStylePrefix();
 
                     if (import == null)
                         import = MAIN_FILE_TAB_NAME;
@@ -214,7 +214,7 @@ namespace PumaGrasshopper
             );
         }
 
-        private List<string> getAllImports(List<RuleAttribute> attributes) => attributes.ConvertAll(attr => attr.getImport()).Distinct().ToList();
+        private List<string> getAllImports(List<RuleAttribute> attributes) => attributes.ConvertAll(attr => attr.getImportWithoutStylePrefix()).Distinct().ToList();
 
         private List<ListViewGroup> getAllGroups(List<RuleAttribute> attributes)
         {

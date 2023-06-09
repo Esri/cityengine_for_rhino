@@ -39,6 +39,7 @@ namespace PumaGrasshopper
     class Utils
     {
         private static string IMPORT_DELIMITER = ".";
+        private static string STYLE_DELIMITER = "$";
 
         public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
         {
@@ -290,12 +291,21 @@ namespace PumaGrasshopper
             grp.ExpirePreview(true);
         }
 
-        public static string getImportPrefix(string attribute)
+        public static string getImportPrefix(string attribute, bool withStylePrefix = true)
         {
-            var setPos = attribute.IndexOf(IMPORT_DELIMITER);
-            if (setPos == -1) return null;
+            var importDelimPos = attribute.LastIndexOf(IMPORT_DELIMITER);
+            if (importDelimPos == -1)
+                return null;
 
-            return attribute.Substring(0, setPos);
+            int importStartPos = 0;
+            if (!withStylePrefix)
+            {
+                int styleDelimPos = attribute.IndexOf(STYLE_DELIMITER);
+                if (styleDelimPos > -1 || styleDelimPos < attribute.Length-1)
+                    importStartPos = styleDelimPos + 1;
+            }
+
+            return attribute.Substring(importStartPos, importDelimPos - importStartPos);
         }
 
         public static string ToXML(object obj)
