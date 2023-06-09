@@ -495,8 +495,8 @@ namespace PumaGrasshopper
                 
                 Annotations.AnnotationArgumentType type = (Annotations.AnnotationArgumentType)attributesTypesArray[i * 3 + 1];
                 int annotCount = attributesTypesArray[i * 3 + 2];
-
-                string[] groups = attributeInfo.Skip(3).Take(groupCount).ToArray();
+                
+                string[] groups = (groupCount > 0) ? attributeInfo.Skip(3).Take(groupCount).ToArray() : new string[0];
 
                 attributes[i] = new RuleAttribute(attributeInfo[1], attributeInfo[2], attributeInfo[0], type, groups);
 

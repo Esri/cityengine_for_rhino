@@ -215,6 +215,7 @@ namespace PumaGrasshopper
         {
             var groupNames = attributes.ConvertAll(attr => attr.getFullGroup());
             var groups = groupNames.Distinct().ToList();
+            groups.RemoveAll(item => item == null);
 
             List<ListViewGroup> groupListView = new List<ListViewGroup>();
             groups.ForEach((groupName) => groupListView.Add(new ListViewGroup(groupName)));

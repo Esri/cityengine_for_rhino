@@ -155,7 +155,12 @@ namespace PumaGrasshopper
             return GH_ParamAccess.tree;
         }
 
-        public string getFullGroup() => mGroups.Aggregate((left, right) => left + " - " + right);
+        public string getFullGroup()
+        {
+            if (mGroups.Length == 0)
+               return null;
+            return mGroups.Aggregate((left, right) => left + " - " + right);
+        }
 
         public string getImport() => Utils.getImportPrefix(mFullName);
 

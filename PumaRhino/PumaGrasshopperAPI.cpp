@@ -281,12 +281,9 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 		pAttributesBuffer->Append(ON_wString(attribute->mRuleFile.c_str()));
 		pAttributesBuffer->Append(ON_wString(attribute->mFullName.c_str()));
 		pAttributesBuffer->Append(ON_wString(attribute->mNickname.c_str()));
-		if (attribute->groups.size() > 0) {
-			std::for_each(attribute->groups.begin(), attribute->groups.end(), [&pAttributesBuffer](auto group) {
-				pAttributesBuffer->Append(ON_wString(group.c_str()));
-			});
-		} else 
-			pAttributesBuffer->Append({});
+		std::for_each(attribute->groups.begin(), attribute->groups.end(), [&pAttributesBuffer](auto group) {
+			pAttributesBuffer->Append(ON_wString(group.c_str()));
+		});
 		pAttributesTypes->Append(attribute->groups.size());
 
 		pAttributesTypes->Append((int)attribute->mType);
