@@ -284,7 +284,7 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 		std::for_each(attribute->groups.begin(), attribute->groups.end(), [&pAttributesBuffer](auto group) {
 			pAttributesBuffer->Append(ON_wString(group.c_str()));
 		});
-		pAttributesTypes->Append(attribute->groups.size());
+		pAttributesTypes->Append(static_cast<int>(attribute->groups.size()));
 
 		pAttributesTypes->Append((int)attribute->mType);
 		pAttributesTypes->Append((int)attribute->mAnnotations.size());
