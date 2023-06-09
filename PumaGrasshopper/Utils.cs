@@ -128,10 +128,10 @@ namespace PumaGrasshopper
             return values.Aggregate("", (acc, x) => acc + x.ToString()) + ":";
         }
 
-        public static string[] StringFromCeArray(string values) => values == null ? Array.Empty<string>(): values.Split(':');
-        public static bool[] BoolFromCeArray(string values) => values == null ? Array.Empty<bool>() : Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
-        public static int[] IntegerFromCeArray(string values) => values == null ? Array.Empty<int>() : Array.ConvertAll(values.Split(':'), value => Convert.ToInt32(value));
-        public static double[] DoubleFromCeArray(string values) => values == null ? Array.Empty<double>() : Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
+        public static string[] StringFromCeArray(string values) => values == null ? new string[0]: values.Split(':');
+        public static bool[] BoolFromCeArray(string values) => values == null ? new bool[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
+        public static int[] IntegerFromCeArray(string values) => values == null ? new int[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToInt32(value));
+        public static double[] DoubleFromCeArray(string values) => values == null ? new double[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
 
         public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
         {
