@@ -71,6 +71,7 @@ namespace PumaGrasshopper
             this.tabContainer.ResumeLayout(false);
             this.ResumeLayout(false);
 
+            this.AcceptButton = OkBtn;
             this.CancelButton = CancelBtn;
         }
 
