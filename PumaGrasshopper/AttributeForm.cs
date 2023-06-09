@@ -12,6 +12,8 @@ namespace PumaGrasshopper
 {
     public partial class AttributeForm : Form
     {
+        private static string MAIN_FILE_TAB_NAME = "Main Rule File";
+        
         List<RuleAttribute> RuleAttributes;
         List<ListViewGroup> Groups;
         List<string> Imports;
@@ -36,7 +38,7 @@ namespace PumaGrasshopper
             var imports = getAllImports(attributes);
             imports.RemoveAll(import => import == null);
             Imports = new List<string>();
-            Imports.Add("Main file");
+            Imports.Add(MAIN_FILE_TAB_NAME);
             Imports.AddRange(imports);
             Imports.ForEach(import => tabs.Add(import, new TabPage
             {
@@ -53,7 +55,7 @@ namespace PumaGrasshopper
             listViews = new Dictionary<string, ListView>();
             Imports.ForEach(import => listViews.Add(import, getListView(import)));
 
-            this.flowLayoutPanel1.SuspendLayout();
+            this.mainTableLayout.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.tabContainer.SuspendLayout();
             this.SuspendLayout();
@@ -63,11 +65,13 @@ namespace PumaGrasshopper
 
             UpdateListView();
 
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
+            this.mainTableLayout.ResumeLayout(false);
+            this.mainTableLayout.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.tabContainer.ResumeLayout(false);
             this.ResumeLayout(false);
+
+            this.CancelButton = CancelBtn;
         }
 
         private void UpdateListView()
@@ -76,7 +80,7 @@ namespace PumaGrasshopper
 
             List<RuleAttribute> elligibleAttributes = SearchText == string.Empty ?
                 RuleAttributes : 
-                RuleAttributes.FindAll(attribute => attribute.mFullName.Contains(SearchText));
+                RuleAttributes.FindAll(attribute => attribute.mNickname.ToLower().Contains(SearchText.ToLower()));
             
             getAttributesListViewItems(elligibleAttributes);
         }
@@ -202,7 +206,8 @@ namespace PumaGrasshopper
                     
                     var import = attribute.getImport();
 
-                    if (import == null) import = "Main file";
+                    if (import == null)
+                        import = MAIN_FILE_TAB_NAME;
 
                     listViews[import].Items.Add(item);
                 }
@@ -228,7 +233,7 @@ namespace PumaGrasshopper
             SetDesktopLocation(InitialLocation.X, InitialLocation.Y);
         }
 
-        private void Ok_Click(object sender, EventArgs e)
+        private void OkBtn_Click(object sender, EventArgs e)
         {
             var selectedTabIndex = tabContainer.SelectedIndex;
             
@@ -252,9 +257,9 @@ namespace PumaGrasshopper
             Close();
         }
 
-        private void SearchTextBox_TextChanged(object sender, EventArgs e)
+        private void searchTextBox_TextChanged(object sender, EventArgs e)
         {
-            SearchText = ((TextBox) sender).Text;
+            SearchText = ((TextBox)sender).Text;
             UpdateListView();
         }
     }
