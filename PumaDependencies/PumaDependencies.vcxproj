@@ -14,7 +14,7 @@
     <ProjectName>PumaDependencies</ProjectName>
   </PropertyGroup>
   <PropertyGroup>
-    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/2.7.8538/esri_ce_sdk-2.7.8538-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
+    <PRTUrl>https://github.com/Esri/cityengine-sdk/releases/download/3.0.8905/esri_ce_sdk-3.0.8905-win10-vc1427-x86_64-rel-opt.zip</PRTUrl>
     <OutputDirectory>$(SolutionDir)build\</OutputDirectory>
     <DependencyDir>$(SolutionDir)deps\</DependencyDir>
   </PropertyGroup>
