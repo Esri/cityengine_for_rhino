@@ -213,13 +213,7 @@ const RuleAttributes ModelGenerator::getRuleAttributes(const std::wstring& ruleP
 }
 
 pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rulePkg) {
-	pcu::ResolveMapSPtr resolveMap;
-	try {
-		resolveMap = getResolveMap(rulePkg);
-	}
-	catch (std::exception&) {
-		throw;
-	}
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
 
 	// Extract the rule package info.
 	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
