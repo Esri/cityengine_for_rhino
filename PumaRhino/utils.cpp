@@ -269,17 +269,11 @@ std::wstring getImportPrefix(const std::wstring& attrName) {
 }
 
 std::wstring getRuleFileEntry(const ResolveMapSPtr& resolveMap) {
-	const std::wstring sCGB(L".cgb");
-
-	size_t nKeys;
-	wchar_t const* const* keys = resolveMap->getKeys(&nKeys);
-	for (size_t k = 0; k < nKeys; ++k) {
-		const std::wstring key(keys[k]);
-		if (std::equal(sCGB.rbegin(), sCGB.rend(), key.rbegin()))
-			return key;
-	}
-
-	return {};
+	prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
+	const wchar_t* cgbKey = resolveMap->findCGBKey(&status);
+	if (cgbKey == nullptr || (status != prt::STATUS_OK))
+		return {};
+	return std::wstring(cgbKey);
 }
 
 std::wstring detectStartRule(const RuleFileInfoPtr& ruleFileInfo) {
