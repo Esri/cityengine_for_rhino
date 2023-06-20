@@ -60,7 +60,6 @@ constexpr const wchar_t* STEP_KEY = L"stepsize";
 constexpr const wchar_t* RESTRICTED_KEY = L"restricted";
 
 using AttributeGroup = std::vector<std::wstring>;
-using AttributeGroupOrder = std::map<AttributeGroup, int>;
 
 enum class AttributeAnnotation { COLOR = 0, RANGE, ENUM, FILE, DIR, NOANNOT };
 enum class EnumAnnotationType { DOUBLE = 0, BOOL, STRING, INVALID };

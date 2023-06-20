@@ -181,7 +181,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path,
 			}
 
 			// Materials
-			pMatIndices->Append((int)meshBundle.size());
+			pMatIndices->Append(static_cast<int>(meshBundle.size()));
 
 			const auto& materials = models[i]->getMaterials();
 			for (const auto& material : materials) {
@@ -192,7 +192,7 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path,
 				pColorsArray->Append(matAttributes.mOpacity);
 				pColorsArray->Append(matAttributes.mShininess);
 
-				pMatIndices->Append((int)matAttributes.mTexturePaths.size());
+				pMatIndices->Append(static_cast<int>(matAttributes.mTexturePaths.size()));
 
 				for (auto& texture : matAttributes.mTexturePaths) {
 
@@ -281,16 +281,16 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 		pAttributesBuffer->Append(ON_wString(attribute->mRuleFile.c_str()));
 		pAttributesBuffer->Append(ON_wString(attribute->mFullName.c_str()));
 		pAttributesBuffer->Append(ON_wString(attribute->mNickname.c_str()));
-		if (attribute->groups.size() > 0)
-			pAttributesBuffer->Append(ON_wString(attribute->groups.front().c_str()));
-		else
-			pAttributesBuffer->Append({});
+		std::for_each(attribute->groups.begin(), attribute->groups.end(), [&pAttributesBuffer](auto group) {
+			pAttributesBuffer->Append(ON_wString(group.c_str()));
+		});
+		pAttributesTypes->Append(static_cast<int>(attribute->groups.size()));
 
-		pAttributesTypes->Append((int)attribute->mType);
-		pAttributesTypes->Append((int)attribute->mAnnotations.size());
+		pAttributesTypes->Append(static_cast<int>(attribute->mType));
+		pAttributesTypes->Append(static_cast<int>(attribute->mAnnotations.size()));
 
 		for (const auto& annot : attribute->mAnnotations) {
-			pBaseAnnotations->Append((int)annot->getType());
+			pBaseAnnotations->Append(static_cast<int>(annot->getType()));
 			
 
 			switch (annot->getType()) { 
@@ -301,14 +301,14 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 					pDoubleAnnotations->Append(range.mStepSize);
 					break;
 				case AttributeAnnotation::ENUM:
-					pBaseAnnotations->Append((int)annot->getEnumType());
+					pBaseAnnotations->Append(static_cast<int>(annot->getEnumType()));
 
 					switch (annot->getEnumType()) {
 						case EnumAnnotationType::DOUBLE: {
 
 							const std::vector<double> annotEnum =
 							        dynamic_cast<AnnotationEnum<double>*>(annot.get())->getAnnotArguments();
-							pBaseAnnotations->Append((int)annotEnum.size());
+							pBaseAnnotations->Append(static_cast<int>(annotEnum.size()));
 							std::for_each(annotEnum.begin(), annotEnum.end(),
 							              [pDoubleAnnotations](double value) { pDoubleAnnotations->Append(value); });
 							break;	
@@ -317,7 +317,7 @@ RHINOPRT_API int GetRuleAttributes(const wchar_t* rpk_path, ON_ClassArray<ON_wSt
 
 							const std::vector<std::wstring> annotEnum =
 							        dynamic_cast<AnnotationEnum<std::wstring>*>(annot.get())->getAnnotArguments();
-							pBaseAnnotations->Append((int)annotEnum.size());
+							pBaseAnnotations->Append(static_cast<int>(annotEnum.size()));
 							std::for_each(annotEnum.begin(), annotEnum.end(), [pStringAnnotations](std::wstring value) {
 								pStringAnnotations->Append(ON_wString(value.c_str()));
 							});

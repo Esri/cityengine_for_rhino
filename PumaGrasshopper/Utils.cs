@@ -38,6 +38,9 @@ namespace PumaGrasshopper
 
     class Utils
     {
+        private static string IMPORT_DELIMITER = ".";
+        private static string STYLE_DELIMITER = "$";
+
         public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
         {
             // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
@@ -125,10 +128,10 @@ namespace PumaGrasshopper
             return values.Aggregate("", (acc, x) => acc + x.ToString()) + ":";
         }
 
-        public static string[] StringFromCeArray(string values) => values.Split(':');
-        public static bool[] BoolFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
-        public static int[] IntegerFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToInt32(value));
-        public static double[] DoubleFromCeArray(string values) => Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
+        public static string[] StringFromCeArray(string values) => values == null ? new string[0]: values.Split(':');
+        public static bool[] BoolFromCeArray(string values) => values == null ? new bool[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
+        public static int[] IntegerFromCeArray(string values) => values == null ? new int[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToInt32(value));
+        public static double[] DoubleFromCeArray(string values) => values == null ? new double[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
 
         public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
         {
@@ -286,6 +289,23 @@ namespace PumaGrasshopper
             grp.AddObject(guid);
             grp.ExpireCaches();
             grp.ExpirePreview(true);
+        }
+
+        public static string getImportPrefix(string attribute, bool withStylePrefix = true)
+        {
+            var importDelimPos = attribute.LastIndexOf(IMPORT_DELIMITER);
+            if (importDelimPos == -1)
+                return null;
+
+            int importStartPos = 0;
+            if (!withStylePrefix)
+            {
+                int styleDelimPos = attribute.IndexOf(STYLE_DELIMITER);
+                if (styleDelimPos > -1 || styleDelimPos < attribute.Length-1)
+                    importStartPos = styleDelimPos + 1;
+            }
+
+            return attribute.Substring(importStartPos, importDelimPos - importStartPos);
         }
 
         public static string ToXML(object obj)
