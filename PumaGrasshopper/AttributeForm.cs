@@ -12,17 +12,17 @@ namespace PumaGrasshopper
 {
     public partial class AttributeForm : Form
     {
-        private static string MAIN_FILE_TAB_NAME = "Main Rule File";
-        
-        List<RuleAttribute> RuleAttributes;
-        List<ListViewGroup> Groups;
-        List<string> Imports;
-        AttributesValuesMap[] DefaultValues;
+        private static readonly string MAIN_FILE_TAB_NAME = "Main Rule File";
+
+        readonly List<RuleAttribute> RuleAttributes;
+        readonly List<ListViewGroup> Groups;
+        readonly List<string> Imports;
+        readonly AttributesValuesMap[] DefaultValues;
         public Point InitialLocation;
         public string SearchText;
         public int SelectedIndex;
-        private Dictionary<string, ListView> listViews;
-        private Dictionary<string, TabPage> tabs;
+        private readonly Dictionary<string, ListView> listViews;
+        private readonly Dictionary<string, TabPage> tabs;
 
         public AttributeForm(List<RuleAttribute> attributes, AttributesValuesMap[] defaultValues, Point loc)
         {
