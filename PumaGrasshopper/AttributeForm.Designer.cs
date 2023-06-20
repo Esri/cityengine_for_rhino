@@ -62,10 +62,10 @@ namespace PumaGrasshopper
             // 
             this.mainTableLayout.ColumnCount = 1;
             this.mainTableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.mainTableLayout.Controls.Add(this.label1, 0, 0);
             this.mainTableLayout.Controls.Add(this.searchTextBox, 0, 1);
             this.mainTableLayout.Controls.Add(this.tabContainer, 0, 2);
             this.mainTableLayout.Controls.Add(this.flowLayoutPanel2, 0, 3);
+            this.mainTableLayout.Controls.Add(this.label1, 0, 0);
             this.mainTableLayout.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainTableLayout.Location = new System.Drawing.Point(0, 0);
             this.mainTableLayout.Name = "mainTableLayout";
@@ -80,33 +80,38 @@ namespace PumaGrasshopper
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.Location = new System.Drawing.Point(3, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(168, 13);
+            this.label1.Size = new System.Drawing.Size(542, 20);
             this.label1.TabIndex = 8;
-            this.label1.Text = "Attributes of Rule Package (RPK):";
+            this.label1.Text = "Filter Attribute Names:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // searchTextBox
             // 
             this.searchTextBox.AccessibleName = "ruleAttributeSearchField";
             this.searchTextBox.AccessibleRole = System.Windows.Forms.AccessibleRole.Text;
             this.searchTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.searchTextBox.Location = new System.Drawing.Point(1, 21);
-            this.searchTextBox.Margin = new System.Windows.Forms.Padding(1);
+            this.searchTextBox.Location = new System.Drawing.Point(5, 21);
+            this.searchTextBox.Margin = new System.Windows.Forms.Padding(5, 1, 5, 1);
             this.searchTextBox.Name = "searchTextBox";
-            this.searchTextBox.Size = new System.Drawing.Size(546, 20);
+            this.searchTextBox.Size = new System.Drawing.Size(538, 20);
             this.searchTextBox.TabIndex = 1;
             this.searchTextBox.TextChanged += new System.EventHandler(this.searchTextBox_TextChanged);
             // 
             // tabContainer
             // 
-            this.tabContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabContainer.Location = new System.Drawing.Point(1, 41);
-            this.tabContainer.Margin = new System.Windows.Forms.Padding(1);
+            this.tabContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabContainer.Location = new System.Drawing.Point(3, 50);
+            this.tabContainer.Margin = new System.Windows.Forms.Padding(3, 10, 1, 1);
             this.tabContainer.Name = "tabContainer";
             this.tabContainer.SelectedIndex = 0;
-            this.tabContainer.Size = new System.Drawing.Size(546, 514);
+            this.tabContainer.Size = new System.Drawing.Size(544, 505);
             this.tabContainer.TabIndex = 2;
+            this.tabContainer.SelectedIndexChanged += new System.EventHandler(this.tabContainer_SelectedIndexChanged);
             // 
             // flowLayoutPanel2
             // 
