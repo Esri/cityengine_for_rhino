@@ -61,16 +61,6 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 	return pcu::AttributeMapPtr(encOpts);
 }
 
-void logAttributeTypeError(const std::wstring& key) {
-	LOG_ERR << "Impossible to get default value for rule attribute: " << key
-	        << " The expected type does not correspond to the actual type of this attribute.";
-}
-
-void logAttributeError(const std::wstring& key, prt::Status& status) {
-	LOG_ERR << "Impossible to get default value for rule attribute: " << key
-	        << " with error: " << prt::getStatusDescription(status);
-}
-
 template <typename T, typename D>
 std::vector<T*> toRawPtrs(const std::vector<std::unique_ptr<T, D>>& smartPtrs) {
 	std::vector<T*> rawPtrs(smartPtrs.size());
