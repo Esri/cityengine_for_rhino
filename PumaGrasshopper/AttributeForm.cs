@@ -32,10 +32,10 @@ namespace PumaGrasshopper
             DefaultValues = defaultValues;
             SearchText = String.Empty;
 
-            Groups = getAllGroups(attributes);
+            Groups = GetAllGroups(attributes);
 
             tabs = new Dictionary<string, TabPage>();
-            var imports = getAllImports(attributes);
+            var imports = GetAllImports(attributes);
             imports.RemoveAll(import => import == null);
             Imports = new List<string>() { MAIN_FILE_TAB_NAME };
             Imports.AddRange(imports);
@@ -52,7 +52,7 @@ namespace PumaGrasshopper
             }));
 
             listViews = new Dictionary<string, ListView>();
-            Imports.ForEach(import => listViews.Add(import, getListView(import)));
+            Imports.ForEach(import => listViews.Add(import, GetListView(import)));
 
             this.mainTableLayout.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
@@ -82,10 +82,10 @@ namespace PumaGrasshopper
                 RuleAttributes : 
                 RuleAttributes.FindAll(attribute => attribute.mNickname.ToLower().Contains(SearchText.ToLower()));
             
-            getAttributesListViewItems(elligibleAttributes);
+            GetAttributesListViewItems(elligibleAttributes);
         }
 
-        private ListView getListView(string importName)
+        private ListView GetListView(string importName)
         {
             var ruleAttributeList = new ListView() { 
                 Alignment = ListViewAlignment.Left,
@@ -193,7 +193,7 @@ namespace PumaGrasshopper
             }
         }
 
-        private void getAttributesListViewItems(List<RuleAttribute> ruleAttributes)
+        private void GetAttributesListViewItems(List<RuleAttribute> ruleAttributes)
         {
             ruleAttributes.ForEach(
                 attribute => {
@@ -202,11 +202,11 @@ namespace PumaGrasshopper
                         GetTypeString(attribute.mAttribType),
                         GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
                     },
-                    group: Groups.Find(group => group.Header == attribute.getFullGroup()));
+                    group: Groups.Find(group => group.Header == attribute.GetFullGroup()));
 
                     item.Name = attribute.mFullName;
                     
-                    var import = attribute.getImportWithoutStylePrefix();
+                    var import = attribute.GetImportWithoutStylePrefix();
 
                     if (import == null)
                         import = MAIN_FILE_TAB_NAME;
@@ -216,11 +216,11 @@ namespace PumaGrasshopper
             );
         }
 
-        private List<string> getAllImports(List<RuleAttribute> attributes) => attributes.ConvertAll(attr => attr.getImportWithoutStylePrefix()).Distinct().ToList();
+        private List<string> GetAllImports(List<RuleAttribute> attributes) => attributes.ConvertAll(attr => attr.GetImportWithoutStylePrefix()).Distinct().ToList();
 
-        private List<ListViewGroup> getAllGroups(List<RuleAttribute> attributes)
+        private List<ListViewGroup> GetAllGroups(List<RuleAttribute> attributes)
         {
-            var groupNames = attributes.ConvertAll(attr => attr.getFullGroup());
+            var groupNames = attributes.ConvertAll(attr => attr.GetFullGroup());
             var groups = groupNames.Distinct().ToList();
             groups.RemoveAll(item => item == null);
 
@@ -259,7 +259,7 @@ namespace PumaGrasshopper
             Close();
         }
 
-        private void searchTextBox_TextChanged(object sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object sender, EventArgs e)
         {
             SearchText = ((TextBox)sender).Text;
             UpdateListView();

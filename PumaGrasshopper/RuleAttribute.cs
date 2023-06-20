@@ -155,14 +155,14 @@ namespace PumaGrasshopper
             return GH_ParamAccess.tree;
         }
 
-        public string getFullGroup()
+        public string GetFullGroup()
         {
             if (mGroups.Length == 0)
                return null;
             return mGroups.Aggregate((left, right) => left + " - " + right);
         }
 
-        public string getImportWithoutStylePrefix() => Utils.getImportPrefix(mFullName, false);
+        public string GetImportWithoutStylePrefix() => Utils.getImportPrefix(mFullName, false);
 
         public string GetDescriptions()
         {
