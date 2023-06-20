@@ -37,8 +37,7 @@ namespace PumaGrasshopper
             tabs = new Dictionary<string, TabPage>();
             var imports = getAllImports(attributes);
             imports.RemoveAll(import => import == null);
-            Imports = new List<string>();
-            Imports.Add(MAIN_FILE_TAB_NAME);
+            Imports = new List<string>() { MAIN_FILE_TAB_NAME };
             Imports.AddRange(imports);
             Imports.ForEach(import => tabs.Add(import, new TabPage
             {
@@ -87,26 +86,28 @@ namespace PumaGrasshopper
         }
 
         private ListView getListView(string importName)
-        { 
-            var ruleAttributeList = new ListView();
-            ruleAttributeList.Alignment = ListViewAlignment.Left;
-            ruleAttributeList.AutoArrange = false;
-            ruleAttributeList.BackgroundImageTiled = true;
+        {
+            var ruleAttributeList = new ListView() { 
+                Alignment = ListViewAlignment.Left,
+                AutoArrange = false,
+                BackgroundImageTiled = true,
+                Dock = DockStyle.Fill,
+                FullRowSelect = true,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable,
+                HideSelection = false,
+                Location = new Point(3, 3),
+                MultiSelect = false,
+                Name = importName,
+                Size = new Size(1298, 1288),
+                TabIndex = 1,
+                UseCompatibleStateImageBehavior = false,
+                View = View.Details
+            };
+
             ruleAttributeList.Columns.AddRange(new ColumnHeader[] {
                 (ColumnHeader)ruleAttributeColumn.Clone(),
                 (ColumnHeader)attributeType.Clone(),
                 (ColumnHeader)defaultValue.Clone()});
-            ruleAttributeList.Dock = DockStyle.Fill;
-            ruleAttributeList.FullRowSelect = true;
-            ruleAttributeList.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            ruleAttributeList.HideSelection = false;
-            ruleAttributeList.Location = new Point(3, 3);
-            ruleAttributeList.MultiSelect = false;
-            ruleAttributeList.Name = importName;
-            ruleAttributeList.Size = new Size(1298, 1288);
-            ruleAttributeList.TabIndex = 1;
-            ruleAttributeList.UseCompatibleStateImageBehavior = false;
-            ruleAttributeList.View = View.Details;
 
             ruleAttributeList.Groups.AddRange(Groups.ToArray());
 
