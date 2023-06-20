@@ -111,7 +111,6 @@ namespace PumaGrasshopper
             this.tabContainer.SelectedIndex = 0;
             this.tabContainer.Size = new System.Drawing.Size(544, 505);
             this.tabContainer.TabIndex = 2;
-            this.tabContainer.SelectedIndexChanged += new System.EventHandler(this.tabContainer_SelectedIndexChanged);
             // 
             // flowLayoutPanel2
             // 
