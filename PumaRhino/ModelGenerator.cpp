@@ -61,16 +61,6 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 	return pcu::AttributeMapPtr(encOpts);
 }
 
-void logAttributeTypeError(const std::wstring& key) {
-	LOG_ERR << "Impossible to get default value for rule attribute: " << key
-	        << " The expected type does not correspond to the actual type of this attribute.";
-}
-
-void logAttributeError(const std::wstring& key, prt::Status& status) {
-	LOG_ERR << "Impossible to get default value for rule attribute: " << key
-	        << " with error: " << prt::getStatusDescription(status);
-}
-
 template <typename T, typename D>
 std::vector<T*> toRawPtrs(const std::vector<std::unique_ptr<T, D>>& smartPtrs) {
 	std::vector<T*> rawPtrs(smartPtrs.size());
@@ -159,33 +149,6 @@ pcu::AttributeMapPtrVector createAttributeMaps(pcu::AttributeMapBuilderVector& a
 	return attributeMaps;
 }
 
-std::tuple<std::wstring, pcu::RuleFileInfoPtr> getRuleFileAndInfo(const pcu::ResolveMapSPtr& resolveMap) {
-	// Extract the rule package info.
-	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
-	if (ruleFile.empty()) {
-		LOG_ERR << "Could not find rule file in rule package";
-		throw std::exception("Could not find rule file in rule package");
-	}
-
-	// To create the ruleFileInfo, we first need the ruleFileURI
-	const wchar_t* ruleFileURI = resolveMap->getString(ruleFile.c_str());
-	if (ruleFileURI == nullptr) {
-		LOG_ERR << "Could not find rule file URI in resolve map of rule package.";
-		throw std::exception("Could not find rule file URI in resolve map of rule package.");
-	}
-
-	// Create RuleFileInfo
-	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
-	pcu::RuleFileInfoPtr ruleFileInfo(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
-
-	if (!ruleFileInfo || infoStatus != prt::STATUS_OK) {
-		LOG_ERR << "could not get rule file info from rule file " << ruleFile;
-		throw std::exception("Could not get rule file info from rule file.");
-	}
-
-	return std::make_tuple(ruleFile, std::move(ruleFileInfo));
-}
-
 } // namespace
 
 ModelGenerator::ModelGenerator() {
@@ -209,16 +172,70 @@ pcu::ResolveMapSPtr ModelGenerator::getResolveMap(const std::wstring& rulePkg) {
 
 const RuleAttributes ModelGenerator::getRuleAttributes(const std::wstring& rulePkg) {
 	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
-	auto [ruleFile, ruleFileInfo] = getRuleFileAndInfo(resolveMap);
+
+	// Extract the rule package info.
+	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
+	if (ruleFile.empty()) {
+		LOG_ERR << "Could not find rule file in rule package" << rulePkg;
+		throw std::exception("Could not find rule file in rule package ");
+	}
+
+	// To create the ruleFileInfo, we first need the ruleFileURI
+	const wchar_t* ruleFileURI = resolveMap->getString(ruleFile.c_str());
+	if (ruleFileURI == nullptr) {
+		LOG_ERR << "Could not find rule file URI in resolve map of rule package." << rulePkg;
+		throw std::exception("Could not find rule file URI in resolve map of rule package.");
+	}
+
+	// Create RuleFileInfo
+	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
+	pcu::RuleFileInfoPtr ruleFileInfo(
+	        prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
+
+	if (!ruleFileInfo || infoStatus != prt::STATUS_OK) {
+		LOG_ERR << "could not get rule file info from rule file " << ruleFile;
+		throw std::exception("Could not get rule file info from rule file.");
+	}
+
 	RuleAttributes attributes;
 	createRuleAttributes(ruleFile, *ruleFileInfo.get(), attributes);
 	return attributes;
 }
 
 pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rulePkg) {
-	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
-	auto [ruleFile, ruleFileInfo] = getRuleFileAndInfo(resolveMap);
+	pcu::ResolveMapSPtr resolveMap;
+	try {
+		resolveMap = getResolveMap(rulePkg);
+	}
+	catch (std::exception&) {
+		throw;
+	}
+
+	// Extract the rule package info.
+	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
+	if (ruleFile.empty()) {
+		LOG_ERR << "Could not find rule file in rule package" << rulePkg;
+		throw std::exception("Could not find rule file in rule package ");
+	}
+
+	// To create the ruleFileInfo, we first need the ruleFileURI
+	const wchar_t* ruleFileURI = resolveMap->getString(ruleFile.c_str());
+	if (ruleFileURI == nullptr) {
+		LOG_ERR << "Could not find rule file URI in resolve map of rule package." << rulePkg;
+		throw std::exception("Could not find rule file URI in resolve map of rule package.");
+	}
+
+	// Create RuleFileInfo
+	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
+	pcu::RuleFileInfoPtr ruleFileInfo(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
+
+	if (!ruleFileInfo || infoStatus != prt::STATUS_OK) {
+		LOG_ERR << "could not get rule file info from rule file " << ruleFile;
+		throw std::exception("Could not get rule file info from rule file.");
+	}
+
 	std::wstring startRule = pcu::detectStartRule(ruleFileInfo);
+
 	return pcu::ShapeAttributes(std::move(ruleFileInfo), ruleFile, startRule);
 }
 
