@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <vector>
 
 RawInitialShape::RawInitialShape(const ON_Mesh& mesh) {
 	ON_wString shapeIdxStr;
@@ -56,29 +57,31 @@ RawInitialShape::RawInitialShape(const ON_Mesh& mesh) {
 		}
 	}
 
-	mVertices.reserve(static_cast<size_t>(mesh.VertexCount() * 3));
-	mIndices.reserve(static_cast<size_t>(mesh.FaceCount() * 4));
-	mFaceCounts.reserve(mesh.FaceCount());
+	ON_Mesh temp(mesh);
+	int planarNgonsCount = temp.AddPlanarNgons(nullptr, 0.5, 3, 1, false);
+	if (planarNgonsCount == 0)
+		throw std::exception("Input mesh is not planar");
 
-	for (int i = 0; i < mesh.VertexCount(); ++i) {
-		ON_3dPoint vertex = mesh.Vertex(i);
-		mVertices.push_back(vertex.x);
-		mVertices.push_back(vertex.z);
-		mVertices.push_back(-vertex.y);
-	}
+	ON_3dPointListRef refs = ON_3dPointListRef(&temp);
+	ON_SimpleArray<ON_3dPoint> boundaryPoints(0);
+	int boundaryPointsCount = temp.Ngon(0)->GetOuterBoundaryPoints(refs, false, boundaryPoints);
+	if (boundaryPointsCount == 0)
+		throw std::exception("Could not get boundary points");
 
-	for (int i = 0; i < mesh.FaceCount(); ++i) {
-		mIndices.push_back(mesh.m_F.At(i)->vi[0]);
-		mIndices.push_back(mesh.m_F.At(i)->vi[1]);
-		mIndices.push_back(mesh.m_F.At(i)->vi[2]);
-		if (mesh.m_F.At(i)->IsQuad()) {
-			mIndices.push_back(mesh.m_F.At(i)->vi[3]);
-			mFaceCounts.push_back(4);
-		}
-		else {
-			mFaceCounts.push_back(3);
-		}
+	mVertices.reserve(static_cast<size_t>(boundaryPointsCount * 3));
+	mIndices.reserve(static_cast<size_t>(boundaryPointsCount));
+	mFaceCounts.reserve(1);
+
+	for (int i = 0; i < boundaryPoints.Count(); ++i) {
+		ON_3dPoint* vertex = boundaryPoints.At(i);
+		mVertices.push_back(vertex->x);
+		mVertices.push_back(vertex->z);
+		mVertices.push_back(-vertex->y);
+
+		mIndices.push_back(i);	
 	}
+	mIndices.push_back(0);
+	mFaceCounts.push_back(boundaryPointsCount);
 }
 
 int RawInitialShape::getID() const {
