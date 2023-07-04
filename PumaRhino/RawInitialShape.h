@@ -19,12 +19,10 @@
 
 #pragma once
 
-#include "MaterialAttribute.h"
-#include "ReportAttribute.h"
-#include "RhinoCallbacks.h"
-#include "utils.h"
-
+#include <string>
 #include <vector>
+
+class ON_Mesh;
 
 const std::wstring INIT_SHAPE_ID_KEY = L"InitShapeIdx";
 
