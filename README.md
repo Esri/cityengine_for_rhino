@@ -73,7 +73,15 @@ Any Grasshopper component providing such objects can be connected to the `Shape(
 1. Draw the rectangle(s) in the Rhino viewport using the Rhino `Rectangle` tool.
 1. Select the rectangle.
 
-Note that there are slight differences in these steps based on the geometry type. The `Surface` component, for example, does not allow you to draw a shape, but only to select a previously existing one. It is needed to draw it first using Rhino tools.
+As the CGA language requires polygon meshes as input, Puma converts all non-mesh input shapes to meshes first using the "fast render mesh" settings. If you need more detailed control when converting Breps, Curves, Polylines and Surfaces to Meshes, we recommend the ["Ngon" plugin](https://www.food4rhino.com/en/app/ngon).
+
+Puma will recognize Ngons (either created manually or by the Ngon plugin) in input meshes and use them to create the input faces for the model generation. In below example, we first used the raw Rhino triangles and quads to run a simple offset-and-extrude rule. Then we used Rhino's "Add Ngons to mesh" command to combine some of the quads/triangles to Ngons. Puma will treat triangles/quads not associated to a Ngon as individual input faces.
+
+<img src="doc/img/ngons2.png" width=48%><img src="doc/img/ngons1.png" width=48%>
+
+To illustrate the use of the "Ngon" plugin, we use the "From Mesh" tool to convert a closed Rhino Curve to a single Ngon and then apply the same simple offset-and-extrude rule:
+
+<img src="doc/img/ngons3.png" width=70%>
 
 #### Working with rule attribute inputs
 
