@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 
+#include "RawInitialShape.h"
+#include "Logger.h"
+
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable : 26451)
@@ -26,9 +29,6 @@
 #ifdef _MSC_VER
 #	pragma warning(pop)
 #endif
-
-#include "Logger.h"
-#include "RawInitialShape.h"
 
 #include <algorithm>
 #include <numeric>
@@ -81,7 +81,7 @@ RawInitialShape::RawInitialShape(const ON_Mesh& mesh) {
 	// handle Ngons (= "curated" set of quads/tris to form initial shape faces for PRT)
 	const unsigned int ngonCount = mesh.NgonUnsignedCount();
 	if (ngonCount > 0) {
-		mFaceCounts.reserve(mFaceCounts.size() + ngonCount);
+		mFaceCounts.reserve(ngonCount);
 		for (unsigned int ngonIdx = 0; ngonIdx < ngonCount; ngonIdx++) {
 			const ON_MeshNgon* ngon = mesh.Ngon(ngonIdx);
 			mIndices.reserve(mIndices.size() + ngon->m_Vcount);
