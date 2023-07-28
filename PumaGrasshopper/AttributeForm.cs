@@ -12,17 +12,17 @@ namespace PumaGrasshopper
 {
     public partial class AttributeForm : Form
     {
-        private static string MAIN_FILE_TAB_NAME = "Main Rule File";
-        
-        List<RuleAttribute> RuleAttributes;
-        List<ListViewGroup> Groups;
-        List<string> Imports;
-        AttributesValuesMap[] DefaultValues;
+        private static readonly string MAIN_FILE_TAB_NAME = "Main Rule File";
+
+        readonly List<RuleAttribute> RuleAttributes;
+        readonly List<ListViewGroup> Groups;
+        readonly List<string> Imports;
+        readonly AttributesValuesMap[] DefaultValues;
         public Point InitialLocation;
         public string SearchText;
         public int SelectedIndex;
-        private Dictionary<string, ListView> listViews;
-        private Dictionary<string, TabPage> tabs;
+        private readonly Dictionary<string, ListView> listViews;
+        private readonly Dictionary<string, TabPage> tabs;
 
         public AttributeForm(List<RuleAttribute> attributes, AttributesValuesMap[] defaultValues, Point loc)
         {
@@ -32,13 +32,12 @@ namespace PumaGrasshopper
             DefaultValues = defaultValues;
             SearchText = String.Empty;
 
-            Groups = getAllGroups(attributes);
+            Groups = GetAllGroups(attributes);
 
             tabs = new Dictionary<string, TabPage>();
-            var imports = getAllImports(attributes);
+            var imports = GetAllImports(attributes);
             imports.RemoveAll(import => import == null);
-            Imports = new List<string>();
-            Imports.Add(MAIN_FILE_TAB_NAME);
+            Imports = new List<string>() { MAIN_FILE_TAB_NAME };
             Imports.AddRange(imports);
             Imports.ForEach(import => tabs.Add(import, new TabPage
             {
@@ -53,7 +52,7 @@ namespace PumaGrasshopper
             }));
 
             listViews = new Dictionary<string, ListView>();
-            Imports.ForEach(import => listViews.Add(import, getListView(import)));
+            Imports.ForEach(import => listViews.Add(import, GetListView(import)));
 
             this.mainTableLayout.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
@@ -83,30 +82,32 @@ namespace PumaGrasshopper
                 RuleAttributes : 
                 RuleAttributes.FindAll(attribute => attribute.mNickname.ToLower().Contains(SearchText.ToLower()));
             
-            getAttributesListViewItems(elligibleAttributes);
+            GetAttributesListViewItems(elligibleAttributes);
         }
 
-        private ListView getListView(string importName)
-        { 
-            var ruleAttributeList = new ListView();
-            ruleAttributeList.Alignment = ListViewAlignment.Left;
-            ruleAttributeList.AutoArrange = false;
-            ruleAttributeList.BackgroundImageTiled = true;
+        private ListView GetListView(string importName)
+        {
+            var ruleAttributeList = new ListView() { 
+                Alignment = ListViewAlignment.Left,
+                AutoArrange = false,
+                BackgroundImageTiled = true,
+                Dock = DockStyle.Fill,
+                FullRowSelect = true,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable,
+                HideSelection = false,
+                Location = new Point(3, 3),
+                MultiSelect = false,
+                Name = importName,
+                Size = new Size(1298, 1288),
+                TabIndex = 1,
+                UseCompatibleStateImageBehavior = false,
+                View = View.Details
+            };
+
             ruleAttributeList.Columns.AddRange(new ColumnHeader[] {
                 (ColumnHeader)ruleAttributeColumn.Clone(),
                 (ColumnHeader)attributeType.Clone(),
                 (ColumnHeader)defaultValue.Clone()});
-            ruleAttributeList.Dock = DockStyle.Fill;
-            ruleAttributeList.FullRowSelect = true;
-            ruleAttributeList.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            ruleAttributeList.HideSelection = false;
-            ruleAttributeList.Location = new Point(3, 3);
-            ruleAttributeList.MultiSelect = false;
-            ruleAttributeList.Name = importName;
-            ruleAttributeList.Size = new Size(1298, 1288);
-            ruleAttributeList.TabIndex = 1;
-            ruleAttributeList.UseCompatibleStateImageBehavior = false;
-            ruleAttributeList.View = View.Details;
 
             ruleAttributeList.Groups.AddRange(Groups.ToArray());
 
@@ -192,7 +193,7 @@ namespace PumaGrasshopper
             }
         }
 
-        private void getAttributesListViewItems(List<RuleAttribute> ruleAttributes)
+        private void GetAttributesListViewItems(List<RuleAttribute> ruleAttributes)
         {
             ruleAttributes.ForEach(
                 attribute => {
@@ -201,11 +202,11 @@ namespace PumaGrasshopper
                         GetTypeString(attribute.mAttribType),
                         GetDefaultValueString(attribute.mFullName, attribute.mAttribType)
                     },
-                    group: Groups.Find(group => group.Header == attribute.getFullGroup()));
+                    group: Groups.Find(group => group.Header == attribute.GetFullGroup()));
 
                     item.Name = attribute.mFullName;
                     
-                    var import = attribute.getImportWithoutStylePrefix();
+                    var import = attribute.GetImportWithoutStylePrefix();
 
                     if (import == null)
                         import = MAIN_FILE_TAB_NAME;
@@ -215,11 +216,11 @@ namespace PumaGrasshopper
             );
         }
 
-        private List<string> getAllImports(List<RuleAttribute> attributes) => attributes.ConvertAll(attr => attr.getImportWithoutStylePrefix()).Distinct().ToList();
+        private List<string> GetAllImports(List<RuleAttribute> attributes) => attributes.ConvertAll(attr => attr.GetImportWithoutStylePrefix()).Distinct().ToList();
 
-        private List<ListViewGroup> getAllGroups(List<RuleAttribute> attributes)
+        private List<ListViewGroup> GetAllGroups(List<RuleAttribute> attributes)
         {
-            var groupNames = attributes.ConvertAll(attr => attr.getFullGroup());
+            var groupNames = attributes.ConvertAll(attr => attr.GetFullGroup());
             var groups = groupNames.Distinct().ToList();
             groups.RemoveAll(item => item == null);
 
@@ -258,7 +259,7 @@ namespace PumaGrasshopper
             Close();
         }
 
-        private void searchTextBox_TextChanged(object sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object sender, EventArgs e)
         {
             SearchText = ((TextBox)sender).Text;
             UpdateListView();
