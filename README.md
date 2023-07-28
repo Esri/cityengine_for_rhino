@@ -170,9 +170,9 @@ Please note, this command is only meant to provide a quick way for testing a RPK
 
 ### Software Requirements
 
-- Windows 10 (Intel/AMD 64bit)
+- Windows 10 or 11 (Intel/AMD 64bit)
 - Rhino 6 or 7 (<https://www.rhino3d.com/download>)
-- Microsoft Visual Studio 2019 with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.5.2)
+- Microsoft Visual Studio 2019 or later with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.5.2)
 - Optional: Python 3.7 or later
 
 ### Build Instructions
@@ -216,6 +216,11 @@ Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box
 For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
 
 ## Release Notes
+
+### Puma 1.1.0 (2023-07-27)
+* Supports Rule Packages from CityEngine 2023.0 and older.
+* Improved the user experience when overriding CGA Rule Attributes.
+* Added support for user-created Mesh Ngons in input shapes.
 
 ### Puma 1.0.0 (2021-12-10)
 * Corresponds to v0.9.4 with updated documentation.
