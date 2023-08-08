@@ -73,6 +73,8 @@ Any Grasshopper component providing such objects can be connected to the `Shape(
 1. Draw the rectangle(s) in the Rhino viewport using the Rhino `Rectangle` tool.
 1. Select the rectangle.
 
+In case building models are pointing "down": Puma considers the winding order of input polygons. The Rhino `Flip` command can be used to correct the orientation of the input polygons.
+
 As the CGA language requires polygon meshes as input, Puma converts all non-mesh input shapes to meshes first using the "fast render mesh" settings. If you need more detailed control when converting Breps, Curves, Polylines and Surfaces to Meshes, we recommend the ["Ngon" plugin](https://www.food4rhino.com/en/app/ngon).
 
 Puma will recognize Ngons (either created manually or by the Ngon plugin) in input meshes and use them to create the input faces for the model generation. In below example, we first used the raw Rhino triangles and quads to run a simple offset-and-extrude rule. Then we used Rhino's "Add Ngons to mesh" command to combine some of the quads/triangles to Ngons. Puma will treat triangles/quads not associated to a Ngon as individual input faces.
