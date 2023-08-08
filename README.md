@@ -87,9 +87,9 @@ To illustrate the use of the "Ngon" plugin, we use the "From Mesh" tool to conve
 
 <img src="doc/img/man_gh_rule_attributes.jpg" width=100%>
 
-When both main inputs are connected, the component is solved a first time. The default values for the cga rule attributes are used. It is possible to override them by adding input parameters to the Puma component. To do that, zoom on the component until a small `+` button appears. It opens a dialog window in which new inputs can be selected from the list of available rule attributes, defined in the rule package currently used.
+When both main inputs for RPK and Shapes are connected, the component starts to generate geometry. Initially, the default values for the CGA rule attributes are used. It is possible to override them by adding input parameters to the Puma component. To do that, zoom on the component until a small `+` button appears. Please note, the `+` button will only appear if the CGA rule defines any attributes. The "Select Rule Attributes" dialog window opens in which new inputs can be selected from the list of available rule attributes, defined in the rule package currently used. The dialog has tabs for the main rule file and optionally for imports. Each tab has columns for name, data type and default value.
 
-These parameters can then be connected to other components. The context menu also provides an easy way to directly assign a value. Puma will use default values for unconnected inputs which are defined in the rules and in general also depend on the input shapes.
+These parameter inputs can then be connected to other Grasshopper components. The context menu also provides an easy way to directly assign a value. Puma will use default values for unconnected inputs which are defined in the rules and in general also depend on the input shapes.
 
 Rule attributes and the corresponding Puma component inputs use four basic data types: (1) Number, (2) String, (3) Boolean (Toggle) and (4) Colour. These can be either single values or lists of values. In case of lists and length mismatches, Puma will either truncate lists or repeat the last value of a list until the length of the `shape(s)` input is matched.
 
