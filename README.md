@@ -52,7 +52,7 @@ See [below](#install-locally-built-packages) in the developer documentation.
 
 ### Using the Puma Grasshopper components
 
-After starting Grasshopper, the Puma components are located in the `Esri` section in the `Special` tab.
+After starting Grasshopper, the Puma components are located in the `Puma` section of the `Esri` tab.
 
 <img src="doc/img/man_gh_icons.jpg" height=200>
 
