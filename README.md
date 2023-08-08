@@ -75,9 +75,16 @@ Any Grasshopper component providing such objects can be connected to the `Shape(
 
 In case building models are pointing "down": Puma considers the winding order of input polygons. The Rhino `Flip` command can be used to correct the orientation of the input polygons.
 
-As the CGA language requires polygon meshes as input, Puma converts all non-mesh input shapes to meshes first using the "fast render mesh" settings. If you need more detailed control when converting Breps, Curves, Polylines and Surfaces to Meshes, we recommend the ["Ngon" plugin](https://www.food4rhino.com/en/app/ngon).
+#### Preparing input shapes for Puma
 
-Puma will recognize Ngons (either created manually or by the Ngon plugin) in input meshes and use them to create the input faces for the model generation. In below example, we first used the raw Rhino triangles and quads to run a simple offset-and-extrude rule. Then we used Rhino's "Add Ngons to mesh" command to combine some of the quads/triangles to Ngons. Puma will treat triangles/quads not associated to a Ngon as individual input faces.
+As the CGA language requires polygon meshes as input, Puma by default converts all non-mesh input shapes to meshes using the "fast render mesh" settings.
+
+There are multiple ways to control the creation of polygons when converting Breps, Curves, Polylines and Surfaces to Meshes:
+1. Directly pass the raw converted mesh into Puma and use the CGA [`cleanupGeometry`](https://doc.arcgis.com/en/cityengine/latest/cga/cga-clenaup-geometry.htm) operation to remove internal edges in the rules.
+1. Use the Rhino commands `AddNgonsToMesh` and `DeleteMeshNgons` to control how polygons are grouped together into Ngons within the mesh.
+1. Use the ["Ngon" plugin](https://www.food4rhino.com/en/app/ngon) for detailed control of the conversion.
+
+Puma will recognize the Ngons created by above methods in the input meshes and use them to create the actual input polygon faces for the model generation. In below example, we first used the raw Rhino triangles and quads to run a simple offset-and-extrude rule. Then we used Rhino's `AddNgonsToMesh` command to combine some of the quads/triangles to Ngons. Puma will treat triangles/quads not associated to a Ngon as individual input faces.
 
 <img src="doc/img/ngons2.png" width=48%><img src="doc/img/ngons1.png" width=48%>
 
