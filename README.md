@@ -224,7 +224,7 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ### Puma 1.0.0 (2021-12-10)
 * Corresponds to v0.9.4 with updated documentation.
-* Published ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0/puma_street_segment_example_v1.zip) (for Rhino 7) to show-case the main features of Puma.
+* Published ["Street Segment" example](https://esri.github.io/cityengine/puma#examples) (for Rhino 7) to show-case the main features of Puma.
 * Puma supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.1 and older.
 * Limitation: no support yet for PBR materials in Rhino 7.
