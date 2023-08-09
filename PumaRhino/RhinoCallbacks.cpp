@@ -219,7 +219,7 @@ prt::Status RhinoCallbacks::assetError(size_t isIndex, prt::CGAErrorLevel level,
 			msg.append(L"; CGA key = '").append(key).append(L"'");
 		if (uri != nullptr)
 			msg.append(L"; CGA URI = '").append(uri).append(L"'");
-		model.addErrorOutput(msg);
+		model.addError(msg);
 	}
 
 	LOG_ERR << L"ASSET ERROR:" << isIndex << " " << level << " " << key << " " << uri << " " << message << std::endl;
@@ -232,7 +232,7 @@ prt::Status RhinoCallbacks::cgaError(size_t isIndex, int32_t shapeID, prt::CGAEr
 
 	if (message != nullptr) {
 		auto msg = std::wstring(L"CGA Error: ").append(message);
-		model.addErrorOutput(msg);
+		model.addError(msg);
 	}
 
 	LOG_ERR << L"CGA ERROR:" << isIndex << " " << shapeID << " " << level << " " << methodId << " " << pc << " "
@@ -244,7 +244,7 @@ prt::Status RhinoCallbacks::cgaPrint(size_t isIndex, int32_t shapeID, const wcha
 	GeneratedModel& model = getOrCreateModel(isIndex);
 
 	if (txt != nullptr)
-		model.addPrintOutput(txt);
+		model.addPrint(txt);
 
 	LOG_INF << L"CGA PRINT:" << isIndex << " " << shapeID << " " << txt << std::endl;
 	return prt::STATUS_OK;

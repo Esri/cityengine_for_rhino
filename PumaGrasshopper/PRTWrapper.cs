@@ -38,6 +38,8 @@ namespace PumaGrasshopper
         public List<Mesh[]> meshes = new List<Mesh[]>();
         public List<GH_Material[]> materials = new List<GH_Material[]>();
         public List<ReportAttribute[]> reports = new List<ReportAttribute[]>();
+        public List<GH_String[]> prints = new List<GH_String[]>();
+        public List<GH_String[]> errors = new List<GH_String[]>();
     }
 
     /// <summary>
@@ -76,7 +78,9 @@ namespace PumaGrasshopper
             [In] IntPtr pInitialMeshes, [Out] IntPtr pMeshCounts, [Out] IntPtr pMeshArray,
             [Out] IntPtr pColorsArray, [Out] IntPtr pTexIndices, [Out] IntPtr pTexKeys, [Out] IntPtr pTexPaths,
             [Out] IntPtr pReportCountArray, [Out] IntPtr pReportKeyArray, [Out] IntPtr pReportDoubleArray,
-            [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray);
+            [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray,
+            [Out] IntPtr pPrintCountsArray, [Out] IntPtr pPrintValuesArray,
+            [Out] IntPtr pErrorCountsArray, [Out] IntPtr pErrorValuesArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern int GetRuleAttributes(string rpk_path, [Out] IntPtr pAttributesBuffer, [Out] IntPtr pAttributesTypes, [Out] IntPtr pBaseAnnotations, [Out] IntPtr pDoubleAnnotations, [Out] IntPtr pStringAnnotations);
@@ -151,6 +155,18 @@ namespace PumaGrasshopper
             var reportStringArray = new ClassArrayString();
             IntPtr pReportStringArray = reportStringArray.NonConstPointer();
 
+            // Prints
+            var printCountsClassArray = new SimpleArrayInt(); // one entry per output model -> number of print "lines" per model
+            IntPtr pPrintCountsClassArray = printCountsClassArray.NonConstPointer();
+            var printValuesClassArray = new ClassArrayString();
+            IntPtr pPrintValuesClassArray = printValuesClassArray.NonConstPointer();
+
+            // Errors
+            var errorCountsClassArray = new SimpleArrayInt(); // one entry per output model -> number of print "lines" per model
+            IntPtr pErrorCountsClassArray = errorCountsClassArray.NonConstPointer();
+            var errorValuesClassArray = new ClassArrayString();
+            IntPtr pErrorValuesClassArray = errorValuesClassArray.NonConstPointer();
+
             Generate(rpkPath,
                      initialMeshes.Count,
                      boolWrapper.StartsPtr(),
@@ -196,7 +212,9 @@ namespace PumaGrasshopper
                      pReportKeyArray,
                      pReportDoubleArray,
                      pReportBoolArray,
-                     pReportStringArray);
+                     pReportStringArray,
+                     pPrintCountsClassArray, pPrintValuesClassArray,
+                     pErrorCountsClassArray, pErrorValuesClassArray);
 
             initialMeshesArray.Dispose();
             boolWrapper.Dispose();
@@ -373,6 +391,30 @@ namespace PumaGrasshopper
                 reportStringOffset += stringReportCount;
 
                 generationResult.reports.Add(reportAttributes.ToArray());
+            }
+
+            // CGA Prints
+            {
+                var printCountsArray = printCountsClassArray.ToArray();
+                var printValuesArray = printValuesClassArray.ToArray();
+                int printOffset = 0;
+                foreach (int printCount in printCountsArray)
+                {
+                    generationResult.prints.Add(printValuesArray.Skip(printOffset).Take(printCount).Select(p => new GH_String(p)).ToArray());
+                    printOffset += printCount;
+                }
+            }
+
+            // CGA Errors
+            {
+                var errorCountsArray = errorCountsClassArray.ToArray();
+                var errorValuesArray = errorValuesClassArray.ToArray();
+                int errorOffset = 0;
+                foreach (int errorCount in errorCountsArray)
+                {
+                    generationResult.errors.Add(errorValuesArray.Skip(errorOffset).Take(errorCount).Select(e => new GH_String(e)).ToArray());
+                    errorOffset += errorCount;
+                }
             }
 
             return generationResult;
