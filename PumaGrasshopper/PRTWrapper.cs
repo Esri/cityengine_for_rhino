@@ -227,21 +227,12 @@ namespace PumaGrasshopper
             doubleArrayWrapper.Dispose();
             stringArrayWrapper.Dispose();
 
-            var meshCountsArray = meshCounts.ToArray();
-            var meshesArray = meshes.ToNonConstArray();
-            // Materials
-            double[] colors = colorsArray.ToArray();
-            int[] materialIndices = matIndices.ToArray();
-            string[] textureKeys = texKeys.ToArray();
-            string[] texturePaths = texPaths.ToArray();
-
             GenerationResult generationResult = new GenerationResult();
 
-            int indexOffset = 0;
-            int colorsOffset = 0;
-            int textureOffset = 0;
-
             // Geometry
+            var meshCountsArray = meshCounts.ToArray();
+            var meshesArray = meshes.ToNonConstArray();
+            int indexOffset = 0;
             for (int id = 0; id < meshCountsArray.Length; id++)
             {
                 if (meshCountsArray[id] > 0)
@@ -256,6 +247,12 @@ namespace PumaGrasshopper
             }
 
             // Materials
+            double[] colors = colorsArray.ToArray();
+            int[] materialIndices = matIndices.ToArray();
+            string[] textureKeys = texKeys.ToArray();
+            string[] texturePaths = texPaths.ToArray();
+            int colorsOffset = 0;
+            int textureOffset = 0;
             for (int id = 0; id < materialIndices.Length;)
             {
                 int meshCount = materialIndices[id];
