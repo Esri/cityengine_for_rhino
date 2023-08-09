@@ -30,6 +30,7 @@ using Rhino.DocObjects;
 
 using Rhino.Runtime.InteropWrappers;
 using System.Linq;
+using System.Diagnostics;
 
 namespace PumaGrasshopper
 {
@@ -355,18 +356,15 @@ namespace PumaGrasshopper
             reportBoolArray.Dispose();
             reportStringArray.Dispose();
 
-            if (reportKeys.Length != reportDouble.Length + reportBool.Length + reportString.Length)
-            {
-                // Something went wrong, don't output any reports.
-                return generationResult;
-            }
+            Debug.Assert(reportKeys.Length == reportDouble.Length + reportBool.Length + reportString.Length);
 
             int reportKeyOffset = 0;
             int reportDoubleOffset = 0;
             int reportBoolOffset = 0;
             int reportStringOffset = 0;
 
-            for(int meshId = 0; meshId < reportCounts.Length; meshId+=3) {
+            for (int meshId = 0; meshId < reportCounts.Length; meshId += 3)
+            {
                 int doubleReportCount = reportCounts[meshId];
                 int boolReportCount = reportCounts[meshId + 1];
                 int stringReportCount = reportCounts[meshId + 2];
@@ -392,7 +390,7 @@ namespace PumaGrasshopper
 
                 generationResult.reports.Add(reportAttributes.ToArray());
             }
-
+            
             // CGA Prints
             {
                 var printCountsArray = printCountsClassArray.ToArray();
