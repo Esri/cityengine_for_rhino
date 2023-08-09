@@ -1,16 +1,16 @@
 import argparse
-import os
 import zipfile
 import re
 import shutil
 from pathlib import Path
 import subprocess
+from string import Template
 
 PACKAGE_WHITELIST = ["PumaGrasshopper.gha", "PumaRhino.rhp", "com.esri.prt.core.dll", "glutess.dll",
                      "lib/PumaCodecs.dll", "lib/com.esri.prt.adaptors.dll", "lib/com.esri.prt.codecs.dll",
-                     "lib/com.esri.prt.usd.dll", "lib/usd_ms.dll", "lib/tbb.dll", "lib/usd",
+                     "lib/com.esri.prt.usd.dll", "lib/prt_usd_ms.dll", "lib/prt_tbb.dll", "lib/usd",
                      "lib/com.esri.prt.oda.dll"]
-      
+
 
 def copy_to_zip(root_path: Path, src_path: Path, relative_file_paths: list, dst: zipfile.ZipFile):
     for rel_path in relative_file_paths:
@@ -40,7 +40,7 @@ def copy_to_dir(root_path: Path, src_path: Path, relative_file_paths: list, dst_
 
 # Parse file "version.h" to get major, minor, revision, build numbers
 def parse_version_file(version_file: Path) -> (int, int, int, int):
-    pattern = re.compile(r'^#define (?P<version>\w+)\s+(?P<number>\d+)$')
+    pattern = re.compile(r'^(?P<version>\w+)=(?P<number>\d+)$')
 
     v_major = 0
     v_minor = 0
@@ -80,13 +80,13 @@ def build_rhi_package(build_dir: str, package_dir: str, v_major, v_minor, v_revi
         copy_to_zip(root_path, root_path, PACKAGE_WHITELIST, myZip)
 
 
-def build_yak_package(build_dir: str, package_dir: str, v_major, v_minor, v_revision):
+def build_yak_package(rh_target, build_dir: str, package_dir: str, v_major, v_minor, v_revision):
     build_path = Path(build_dir)
     yak_temp_path = Path(package_dir, "yak_temp")
     copy_to_dir(build_path, build_path, PACKAGE_WHITELIST, yak_temp_path)
     copy_to_dir(build_path.parent, build_path.parent, ['manifest.yml'], yak_temp_path)
 
-    subprocess.run(["C:\\Program Files\\Rhino 7\\System\\Yak.exe", "build"], shell=True, check=True, cwd=yak_temp_path)
+    subprocess.run([f'C:\\Program Files\\Rhino {rh_target}\\System\\Yak.exe', "build"], shell=True, check=True, cwd=yak_temp_path)
 
     # Get the file created: could change depending on Rhino/GH versions.
     yak_paths = list(yak_temp_path.glob("puma-*.yak"))
@@ -94,32 +94,43 @@ def build_yak_package(build_dir: str, package_dir: str, v_major, v_minor, v_revi
         raise IOError('Error: the yak package could not be created.')
     yak_path = yak_paths[0]
 
-    # create rhino 7 yak package
-    yak_rh7_path = Path(yak_temp_path, f'puma-{v_major}.{v_minor}.{v_revision}-rh7-any.yak')
-    shutil.copyfile(yak_path, yak_rh7_path)
-
-    # move both yak to the package_output directory
     package_path = Path(package_dir)
     shutil.move(yak_path, Path(package_path, yak_path.name))
-    shutil.move(yak_rh7_path, Path(package_path, yak_rh7_path.name))
 
     shutil.rmtree(yak_temp_path)
 
 
-def build(build_mode: str, build_dir: Path, package_dir: Path, v_major, v_minor, v_revision, v_build):
+def build(rh_target, build_mode: str, build_dir: Path, package_dir: Path, v_major, v_minor, v_revision, v_build):
     if build_mode == 'both' or build_mode == 'rhi':
         build_rhi_package(build_dir, package_dir, v_major, v_minor, v_revision, v_build)
 
     if build_mode == 'both' or build_mode == 'yak':
-        build_yak_package(build_dir, package_dir, v_major, v_minor, v_revision)
+        build_yak_package(rh_target, build_dir, package_dir, v_major, v_minor, v_revision)
 
 
 def parse_args():
     arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--rhino-target', default='6', choices=['6', '7'],
+                            help='The target rhino major version to build yak for.')
     arg_parser.add_argument('--build-module', default='both', choices=['both', 'rhi', 'yak'],
                             help='The package to build.')
     args = arg_parser.parse_args()
     return args
+
+
+def update_yml_manifest(root_path, v_major, v_minor, v_revision):
+    manifest_template = Path(root_path, "manifest.template")
+    manifest = Path(root_path, "manifest.yml")
+
+    template_file = open(manifest_template, mode='r')
+    template_string = template_file.read()
+    template_file.close()
+
+    template = Template(template_string)
+    generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor, VERSION_REVISION=v_revision)
+
+    with open(manifest, mode='w') as file:
+        file.write(generated_manifest)
 
 
 def main():
@@ -130,10 +141,12 @@ def main():
     package_path = Path(root_path, 'packages')
     clean_package_output(package_path)
 
-    version_file = Path(root_path, "PumaRhino", "version.h")
+    version_file = Path(root_path, "version.properties")
     (v_major, v_minor, v_revision, v_build) = parse_version_file(version_file)
 
-    build(args.build_module, build_path, package_path, v_major, v_minor, v_revision, v_build)
+    update_yml_manifest(root_path, v_major, v_minor, v_revision)
+
+    build(args.rhino_target, args.build_module, build_path, package_path, v_major, v_minor, v_revision, v_build)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 struct IUnknown; // Workaround for "combaseapi.h(229): error C2187: syntax error: 'identifier' was unexpected here" when
                  // using /permissive-
@@ -57,15 +58,6 @@ template <>
 char getDirSeparator();
 template <>
 wchar_t getDirSeparator();
-
-struct ShapeAttributes {
-	std::wstring ruleFile;
-	std::wstring startRule;
-	std::wstring shapeName;
-
-	ShapeAttributes(const std::wstring rulef = L"bin/rule.cgb", const std::wstring startRl = L"Default$Lot",
-	                const std::wstring shapeN = L"Lot");
-};
 
 /**
  * helpers for prt object management
@@ -96,6 +88,18 @@ using DecoderInfoPtr = std::unique_ptr<const prt::DecoderInfo, PRTDestroyer>;
 using SimpleOutputCallbacksPtr = std::unique_ptr<prt::SimpleOutputCallbacks, PRTDestroyer>;
 using RhinoCallbacksPtr = std::unique_ptr<RhinoCallbacks>;
 
+struct ShapeAttributes {
+	std::wstring ruleFile;
+	std::wstring startRule;
+	std::wstring shapeName;
+	RuleFileInfoPtr ruleFileInfo;
+	int32_t seed;
+
+	ShapeAttributes(RuleFileInfoPtr ruleFileInfo, const std::wstring rulef = L"bin/rule.cgb",
+	                const std::wstring startRl = L"Default$Lot", const std::wstring shapeN = L"Lot",
+	                const int32_t seed = 0);
+};
+
 AttributeMapPtr createAttributeMapForShape(const ShapeAttributes& attrs, prt::AttributeMapBuilder& bld);
 AttributeMapPtr createValidatedOptions(const wchar_t* encID, const prt::AttributeMap* unvalidatedOptions = nullptr);
 
@@ -109,6 +113,7 @@ std::string toUTF8FromUTF16(const std::wstring& utf16String);
 std::string toUTF8FromOSNarrow(const std::string& osString);
 
 void appendToRhinoString(ON_wString& rhinoString, const std::wstring& appendee);
+void appendColor(const ON_Color& color, ON_SimpleArray<double>* pArray);
 
 std::string percentEncode(const std::string& utf8String);
 std::string toFileURI(const std::string& osNarrowPath);
@@ -119,6 +124,7 @@ std::wstring filename(const std::wstring& path);
 constexpr const wchar_t IMPORT_DELIMITER = L'.';
 constexpr const wchar_t STYLE_DELIMITER = L'$';
 constexpr const wchar_t* DEFAULT_STYLE_PREFIX = L"Default$";
+constexpr const wchar_t* CE_ARRAY_DELIMITER = L":";
 
 bool isDefaultStyle(const std::wstring& attrName);
 std::wstring removePrefix(const std::wstring& attrName, wchar_t delim);
@@ -135,6 +141,98 @@ std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std:
 	return str;
 }
 
+std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim);
+
+std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray);
+const std::wstring toCeArray(const wchar_t* const* values, size_t count);
+const std::wstring toCeArray(const bool* values, size_t count);
+const std::wstring toCeArray(const double* values, size_t count);
+const std::wstring toCeArray(const int* values, size_t count);
+
+/**
+ * Interop helpers
+ */
+
+template<typename T>
+void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBuilderPtr& /* aBuilder */) {
+	static_assert(std::is_same<T, int32_t>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
+	              "Type T must be one of int32_t, double or bool");
+}
+
+template<typename T>
+void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const wchar_t*>& /* values */,
+	AttributeMapBuilderPtr& /* aBuilder */) {
+	static_assert(std::is_same<T, int32_t>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
+	              "Type T must be one of int32_t, double or bool");
+}
+
+template <>
+inline void fillMapBuilder<bool>(const std::wstring& key, bool value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setBool(key.c_str(), value);
+}
+
+template <>
+inline void fillMapBuilder<int32_t>(const std::wstring& key, int32_t value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setInt(key.c_str(), value);
+}
+
+template <>
+inline void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapBuilderPtr& aBuilder) {
+	aBuilder->setFloat(key.c_str(), value);
+}
+
+template <>
+inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+                               AttributeMapBuilderPtr& aBuilder) {
+	bool* bArray = new bool[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
+	}
+	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
+}
+
+template <>
+inline void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+                                     AttributeMapBuilderPtr& aBuilder) {
+	int32_t* iArray = new int32_t[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		iArray[i] = (int32_t)std::stoi(std::wstring(values[i]));
+	}
+	aBuilder->setIntArray(key.c_str(), iArray, values.size());
+}
+
+template <>
+inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+                                 AttributeMapBuilderPtr& aBuilder) {
+	double* dArray = new double[values.size()];
+	for (int i = 0; i < values.size(); ++i) {
+		dArray[i] = (double)std::stod(std::wstring(values[i]));
+	}
+	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
+}
+
+
+void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
+                      AttributeMapBuilderPtr& aBuilder);
+
+void unpackIntegerAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
+                             AttributeMapBuilderPtr& aBuilder);
+
+void unpackDoubleAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<double>* values,
+                          AttributeMapBuilderPtr& aBuilder);
+
+void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                               AttributeMapBuilderPtr& aBuilder);
+
+void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                           AttributeMapBuilderPtr& aBuilder);
+
+void unpackIntegerArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
+                                  ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder);
+
+void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
+                            AttributeMapBuilderPtr& aBuilder, bool isArray);
+
 /**
  * Resolve map helpers
  */
@@ -149,5 +247,9 @@ struct PathRemover {
 };
 
 using ScopedPath = std::unique_ptr<std::filesystem::path, PathRemover>;
+
+void logAttributeTypeError(const std::wstring& key);
+
+void logAttributeError(const std::wstring& key, prt::Status& status);
 
 } // namespace pcu

@@ -89,7 +89,7 @@ BEGIN
             VALUE "FileDescription", "Puma"
             VALUE "FileVersion", VER_FILE_VERSION_STR
             VALUE "InternalName", "PumaRhino.rhp"
-            VALUE "LegalCopyright", "Copyright © 2021"
+            VALUE "LegalCopyright", "Copyright ï¿½ 2021"
             VALUE "OriginalFilename", "PumaRhino.rhp"
             VALUE "ProductName", "Puma"
             VALUE "ProductVersion", VER_PRODUCT_VERSION_STR

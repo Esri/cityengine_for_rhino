@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,16 +59,6 @@ pcu::AttributeMapPtr getAttrEvalEncoderInfo() {
 	const prt::AttributeMap* encOpts = nullptr;
 	encInfo->createValidatedOptionsAndStates(nullptr, &encOpts);
 	return pcu::AttributeMapPtr(encOpts);
-}
-
-void logAttributeTypeError(const std::wstring& key) {
-	LOG_ERR << "Impossible to get default value for rule attribute: " << key
-	        << " The expected type does not correspond to the actual type of this attribute.";
-}
-
-void logAttributeError(const std::wstring& key, prt::Status& status) {
-	LOG_ERR << "Impossible to get default value for rule attribute: " << key
-	        << " with error: " << prt::getStatusDescription(status);
 }
 
 template <typename T, typename D>
@@ -159,6 +149,33 @@ pcu::AttributeMapPtrVector createAttributeMaps(pcu::AttributeMapBuilderVector& a
 	return attributeMaps;
 }
 
+std::tuple<std::wstring, pcu::RuleFileInfoPtr> getRuleFileAndInfo(const pcu::ResolveMapSPtr& resolveMap) {
+	// Extract the rule package info.
+	std::wstring ruleFile = pcu::getRuleFileEntry(resolveMap);
+	if (ruleFile.empty()) {
+		LOG_ERR << "Could not find rule file in rule package";
+		throw std::exception("Could not find rule file in rule package");
+	}
+
+	// To create the ruleFileInfo, we first need the ruleFileURI
+	const wchar_t* ruleFileURI = resolveMap->getString(ruleFile.c_str());
+	if (ruleFileURI == nullptr) {
+		LOG_ERR << "Could not find rule file URI in resolve map of rule package.";
+		throw std::exception("Could not find rule file URI in resolve map of rule package.");
+	}
+
+	// Create RuleFileInfo
+	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
+	pcu::RuleFileInfoPtr ruleFileInfo(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
+
+	if (!ruleFileInfo || infoStatus != prt::STATUS_OK) {
+		LOG_ERR << "could not get rule file info from rule file " << ruleFile;
+		throw std::exception("Could not get rule file info from rule file.");
+	}
+
+	return std::make_tuple(ruleFile, std::move(ruleFileInfo));
+}
+
 } // namespace
 
 ModelGenerator::ModelGenerator() {
@@ -175,63 +192,31 @@ ModelGenerator::ModelGenerator() {
 	mCGAPrintOptions = pcu::createValidatedOptions(ENCODER_ID_CGA_PRINT, printOptions.get());
 }
 
-void ModelGenerator::updateRuleFiles(const std::wstring& rulePkg) {
-	mCurrentRPK = rulePkg;
-
-	try {
-		const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
-		if (lookup.second == ResolveMap::ResolveMapCache::CacheStatus::HIT && rulePkg == mRulePkg) {
-			// resolvemap already exists and the rule file was not changed, no need to update.
-			return;
-		}
-		mResolveMap = lookup.first;
-	}
-	catch (std::exception&) {
-		mResolveMap.reset();
-		mRuleFile.clear();
-		mStartRule.clear();
-		mRuleAttributes.clear();
-		throw;
-	}
-
-	// Cache miss -> initialize everything
-	// Reset the rule infos
-	mRuleAttributes.clear();
-	mRuleFile.clear();
-	mStartRule.clear();
-	mRulePkg = rulePkg;
-
-	// Extract the rule package info.
-	mRuleFile = pcu::getRuleFileEntry(mResolveMap);
-	if (mRuleFile.empty()) {
-		LOG_ERR << "Could not find rule file in rule package " << mRulePkg;
-		return;
-	}
-
-	// To create the ruleFileInfo, we first need the ruleFileURI
-	const wchar_t* ruleFileURI = mResolveMap->getString(mRuleFile.c_str());
-	if (ruleFileURI == nullptr) {
-		LOG_ERR << "Could not find rule file URI in resolve map of rule package " << mRulePkg;
-		return;
-	}
-
-	// Create RuleFileInfo
-	prt::Status infoStatus = prt::STATUS_UNSPECIFIED_ERROR;
-	mRuleFileInfo =
-	        pcu::RuleFileInfoPtr(prt::createRuleFileInfo(ruleFileURI, PRTContext::get()->mPRTCache.get(), &infoStatus));
-	if (!mRuleFileInfo || infoStatus != prt::STATUS_OK) {
-		LOG_ERR << "could not get rule file info from rule file " << mRuleFile;
-		return;
-	}
-
-	mStartRule = pcu::detectStartRule(mRuleFileInfo);
-
-	// Fill the list of rule attributes
-	createRuleAttributes(mRuleFile, *mRuleFileInfo.get(), mRuleAttributes);
+pcu::ResolveMapSPtr ModelGenerator::getResolveMap(const std::wstring& rulePkg) {
+	const ResolveMap::ResolveMapCache::LookupResult lookup = PRTContext::get()->getResolveMap(rulePkg);
+	return lookup.first;
 }
 
-bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& rawInitialShapes,
-                                           std::vector<pcu::ShapeAttributes>& shapeAttributes) {
+const RuleAttributes ModelGenerator::getRuleAttributes(const std::wstring& rulePkg) {
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
+	auto [ruleFile, ruleFileInfo] = getRuleFileAndInfo(resolveMap);
+	RuleAttributes attributes;
+	createRuleAttributes(ruleFile, *ruleFileInfo.get(), attributes);
+	return attributes;
+}
+
+pcu::ShapeAttributes ModelGenerator::getShapeAttributes(const std::wstring& rulePkg) {
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
+	auto [ruleFile, ruleFileInfo] = getRuleFileAndInfo(resolveMap);
+	std::wstring startRule = pcu::detectStartRule(ruleFileInfo);
+	return pcu::ShapeAttributes(std::move(ruleFileInfo), ruleFile, startRule);
+}
+
+pcu::AttributeMapPtrVector ModelGenerator::evalDefaultAttributes(const std::wstring& rulePkg,
+										   const std::vector<RawInitialShape>& rawInitialShapes,
+                                           pcu::ShapeAttributes& shapeAttributes) {
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
+
 	// setup encoder options for attribute evaluation encoder
 	constexpr const wchar_t* encs[] = {ENCODER_ID_CGA_EVALATTR};
 	constexpr size_t encsCount = sizeof(encs) / sizeof(encs[0]);
@@ -250,31 +235,33 @@ bool ModelGenerator::evalDefaultAttributes(const std::vector<RawInitialShape>& r
 
 	std::vector<pcu::InitialShapePtr> initialShapes;
 	std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
-	if (!createInitialShapes(rawInitialShapes, shapeAttributes, attribMapBuilders, initialShapes,
+	if (!createInitialShapes(resolveMap, rawInitialShapes, shapeAttributes, attribMapBuilders, initialShapes,
 	                         initialShapeAttributes))
-		return false;
+		return {};
 
 	// run generate
-	AttrEvalCallbacks aec(attribMapBuilders, mRuleFileInfo);
+	AttrEvalCallbacks aec(attribMapBuilders, shapeAttributes.ruleFileInfo); // TODO: What if rule file info is not the same for all shapes?
 	const std::vector<prt::InitialShape const*> rawInitialShapePtrs = toRawPtrs<const prt::InitialShape>(initialShapes);
 	const prt::Status status = prt::generate(rawInitialShapePtrs.data(), rawInitialShapePtrs.size(), nullptr, encs,
 	                                         encsCount, encsOpts, &aec, PRTContext::get()->mPRTCache.get(), nullptr);
 	if (status != prt::STATUS_OK) {
 		LOG_ERR << "Failed to get default rule attributes: '" << prt::getStatusDescription(status) << "' (" << status
 		        << ")";
-		return false;
+		return {};
 	}
 
-	mDefaultValuesMap = createAttributeMaps(attribMapBuilders);
-
-	return true;
+	pcu::AttributeMapPtrVector defaultValuesMap = createAttributeMaps(attribMapBuilders);
+	
+	return defaultValuesMap;
 }
 
-bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& rawInitialShapes,
-                                         const std::vector<pcu::ShapeAttributes>& shapeAttributes,
-                                         pcu::AttributeMapBuilderVector& aBuilders,
-                                         std::vector<pcu::InitialShapePtr>& initialShapes,
-                                         std::vector<pcu::AttributeMapPtr>& initialShapesAttributes) const {
+bool ModelGenerator::createInitialShapes(
+	pcu::ResolveMapSPtr& resolveMap,
+	const std::vector<RawInitialShape>& rawInitialShapes,
+    const pcu::ShapeAttributes& shapeAttributes,
+    pcu::AttributeMapBuilderVector& aBuilders,
+    std::vector<pcu::InitialShapePtr>& initialShapes,
+    std::vector<pcu::AttributeMapPtr>& initialShapesAttributes) const {
 
 	pcu::InitialShapeBuilderPtr isb(prt::InitialShapeBuilder::create());
 	initialShapes.reserve(rawInitialShapes.size());
@@ -291,20 +278,17 @@ bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& raw
 			return false;
 		}
 
-		// TODO: is this check necessary?
-		pcu::ShapeAttributes shapeAttr = (shapeAttributes.size() > i) ? shapeAttributes[0] : shapeAttributes[i];
-
 		// Set to default values
-		std::wstring ruleF = mRuleFile;
-		std::wstring startR = mStartRule;
-		int32_t randomS = mSeed;
-		std::wstring shapeN = mShapeName;
+		std::wstring ruleF = shapeAttributes.ruleFile;
+		std::wstring startR = shapeAttributes.startRule;
+		int32_t randomS = shapeAttributes.seed;
+		std::wstring shapeN = shapeAttributes.shapeName;
 
 		pcu::AttributeMapPtr initialShapeAttributes;
-		extractMainShapeAttributes(aBuilders[i], shapeAttr, ruleF, startR, randomS, shapeN, initialShapeAttributes);
+		extractMainShapeAttributes(aBuilders[i], shapeAttributes, ruleF, startR, randomS, shapeN, initialShapeAttributes);
 
 		const prt::Status attributeStatus = isb->setAttributes(ruleF.c_str(), startR.c_str(), randomS, shapeN.c_str(),
-		                                                       initialShapeAttributes.get(), mResolveMap.get());
+		                                                       initialShapeAttributes.get(), resolveMap.get());
 		if (attributeStatus != prt::STATUS_OK) {
 			LOG_ERR << "Failed to set initial shape attributes: " << prt::getStatusDescription(attributeStatus);
 			return false;
@@ -324,29 +308,17 @@ bool ModelGenerator::createInitialShapes(const std::vector<RawInitialShape>& raw
 	return true;
 }
 
-std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::vector<RawInitialShape>& rawInitialShapes,
-                                                             const std::vector<pcu::ShapeAttributes>& shapeAttributes,
+std::vector<GeneratedModelPtr> ModelGenerator::generateModel(const std::wstring& rulePkg,
+															 const std::vector<RawInitialShape>& rawInitialShapes,
+                                                             const pcu::ShapeAttributes& shapeAttributes,
                                                              pcu::AttributeMapBuilderVector& aBuilders) {
-	if ((shapeAttributes.size() != 1) && (shapeAttributes.size() < rawInitialShapes.size())) {
-		LOG_ERR << "Not enough shape attributes dictionaries defined.";
-		return {};
-	}
-	else if (shapeAttributes.size() > rawInitialShapes.size()) {
-		LOG_WRN << "Number of shape attributes dictionaries defined greater than number of initial shapes given.";
-	}
 
-	if (!mRulePkg.empty()) {
-		LOG_INF << "using rule package " << mRulePkg;
-		if (!mResolveMap || mRuleFile.empty() || !mRuleFileInfo) {
-			LOG_ERR << "Rule package not processed correcty.";
-			return {};
-		}
-	}
+	pcu::ResolveMapSPtr resolveMap = getResolveMap(rulePkg);
 
 	try {
 		std::vector<pcu::InitialShapePtr> initialShapes;
 		std::vector<pcu::AttributeMapPtr> initialShapeAttributes; // put here to ensure same life time as initialShapes
-		if (!createInitialShapes(rawInitialShapes, shapeAttributes, aBuilders, initialShapes, initialShapeAttributes))
+		if (!createInitialShapes(resolveMap, rawInitialShapes, shapeAttributes, aBuilders, initialShapes, initialShapeAttributes))
 			return {};
 
 		const std::vector<const prt::AttributeMap*> encoderOptions = {mRhinoEncoderOptions.get(),
@@ -393,225 +365,4 @@ void ModelGenerator::extractMainShapeAttributes(pcu::AttributeMapBuilderPtr& aBu
 		    convertShapeAttr->getType(L"shapeName") == prt::AttributeMap::PT_STRING)
 			shapeName = convertShapeAttr->getString(L"shapeName");
 	}
-}
-
-std::wstring ModelGenerator::getRuleFile() {
-	return this->mRuleFile;
-}
-std::wstring ModelGenerator::getStartingRule() {
-	return this->mStartRule;
-};
-std::wstring ModelGenerator::getDefaultShapeName() {
-	return this->mShapeName;
-};
-
-bool ModelGenerator::getDefaultValuesBoolean(const std::wstring& key, ON_SimpleArray<int>* pValues) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-			case prt::AttributeMap::PrimitiveType::PT_BOOL: {
-				prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-				bool value = am->getBool(key.c_str(), &status);
-				if (status != prt::STATUS_OK) {
-					logAttributeError(key, status);
-					return false;
-				}
-
-				pValues->Append(value);
-				break;
-			}
-			default:
-				logAttributeTypeError(key);
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesNumber(const std::wstring& key, ON_SimpleArray<double>* pValues) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			prt::Status status = prt::STATUS_OK;
-
-			switch (am->getType(key.c_str())) {
-			case prt::AttributeMap::PrimitiveType::PT_FLOAT: {
-				double value = am->getFloat(key.c_str(), &status);
-				if (status == prt::STATUS_OK)
-					pValues->Append(value);
-				break;
-			}
-			case prt::AttributeMap::PrimitiveType::PT_INT: {
-				int32_t value = am->getInt(key.c_str(), &status);
-				if (status == prt::STATUS_OK)
-					pValues->Append(value);
-				break;
-			}
-			default:
-				logAttributeTypeError(key);
-				return false;
-			}
-
-			if (status != prt::STATUS_OK) {
-				logAttributeError(key, status);
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesText(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-				case prt::AttributeMap::PrimitiveType::PT_STRING: {
-
-					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-					std::wstring valueStr(am->getString(key.c_str(), &status));
-
-					if (status != prt::STATUS_OK) {
-						logAttributeError(key, status);
-						return false;
-					}
-
-					ON_wString onString;
-					pcu::appendToRhinoString(onString, valueStr);
-					pTexts->Append(onString);
-					break;
-				}
-				default:
-					logAttributeTypeError(key);
-					return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesBooleanArray(const std::wstring& key, ON_SimpleArray<int>* pValues,
-                                                  ON_SimpleArray<int>* pSizes) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-				case prt::AttributeMap::PrimitiveType::PT_BOOL_ARRAY: {
-					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-					size_t count = 0;
-					const bool* pBoolArray = am->getBoolArray(key.c_str(), &count, &status);
-					if (status != prt::STATUS_OK) {
-						logAttributeError(key, status);
-						return false;
-					}
-
-					for (size_t i = 0; i < count; ++i) {
-						pValues->Append(pBoolArray[i]);
-					}
-					pSizes->Append(static_cast<int>(count));
-					break;
-				}
-				default:
-					logAttributeTypeError(key);
-					return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesNumberArray(const std::wstring& key, ON_SimpleArray<double>* pValues,
-                                                ON_SimpleArray<int>* pSizes) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-			size_t count = 0;
-
-			switch (am->getType(key.c_str())) {
-			case prt::AttributeMap::PrimitiveType::PT_FLOAT_ARRAY: {
-				const double* pDoubleArray = am->getFloatArray(key.c_str(), &count, &status);
-				if (status == prt::STATUS_OK) {
-					for (int i = 0; i < count; ++i) {
-						pValues->Append(pDoubleArray[i]);
-					}
-
-					pSizes->Append(static_cast<int>(count));
-				}
-				break;
-			}
-			case prt::AttributeMap::PrimitiveType::PT_INT_ARRAY: {
-				const int32_t* pIntArray = am->getIntArray(key.c_str(), &count, &status);
-				if (status == prt::STATUS_OK) {
-					for (size_t i = 0; i < count; ++i) {
-						pValues->Append(pIntArray[i]);
-					}
-
-					pSizes->Append(static_cast<int>(count));
-				}
-				break;
-			}
-			default:
-				logAttributeTypeError(key);
-				return false;
-			}
-
-			if(status != prt::STATUS_OK) {
-				logAttributeError(key, status);
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-bool ModelGenerator::getDefaultValuesTextArray(const std::wstring& key, ON_ClassArray<ON_wString>* pTexts,
-                                               ON_SimpleArray<int>* pSizes) {
-	if (mDefaultValuesMap.empty())
-		return false;
-
-	for (const auto& am : mDefaultValuesMap) {
-		if (am->hasKey(key.c_str())) {
-			switch (am->getType(key.c_str())) {
-				case prt::AttributeMap::PrimitiveType::PT_STRING_ARRAY: {
-					prt::Status status = prt::STATUS_UNSPECIFIED_ERROR;
-					size_t count = 0;
-					const wchar_t* const* pStringArray = am->getStringArray(key.c_str(), &count, &status);
-					if (status != prt::STATUS_OK) {
-						logAttributeError(key, status);
-						return false;
-					}
-
-					for (size_t i = 0; i < count; ++i) {
-						pTexts->Append(ON_wString(pStringArray[i]));
-					}
-
-					pSizes->Append(static_cast<int>(count));
-					break;
-				}
-				default:
-					logAttributeTypeError(key);
-					return false;
-			}
-		}
-	}
-
-	return true;
 }

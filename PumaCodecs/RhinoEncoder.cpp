@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 
 #include "RhinoEncoder.h"
 
-#include "Logger.h"
 #include "TextureEncoder.h"
 
 #include "prtx/DataBackend.h"
@@ -29,6 +28,7 @@
 #include "prtx/GenerateContext.h"
 #include "prtx/Geometry.h"
 #include "prtx/Mesh.h"
+#include "prtx/Log.h"
 #include "prtx/PRTUtils.h"
 #include "prtx/ReportsCollector.h"
 #include "prtx/Shape.h"
@@ -67,7 +67,7 @@ const prtx::EncodePreparator::PreparationFlags ENC_PREP_FLAGS =
                 .cleanupVertexNormals(true)
                 .processVertexNormals(prtx::VertexNormalProcessor::SET_MISSING_TO_FACE_NORMALS)
                 .indexSharing(prtx::EncodePreparator::PreparationFlags::INDICES_SAME_FOR_ALL_VERTEX_ATTRIBUTES)
-                .mergeByMaterial(true)
+                .meshMerging(prtx::MeshMerging::ALL_OF_SAME_MATERIAL_AND_TYPE)
                 .processHoles(prtx::HoleProcessor::TRIANGULATE_FACES_WITH_HOLES);
 
 std::vector<const wchar_t*> toPtrVec(const prtx::WStringVector& wsv) {
@@ -247,14 +247,14 @@ const std::set<std::wstring> MATERIAL_ATTRIBUTE_BLACKLIST = {
 void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, const prtx::Material& prtxAttr,
                                    const prtx::WStringVector& keys, IRhinoCallbacks* cb, prt::Cache* cache) {
 	if constexpr (ENC_DBG)
-		LOG_DBG << L"Converting material " << prtxAttr.name();
+		log_debug("Converting material %1%") % prtxAttr.name();
 
 	for (const auto& key : keys) {
 		if (MATERIAL_ATTRIBUTE_BLACKLIST.count(key) > 0)
 			continue;
 
 		if constexpr (ENC_DBG)
-			LOG_DBG << L"key: " << key;
+			log_debug("key: %1%") % key;
 
 		switch (prtxAttr.getType(key)) {
 			case prt::Attributable::PT_BOOL:
@@ -302,14 +302,14 @@ void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, c
 				const std::wstring texPath = getTexturePath(tex, cb, cache);
 				if (texPath.length() > 0) {
 					if constexpr (ENC_DBG)
-						LOG_DBG << "Using getTexture with key: " << key << " : " << texPath;
+						log_debug("Using getTexture with key: %1% : %2%") % key % texPath;
 					amb->setString(key.c_str(), texPath.c_str());
 				}
 				break;
 			}
 			case prtx::Material::PT_TEXTURE_ARRAY: {
 				if constexpr (ENC_DBG)
-					LOG_DBG << "Texture array with key: " << key;
+					log_debug("Texture array with key: %1%") % key;
 
 				const auto& texArray = prtxAttr.getTextureArray(key);
 
@@ -330,7 +330,7 @@ void convertMaterialToAttributeMap(prtx::PRTUtils::AttributeMapBuilderPtr amb, c
 			}
 			default: {
 				if constexpr (ENC_DBG)
-					LOG_DBG << L"Ignored attribute " << key;
+					log_debug("Ignored attribute %1%") % key;
 				continue;
 			}
 		}
@@ -440,7 +440,7 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 	        prtx::AllShapesReportingStrategy::create(context, initialShapeIndex, reportsAccumulator)};
 
 	if constexpr (ENC_DBG)
-		LOG_DBG << L"Starting leaf iteration";
+		log_debug("Starting leaf iteration");
 
 	try {
 		prtx::LeafIteratorPtr li = prtx::LeafIterator::create(context, initialShapeIndex);
@@ -450,12 +450,12 @@ void RhinoEncoder::encode(prtx::GenerateContext& context, size_t initialShapeInd
 		}
 	}
 	catch (std::exception& e) {
-		LOG_ERR << e.what();
+		log_error("Caught exception: %1%") % e.what();
 
 		mEncodePreparator->add(context.getCache(), initialShape, initialShapeIndex);
 	}
 	catch (...) {
-		LOG_ERR << "Unknown exception while encoding geometry." << std::endl;
+		log_error("Unknown exception while encoding geometry.");
 
 		mEncodePreparator->add(context.getCache(), initialShape, initialShapeIndex);
 	}
@@ -506,8 +506,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 
 		if constexpr (ENC_DBG) {
 			size_t mesh_count = meshes.size();
-			LOG_DBG << L"Material count for instance " << instance.getInitialShapeIndex() << ": " << materials.size()
-			        << ", meshes: " << mesh_count << std::endl;
+			log_debug("Material count for instance %1%: %2%, meshes: %3%") % instance.getInitialShapeIndex() % materials.size() % mesh_count;
 		}
 
 		vertexIndexBase = 0;
@@ -573,7 +572,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 				        (numUVSets > 0) ? mesh->getFaceUVCounts(0) : prtx::IndexVector(mesh->getFaceCount(), 0);
 
 				if constexpr (ENC_DBG)
-					LOG_DBG << "-- mesh: numUVSets = " << numUVSets;
+					log_debug("-- mesh: numUVSets = %1%") % numUVSets;
 
 				if (numUVSets > 0) {
 					for (uint32_t uvSet = 0; uvSet < uvs.size(); uvSet++) {
@@ -593,7 +592,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 						tgtCounts.insert(tgtCounts.end(), faceUVCounts.begin(), faceUVCounts.end());
 
 						if constexpr (ENC_DBG)
-							LOG_DBG << "  -- uvset " << uvSet << ": face counts size = " << faceUVCounts.size();
+							log_debug("  -- uvset %1%: face counts size = %2%") % uvSet % faceUVCounts.size();
 
 						// append uv vertex indices
 						for (uint32_t faceId = 0; faceId < static_cast<uint32_t>(faceUVCounts.size()); ++faceId) {
@@ -605,8 +604,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 							const uint32_t faceUVCnt = faceUVCounts[faceId];
 
 							if constexpr (ENC_DBG)
-								LOG_DBG << "      faceId " << faceId << ": faceUVCnt = " << faceUVCnt
-								        << ", faceVtxCnt = " << mesh->getFaceVertexCount(faceId);
+								log_debug("      faceId %1%: faceUVCnt = %2%, faceVtxCnt = %3%") % faceId % faceUVCnt %  mesh->getFaceVertexCount(faceId);
 
 							for (uint32_t vrtxId = 0; vrtxId < faceUVCnt; ++vrtxId) {
 								uvIndices[uvSet].push_back(uvIndexBases[uvSet] + faceUVIdx[vrtxId]);
@@ -619,7 +617,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 				convertMaterialToAttributeMap(amb, *(mat.get()), mat->getKeys(), cb, cache);
 				matAttrMap.emplace_back(amb->createAttributeMapAndReset());
 				if constexpr (ENC_DBG)
-					LOG_DBG << "mat map: " << prtx::PRTUtils::objectToXML(matAttrMap.back().get());
+					log_debug("mat map: %1%") % prtx::PRTUtils::objectToXML(matAttrMap.back().get());
 			}
 		}
 		faceRanges.push_back(faceCount);
@@ -653,7 +651,7 @@ void RhinoEncoder::convertGeometry(const prtx::InitialShape&, const prtx::Encode
 
 void RhinoEncoder::finish(prtx::GenerateContext&) {
 	if constexpr (ENC_DBG)
-		LOG_DBG << "In finish  function...";
+		log_debug("In finish  function...");
 }
 
 RhinoEncoderFactory* RhinoEncoderFactory::createInstance() {

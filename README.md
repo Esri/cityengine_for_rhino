@@ -13,7 +13,7 @@ _Puma is free for personal, educational, and non-commercial use._ Commercial use
 Download and open the ["Street Segment" example](https://esri.github.io/cityengine/puma#examples) or create a scene from scratch:
 
 1. In CityEngine, download e.g. [Tutorial 9](https://doc.arcgis.com/en/cityengine/latest/tutorials/tutorial-9-advanced-shape-grammar.htm) and export the "Parthenon" CGA rules to a RPK (see [Creating a Rule Package](https://doc.arcgis.com/en/cityengine/latest/help/help-rule-package.htm)).
-1. Install Puma via the **Rhino 7 Package Manager in the Tools menu** (recommended) or from [food4rhino](https://www.food4rhino.com/app/puma).
+1. Install Puma from the [Puma market place at food4rhino](https://www.food4rhino.com/app/puma).
 1. Start Rhino and open Grasshopper.
 1. In Grasshopper go to the "Esri" tab and find the "Puma" section, drag the Puma component into the document.
 1. Right-click on the RPK input parameter to select the "Parthenon" RPK created above. Puma will ask you to save the document, so it can store the path to the RPK relative to the document. It is best practice to put RPKs next to the Grasshopper document or in a subdirectory.
@@ -27,7 +27,6 @@ Download and open the ["Street Segment" example](https://esri.github.io/cityengi
 ## Table of Contents
 
 - [User Manual](#user-manual)
-- [Examples](https://esri.github.io/cityengine/puma#examples)
 - [Developer Manual](#developer-manual)
 - [Release Notes](#release-notes)
 - [Licensing Information](#licensing-information)
@@ -38,15 +37,14 @@ Puma technically consists of two plugins, (1) a command for Rhino and (2) compon
 
 ### Installation
 
-Note: Puma is currently only available for Windows 10 (Intel/AMD 64bit).
+#### System Requirements
+* Windows 10 or 11 (Intel/AMD 64bit).
+* Rhino 6.35 or Rhino 7.17 or later.
+* To author Rule Packages (RPK), a license for CityEngine is needed.
 
-#### Recommended Installation Method: Rhino 7 Package Manager
+#### Recommended Installation Method: Food4Rhino Marketplace
 
-Open the Package Manager in the Rhino 7 "Tools" menu and search for "Puma".
-
-#### Food4Rhino App Store
-
-Go to the [Puma app store entry on food4rhino](https://www.food4rhino.com/app/puma) and click on Download, this will download the Puma installer file. Double-click to install into your Rhino.
+Go to the [Puma market place](https://www.food4rhino.com/app/puma) and click on Download, this will download and install Puma.
 
 #### Install from local files
 
@@ -54,7 +52,7 @@ See [below](#install-locally-built-packages) in the developer documentation.
 
 ### Using the Puma Grasshopper components
 
-After starting Grasshopper, the Puma components are located in the `Esri` section in the `Special` tab.
+After starting Grasshopper, the Puma components are located in the `Puma` section of the `Esri` tab.
 
 <img src="doc/img/man_gh_icons.jpg" height=200>
 
@@ -75,15 +73,32 @@ Any Grasshopper component providing such objects can be connected to the `Shape(
 1. Draw the rectangle(s) in the Rhino viewport using the Rhino `Rectangle` tool.
 1. Select the rectangle.
 
-Note that there are slight differences in these steps based on the geometry type. The `Surface` component, for example, does not allow you to draw a shape, but only to select a previously existing one. It is needed to draw it first using Rhino tools.
+In case building models are pointing "down": Puma considers the winding order of input polygons. The Rhino `Flip` command can be used to correct the orientation of the input polygons.
+
+#### Preparing input shapes for Puma
+
+As the CGA language requires polygon meshes as input, Puma by default converts all non-mesh input shapes to meshes using the "fast render mesh" settings.
+
+There are multiple ways to control the creation of polygons when converting Breps, Curves, Polylines and Surfaces to Meshes:
+1. Directly pass the raw converted mesh into Puma and use the CGA [`cleanupGeometry`](https://doc.arcgis.com/en/cityengine/latest/cga/cga-clenaup-geometry.htm) operation to remove internal edges in the rules.
+1. Use the Rhino commands `AddNgonsToMesh` and `DeleteMeshNgons` to control how polygons are grouped together into Ngons within the mesh.
+1. Use the ["Ngon" plugin](https://www.food4rhino.com/en/app/ngon) for detailed control of the conversion.
+
+Puma will recognize the Ngons created by above methods in the input meshes and use them to create the actual input polygon faces for the model generation. In below example, we first used the raw Rhino triangles and quads to run a simple offset-and-extrude rule. Then we used Rhino's `AddNgonsToMesh` command to combine some of the quads/triangles to Ngons. Puma will treat triangles/quads not associated to a Ngon as individual input faces.
+
+<img src="doc/img/ngons2.png" width=48%><img src="doc/img/ngons1.png" width=48%>
+
+To illustrate the use of the "Ngon" plugin, we use the "From Mesh" tool to convert a closed Rhino Curve to a single Ngon and then apply the same simple offset-and-extrude rule:
+
+<img src="doc/img/ngons3.png" width=70%>
 
 #### Working with rule attribute inputs
 
 <img src="doc/img/man_gh_rule_attributes.jpg" width=100%>
 
-When both main inputs are connected, the component is solved a first time. The default values for the cga rule attributes are used. It is possible to override them by adding input parameters to the Puma component. To do that, zoom on the component until a small `+` button appears. It opens a dialog window in which new inputs can be selected from the list of available rule attributes, defined in the rule package currently used.
+When both main inputs for RPK and Shapes are connected, the component starts to generate geometry. Initially, the default values for the CGA rule attributes are used. It is possible to override them by adding input parameters to the Puma component. To do that, zoom on the component until a small `+` button appears. Please note, the `+` button will only appear if the CGA rule defines any attributes. The "Select Rule Attributes" dialog window opens in which new inputs can be selected from the list of available rule attributes, defined in the rule package currently used. The dialog has tabs for the main rule file and optionally for imports. Each tab has columns for name, data type and default value.
 
-These parameters can then be connected to other components. The context menu also provides an easy way to directly assign a value. Puma will use default values for unconnected inputs which are defined in the rules and in general also depend on the input shapes.
+These parameter inputs can then be connected to other Grasshopper components. The context menu also provides an easy way to directly assign a value. Puma will use default values for unconnected inputs which are defined in the rules and in general also depend on the input shapes.
 
 Rule attributes and the corresponding Puma component inputs use four basic data types: (1) Number, (2) String, (3) Boolean (Toggle) and (4) Colour. These can be either single values or lists of values. In case of lists and length mismatches, Puma will either truncate lists or repeat the last value of a list until the length of the `shape(s)` input is matched.
 
@@ -164,9 +179,9 @@ Please note, this command is only meant to provide a quick way for testing a RPK
 
 ### Software Requirements
 
-- Windows 10 (Intel/AMD 64bit)
+- Windows 10 or 11 (Intel/AMD 64bit)
 - Rhino 6 or 7 (<https://www.rhino3d.com/download>)
-- Microsoft Visual Studio 2019 with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.5.2)
+- Microsoft Visual Studio 2019 or later with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.5.2)
 - Optional: Python 3.7 or later
 
 ### Build Instructions
@@ -211,9 +226,14 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
+### Puma 1.1.0 (2023-07-27)
+* Supports Rule Packages from CityEngine 2023.0 and older.
+* Improved the user experience when overriding CGA Rule Attributes.
+* Added support for user-created Mesh Ngons in input shapes.
+
 ### Puma 1.0.0 (2021-12-10)
 * Corresponds to v0.9.4 with updated documentation.
-* Published ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0/puma_street_segment_example_v1.zip) (for Rhino 7) to show-case the main features of Puma.
+* Published ["Street Segment" example](https://esri.github.io/cityengine/puma#examples) (for Rhino 7) to show-case the main features of Puma.
 * Puma supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.1 and older.
 * Limitation: no support yet for PBR materials in Rhino 7.

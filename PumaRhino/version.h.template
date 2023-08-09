@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
 
 #pragma once
 
+#define VERSION_MAJOR @VERSION_MAJOR@
+#define VERSION_MINOR @VERSION_MINOR@
+#define VERSION_REVISION @VERSION_REVISION@
+#define VERSION_BUILD @VERSION_BUILD@
+
 #define STRINGIZE2(s) #s
 #define STRINGIZE(s) STRINGIZE2(s)
-
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 0
-#define VERSION_REVISION 0
-#define VERSION_BUILD 0
 
 #define VER_FILE_VERSION VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD
 #define VER_FILE_VERSION_STR                                                                                           \
@@ -34,3 +34,4 @@
 
 #define VER_PRODUCT_VERSION VER_FILE_VERSION
 #define VER_PRODUCT_VERSION_STR VER_FILE_VERSION_STR
+

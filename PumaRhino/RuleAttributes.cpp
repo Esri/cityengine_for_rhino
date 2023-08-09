@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,12 @@ CompareResult compareImport(const std::wstring& left, const std::wstring& right)
 	return leftImport.compare(rightImport) < 0 ? CompareResult::LESS_THAN : CompareResult::GREATER_THAN;
 }
 
+bool compareByOrder(const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
+	if (left->order != right->order)
+		return left->order < right->order;
+	return left->mNickname.compare(right->mNickname) < 0;
+}
+
 bool compareRuleAttributes(const RuleAttributeUPtr& left, const RuleAttributeUPtr& right) {
 	CompareResult result = compareImport(left->mFullName, right->mFullName);
 	if (result != CompareResult::SKIP)
@@ -67,9 +73,7 @@ bool compareRuleAttributes(const RuleAttributeUPtr& left, const RuleAttributeUPt
 	if (left->groups.size() == 0) {
 		if (right->groups.size() == 0) {
 			// No groups for both attributes: sort by order if they are set, else sort by string compare.
-			if (left->order != right->order)
-				return left->order < right->order;
-			return left->mNickname.compare(right->mNickname) < 0;
+			return compareByOrder(left, right);
 		}
 		else {
 			return true; // Attributes without group are placed first.
@@ -79,20 +83,23 @@ bool compareRuleAttributes(const RuleAttributeUPtr& left, const RuleAttributeUPt
 		return false; // Attributes without group are placed first.
 	}
 
-	// support only first level groups for now.
-	int group_cmpr = left->groups.front().compare(right->groups.front());
-	if (group_cmpr == 0) {
-		// same group, sort by order if set.
-		if (left->order != right->order)
-			return left->order < right->order;
-		return left->mNickname.compare(right->mNickname) < 0;
+	for (int i = 0; i < std::min(left->groups.size(), right->groups.size()); ++i) {
+		int group_cmpr = left->groups[i].compare(right->groups[i]);
+		if (group_cmpr != 0) {
+			// different group, sort by groupOrder if they are set, else use string compare.
+			if (left->groupOrder != right->groupOrder)
+				return left->groupOrder < right->groupOrder;
+			return group_cmpr < 0;
+		}
+		// same group, sort by subgroup
 	}
-	else {
-		// different group, sort by groupOrder if they are set, else use string compare.
-		if (left->groupOrder != right->groupOrder)
-			return left->groupOrder < right->groupOrder;
-		return group_cmpr < 0;
-	}
+
+	// Both have same groups. If one has more groups than the other, it is placed after.
+	if (left->groups.size() != right->groups.size())
+		return left->groups.size() < right->groups.size();
+
+	// Both have exact same group, sort by order or string compare.
+	return compareByOrder(left, right);
 }
 
 } // namespace

@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,58 @@ using System.Drawing;
 using Grasshopper.Kernel.Data;
 using System.Xml.Serialization;
 using System.IO;
+using Rhino.Geometry;
 
 namespace PumaGrasshopper
 {
 
     class Utils
     {
+        private static string IMPORT_DELIMITER = ".";
+        private static string STYLE_DELIMITER = "$";
+
+        public static GH_Structure<GH_Mesh> CreateMeshStructure(List<Mesh[]> generatedMeshes)
+        {
+            // GH_Structure is the data tree outputed by our component, it takes only GH_Mesh (which is a grasshopper wrapper class over the rhino Mesh), 
+            // thus a conversion is necessary when adding Meshes.
+            GH_Structure<GH_Mesh> mesh_struct = new GH_Structure<GH_Mesh>();
+
+            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            {
+                if (generatedMeshes[shapeId] == null)
+                    continue;
+
+                GH_Path path = new GH_Path(shapeId);
+                var meshBundle = generatedMeshes[shapeId];
+                foreach (var mesh in meshBundle)
+                {
+                    GH_Mesh gh_mesh = null;
+                    var status = GH_Convert.ToGHMesh(mesh, GH_Conversion.Both, ref gh_mesh);
+                    if (status)
+                    {
+                        mesh_struct.Append(gh_mesh, path);
+                    }
+                }
+            }
+
+            return mesh_struct;
+        }
+
+        public static GH_Structure<GH_Material> CreateMaterialStructure(List<GH_Material[]> materials)
+        {
+            GH_Structure<GH_Material> material_struct = new GH_Structure<GH_Material>();
+
+            int index = 0;
+            materials.ForEach((material) =>
+            {
+                GH_Path path = new GH_Path(index);
+                material_struct.AppendRange(material, path);
+                index++;
+            });
+
+            return material_struct;
+        }
+
         public static IntPtr CreateIntArrayPtr(int size)
         {
             return Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * size);
@@ -77,6 +123,16 @@ namespace PumaGrasshopper
             return array;
         }
 
+        public static string ToCeArray<T>(T[] values)
+        {
+            return values.Aggregate("", (acc, x) => acc + x.ToString()) + ":";
+        }
+
+        public static string[] StringFromCeArray(string values) => values == null ? new string[0]: values.Split(':');
+        public static bool[] BoolFromCeArray(string values) => values == null ? new bool[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToBoolean(value));
+        public static int[] IntegerFromCeArray(string values) => values == null ? new int[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToInt32(value));
+        public static double[] DoubleFromCeArray(string values) => values == null ? new double[0] : Array.ConvertAll(values.Split(':'), value => Convert.ToDouble(value));
+
         public static GH_Structure<GH_Number> FromListToTree(List<double> valueList)
         {
             GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();
@@ -96,6 +152,17 @@ namespace PumaGrasshopper
             }
             return tree;
         }
+
+        public static GH_Structure<GH_Integer> FromListToTree(List<int> valueList)
+        {
+            GH_Structure<GH_Integer> tree = new GH_Structure<GH_Integer>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.Insert(new GH_Integer(valueList[i]), new GH_Path(i), 0);
+            }
+            return tree;
+        }
+
         public static GH_Structure<GH_String> FromListToTree(List<string> valueList)
         {
             GH_Structure<GH_String> tree = new GH_Structure<GH_String>();
@@ -122,6 +189,16 @@ namespace PumaGrasshopper
             for (int i = 0; i < valueList.Count; ++i)
             {
                 tree.AppendRange(valueList[i].ConvertAll(val => new GH_Boolean(val)), new GH_Path(i));
+            }
+            return tree;
+        }
+
+        public static GH_Structure<GH_Integer> FromListToTree(List<List<int>> valueList)
+        {
+            GH_Structure<GH_Integer> tree = new GH_Structure<GH_Integer>();
+            for(int i = 0; i < valueList.Count; ++i)
+            {
+                tree.AppendRange(valueList[i].ConvertAll(val => new GH_Integer(val)), new GH_Path(i));
             }
             return tree;
         }
@@ -177,6 +254,11 @@ namespace PumaGrasshopper
             return ColorTranslator.FromHtml(hexColor);
         }
 
+        public static Color ColorFromRGB(double[] colorArray)
+        {
+            return Color.FromArgb((int)(colorArray[0] * 255), (int)(colorArray[1] * 255), (int)(colorArray[2] * 255));
+        }
+
         public static bool IsInteger(double d)
         {
             return Math.Abs(d % 1) <= (Double.Epsilon * 100);
@@ -207,6 +289,23 @@ namespace PumaGrasshopper
             grp.AddObject(guid);
             grp.ExpireCaches();
             grp.ExpirePreview(true);
+        }
+
+        public static string getImportPrefix(string attribute, bool withStylePrefix = true)
+        {
+            var importDelimPos = attribute.LastIndexOf(IMPORT_DELIMITER);
+            if (importDelimPos == -1)
+                return null;
+
+            int importStartPos = 0;
+            if (!withStylePrefix)
+            {
+                int styleDelimPos = attribute.IndexOf(STYLE_DELIMITER);
+                if (styleDelimPos > -1 || styleDelimPos < attribute.Length-1)
+                    importStartPos = styleDelimPos + 1;
+            }
+
+            return attribute.Substring(importStartPos, importDelimPos - importStartPos);
         }
 
         public static string ToXML(object obj)

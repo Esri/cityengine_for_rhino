@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,28 +141,19 @@ CRhinoCommand::result CCommandApplyRulePackage::RunCommand(const CRhinoCommandCo
 		return failure;
 	}
 
-	try {
-		RhinoPRT::get().SetRPKPath(rpk);
-	}
-	catch (std::exception& e) {
-		LOG_ERR << "Failed to set Rule Packages: " << e.what();
-		return CRhinoCommand::failure;
-	}
-
-	RhinoPRT::get().ClearInitialShapes();
-
 	std::vector<RawInitialShape> rawInitialShapes;
 	rawInitialShapes.reserve(mesh_array.Count());
 	for (int i = 0; i < mesh_array.Count(); ++i)
 		rawInitialShapes.emplace_back(*mesh_array[i]);
-	RhinoPRT::get().SetInitialShapes(rawInitialShapes);
+
+	// Initialise the attribute map builders for each initial shape.
+	pcu::AttributeMapBuilderVector aBuilders(mesh_array.Count());
+	for (auto& it : aBuilders) {
+		it.reset(prt::AttributeMapBuilder::create());
+	}
 
 	// PRT Generation
-	bool status = RhinoPRT::get().GenerateGeometry();
-	if (!status)
-		return CRhinoCommand::failure;
-
-	const auto& generated_models = RhinoPRT::get().getGenModels();
+	const auto& generated_models = RhinoPRT::get().GenerateGeometry(rpk, rawInitialShapes, aBuilders);
 
 	// Add the objects to the Rhino scene.
 	for (size_t initialShapeIndex = 0; initialShapeIndex < generated_models.size(); initialShapeIndex++) {

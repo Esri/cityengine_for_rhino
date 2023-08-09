@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021 Esri R&D Center Zurich
+ * Copyright (c) 2021-2023 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ namespace PumaGrasshopper.AttributeParameter
 
         public PumaParameter(string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
-            mGroupName = groupName;
+            mGroupName = groupName != null ? groupName : "";
             mExpectsArray = expectsArray;
             mAnnotations = annotations;
         }
@@ -91,13 +91,6 @@ namespace PumaGrasshopper.AttributeParameter
             }
 
             return base.Read(reader);
-        }
-
-        protected void RefreshRpk()
-        {
-            var pumaAttributes = (GH_ComponentAttributes)Attributes.GetTopLevel;
-            ComponentPuma puma = (ComponentPuma)pumaAttributes.Owner;
-            puma.RefreshRpk();
         }
 
         protected void DisplayExtractedParam(IGH_Param param)
@@ -146,25 +139,6 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_Boolean> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
-
-            RefreshRpk();
-
-            if (mExpectsArray)
-            {
-                List<List<bool>> defaultValues = PRTWrapper.GetDefaultValuesBooleanArray(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
-            else
-            {
-                List<bool> defaultValues = PRTWrapper.GetDefaultValuesBoolean(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
 
             return new GH_Structure<GH_Boolean>();
         }
@@ -215,25 +189,6 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_Number> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
-
-            RefreshRpk();
-
-            if (mExpectsArray)
-            {
-                List<List<double>> defaultValues = PRTWrapper.GetDefaultValuesNumberArray(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
-            else
-            {
-                List<double> defaultValues = PRTWrapper.GetDefaultValuesNumber(Name);
-                if(defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
 
             return new GH_Structure<GH_Number>();
         }
@@ -292,25 +247,6 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_String> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
-
-            RefreshRpk();
-
-            if (mExpectsArray)
-            {
-                List<List<string>> defaultValues = PRTWrapper.GetDefaultValuesTextArray(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
-            else
-            {
-                List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
-                if (defaultValues != null)
-                {
-                    return Utils.FromListToTree(defaultValues);
-                }
-            }
 
             return new GH_Structure<GH_String>();
         }
@@ -378,14 +314,6 @@ namespace PumaGrasshopper.AttributeParameter
         private GH_Structure<GH_Colour> GetData()
         {
             if (PersistentDataCount > 0) return PersistentData;
-
-            RefreshRpk();
-
-            List<string> defaultValues = PRTWrapper.GetDefaultValuesText(Name);
-            if (defaultValues != null)
-            {
-                return Utils.HexListToColorTree(defaultValues);
-            }
             
             return new GH_Structure<GH_Colour>();
         }

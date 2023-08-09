@@ -1,5 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" InitialTargets="ReadVersion" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ReadVersion" BeforeTargets="Build">
+    <ReadLinesFromFile File="..\version.properties">
+      <Output TaskParameter="Lines" ItemName="Versions" />
+    </ReadLinesFromFile>
+    <CreateItem Include="Versions" AdditionalMetadata="@(Versions)">
+      <Output TaskParameter="Include" ItemName="PumaVersions" />
+    </CreateItem>
+    <PropertyGroup>
+      <VersionMajor>%(PumaVersions.VERSION_MAJOR)</VersionMajor>
+      <VersionMinor>%(PumaVersions.VERSION_MINOR)</VersionMinor>
+      <VersionBuild>$(PumaVersionBuild)</VersionBuild>
+	  <VersionBuild Condition="'$(PumaVersionBuild)'==''">%(PumaVersions.VERSION_BUILD)</VersionBuild>
+      <VersionRevision>%(PumaVersions.VERSION_REVISION)</VersionRevision>
+    </PropertyGroup>
+    <ReadLinesFromFile File=".\Properties\AssemblyVersion.template">
+      <Output TaskParameter="Lines" ItemName="TemplateVersionStrings" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <GeneratedVersionStrings>
+        @(TemplateVersionStrings-&gt;
+        Replace('@VERSION_MAJOR@', $(VersionMajor))-&gt;
+        Replace('@VERSION_MINOR@', $(VersionMinor))-&gt;
+        Replace('@VERSION_REVISION@', $(VersionRevision))-&gt;
+        Replace('@VERSION_BUILD@', $(VersionBuild)))
+      </GeneratedVersionStrings>
+    </PropertyGroup>
+    <WriteLinesToFile File=".\Properties\AssemblyVersion.cs" Lines="$(GeneratedVersionStrings)" Overwrite="true">
+    </WriteLinesToFile>
+  </Target>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +39,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PumaGrasshopper</RootNamespace>
     <AssemblyName>PumaGrasshopper</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
@@ -41,23 +70,24 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="RhinoCommon">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Rhino 6\System\rhinocommon.dll</HintPath>
+      <HintPath>C:\Program Files\Rhino $(RhinoTargetVersion)\System\rhinocommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Grasshopper">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Rhino 6\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
+      <HintPath>C:\Program Files\Rhino $(RhinoTargetVersion)\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="GH_IO">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Rhino 6\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
+      <HintPath>C:\Program Files\Rhino $(RhinoTargetVersion)\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Annotations.cs" />
     <Compile Include="AnnotationSerialization.cs" />
+    <Compile Include="AttributesValuesMap.cs" />
     <Compile Include="ComponentPuma.cs" />
     <Compile Include="ComponentLibraryInfo.cs" />
     <Compile Include="ComponentReportsDisplay.cs" />
@@ -69,7 +99,11 @@
     <Compile Include="AttributeForm.Designer.cs">
       <DependentUpon>AttributeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="InteropWrapper.cs" />
+    <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" >
+      <DependentUpon>Properties\AssemblyVersion.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -79,6 +113,7 @@
     <Compile Include="PumaUIDs.cs" />
     <Compile Include="ReportAttribute.cs" />
     <Compile Include="RuleAttribute.cs" />
+    <Compile Include="RuleAttributesMap.cs" />
     <Compile Include="RulePackageParam.cs" />
     <Compile Include="SerializationIDs.cs" />
     <Compile Include="Utils.cs" />
@@ -94,6 +129,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\AssemblyVersion.template" />
     <None Include="Resources\gh_prt_main_component.png" />
   </ItemGroup>
   <ItemGroup>
@@ -121,14 +157,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
-    <StartProgram>C:\Program Files\Rhino 6\System\Rhino.exe</StartProgram>
+    <StartProgram>C:\Program Files\Rhino $(RhinoTargetVersion)\System\Rhino.exe</StartProgram>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartAction>Program</StartAction>
-    <StartProgram>C:\Program Files\Rhino 6\System\Rhino.exe</StartProgram>
+    <StartProgram>C:\Program Files\Rhino $(RhinoTargetVersion)\System\Rhino.exe</StartProgram>
     <DefineConstants>
     </DefineConstants>
     <DebugType>full</DebugType>
