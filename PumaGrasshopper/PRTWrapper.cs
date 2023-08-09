@@ -384,7 +384,7 @@ namespace PumaGrasshopper
                 reportKeyOffset += boolReportCount;
                 reportBoolOffset += boolReportCount;
 
-                var stringKeys = reportString.Skip(reportKeyOffset).Take(stringReportCount);
+                var stringKeys = reportKeys.Skip(reportKeyOffset).Take(stringReportCount);
                 var s = reportString.Skip(reportStringOffset).Take(stringReportCount).Zip(stringKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_STRING, value));
                 reportAttributes.AddRange(s);
                 reportKeyOffset += stringReportCount;
