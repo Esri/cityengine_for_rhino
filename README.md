@@ -52,7 +52,7 @@ See [below](#install-locally-built-packages) in the developer documentation.
 
 ### Using the Puma Grasshopper components
 
-After starting Grasshopper, the Puma components are located in the `Esri` section in the `Special` tab.
+After starting Grasshopper, the Puma components are located in the `Puma` section of the `Esri` tab.
 
 <img src="doc/img/man_gh_icons.jpg" height=200>
 
@@ -73,9 +73,18 @@ Any Grasshopper component providing such objects can be connected to the `Shape(
 1. Draw the rectangle(s) in the Rhino viewport using the Rhino `Rectangle` tool.
 1. Select the rectangle.
 
-As the CGA language requires polygon meshes as input, Puma converts all non-mesh input shapes to meshes first using the "fast render mesh" settings. If you need more detailed control when converting Breps, Curves, Polylines and Surfaces to Meshes, we recommend the ["Ngon" plugin](https://www.food4rhino.com/en/app/ngon).
+In case building models are pointing "down": Puma considers the winding order of input polygons. The Rhino `Flip` command can be used to correct the orientation of the input polygons.
 
-Puma will recognize Ngons (either created manually or by the Ngon plugin) in input meshes and use them to create the input faces for the model generation. In below example, we first used the raw Rhino triangles and quads to run a simple offset-and-extrude rule. Then we used Rhino's "Add Ngons to mesh" command to combine some of the quads/triangles to Ngons. Puma will treat triangles/quads not associated to a Ngon as individual input faces.
+#### Preparing input shapes for Puma
+
+As the CGA language requires polygon meshes as input, Puma by default converts all non-mesh input shapes to meshes using the "fast render mesh" settings.
+
+There are multiple ways to control the creation of polygons when converting Breps, Curves, Polylines and Surfaces to Meshes:
+1. Directly pass the raw converted mesh into Puma and use the CGA [`cleanupGeometry`](https://doc.arcgis.com/en/cityengine/latest/cga/cga-clenaup-geometry.htm) operation to remove internal edges in the rules.
+1. Use the Rhino commands `AddNgonsToMesh` and `DeleteMeshNgons` to control how polygons are grouped together into Ngons within the mesh.
+1. Use the ["Ngon" plugin](https://www.food4rhino.com/en/app/ngon) for detailed control of the conversion.
+
+Puma will recognize the Ngons created by above methods in the input meshes and use them to create the actual input polygon faces for the model generation. In below example, we first used the raw Rhino triangles and quads to run a simple offset-and-extrude rule. Then we used Rhino's `AddNgonsToMesh` command to combine some of the quads/triangles to Ngons. Puma will treat triangles/quads not associated to a Ngon as individual input faces.
 
 <img src="doc/img/ngons2.png" width=48%><img src="doc/img/ngons1.png" width=48%>
 
@@ -87,9 +96,9 @@ To illustrate the use of the "Ngon" plugin, we use the "From Mesh" tool to conve
 
 <img src="doc/img/man_gh_rule_attributes.jpg" width=100%>
 
-When both main inputs are connected, the component is solved a first time. The default values for the cga rule attributes are used. It is possible to override them by adding input parameters to the Puma component. To do that, zoom on the component until a small `+` button appears. It opens a dialog window in which new inputs can be selected from the list of available rule attributes, defined in the rule package currently used.
+When both main inputs for RPK and Shapes are connected, the component starts to generate geometry. Initially, the default values for the CGA rule attributes are used. It is possible to override them by adding input parameters to the Puma component. To do that, zoom on the component until a small `+` button appears. Please note, the `+` button will only appear if the CGA rule defines any attributes. The "Select Rule Attributes" dialog window opens in which new inputs can be selected from the list of available rule attributes, defined in the rule package currently used. The dialog has tabs for the main rule file and optionally for imports. Each tab has columns for name, data type and default value.
 
-These parameters can then be connected to other components. The context menu also provides an easy way to directly assign a value. Puma will use default values for unconnected inputs which are defined in the rules and in general also depend on the input shapes.
+These parameter inputs can then be connected to other Grasshopper components. The context menu also provides an easy way to directly assign a value. Puma will use default values for unconnected inputs which are defined in the rules and in general also depend on the input shapes.
 
 Rule attributes and the corresponding Puma component inputs use four basic data types: (1) Number, (2) String, (3) Boolean (Toggle) and (4) Colour. These can be either single values or lists of values. In case of lists and length mismatches, Puma will either truncate lists or repeat the last value of a list until the length of the `shape(s)` input is matched.
 
@@ -224,7 +233,7 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ### Puma 1.0.0 (2021-12-10)
 * Corresponds to v0.9.4 with updated documentation.
-* Published ["Street Segment" example](https://github.com/esri/puma/releases/download/v1.0.0/puma_street_segment_example_v1.zip) (for Rhino 7) to show-case the main features of Puma.
+* Published ["Street Segment" example](https://esri.github.io/cityengine/puma#examples) (for Rhino 7) to show-case the main features of Puma.
 * Puma supports Rhino 6 and 7.
 * Supports Rule Packages from CityEngine 2021.1 and older.
 * Limitation: no support yet for PBR materials in Rhino 7.
