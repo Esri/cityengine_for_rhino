@@ -217,9 +217,7 @@ namespace PumaGrasshopper
             {
                 mCurrentRpk = rpk;
                 mRuleAttributes = PRTWrapper.GetRuleAttributes(rpk.path);
-
-                if(mDefaultValues == null || inputMeshes.Count != mDefaultValues.Length)
-                    mDefaultValues = PRTWrapper.GetDefaultValues(rpk.path, inputMeshes);
+                mDefaultValues = PRTWrapper.GetDefaultValues(rpk.path, inputMeshes);
             }
 
             RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
