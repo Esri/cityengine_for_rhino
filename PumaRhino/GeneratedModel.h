@@ -51,11 +51,11 @@ public:
 	void addReport(const Reporting::ReportAttribute& ra);
 	const Reporting::ReportMap& getReports() const;
 
-	void addPrintOutput(const std::wstring_view& message);
-	const std::vector<std::wstring>& getPrintOutput() const;
+	void addPrint(const std::wstring_view& message);
+	const std::vector<std::wstring>& getPrints() const;
 
-	void addErrorOutput(const std::wstring_view& error);
-	const std::vector<std::wstring>& getErrorOutput() const;
+	void addError(const std::wstring_view& error);
+	const std::vector<std::wstring>& getErrors() const;
 
 	using MeshBundle = std::vector<ON_Mesh>;
 	const MeshBundle createRhinoMeshes(size_t initialShapeIndex) const;
@@ -64,8 +64,8 @@ private:
 	std::vector<ModelPart> mModelParts;
 	Reporting::ReportMap mReports;
 	Materials::MaterialsMap mMaterials;
-	std::vector<std::wstring> mPrintOutput;
-	std::vector<std::wstring> mErrorOutput;
+	std::vector<std::wstring> mPrints;
+	std::vector<std::wstring> mErrors;
 };
 
 using GeneratedModelPtr = std::shared_ptr<GeneratedModel>;

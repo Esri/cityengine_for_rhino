@@ -30,6 +30,7 @@ using Rhino.DocObjects;
 
 using Rhino.Runtime.InteropWrappers;
 using System.Linq;
+using System.Diagnostics;
 
 namespace PumaGrasshopper
 {
@@ -38,6 +39,8 @@ namespace PumaGrasshopper
         public List<Mesh[]> meshes = new List<Mesh[]>();
         public List<GH_Material[]> materials = new List<GH_Material[]>();
         public List<ReportAttribute[]> reports = new List<ReportAttribute[]>();
+        public List<GH_String[]> prints = new List<GH_String[]>();
+        public List<GH_String[]> errors = new List<GH_String[]>();
     }
 
     /// <summary>
@@ -76,7 +79,9 @@ namespace PumaGrasshopper
             [In] IntPtr pInitialMeshes, [Out] IntPtr pMeshCounts, [Out] IntPtr pMeshArray,
             [Out] IntPtr pColorsArray, [Out] IntPtr pTexIndices, [Out] IntPtr pTexKeys, [Out] IntPtr pTexPaths,
             [Out] IntPtr pReportCountArray, [Out] IntPtr pReportKeyArray, [Out] IntPtr pReportDoubleArray,
-            [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray);
+            [Out] IntPtr pReportBoolArray, [Out] IntPtr pReportStringArray,
+            [Out] IntPtr pPrintCountsArray, [Out] IntPtr pPrintValuesArray,
+            [Out] IntPtr pErrorCountsArray, [Out] IntPtr pErrorValuesArray);
 
         [DllImport(dllName: PUMA_RHINO_LIBRARY, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         public static extern int GetRuleAttributes(string rpk_path, [Out] IntPtr pAttributesBuffer, [Out] IntPtr pAttributesTypes, [Out] IntPtr pBaseAnnotations, [Out] IntPtr pDoubleAnnotations, [Out] IntPtr pStringAnnotations);
@@ -151,6 +156,18 @@ namespace PumaGrasshopper
             var reportStringArray = new ClassArrayString();
             IntPtr pReportStringArray = reportStringArray.NonConstPointer();
 
+            // Prints
+            var printCountsClassArray = new SimpleArrayInt(); // one entry per output model -> number of print "lines" per model
+            IntPtr pPrintCountsClassArray = printCountsClassArray.NonConstPointer();
+            var printValuesClassArray = new ClassArrayString();
+            IntPtr pPrintValuesClassArray = printValuesClassArray.NonConstPointer();
+
+            // Errors
+            var errorCountsClassArray = new SimpleArrayInt(); // one entry per output model -> number of print "lines" per model
+            IntPtr pErrorCountsClassArray = errorCountsClassArray.NonConstPointer();
+            var errorValuesClassArray = new ClassArrayString();
+            IntPtr pErrorValuesClassArray = errorValuesClassArray.NonConstPointer();
+
             Generate(rpkPath,
                      initialMeshes.Count,
                      boolWrapper.StartsPtr(),
@@ -196,7 +213,9 @@ namespace PumaGrasshopper
                      pReportKeyArray,
                      pReportDoubleArray,
                      pReportBoolArray,
-                     pReportStringArray);
+                     pReportStringArray,
+                     pPrintCountsClassArray, pPrintValuesClassArray,
+                     pErrorCountsClassArray, pErrorValuesClassArray);
 
             initialMeshesArray.Dispose();
             boolWrapper.Dispose();
@@ -208,21 +227,12 @@ namespace PumaGrasshopper
             doubleArrayWrapper.Dispose();
             stringArrayWrapper.Dispose();
 
-            var meshCountsArray = meshCounts.ToArray();
-            var meshesArray = meshes.ToNonConstArray();
-            // Materials
-            double[] colors = colorsArray.ToArray();
-            int[] materialIndices = matIndices.ToArray();
-            string[] textureKeys = texKeys.ToArray();
-            string[] texturePaths = texPaths.ToArray();
-
             GenerationResult generationResult = new GenerationResult();
 
-            int indexOffset = 0;
-            int colorsOffset = 0;
-            int textureOffset = 0;
-
             // Geometry
+            var meshCountsArray = meshCounts.ToArray();
+            var meshesArray = meshes.ToNonConstArray();
+            int indexOffset = 0;
             for (int id = 0; id < meshCountsArray.Length; id++)
             {
                 if (meshCountsArray[id] > 0)
@@ -237,6 +247,12 @@ namespace PumaGrasshopper
             }
 
             // Materials
+            double[] colors = colorsArray.ToArray();
+            int[] materialIndices = matIndices.ToArray();
+            string[] textureKeys = texKeys.ToArray();
+            string[] texturePaths = texPaths.ToArray();
+            int colorsOffset = 0;
+            int textureOffset = 0;
             for (int id = 0; id < materialIndices.Length;)
             {
                 int meshCount = materialIndices[id];
@@ -337,18 +353,15 @@ namespace PumaGrasshopper
             reportBoolArray.Dispose();
             reportStringArray.Dispose();
 
-            if (reportKeys.Length != reportDouble.Length + reportBool.Length + reportString.Length)
-            {
-                // Something went wrong, don't output any reports.
-                return generationResult;
-            }
+            Debug.Assert(reportKeys.Length == reportDouble.Length + reportBool.Length + reportString.Length);
 
             int reportKeyOffset = 0;
             int reportDoubleOffset = 0;
             int reportBoolOffset = 0;
             int reportStringOffset = 0;
 
-            for(int meshId = 0; meshId < reportCounts.Length; meshId+=3) {
+            for (int meshId = 0; meshId < reportCounts.Length; meshId += 3)
+            {
                 int doubleReportCount = reportCounts[meshId];
                 int boolReportCount = reportCounts[meshId + 1];
                 int stringReportCount = reportCounts[meshId + 2];
@@ -366,13 +379,37 @@ namespace PumaGrasshopper
                 reportKeyOffset += boolReportCount;
                 reportBoolOffset += boolReportCount;
 
-                var stringKeys = reportString.Skip(reportKeyOffset).Take(stringReportCount);
+                var stringKeys = reportKeys.Skip(reportKeyOffset).Take(stringReportCount);
                 var s = reportString.Skip(reportStringOffset).Take(stringReportCount).Zip(stringKeys, (value, key) => ReportAttribute.CreateReportAttribute(meshId / 3, key, ReportTypes.PT_STRING, value));
                 reportAttributes.AddRange(s);
                 reportKeyOffset += stringReportCount;
                 reportStringOffset += stringReportCount;
 
                 generationResult.reports.Add(reportAttributes.ToArray());
+            }
+            
+            // CGA Prints
+            {
+                var printCountsArray = printCountsClassArray.ToArray();
+                var printValuesArray = printValuesClassArray.ToArray();
+                int printOffset = 0;
+                foreach (int printCount in printCountsArray)
+                {
+                    generationResult.prints.Add(printValuesArray.Skip(printOffset).Take(printCount).Select(p => new GH_String(p)).ToArray());
+                    printOffset += printCount;
+                }
+            }
+
+            // CGA Errors
+            {
+                var errorCountsArray = errorCountsClassArray.ToArray();
+                var errorValuesArray = errorValuesClassArray.ToArray();
+                int errorOffset = 0;
+                foreach (int errorCount in errorCountsArray)
+                {
+                    generationResult.errors.Add(errorValuesArray.Skip(errorOffset).Take(errorCount).Select(e => new GH_String(e)).ToArray());
+                    errorOffset += errorCount;
+                }
             }
 
             return generationResult;

@@ -99,8 +99,14 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path,
 						   // Reports
 						   ON_SimpleArray<int>* pReportsCountArray,
                            ON_ClassArray<ON_wString>* pKeysArray, ON_SimpleArray<double>* pDoubleReports,
-                           ON_SimpleArray<bool>* pBoolReports, ON_ClassArray<ON_wString>* pStringReports) {
-
+                           ON_SimpleArray<bool>* pBoolReports, ON_ClassArray<ON_wString>* pStringReports,
+	
+						   // Prints
+                           ON_SimpleArray<int>* pPrintCountsArray, ON_ClassArray<ON_wString>* pPrintValuesArray,
+	
+						   // Errors
+                           ON_SimpleArray<int>* pErrorCountsArray, ON_ClassArray<ON_wString>* pErrorValuesArray)
+{
 	if (pMesh == nullptr)
 		return false;
 
@@ -262,6 +268,22 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path,
 			pReportsCountArray->Append(doubleReportsCount);
 			pReportsCountArray->Append(boolReportsCount);
 			pReportsCountArray->Append(stringReportsCount);
+
+			// CGA Prints
+			{
+				const auto& prints = models[i]->getPrints();
+				pPrintCountsArray->Append(static_cast<int>(prints.size()));
+				for (const auto& p : prints)
+					pPrintValuesArray->Append(ON_wString(p.c_str()));
+			}
+
+			// CGA Errors
+			{
+				const auto& errors = models[i]->getErrors();
+				pErrorCountsArray->Append(static_cast<int>(errors.size()));
+				for (const auto& p : errors)
+					pErrorValuesArray->Append(ON_wString(p.c_str()));
+			}
 		}
 		else {
 			pMeshCounts->Append(0);
@@ -467,28 +489,6 @@ RHINOPRT_API bool GetDefaultAttributes(	const wchar_t* rpk_path, ON_SimpleArray<
 	}
 
 	return true;
-}
-
-RHINOPRT_API void GetCGAPrintOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pPrintOutput) {
-	const std::vector<GeneratedModelPtr> models; // = RhinoPRT::get().getGenModels();
-
-	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
-		return;
-
-	const std::vector<std::wstring>& printOutput = models[initialShapeIndex]->getPrintOutput();
-	for (const std::wstring& item : printOutput)
-		pPrintOutput->Append(ON_wString(item.c_str()));
-}
-
-RHINOPRT_API void GetCGAErrorOutput(int initialShapeIndex, ON_ClassArray<ON_wString>* pErrorOutput) {
-	const std::vector<GeneratedModelPtr> models; // = RhinoPRT::get().getGenModels();
-
-	if ((models.size() <= initialShapeIndex) || !models[initialShapeIndex])
-		return;
-
-	const std::vector<std::wstring>& errorOutput = models[initialShapeIndex]->getErrorOutput();
-	for (const std::wstring& item : errorOutput)
-		pErrorOutput->Append(ON_wString(item.c_str()));
 }
 
 RHINOPRT_API void SetMaterialGenerationOption(bool doGenerate) {

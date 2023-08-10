@@ -125,21 +125,21 @@ const Materials::MaterialsMap& GeneratedModel::getMaterials() const {
 	return mMaterials;
 }
 
-void GeneratedModel::addPrintOutput(const std::wstring_view& message) {
+void GeneratedModel::addPrint(const std::wstring_view& message) {
 	assert(message.length() > 0); // we expect at least the newline character added by PRT
-	mPrintOutput.emplace_back(message.substr(0, message.length() - 1)); // let's trim the newline away
+	mPrints.emplace_back(message.substr(0, message.length() - 1)); // let's trim the newline away
 }
 
-const std::vector<std::wstring>& GeneratedModel::getPrintOutput() const {
-	return mPrintOutput;
+const std::vector<std::wstring>& GeneratedModel::getPrints() const {
+	return mPrints;
 }
 
-void GeneratedModel::addErrorOutput(const std::wstring_view& error) {
-	mErrorOutput.emplace_back(error);
+void GeneratedModel::addError(const std::wstring_view& error) {
+	mErrors.emplace_back(error);
 }
 
-const std::vector<std::wstring>& GeneratedModel::getErrorOutput() const {
-	return mErrorOutput;
+const std::vector<std::wstring>& GeneratedModel::getErrors() const {
+	return mErrors;
 }
 
 void GeneratedModel::addMaterial(const Materials::MaterialAttribute& ma) {
