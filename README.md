@@ -169,11 +169,11 @@ The `Reports` passes through the selected reports for further processing. For ex
 
 The `Puma Reports Unpacker` component unpacks the reports data from `Puma` into lists of shape index, report name and report value. This is typically used to further process the reports with built-in Grasshopper components, e.g. to write the reports to a text file.
 
-### Using the Puma Rhino command
+### Using the Puma Rhino command (ApplyRulePackage)
 
 In Rhino, select a shape and type the command `ApplyRulePackage` in the command line. This will open a file dialog to choose a RPK file. After confirming, the models will be generated on the selected shape.
 
-Please note, this command is only meant to provide a quick way for testing a RPK on a shape and it is currently not possible to change the rule attributes.
+Please note, this command is only meant to provide a quick way for testing a RPK on a shape. It is currently not possible to change the rule attributes, nor will the command apply materials.
 
 ## Developer Manual
 

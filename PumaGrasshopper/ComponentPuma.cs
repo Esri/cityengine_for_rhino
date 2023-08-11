@@ -217,9 +217,7 @@ namespace PumaGrasshopper
             {
                 mCurrentRpk = rpk;
                 mRuleAttributes = PRTWrapper.GetRuleAttributes(rpk.path);
-
-                if(mDefaultValues == null || inputMeshes.Count != mDefaultValues.Length)
-                    mDefaultValues = PRTWrapper.GetDefaultValues(rpk.path, inputMeshes);
+                mDefaultValues = PRTWrapper.GetDefaultValues(rpk.path, inputMeshes);
             }
 
             RuleAttributesMap MM = FillAttributesFromNode(DA, inputMeshes.Count);
@@ -228,9 +226,8 @@ namespace PumaGrasshopper
             OutputGeometry(DA, generatedMeshes.meshes);
             OutputMaterials(DA, generatedMeshes.materials);
             OutputReports(DA, generatedMeshes.reports);
-            // TODO: Add CGA print and errors to generate return.
-            // OutputCGAPrint(DA, generatedMeshes);
-            // OutputCGAErrors(DA, generatedMeshes);
+            OutputCGAPrint(DA, generatedMeshes.prints);
+            OutputCGAErrors(DA, generatedMeshes.errors);
         }
 
         private RulePackage GetRulePackage(IGH_DataAccess dataAccess)
@@ -353,35 +350,29 @@ namespace PumaGrasshopper
             dataAccess.SetDataTree((int)OutputParams.REPORTS, reports);
         }
 
-        private void OutputCGAPrint(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
+        private void OutputCGAPrint(IGH_DataAccess dataAccess, List<GH_String[]> generatedPrints)
         {
             var outputTree = new GH_Structure<GH_String>();
 
-            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            for (int shapeId = 0; shapeId < generatedPrints.Count; shapeId++)
             {
-                List<String> printOutput = PRTWrapper.GetCGAPrintOutput(shapeId);
-                if (printOutput.Count > 0)
-                {
-                    var shapePath = new GH_Path(shapeId);
-                    printOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
-                }
+                var shapePath = new GH_Path(shapeId);
+
+
+                outputTree.AppendRange(generatedPrints[shapeId], shapePath);
             }
 
             dataAccess.SetDataTree((int)OutputParams.PRINTS, outputTree);
         }
 
-        private void OutputCGAErrors(IGH_DataAccess dataAccess, List<Mesh[]> generatedMeshes)
+        private void OutputCGAErrors(IGH_DataAccess dataAccess, List<GH_String[]> generatedErrors)
         {
             var outputTree = new GH_Structure<GH_String>();
 
-            for (int shapeId = 0; shapeId < generatedMeshes.Count; shapeId++)
+            for (int shapeId = 0; shapeId < generatedErrors.Count; shapeId++)
             {
-                List<String> errorOutput = PRTWrapper.GetCGAErrorOutput(shapeId);
-                if (errorOutput.Count > 0)
-                {
-                    var shapePath = new GH_Path(shapeId);
-                    errorOutput.ForEach(o => outputTree.Append(new GH_String(o), shapePath));
-                }
+                var shapePath = new GH_Path(shapeId);
+                outputTree.AppendRange(generatedErrors[shapeId], shapePath);
             }
 
             dataAccess.SetDataTree((int)OutputParams.ERRORS, outputTree);
