@@ -80,7 +80,7 @@ def build_rhi_package(build_dir: str, package_dir: str, v_major, v_minor, v_revi
         copy_to_zip(root_path, root_path, PACKAGE_WHITELIST, myZip)
 
 
-def build_yak_package(rh_target, build_dir: str, package_dir: str, v_major, v_minor, v_revision):
+def build_yak_package(rh_target, build_dir: str, package_dir: str):
     build_path = Path(build_dir)
     yak_temp_path = Path(package_dir, "yak_temp")
     copy_to_dir(build_path, build_path, PACKAGE_WHITELIST, yak_temp_path)
@@ -105,12 +105,12 @@ def build(rh_target, build_mode: str, build_dir: Path, package_dir: Path, v_majo
         build_rhi_package(build_dir, package_dir, v_major, v_minor, v_revision, v_build)
 
     if build_mode == 'both' or build_mode == 'yak':
-        build_yak_package(rh_target, build_dir, package_dir, v_major, v_minor, v_revision)
+        build_yak_package(rh_target, build_dir, package_dir)
 
 
 def parse_args():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--rhino-target', default='6', choices=['6', '7'],
+    arg_parser.add_argument('--rhino-target', default='7', choices=['6', '7'],
                             help='The target rhino major version to build yak for.')
     arg_parser.add_argument('--build-module', default='both', choices=['both', 'rhi', 'yak'],
                             help='The package to build.')
@@ -118,7 +118,7 @@ def parse_args():
     return args
 
 
-def update_yml_manifest(root_path, v_major, v_minor, v_revision):
+def update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build):
     manifest_template = Path(root_path, "manifest.template")
     manifest = Path(root_path, "manifest.yml")
 
@@ -127,7 +127,7 @@ def update_yml_manifest(root_path, v_major, v_minor, v_revision):
     template_file.close()
 
     template = Template(template_string)
-    generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor, VERSION_REVISION=v_revision)
+    generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor, VERSION_REVISION=v_revision, VERSION_BUILD=v_build)
 
     with open(manifest, mode='w') as file:
         file.write(generated_manifest)
@@ -144,7 +144,7 @@ def main():
     version_file = Path(root_path, "version.properties")
     (v_major, v_minor, v_revision, v_build) = parse_version_file(version_file)
 
-    update_yml_manifest(root_path, v_major, v_minor, v_revision)
+    update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build)
 
     build(args.rhino_target, args.build_module, build_path, package_path, v_major, v_minor, v_revision, v_build)
 
