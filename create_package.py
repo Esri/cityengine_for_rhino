@@ -118,8 +118,8 @@ def parse_args():
     return args
 
 
-def update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build):
-    manifest_template = Path(root_path, "manifest.template")
+def update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build, rh_target):
+    manifest_template = Path(root_path, "manifest_rh6.template" if rh_target == '6' else "manifest_rh7.template")
     manifest = Path(root_path, "manifest.yml")
 
     template_file = open(manifest_template, mode='r')
@@ -127,7 +127,12 @@ def update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build):
     template_file.close()
 
     template = Template(template_string)
-    generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor, VERSION_REVISION=v_revision, VERSION_BUILD=v_build)
+    if rh_target == '7':
+        generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor,
+                                                 VERSION_REVISION=v_revision, VERSION_BUILD=v_build)
+    else:
+        generated_manifest = template.substitute(VERSION_MAJOR=v_major, VERSION_MINOR=v_minor,
+                                                 VERSION_REVISION=v_revision)
 
     with open(manifest, mode='w') as file:
         file.write(generated_manifest)
@@ -144,7 +149,7 @@ def main():
     version_file = Path(root_path, "version.properties")
     (v_major, v_minor, v_revision, v_build) = parse_version_file(version_file)
 
-    update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build)
+    update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build, args.rhino_target)
 
     build(args.rhino_target, args.build_module, build_path, package_path, v_major, v_minor, v_revision, v_build)
 
