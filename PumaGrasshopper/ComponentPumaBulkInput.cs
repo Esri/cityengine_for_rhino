@@ -71,6 +71,7 @@ namespace PumaGrasshopper
                         break;
                     case ParamType.GENERIC:
                         pManager.AddGenericParameter(desc.name, desc.nickName, desc.desc, GH_ParamAccess.tree);
+                        pManager[3].Optional = true;
                         break;
                 }
             }
@@ -108,7 +109,7 @@ namespace PumaGrasshopper
         {
             RuleAttributesMap MM = new RuleAttributesMap();
 
-            GH_Structure<GH_Goo<Param_GenericObject>> inputTree;
+            GH_Structure<IGH_Goo> inputTree;
             if (!DA.GetDataTree(BULK_INPUT_NAME, out inputTree))
                 return null;
 
@@ -118,14 +119,124 @@ namespace PumaGrasshopper
             {
                 MM.StartNewSection();
 
-                List<KeyValuePair<string, object>> branch = (List<KeyValuePair<string, object>>)inputTree.get_Branch(shapeId);
+                if(shapeId < inputTree.PathCount)
+                {
+                    List<IGH_Goo> branch = (List<IGH_Goo>)inputTree.get_Branch(shapeId);
 
-                branch.ForEach((attribute) => {
-                    // TODO
-                });
+                    branch.ForEach((input) => {
+                        var pair = Utils.ParseInputPair(input);
+                        var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key));
+
+                        if (attribute == null) return;
+
+                        if (attribute.IsArray())
+                        {
+                            SetRuleAttributeArray(attribute, (object[])pair.Value, ref MM);
+                        }
+                        else
+                        {
+                            SetRuleAttribute(attribute, pair.Value, ref MM);
+                        }
+                    });
+                } 
             }
 
             return MM;
+        }
+
+        private void SetRuleAttribute(RuleAttribute attribute, object value, ref RuleAttributesMap MM)
+        {
+            var name = attribute.mFullName;
+            switch(attribute.mAttribType)
+            {
+                case Annotations.AnnotationArgumentType.AAT_BOOL: 
+                    if(value is string)
+                        MM.AddBoolean(name, Boolean.Parse((string)value));
+                    else if(value is bool)
+                        MM.AddBoolean(name, (bool)value);
+                    else
+                        throw new Exception(Utils.GetCastErrorMessage(name, "boolean"));
+                    break;
+                case Annotations.AnnotationArgumentType.AAT_INT:
+                    if (value is int)
+                        MM.AddInteger(name, (int)value);
+                    else if (value is string)
+                        MM.AddInteger(name, int.Parse((string)value));
+                    else
+                        throw new Exception(Utils.GetCastErrorMessage(name, "integer"));
+                    break;
+                case Annotations.AnnotationArgumentType.AAT_FLOAT:
+                    if (value is double)
+                        MM.AddDouble(name, (double)value);
+                    else if (value is string)
+                        MM.AddDouble(name, double.Parse((string)value));
+                    else
+                        throw new Exception(Utils.GetCastErrorMessage(name, "double"));
+                    break;
+                case Annotations.AnnotationArgumentType.AAT_STR:
+                    if(value is string)
+                        MM.AddString(name, (string)value);
+                    else
+                        throw new Exception(Utils.GetCastErrorMessage(name, "string"));
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        private void SetRuleAttributeArray(RuleAttribute attribute, object value, ref RuleAttributesMap MM)
+        {
+            var name = attribute.mFullName;
+
+            switch(attribute.mAttribType)
+            {
+                case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
+                    if(value is Array)
+                    {
+                        bool[] boolList = Array.ConvertAll<object, bool>((object[])value, (x) =>
+                        {
+                            if (x is bool || x is int) return (bool)x;
+                            if (x is string) return Boolean.Parse((string)x);
+                            return false;
+                        });
+                        MM.AddBoolArray(name, boolList);
+                    } else if(value is string)
+                    {
+                        bool[] boolList = Utils.BoolFromCeArray((string)value);
+                        MM.AddBoolArray(name, boolList);
+                    } else
+                    {
+                        throw new Exception(Utils.GetCastErrorMessage(name, "bool array"));
+                    }
+                    break;
+                case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
+                    if (value is Array)
+                    {
+                        double[] doubleList = Array.ConvertAll<object, double>((object[])value, (x) =>
+                        {
+                            if (x is float || x is double) return (double)x;
+                            if (x is string) return Double.Parse((string)x);
+                            return 0;
+                        });
+                        MM.AddDoubleArray(name, doubleList);
+                    }
+                    else if (value is string)
+                    {
+                        double[] doubleList = Utils.DoubleFromCeArray((string)value);
+                        MM.AddDoubleArray(name, doubleList);
+                    }
+                    else
+                    {
+                        throw new Exception(Utils.GetCastErrorMessage(name, "double array"));
+                    }
+                    break;
+                case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
+                    // TODO
+                case Annotations.AnnotationArgumentType.AAT_INT_ARRAY:
+                    // TODO
+                default:
+                    return;
+            }
         }
 
         protected override System.Drawing.Bitmap Icon
