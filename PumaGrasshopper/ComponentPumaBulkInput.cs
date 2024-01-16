@@ -119,16 +119,17 @@ namespace PumaGrasshopper
             {
                 MM.StartNewSection();
 
-                if(shapeId < inputTree.PathCount)
-                {
-                    List<IGH_Goo> branch = (List<IGH_Goo>)inputTree.get_Branch(shapeId);
+                // Repeat the last attribute branch in case there is more shape than attribute branch.
+                var branchId = shapeId < inputTree.PathCount ? shapeId : inputTree.PathCount - 1;
 
-                    branch.ForEach((input) => {
-                        var pair = Utils.ParseInputPair(input);
-                        var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key) || attr.mNickname.Equals(pair.Key));
+                List<IGH_Goo> branch = (List<IGH_Goo>)inputTree.get_Branch(branchId);
 
-                        if (attribute == null) return;
+                branch.ForEach((input) => {
+                    var pair = Utils.ParseInputPair(input);
+                    var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key) || attr.mNickname.Equals(pair.Key));
 
+                    if(attribute != null)
+                    {
                         if (attribute.IsArray())
                         {
                             SetRuleAttributeArray(attribute, pair.Value, ref MM);
@@ -140,8 +141,9 @@ namespace PumaGrasshopper
                         {
                             throw new Exception("Attribute key " + pair.Key + " has no corresponding value");
                         }
-                    });
-                } 
+                    }
+                });
+                
             }
 
             return MM;
