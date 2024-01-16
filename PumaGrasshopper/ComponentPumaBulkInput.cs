@@ -32,9 +32,13 @@ namespace PumaGrasshopper
     
     public class ComponentPumaBulkInput : ComponentPumaShared
     {
+        const string COMPONENT_NAME = "Puma bulk input";
+        const string COMPONENT_NICK_NAME = "CityEngine Puma bulk";
+
         const string BULK_INPUT_NAME = "Rule attributes";
         const string BULK_INPUT_NICK_NAME = "Attributes";
         const string BULK_INPUT_DESC = "Attributes passed to the rule. Expects a tree of key:value pairs.";
+
         enum InputParams
         {
             RPK,
@@ -117,32 +121,39 @@ namespace PumaGrasshopper
 
             for(int shapeId = 0; shapeId < shapeCount; ++shapeId)
             {
+                // We need to initialize the buffers even if there are no attributes provided.
                 MM.StartNewSection();
 
-                // Repeat the last attribute branch in case there is more shape than attribute branch.
-                var branchId = shapeId < inputTree.PathCount ? shapeId : inputTree.PathCount - 1;
+                // Only continue if actual attributes are provided.
+                if (inputTree.PathCount > 0)
+                {
+                    // Repeat the last attribute branch in case there is more shape than attribute branch.
+                    var branchId = shapeId < inputTree.PathCount ? shapeId : inputTree.PathCount - 1;
 
-                List<IGH_Goo> branch = (List<IGH_Goo>)inputTree.get_Branch(branchId);
+                    List<IGH_Goo> branch = (List<IGH_Goo>)inputTree.get_Branch(branchId);
 
-                branch.ForEach((input) => {
-                    var pair = Utils.ParseInputPair(input);
-                    var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key) || attr.mNickname.Equals(pair.Key));
+                    branch.ForEach((input) => {
+                        var pair = Utils.ParseInputPair(input);
+                        var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key) || attr.mNickname.Equals(pair.Key));
 
-                    if(attribute != null)
-                    {
-                        if (attribute.IsArray())
+                        if(attribute != null)
                         {
-                            SetRuleAttributeArray(attribute, pair.Value, ref MM);
+                            if (attribute.IsArray())
+                            {
+                                SetRuleAttributeArray(attribute, pair.Value, ref MM);
+                            }
+                            else if(pair.Value.Length > 0)
+                            {
+                                SetRuleAttribute(attribute, pair.Value[0], ref MM);
+                            } else
+                            {
+                                throw new Exception("Attribute key " + pair.Key + " has no corresponding value");
+                            }
                         }
-                        else if(pair.Value.Length > 0)
-                        {
-                            SetRuleAttribute(attribute, pair.Value[0], ref MM);
-                        } else
-                        {
-                            throw new Exception("Attribute key " + pair.Key + " has no corresponding value");
-                        }
-                    }
-                });
+                    });
+                }
+
+                
                 
             }
 

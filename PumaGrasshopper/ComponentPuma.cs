@@ -40,6 +40,8 @@ namespace PumaGrasshopper
 
     public class ComponentPuma : ComponentPumaShared, IGH_VariableParameterComponent
     {
+        public const string COMPONENT_NAME = "Puma";
+        public const string COMPONENT_NICK_NAME = "CityEngine Puma";
 
         enum InputParams
         {

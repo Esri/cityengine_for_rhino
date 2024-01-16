@@ -32,9 +32,6 @@ namespace PumaGrasshopper
 {
     public abstract class ComponentPumaShared: GH_Component
     {
-        public const string COMPONENT_NAME = "Puma";
-        public const string COMPONENT_NICK_NAME = "CityEngine Puma";
-
         public const string RPK_INPUT_NAME = "Path to Rule Package";
         public const string RPK_INPUT_NICK_NAME = "RPK";
         public const string RPK_INPUT_DESC = "Path to a CityEngine rule package (RPK).";
