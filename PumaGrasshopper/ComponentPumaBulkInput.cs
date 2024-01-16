@@ -125,17 +125,20 @@ namespace PumaGrasshopper
 
                     branch.ForEach((input) => {
                         var pair = Utils.ParseInputPair(input);
-                        var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key));
+                        var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key) || attr.mNickname.Equals(pair.Key));
 
                         if (attribute == null) return;
 
                         if (attribute.IsArray())
                         {
-                            SetRuleAttributeArray(attribute, (object[])pair.Value, ref MM);
+                            SetRuleAttributeArray(attribute, pair.Value, ref MM);
                         }
-                        else
+                        else if(pair.Value.Length > 0)
                         {
-                            SetRuleAttribute(attribute, pair.Value, ref MM);
+                            SetRuleAttribute(attribute, pair.Value[0], ref MM);
+                        } else
+                        {
+                            throw new Exception("Attribute key " + pair.Key + " has no corresponding value");
                         }
                     });
                 } 
@@ -144,55 +147,54 @@ namespace PumaGrasshopper
             return MM;
         }
 
-        private void SetRuleAttribute(RuleAttribute attribute, object value, ref RuleAttributesMap MM)
+        private void SetRuleAttribute(RuleAttribute attribute, string value, ref RuleAttributesMap MM)
         {
             var name = attribute.mFullName;
             switch(attribute.mAttribType)
             {
-                case Annotations.AnnotationArgumentType.AAT_BOOL: 
-                    if(value is string)
-                        MM.AddBoolean(name, Boolean.Parse((string)value));
-                    else if(value is bool)
-                        MM.AddBoolean(name, (bool)value);
-                    else
+                case Annotations.AnnotationArgumentType.AAT_BOOL:
+                    try
+                    {
+                        MM.AddBoolean(name, Convert.ToBoolean(value));
+                    } catch(Exception)
+                    {
                         throw new Exception(Utils.GetCastErrorMessage(name, "boolean"));
+                    }
                     break;
                 case Annotations.AnnotationArgumentType.AAT_INT:
-                    if (value is int)
-                        MM.AddInteger(name, (int)value);
-                    else if (value is string)
-                        MM.AddInteger(name, int.Parse((string)value));
-                    else
+                    try
+                    {
+                        MM.AddInteger(name, Convert.ToInt32(value));
+                    } catch(Exception)
+                    {
                         throw new Exception(Utils.GetCastErrorMessage(name, "integer"));
+                    }
                     break;
                 case Annotations.AnnotationArgumentType.AAT_FLOAT:
-                    if (value is double)
-                        MM.AddDouble(name, (double)value);
-                    else if (value is string)
-                        MM.AddDouble(name, double.Parse((string)value));
-                    else
+                    try
+                    {
+                        MM.AddDouble(name, Convert.ToDouble(value));
+                    } catch (Exception)
+                    {
                         throw new Exception(Utils.GetCastErrorMessage(name, "double"));
+                    }                        
                     break;
                 case Annotations.AnnotationArgumentType.AAT_STR:
-                    if(value is string)
-                        MM.AddString(name, (string)value);
-                    else
-                        throw new Exception(Utils.GetCastErrorMessage(name, "string"));
+                    MM.AddString(name, value);
                     break;
                 default:
                     return;
             }
         }
 
-        private void SetRuleAttributeArray(RuleAttribute attribute, object value, ref RuleAttributesMap MM)
+        private void SetRuleAttributeArray(RuleAttribute attribute, string[] value, ref RuleAttributesMap MM)
         {
             var name = attribute.mFullName;
 
             switch(attribute.mAttribType)
             {
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
-                    if(value is Array)
-                    {
+                    try { 
                         bool[] boolList = Array.ConvertAll<object, bool>((object[])value, (x) =>
                         {
                             if (x is bool || x is int) return (bool)x;
@@ -200,18 +202,13 @@ namespace PumaGrasshopper
                             return false;
                         });
                         MM.AddBoolArray(name, boolList);
-                    } else if(value is string)
-                    {
-                        bool[] boolList = Utils.BoolFromCeArray((string)value);
-                        MM.AddBoolArray(name, boolList);
-                    } else
+                    } catch(Exception)
                     {
                         throw new Exception(Utils.GetCastErrorMessage(name, "bool array"));
                     }
                     break;
                 case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
-                    if (value is Array)
-                    {
+                    try {
                         double[] doubleList = Array.ConvertAll<object, double>((object[])value, (x) =>
                         {
                             if (x is float || x is double) return (double)x;
@@ -219,14 +216,7 @@ namespace PumaGrasshopper
                             return 0;
                         });
                         MM.AddDoubleArray(name, doubleList);
-                    }
-                    else if (value is string)
-                    {
-                        double[] doubleList = Utils.DoubleFromCeArray((string)value);
-                        MM.AddDoubleArray(name, doubleList);
-                    }
-                    else
-                    {
+                    } catch(Exception)  {
                         throw new Exception(Utils.GetCastErrorMessage(name, "double array"));
                     }
                     break;
