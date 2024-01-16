@@ -197,12 +197,7 @@ namespace PumaGrasshopper
             {
                 case Annotations.AnnotationArgumentType.AAT_BOOL_ARRAY:
                     try { 
-                        bool[] boolList = Array.ConvertAll<object, bool>((object[])value, (x) =>
-                        {
-                            if (x is bool || x is int) return (bool)x;
-                            if (x is string) return Boolean.Parse((string)x);
-                            return false;
-                        });
+                        bool[] boolList = Array.ConvertAll(value, (x) => Convert.ToBoolean(x));
                         MM.AddBoolArray(name, boolList);
                     } catch(Exception)
                     {
@@ -211,21 +206,25 @@ namespace PumaGrasshopper
                     break;
                 case Annotations.AnnotationArgumentType.AAT_FLOAT_ARRAY:
                     try {
-                        double[] doubleList = Array.ConvertAll<object, double>((object[])value, (x) =>
-                        {
-                            if (x is float || x is double) return (double)x;
-                            if (x is string) return Double.Parse((string)x);
-                            return 0;
-                        });
+                        double[] doubleList = Array.ConvertAll(value, (x) => Convert.ToDouble(x));
                         MM.AddDoubleArray(name, doubleList);
                     } catch(Exception)  {
                         throw new Exception(Utils.GetCastErrorMessage(name, "double array"));
                     }
                     break;
                 case Annotations.AnnotationArgumentType.AAT_STR_ARRAY:
-                    // TODO
+                    MM.AddStringArray(name, value);
+                    break;
                 case Annotations.AnnotationArgumentType.AAT_INT_ARRAY:
-                    // TODO
+                    try
+                    {
+                        int[] intList = Array.ConvertAll(value, x => Convert.ToInt32(x));
+                        MM.AddIntegerArray(name, intList);
+                    } catch(Exception)
+                    {
+                        throw new Exception(Utils.GetCastErrorMessage(name, "integer array"));
+                    }
+                    break;
                 default:
                     return;
             }
