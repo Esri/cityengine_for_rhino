@@ -152,9 +152,6 @@ namespace PumaGrasshopper
                         }
                     });
                 }
-
-                
-                
             }
 
             return MM;

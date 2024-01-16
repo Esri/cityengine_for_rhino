@@ -141,7 +141,6 @@ namespace PumaGrasshopper
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Unable to compute absolute path to RPK: " + e.Message);
             }
 
-
             return result;
         }
 
@@ -276,8 +275,6 @@ namespace PumaGrasshopper
             for (int shapeId = 0; shapeId < generatedPrints.Count; shapeId++)
             {
                 var shapePath = new GH_Path(shapeId);
-
-
                 outputTree.AppendRange(generatedPrints[shapeId], shapePath);
             }
 
@@ -296,6 +293,5 @@ namespace PumaGrasshopper
 
             dataAccess.SetDataTree((int)OutputParams.ERRORS, outputTree);
         }
-
     }
 }
