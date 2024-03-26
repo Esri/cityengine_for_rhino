@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Parameters;
 using Grasshopper.Kernel.Types;
 using PumaGrasshopper.Properties;
 using Rhino.Geometry;
@@ -145,7 +144,8 @@ namespace PumaGrasshopper
                             else if(pair.Value.Length > 0)
                             {
                                 SetRuleAttribute(attribute, pair.Value[0], ref MM);
-                            } else
+                            } 
+                            else
                             {
                                 throw new Exception("Attribute key " + pair.Key + " has no corresponding value");
                             }

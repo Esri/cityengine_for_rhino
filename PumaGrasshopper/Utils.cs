@@ -327,7 +327,7 @@ namespace PumaGrasshopper
         {
             if (!input.CastTo(out string value)) throw new Exception("Could not cast input pair to string");
 
-            string[] tokens = value.Split(':');
+            string[] tokens = StringFromCeArray(value);
 
             if(tokens.Length >= 2)
             {
