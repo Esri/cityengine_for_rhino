@@ -39,6 +39,7 @@ properties([ disableConcurrentBuilds() ])
 @Field final Map RHINO6_CONFIG = [ rh: '6.35.21222.17001', rhsdk: '6.35.21222.17001', py: '3.9.13' ]
 @Field final Map RHINO7_CONFIG = [ rh: '7.17.22102.5001',  rhsdk: '7.19.22165.13001', py: '3.9.13' ]
 @Field final Map RHINO8_CONFIG = [ rh: '8.8.24163.12481',  rhsdk: '8.8.24163.12481',  py: '3.9.13' ]
+@Field final int DOCKER_IMAGE_REVISION = 2 // see counter part in the containers repository
 
 @Field final List CONFIGS_PREPARE = [
     WINDOWS_NATIVE_CONFIG
@@ -87,7 +88,7 @@ def taskBuildPuma(cfg) {
 	cepl.cleanCurrentDir()
 	unstash(name: SOURCE_STASH)
 
-	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}-py${cfg.py}"
+	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}-py${cfg.py}-v${DOCKER_IMAGE_REVISION}"
 	final String image = "zrh-dreg-sp-1.esri.com/puma/puma-toolchain:${tag}"
 
 	final String buildCmd = "ci_build.cmd"
