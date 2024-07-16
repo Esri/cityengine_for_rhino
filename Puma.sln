@@ -42,19 +42,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rhino8DebugLauncher", "Rhin
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5A60A717-8038-4A31-8045-5C802788F715}.Debug|x64.ActiveCfg = Release|x64
+		{5A60A717-8038-4A31-8045-5C802788F715}.Debug|x64.Build.0 = Release|x64
 		{5A60A717-8038-4A31-8045-5C802788F715}.Release|x64.ActiveCfg = Release|x64
 		{5A60A717-8038-4A31-8045-5C802788F715}.Release|x64.Build.0 = Release|x64
+		{80FD5576-DAF6-4922-933D-86EFD7A1DB94}.Debug|x64.ActiveCfg = Release|x64
+		{80FD5576-DAF6-4922-933D-86EFD7A1DB94}.Debug|x64.Build.0 = Release|x64
 		{80FD5576-DAF6-4922-933D-86EFD7A1DB94}.Release|x64.ActiveCfg = Release|x64
 		{80FD5576-DAF6-4922-933D-86EFD7A1DB94}.Release|x64.Build.0 = Release|x64
+		{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}.Debug|x64.ActiveCfg = Release|Any CPU
+		{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}.Debug|x64.Build.0 = Release|Any CPU
 		{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}.Release|x64.ActiveCfg = Release|Any CPU
 		{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}.Release|x64.Build.0 = Release|Any CPU
+		{3834552A-23FC-4584-850C-D823CA9F4227}.Debug|x64.ActiveCfg = Release|x64
+		{3834552A-23FC-4584-850C-D823CA9F4227}.Debug|x64.Build.0 = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release|x64.ActiveCfg = Release|x64
 		{3834552A-23FC-4584-850C-D823CA9F4227}.Release|x64.Build.0 = Release|x64
+		{A22643AD-D667-4F1C-AFB1-B6996D4B416E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A22643AD-D667-4F1C-AFB1-B6996D4B416E}.Debug|x64.Build.0 = Debug|Any CPU
 		{A22643AD-D667-4F1C-AFB1-B6996D4B416E}.Release|x64.ActiveCfg = Release|Any CPU
-		{A22643AD-D667-4F1C-AFB1-B6996D4B416E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
