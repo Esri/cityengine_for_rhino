@@ -86,12 +86,12 @@ BEGIN
         BLOCK "00000409"
         BEGIN
             VALUE "CompanyName", "Esri Online LLC"
-            VALUE "FileDescription", "Puma"
+            VALUE "FileDescription", "ArcGIS CityEngine for Rhino"
             VALUE "FileVersion", VER_FILE_VERSION_STR
             VALUE "InternalName", "PumaRhino.rhp"
-            VALUE "LegalCopyright", "Copyright � 2021"
+            VALUE "LegalCopyright", "Copyright (c) 2024"
             VALUE "OriginalFilename", "PumaRhino.rhp"
-            VALUE "ProductName", "Puma"
+            VALUE "ProductName", "ArcGIS CityEngine for Rhino"
             VALUE "ProductVersion", VER_PRODUCT_VERSION_STR
         END
     END

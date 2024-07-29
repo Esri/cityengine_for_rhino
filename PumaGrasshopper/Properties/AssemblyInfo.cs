@@ -23,8 +23,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Puma")]
-[assembly: AssemblyDescription("Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.")]
+[assembly: AssemblyTitle("ArcGIS CityEngine for Rhino")]
+[assembly: AssemblyDescription("ArcGIS CityEngine for Rhino enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Esri Online LLC")]
 [assembly: AssemblyProduct("Puma")]

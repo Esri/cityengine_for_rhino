@@ -47,7 +47,7 @@ RHINO_PLUG_IN_DECLARE
 
 // Rhino plug-in name
 // Provide a short, friendly name for this plug-in.
-RHINO_PLUG_IN_NAME(L"Puma");
+RHINO_PLUG_IN_NAME(L"ArcGIS CityEngine for Rhino");
 
 // Rhino plug-in id
 // Provide a unique uuid for this plug-in.
@@ -59,7 +59,7 @@ RHINO_PLUG_IN_VERSION(VER_PRODUCT_VERSION_STR);
 
 // Rhino plug-in description
 // Provide a description of this plug-in.
-RHINO_PLUG_IN_DESCRIPTION(L"Puma enables the use of CityEngine CGA rules for the generation of procedural buildings "
+RHINO_PLUG_IN_DESCRIPTION(L"ArcGIS CityEngine for Rhino enables the use of CityEngine CGA rules for the generation of procedural buildings "
                           L"within Rhino and Grasshopper.");
 
 // Rhino plug-in icon resource id

@@ -1,11 +1,11 @@
 ---
-name: Puma
+name: ArcGIS CityEngine for Rhino
 version: 1.2.0.0
 authors:
   - Esri RnD Center Zurich
 description: >
-  Puma enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.
-url: https://esri.github.io/cityengine/puma
+  ArcGIS CityEngine for Rhino enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.
+url: https://esri.github.io/cityengine/rhino
 keywords:
   - CityEngine
   - architecture
