@@ -1,7 +1,7 @@
 ﻿/**
  * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
  * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
@@ -74,7 +74,7 @@ RHINO_PLUG_IN_DEVELOPER_COUNTRY(L"United States");
 RHINO_PLUG_IN_DEVELOPER_PHONE(L"+1 909 793 2853");
 RHINO_PLUG_IN_DEVELOPER_FAX(L"");
 RHINO_PLUG_IN_DEVELOPER_EMAIL(L"cityengine-info@esri.com");
-RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"https://esri.github.io/cityengine/puma");
+RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"https://esri.github.io/cityengine/rhino");
 RHINO_PLUG_IN_UPDATE_URL(L"https://github.com/esri/puma/releases");
 
 // The one and only CRhinoPRTPlugIn object

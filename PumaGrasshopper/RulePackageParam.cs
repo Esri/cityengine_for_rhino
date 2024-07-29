@@ -1,7 +1,7 @@
 ﻿/**
  * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
  * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
