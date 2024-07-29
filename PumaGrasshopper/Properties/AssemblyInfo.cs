@@ -3,7 +3,7 @@
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
- * Copyright (c) 2021-2023 Esri R&D Center Zurich
+ * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Esri Online LLC")]
 [assembly: AssemblyProduct("Puma")]
-[assembly: AssemblyCopyright("Copyright © 2021-2023")]
+[assembly: AssemblyCopyright("Copyright © 2021-2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
