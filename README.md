@@ -169,7 +169,7 @@ The `Reports` passes through the selected reports for further processing. For ex
 
 The `Puma Reports Unpacker` component unpacks the reports data from `Puma` into lists of shape index, report name and report value. This is typically used to further process the reports with built-in Grasshopper components, e.g. to write the reports to a text file.
 
-### Using the Puma Bulk component
+### Using the Puma Bulk Grasshopper component
 
 The `Puma Bulk Input` component works like the standard `Puma` component with the difference that all CGA attributes are input with a single (tree) parameter. The below example uses a Panel with _"Multiline Data" disabled_ and each line represents a CGA attribute in the form `<name>:<value>`.
 
@@ -233,6 +233,11 @@ Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box
 For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
 
 ## Release Notes
+
+### Puma 1.2.0 Beta 1 (2024-07-29)
+* Added a new component where CGA attributes can be input in bulk via a tree parameter.
+* Supports Rule Packages from CityEngine 2023.1 and older. Note, the final version 1.2.0 will support CityEngine 2024.0.
+* Supports Rhino 6 and 7. Note, Rhino 6 support will be removed in the final version 1.2.0.
 
 ### Puma 1.1.0 (2023-07-27)
 * Supports Rule Packages from CityEngine 2023.0 and older.
