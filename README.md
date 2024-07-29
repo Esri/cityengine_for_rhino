@@ -50,7 +50,7 @@ Go to the [Puma market place](https://www.food4rhino.com/app/puma) and click on 
 
 See [below](#install-locally-built-packages) in the developer documentation.
 
-### Using the Puma Grasshopper components
+### Using the Puma Grasshopper component
 
 After starting Grasshopper, the Puma components are located in the `Puma` section of the `Esri` tab.
 
@@ -168,6 +168,14 @@ The `Reports` passes through the selected reports for further processing. For ex
 <img src="doc/img/man_gh_report_unpack_connected.jpg" width=100%>
 
 The `Puma Reports Unpacker` component unpacks the reports data from `Puma` into lists of shape index, report name and report value. This is typically used to further process the reports with built-in Grasshopper components, e.g. to write the reports to a text file.
+
+### Using the Puma Bulk component
+
+The `Puma Bulk Input` component works like the standard `Puma` component with the difference that all CGA attributes are input with a single (tree) parameter. The below example uses a Panel with _"Multiline Data" disabled_ and each line represents a CGA attribute in the form `<name>:<value>`.
+
+A typical use case is to read the CGA attributes from a text file using the `File` component (set to "per line").
+
+<img src="doc/img/man_gh_bulk_input.png" width=100% />
 
 ### Using the Puma Rhino command (ApplyRulePackage)
 
