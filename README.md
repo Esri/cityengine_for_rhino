@@ -50,7 +50,7 @@ Go to the [Puma market place](https://www.food4rhino.com/app/puma) and click on 
 
 See [below](#install-locally-built-packages) in the developer documentation.
 
-### Using the Puma Grasshopper components
+### Using the Puma Grasshopper component
 
 After starting Grasshopper, the Puma components are located in the `Puma` section of the `Esri` tab.
 
@@ -169,6 +169,14 @@ The `Reports` passes through the selected reports for further processing. For ex
 
 The `Puma Reports Unpacker` component unpacks the reports data from `Puma` into lists of shape index, report name and report value. This is typically used to further process the reports with built-in Grasshopper components, e.g. to write the reports to a text file.
 
+### Using the Puma Bulk Grasshopper component
+
+The `Puma Bulk Input` component works like the standard `Puma` component with the difference that all CGA attributes are input with a single (tree) parameter. The below example uses a Panel with _"Multiline Data" disabled_ and each line represents a CGA attribute in the form `<name>:<value>`.
+
+A typical use case is to read the CGA attributes from a text file using the `File` component (set to "per line").
+
+<img src="doc/img/man_gh_bulk_input.png" width=100% />
+
 ### Using the Puma Rhino command (ApplyRulePackage)
 
 In Rhino, select a shape and type the command `ApplyRulePackage` in the command line. This will open a file dialog to choose a RPK file. After confirming, the models will be generated on the selected shape.
@@ -225,6 +233,11 @@ Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box
 For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
 
 ## Release Notes
+
+### Puma 1.2.0 Beta 1 (2024-07-29)
+* Added a new component where CGA attributes can be input in bulk via a tree parameter.
+* Supports Rule Packages from CityEngine 2023.1 and older. Note, the final version 1.2.0 will support CityEngine 2024.0.
+* Supports Rhino 6 and 7. Note, Rhino 6 support will be removed in the final version 1.2.0.
 
 ### Puma 1.1.0 (2023-07-27)
 * Supports Rule Packages from CityEngine 2023.0 and older.
