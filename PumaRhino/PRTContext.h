@@ -1,5 +1,5 @@
 /**
- * Puma - CityEngine Plugin for Rhinoceros
+ * ArcGIS CityEngine for Rhino
  *
  * See https://esri.github.io/cityengine/puma for documentation.
  *
