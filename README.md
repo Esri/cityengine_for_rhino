@@ -39,7 +39,7 @@ Puma technically consists of two plugins, (1) a command for Rhino and (2) compon
 
 #### System Requirements
 * Windows 10 or 11 (Intel/AMD 64bit).
-* Rhino 6.35 or Rhino 7.17 or later.
+* Rhino 7.17 (or later) or Rhino 8.8 (or later).
 * To author Rule Packages (RPK), a license for CityEngine is needed.
 
 #### Recommended Installation Method: Food4Rhino Marketplace
@@ -188,8 +188,8 @@ Please note, this command is only meant to provide a quick way for testing a RPK
 ### Software Requirements
 
 - Windows 10 or 11 (Intel/AMD 64bit)
-- Rhino 6 or 7 (<https://www.rhino3d.com/download>)
-- Microsoft Visual Studio 2019 or later with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.5.2)
+- Rhino 7 or 8 (<https://www.rhino3d.com/download>)
+- Microsoft Visual Studio 2019 or later with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.8 and .NET Core 7.0)
 - Optional: Python 3.7 or later
 
 ### Build Instructions

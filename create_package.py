@@ -119,7 +119,7 @@ def parse_args():
 
 
 def update_yml_manifest(root_path, v_major, v_minor, v_revision, v_build, rh_target):
-    manifest_template = Path(root_path, "manifest_rh7.template")
+    manifest_template = Path(root_path, "manifest.template")
     manifest = Path(root_path, "manifest.yml")
 
     template_file = open(manifest_template, mode='r')
