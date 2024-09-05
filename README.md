@@ -189,7 +189,7 @@ Please note, this command is only meant to provide a quick way for testing a RPK
 
 - Windows 10 or 11 (Intel/AMD 64bit)
 - Rhino 7 or 8 (<https://www.rhino3d.com/download>)
-- Microsoft Visual Studio 2019 or later with MSVC 143, MFC for MSVC 143 and C# (.NET Framework 4.5.2 and 4.8)
+- Microsoft Visual Studio 2019 or later with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.8 and .NET Core 7.0)
 - Optional: Python 3.7 or later
 
 ### Build Instructions
