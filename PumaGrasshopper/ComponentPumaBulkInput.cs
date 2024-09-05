@@ -252,7 +252,7 @@ namespace PumaGrasshopper
         {
             get
             {
-                return Resources.gh_prt_main_component;
+                return Resources.gh_prt_bulk_component;
             }
         }
 
