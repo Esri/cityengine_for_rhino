@@ -86,7 +86,7 @@ namespace PumaGrasshopper
 
             if (doc.FilePath == null)
             {
-                Rhino.UI.Dialogs.ShowMessage("Puma needs to save the current document first...", "Relative Rule Package Path");
+                Rhino.UI.Dialogs.ShowMessage("CityEngine for Rhino needs to save the current document first...", "Relative Rule Package Path");
                 GH_DocumentIO docIO = new GH_DocumentIO(doc);
                 if (!docIO.Save())
                     return GH_GetterResult.cancel;

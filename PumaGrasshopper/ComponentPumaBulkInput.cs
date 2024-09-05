@@ -31,8 +31,8 @@ namespace PumaGrasshopper
     
     public class ComponentPumaBulkInput : ComponentPumaShared
     {
-        const string COMPONENT_NAME = "Puma bulk input";
-        const string COMPONENT_NICK_NAME = "CityEngine Puma (bulk)";
+        const string COMPONENT_NAME = "ArcGIS CityEngine (Bulk) for Grasshopper";
+        const string COMPONENT_NICK_NAME = "CityEngine Bulk";
 
         const string BULK_INPUT_NAME = "Rule attributes";
         const string BULK_INPUT_NICK_NAME = "Attributes";

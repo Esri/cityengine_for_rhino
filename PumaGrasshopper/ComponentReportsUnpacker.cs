@@ -26,8 +26,8 @@ namespace PumaGrasshopper
 {
     public class ComponentReportsUnpacker : GH_Component
     {
-        const string COMPONENT_NAME = "PumaReportsUnpacker";
-        const string COMPONENT_NICK_NAME = "Puma Reports Unpacker";
+        const string COMPONENT_NAME = "CityEngine CGA Reports Unpacker";
+        const string COMPONENT_NICK_NAME = "CGA Reports Unpacker";
         
         const string REPORT_INPUT_NAME = "Reports";
         const string REPORT_SHAPE_ID_NAME = "Shape IDs";
@@ -36,7 +36,7 @@ namespace PumaGrasshopper
 
         public ComponentReportsUnpacker()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
-              "Unpacks Puma CGA reports into report names and values per input shape. (Version " + PRTWrapper.GetVersion() + ")",
+              "Unpacks CityEngine CGA reports into names and values per input shape. (Version " + PRTWrapper.GetVersion() + ")",
               ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
         }
@@ -44,7 +44,7 @@ namespace PumaGrasshopper
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter(REPORT_INPUT_NAME, REPORT_INPUT_NAME,
-                "The Puma CGA reports to unpack.",
+                "CityEngine CGA reports to unpack.",
                 GH_ParamAccess.item);
         }
 
