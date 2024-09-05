@@ -26,7 +26,7 @@ using Grasshopper.Kernel.Data;
 
 using Rhino.Geometry;
 using System.Linq;
-using PumaGrasshopper.Properties;
+using CityEngineGrasshopper.Properties;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;

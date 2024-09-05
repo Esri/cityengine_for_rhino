@@ -23,7 +23,7 @@ using Grasshopper.Kernel.Types;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using PumaGrasshopper.Properties;
+using CityEngineGrasshopper.Properties;
 using System.IO;
 
 namespace PumaGrasshopper

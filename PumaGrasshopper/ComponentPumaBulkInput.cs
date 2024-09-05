@@ -23,7 +23,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using PumaGrasshopper.Properties;
+using CityEngineGrasshopper.Properties;
 using Rhino.Geometry;
 
 namespace PumaGrasshopper

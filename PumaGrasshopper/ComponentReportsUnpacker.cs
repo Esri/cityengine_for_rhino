@@ -19,7 +19,7 @@
 
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using PumaGrasshopper.Properties;
+using CityEngineGrasshopper.Properties;
 using System;
 
 namespace PumaGrasshopper
