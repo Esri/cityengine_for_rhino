@@ -188,9 +188,9 @@ Please note, this command is only meant to provide a quick way for testing a RPK
 ### Software Requirements
 
 - Windows 10 or 11 (Intel/AMD 64bit)
-- Rhino 7 or 8 (<https://www.rhino3d.com/download>)
-- Microsoft Visual Studio 2019 or later with MSVC 14.27, MFC for MSVC 14.27 and C# (.NET Framework 4.8 and .NET Core 7.0)
-- Optional: Python 3.7 or later
+- Rhino 7 or 8 including Rhino SDK (<https://www.rhino3d.com/download>)
+- Microsoft Visual Studio 2022 or later with MSVC 14.37, MFC for MSVC 14.37 and C# (.NET Framework 4.8 and .NET Core 7.0)
+- Optional: Python 3.9 or later
 
 ### Build Instructions
 
@@ -233,6 +233,11 @@ Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box
 For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
 
 ## Release Notes
+
+### Puma 1.2.0 Beta 2 (2024-09-05)
+* Improved the new bulk component: added new icon, silently ignore empty input lines for attribute values, warn if lines do not match the key:value pattern.
+* Added support for Rhino 8, removed support for Rhino 6.
+* Added support for Rule Packages created with CityEngine 2024.0.
 
 ### Puma 1.2.0 Beta 1 (2024-07-29)
 * Added a new component where CGA attributes can be input in bulk via a tree parameter.
