@@ -234,6 +234,11 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
+### Puma 1.2.0 Beta 2 (2024-09-05)
+* Improved the new bulk component: added new icon, silently ignore empty input lines for attribute values, warn if lines do not match the key:value pattern.
+* Added support for Rhino 8, removed support for Rhino 6.
+* Added support for Rule Packages created with CityEngine 2024.0.
+
 ### Puma 1.2.0 Beta 1 (2024-07-29)
 * Added a new component where CGA attributes can be input in bulk via a tree parameter.
 * Supports Rule Packages from CityEngine 2023.1 and older. Note, the final version 1.2.0 will support CityEngine 2024.0.
