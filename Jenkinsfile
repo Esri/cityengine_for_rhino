@@ -34,18 +34,19 @@ properties([ disableConcurrentBuilds() ])
 @Field final String DOCKER_WS_WINDOWS = "c:/temp/puma/ws"
 
 @Field final Map WINDOWS_DOCKER_CONFIG = [ ba: DOCKER_AGENT_WINDOWS, ws: DOCKER_WS_WINDOWS ]
-@Field final Map WINDOWS_NATIVE_CONFIG = [ os: cepl.CFG_OS_WIN10, bc: cepl.CFG_BC_REL, tc: cepl.CFG_TC_VC1427, cc: cepl.CFG_CC_OPT, arch: cepl.CFG_ARCH_X86_64 ]
+@Field final Map WINDOWS_NATIVE_CONFIG = [ os: cepl.CFG_OS_WIN10, bc: cepl.CFG_BC_REL, tc: cepl.CFG_TC_VC1437, cc: cepl.CFG_CC_OPT, arch: cepl.CFG_ARCH_X86_64 ]
 
-@Field final Map RHINO6_CONFIG = [ rh: '6.35.21222.17001', rhsdk: '6.35.21222.17001', py: '3.9.13' ]
 @Field final Map RHINO7_CONFIG = [ rh: '7.17.22102.5001',  rhsdk: '7.19.22165.13001', py: '3.9.13' ]
+@Field final Map RHINO8_CONFIG = [ rh: '8.8.24163.12481',  rhsdk: '8.8.24163.12481',  py: '3.9.13' ]
+@Field final int DOCKER_IMAGE_REVISION = 2 // see counter part in the containers repository
 
 @Field final List CONFIGS_PREPARE = [
     WINDOWS_NATIVE_CONFIG
 ]
 
 @Field final List CONFIGS = [
-	composeConfig(RHINO6_CONFIG, WINDOWS_NATIVE_CONFIG, WINDOWS_DOCKER_CONFIG),
 	composeConfig(RHINO7_CONFIG, WINDOWS_NATIVE_CONFIG, WINDOWS_DOCKER_CONFIG),
+	composeConfig(RHINO8_CONFIG, WINDOWS_NATIVE_CONFIG, WINDOWS_DOCKER_CONFIG),
 ]
 
 
@@ -85,7 +86,7 @@ def taskBuildPuma(cfg) {
 	cepl.cleanCurrentDir()
 	unstash(name: SOURCE_STASH)
 
-	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}-py${cfg.py}"
+	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}-py${cfg.py}-v${DOCKER_IMAGE_REVISION}"
 	final String image = "zrh-dreg-sp-1.esri.com/puma/puma-toolchain:${tag}"
 
 	final String buildCmd = "ci_build.cmd"
