@@ -173,7 +173,7 @@ The `Puma Reports Unpacker` component unpacks the reports data from `Puma` into 
 
 The `Puma Bulk Input` component works like the standard `Puma` component with the difference that all CGA attributes are input with a single (tree) parameter. The below example uses a Panel with _"Multiline Data" disabled_ and each line represents a CGA attribute in the form `<name>:<value>`.
 
-A typical use case is to read the CGA attributes from a text file using the `File` component (set to "per line").
+A typical use case is to read the CGA attributes from a text file using the `File` component (set to "per line"). Note that empty lines are silently ignored.
 
 <img src="doc/img/man_gh_bulk_input.png" width=100% />
 

@@ -32,7 +32,7 @@ namespace PumaGrasshopper
     public class ComponentPumaBulkInput : ComponentPumaShared
     {
         const string COMPONENT_NAME = "Puma bulk input";
-        const string COMPONENT_NICK_NAME = "CityEngine Puma bulk";
+        const string COMPONENT_NICK_NAME = "CityEngine Puma (bulk)";
 
         const string BULK_INPUT_NAME = "Rule attributes";
         const string BULK_INPUT_NICK_NAME = "Attributes";
@@ -130,27 +130,37 @@ namespace PumaGrasshopper
                     var branchId = shapeId < inputTree.PathCount ? shapeId : inputTree.PathCount - 1;
 
                     List<IGH_Goo> branch = (List<IGH_Goo>)inputTree.get_Branch(branchId);
+                    
+                    for(int i = 0; i < branch.Count; ++i) {
+                        var input = branch[i];
 
-                    branch.ForEach((input) => {
-                        var pair = Utils.ParseInputPair(input);
-                        var attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key) || attr.mNickname.Equals(pair.Key));
-
-                        if(attribute != null)
+                        var success = Utils.ParseInputPair(input, out KeyValuePair<string, string[] > pair);
+                        if(success)
                         {
-                            if (attribute.IsArray())
+                            RuleAttribute attribute = attributesList.Find(attr => attr.mFullName.Equals(pair.Key) || attr.mNickname.Equals(pair.Key));
+
+                            if (attribute != null)
                             {
-                                SetRuleAttributeArray(attribute, pair.Value, ref MM);
-                            }
-                            else if(pair.Value.Length > 0)
-                            {
-                                SetRuleAttribute(attribute, pair.Value[0], ref MM);
-                            } 
-                            else
-                            {
-                                throw new Exception("Attribute key " + pair.Key + " has no corresponding value");
+                                if (attribute.IsArray())
+                                {
+                                    SetRuleAttributeArray(attribute, pair.Value, ref MM);
+                                }
+                                else if(pair.Value.Length > 0)
+                                {
+                                    SetRuleAttribute(attribute, pair.Value[0], ref MM);
+                                }
+                                else
+                                {
+                                    throw new Exception("Attribute key " + pair.Key + " has no corresponding value");
+                                }
                             }
                         }
-                    });
+                        else if(pair.Key.Length > 0)
+                        {
+                            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
+                                              "Branch " + branchId + " - Line " + i + ": Input is not matching the key:value pattern (input: '" + pair.Key + "').");
+                        }
+                    }
                 }
             }
 
@@ -242,7 +252,7 @@ namespace PumaGrasshopper
         {
             get
             {
-                return Resources.gh_prt_main_component;
+                return Resources.gh_prt_bulk_component;
             }
         }
 
