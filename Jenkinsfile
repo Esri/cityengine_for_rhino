@@ -112,8 +112,8 @@ def taskBuildPuma(cfg) {
 		List rhVerComp = cfg.rh.tokenize('.')
 		return "rh${rhVerComp[0]}_${rhVerComp[1]}-win"
 	}
-	papl.publish('puma', env.BRANCH_NAME, '*.yak', getVersion, cfg, getClassifier, "${SOURCE}/packages")
-	papl.publish('puma', env.BRANCH_NAME, '*.rhi', getVersion, cfg, getClassifier, "${SOURCE}/packages")
+	papl.publish('cityengine_for_rhino', env.BRANCH_NAME, '*.yak', getVersion, cfg, getClassifier, "${SOURCE}/packages")
+	papl.publish('cityengine_for_rhino', env.BRANCH_NAME, '*.rhi', getVersion, cfg, getClassifier, "${SOURCE}/packages")
 }
 
 
