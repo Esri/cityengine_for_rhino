@@ -1,7 +1,7 @@
 ﻿/**
- * Puma - CityEngine Plugin for Rhinoceros
+ * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
  * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
@@ -26,7 +26,7 @@ using Grasshopper.Kernel.Data;
 
 using Rhino.Geometry;
 using System.Linq;
-using PumaGrasshopper.Properties;
+using CityEngineGrasshopper.Properties;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
@@ -40,8 +40,8 @@ namespace PumaGrasshopper
 
     public class ComponentPuma : ComponentPumaShared, IGH_VariableParameterComponent
     {
-        public const string COMPONENT_NAME = "Puma";
-        public const string COMPONENT_NICK_NAME = "CityEngine Puma";
+        public const string COMPONENT_NAME = "ArcGIS CityEngine for Grasshopper";
+        public const string COMPONENT_NICK_NAME = "CityEngine";
 
         enum InputParams
         {

@@ -1,7 +1,7 @@
 ﻿/**
- * Puma - CityEngine Plugin for Rhinoceros
+ * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
  * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
@@ -37,14 +37,14 @@ namespace PumaGrasshopper.AttributeParameter
         protected bool mExpectsArray;
         protected List<Annotations.Base> mAnnotations;
 
-        public PumaParameter() : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+        public PumaParameter() : base("PumaParam", "PumaParam", "Default parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = "";
             mExpectsArray = false;
             mAnnotations = new List<Annotations.Base>();
         }
 
-        public PumaParameter(string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default puma parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+        public PumaParameter(string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
         {
             mGroupName = groupName != null ? groupName : "";
             mExpectsArray = expectsArray;
@@ -108,7 +108,7 @@ namespace PumaGrasshopper.AttributeParameter
             AddSource(param);
 
             if (Attributes.IsTopLevel)
-                throw new Exception("Puma parameters can only be used within a Puma component");
+                throw new Exception("CGA parameters can only be used within a CityEngine component.");
 
             if (mGroupName.Length > 0)
             {

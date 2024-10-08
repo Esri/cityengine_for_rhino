@@ -1,7 +1,7 @@
-﻿/**
- * Puma - CityEngine Plugin for Rhinoceros
+/**
+ * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
  * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
@@ -23,7 +23,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using PumaGrasshopper.Properties;
+using CityEngineGrasshopper.Properties;
 using Rhino.Geometry;
 
 namespace PumaGrasshopper
@@ -31,8 +31,8 @@ namespace PumaGrasshopper
     
     public class ComponentPumaBulkInput : ComponentPumaShared
     {
-        const string COMPONENT_NAME = "Puma bulk input";
-        const string COMPONENT_NICK_NAME = "CityEngine Puma (bulk)";
+        const string COMPONENT_NAME = "ArcGIS CityEngine (Bulk) for Grasshopper";
+        const string COMPONENT_NICK_NAME = "CityEngine Bulk";
 
         const string BULK_INPUT_NAME = "Rule attributes";
         const string BULK_INPUT_NICK_NAME = "Attributes";

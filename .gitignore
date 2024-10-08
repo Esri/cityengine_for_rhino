@@ -383,3 +383,4 @@ Downloads/*
 PumaRhino/version.h
 PumaGrasshopper/Properties/AssemblyVersion.cs
 Rhino8DebugLauncher/bin
+/manifest.yml

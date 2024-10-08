@@ -3,23 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PumaRhino", "PumaRhino\PumaRhino.vcxproj", "{5A60A717-8038-4A31-8045-5C802788F715}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CityEngineRhino", "PumaRhino\PumaRhino.vcxproj", "{5A60A717-8038-4A31-8045-5C802788F715}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3834552A-23FC-4584-850C-D823CA9F4227} = {3834552A-23FC-4584-850C-D823CA9F4227}
 		{80FD5576-DAF6-4922-933D-86EFD7A1DB94} = {80FD5576-DAF6-4922-933D-86EFD7A1DB94}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PumaCodecs", "PumaCodecs\PumaCodecs.vcxproj", "{80FD5576-DAF6-4922-933D-86EFD7A1DB94}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RhinoCodecs", "PumaCodecs\PumaCodecs.vcxproj", "{80FD5576-DAF6-4922-933D-86EFD7A1DB94}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3834552A-23FC-4584-850C-D823CA9F4227} = {3834552A-23FC-4584-850C-D823CA9F4227}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PumaGrasshopper", "PumaGrasshopper\PumaGrasshopper.csproj", "{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CityEngineGrasshopper", "PumaGrasshopper\CityEngineGrasshopper.csproj", "{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5A60A717-8038-4A31-8045-5C802788F715} = {5A60A717-8038-4A31-8045-5C802788F715}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PumaDependencies", "PumaDependencies\PumaDependencies.vcxproj", "{3834552A-23FC-4584-850C-D823CA9F4227}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dependencies", "PumaDependencies\PumaDependencies.vcxproj", "{3834552A-23FC-4584-850C-D823CA9F4227}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BF2FECF2-F945-462D-A543-86DBCE140D48}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		create_package.py = create_package.py
 		Directory.Build.props = Directory.Build.props
 		LICENSE.txt = LICENSE.txt
-		manifest.yml = manifest.yml
+		manifest.template = manifest.template
 		doc\img\puma_street_segment_scene.jpg = doc\img\puma_street_segment_scene.jpg
 		README.md = README.md
 		version.properties = version.properties

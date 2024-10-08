@@ -98,6 +98,7 @@
     <Keyword>MFCDLLProj</Keyword>
     <ProjectGuid>{5A60A717-8038-4A31-8045-5C802788F715}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>CityEngineRhino</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
