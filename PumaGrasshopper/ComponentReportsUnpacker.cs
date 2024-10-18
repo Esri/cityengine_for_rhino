@@ -37,7 +37,7 @@ namespace PumaGrasshopper
         public ComponentReportsUnpacker()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Unpacks CityEngine CGA reports into names and values per input shape. (Version " + PRTWrapper.GetVersion() + ")",
-              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.SubCategoryTools)
         {
         }
 
