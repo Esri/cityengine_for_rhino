@@ -32,7 +32,7 @@ namespace PumaGrasshopper
     {
         public RulePackageParam()
             : base("Rule Package", "RPK", "References a Rule Package (RPK). (Version " + PRTWrapper.GetVersion() + ")",
-                ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+                ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.SubCategoryTools)
         { }
 
         public override GH_Exposure Exposure { get; }

@@ -40,7 +40,7 @@ namespace PumaGrasshopper
 
     public class ComponentPuma : ComponentPumaShared, IGH_VariableParameterComponent
     {
-        public const string COMPONENT_NAME = "ArcGIS CityEngine for Grasshopper";
+        public const string COMPONENT_NAME = "CityEngine for Grasshopper";
         public const string COMPONENT_NICK_NAME = "CityEngine";
 
         enum InputParams

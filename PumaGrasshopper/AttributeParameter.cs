@@ -37,14 +37,14 @@ namespace PumaGrasshopper.AttributeParameter
         protected bool mExpectsArray;
         protected List<Annotations.Base> mAnnotations;
 
-        public PumaParameter() : base("PumaParam", "PumaParam", "Default parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+        public PumaParameter() : base("PumaParam", "PumaParam", "Default parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.SubCategoryTools)
         {
             mGroupName = "";
             mExpectsArray = false;
             mAnnotations = new List<Annotations.Base>();
         }
 
-        public PumaParameter(string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+        public PumaParameter(string groupName, bool expectsArray, List<Annotations.Base> annotations) : base("PumaParam", "PumaParam", "Default parameter", ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.SubCategoryTools)
         {
             mGroupName = groupName != null ? groupName : "";
             mExpectsArray = expectsArray;

@@ -109,7 +109,7 @@ namespace PumaGrasshopper
         protected bool mDoGenerateMaterials;
 
         public ComponentPumaShared(string name, string nickname): base(name, nickname, "ArcGIS CityEngine for Rhino runs CityEngine CGA rules on input shapes and returns the generated models. (Version " + PRTWrapper.GetVersion() + ")",
-            ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+            ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.SubCategoryMain)
         {
             bool status = PRTWrapper.InitializeRhinoPRT();
             if (!status) throw new Exception("Fatal Error: PRT initialization failed.");
