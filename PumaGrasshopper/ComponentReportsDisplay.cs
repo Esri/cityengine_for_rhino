@@ -44,7 +44,7 @@ namespace PumaGrasshopper
         public ComponentReportsDisplay()
           : base(COMPONENT_NAME, COMPONENT_NICK_NAME,
               "Filters and prepares CityEngine CGA reports for display in the viewport. (Version " + PRTWrapper.GetVersion() + ")",
-              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.PumaSubCategory)
+              ComponentLibraryInfo.MainCategory, ComponentLibraryInfo.SubCategoryTools)
         {
         }
 

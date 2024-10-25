@@ -73,7 +73,8 @@ namespace PumaGrasshopper
             }
         }
 
-        public const string MainCategory = "Esri";
-        public const string PumaSubCategory = "ArcGIS CityEngine";
+        public const string MainCategory = "CityEngine";
+        public const string SubCategoryMain = "Main";
+        public const string SubCategoryTools = "Tools";
     }
 }
