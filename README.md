@@ -234,11 +234,15 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
+### Version 1.2.0 (2024-10-28)
+* Rebranded from "Puma" to "ArcGIS CityEngine for Rhino and Grasshopper". We will continue to use the compact name "Puma" in the source code.
+* Small restructuring of the Grasshopper component toolbar to make it easier to find for new users.
+* Renamed the build output to `CityEngineRhino.rhp`, `CityEngineGrasshopper.gha` as well as `CityEngineRhino.rhi/yak`.
+
 ### Version 1.2.0 Beta 2 (2024-09-05)
 * Improved the new bulk component: added new icon, silently ignore empty input lines for attribute values, warn if lines do not match the key:value pattern.
 * Added support for Rhino 8, removed support for Rhino 6.
 * Added support for Rule Packages created with CityEngine 2024.0.
-* Rebranded from "Puma" to "ArcGIS CityEngine for Rhino and Grasshopper". We will continue to use the compact name "Puma" in the source code.
 
 ### Version 1.2.0 Beta 1 (2024-07-29)
 * Added a new component where CGA attributes can be input in bulk via a tree parameter.
