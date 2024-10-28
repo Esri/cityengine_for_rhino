@@ -200,16 +200,16 @@ Please note, this command is only meant to provide a quick way for testing a RPK
 1. Checkout this Git repository.
 1. Open the Visual Studio solution.
 1. Ensure the configuration is set to `Release` and `x64` (the only supported configuration).
-1. Build the solution. The result is stored in the `build` directory, foremost `PumaRhino.rhp` and `PumaGrasshopper.gha`.
+1. Build the solution. The result is stored in the `build` directory, foremost `CityEngineRhino.rhp` and `CityEngineGrasshopper.gha`.
 
 ### Installing locally built plugins
 
 After having built the plugins, they have to be installed in Rhino and Grasshopper respectively.
 
 1. Start Rhino. In the menu bar, go to _Tools -> Options -> Rhino Options -> Plug-ins_.
-1. Click on `install` and select the `PumaRhino.rhp` file located in `path-to-solution/build`.
+1. Click on `install` and select the `CityEngineRhino.rhp` file located in `path-to-solution/build`.
 1. To install the Grasshopper plugin, run the command `GrasshopperDeveloperSettings` in Rhino.
-1. In the window that opens, add the folder `path-to-solution/build` containing `PumaGrasshopper.gha`. Make sure the `Memory load .gha assemblies...` box is unticked.
+1. In the window that opens, add the folder `path-to-solution/build` containing `CityEngineGrasshopper.gha`. Make sure the `Memory load .gha assemblies...` box is unticked.
 1. Confirm, then restart Rhino and Grasshopper.
 
 ### Create installation packages (rhi, yak)
@@ -230,7 +230,7 @@ Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box
 
 ### Debug the native code
 
-For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
+For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the `RinoCodecs` and `CityEngineRhino` C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
 
 ## Release Notes
 
