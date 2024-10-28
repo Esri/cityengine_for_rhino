@@ -75,7 +75,7 @@ RHINO_PLUG_IN_DEVELOPER_PHONE(L"+1 909 793 2853");
 RHINO_PLUG_IN_DEVELOPER_FAX(L"");
 RHINO_PLUG_IN_DEVELOPER_EMAIL(L"cityengine-info@esri.com");
 RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"https://esri.github.io/cityengine/rhino");
-RHINO_PLUG_IN_UPDATE_URL(L"https://github.com/esri/puma/releases");
+RHINO_PLUG_IN_UPDATE_URL(L"https://github.com/esri/cityengine_for_rhino/releases");
 
 // The one and only CRhinoPRTPlugIn object
 static class CRhinoPRTPlugIn thePlugIn;

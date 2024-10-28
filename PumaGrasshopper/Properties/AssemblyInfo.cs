@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("ArcGIS CityEngine for Rhino enables the use of CityEngine CGA rules for the generation of procedural buildings within Rhino and Grasshopper.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Esri Online LLC")]
-[assembly: AssemblyProduct("Puma")]
+[assembly: AssemblyProduct("CityEngineRhino")]
 [assembly: AssemblyCopyright("Copyright © 2021-2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
