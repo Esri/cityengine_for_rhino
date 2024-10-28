@@ -13,15 +13,15 @@ _CityEngine for Rhino is free for personal, educational, and non-commercial use.
 Download and open the ["Street Segment" example](https://esri.github.io/cityengine/rhino#examples) or create a scene from scratch:
 
 1. In CityEngine, download e.g. [Tutorial 9](https://doc.arcgis.com/en/cityengine/latest/tutorials/tutorial-9-advanced-shape-grammar.htm) and export the "Parthenon" CGA rules to a RPK (see [Creating a Rule Package](https://doc.arcgis.com/en/cityengine/latest/help/help-rule-package.htm)).
-1. Install CityEngine for Rhino from the [market place at food4rhino](https://www.food4rhino.com/app/puma).
+1. Install CityEngine for Rhino from the [market place at food4rhino](https://www.food4rhino.com/en/app/arcgis-cityengine-rhino-and-grasshopper).
 1. Start Rhino and open Grasshopper.
 1. In Grasshopper go to the "Esri" tab and find the "ArcGIS CityEngine" section, drag the "CityEngine" component into the document.
 1. Right-click on the RPK input parameter to select the "Parthenon" RPK created above. CityEngine for Rhino will ask you to save the document, so it can store the path to the RPK relative to the document. It is best practice to put RPKs next to the Grasshopper document or in a subdirectory.
 1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
 1. Connect the "Surface" to the "Shapes" input. Now CityEngine for Rhino will generate the model in the Rhino viewport.
 
-<div align="center"><a href="https://youtu.be/JHMathmLBY8" target="_blank">
-    <img src="https://img.youtube.com/vi/JHMathmLBY8/0.jpg" alt="CityEngine for Rhino demo video on Youtube" width="640" />
+<div align="center"><a href="https://mediaspace.esri.com/media/t/1_01id0tp9" target="_blank">
+<img src="doc/img/demo_video.png" alt="CityEngine for Rhino demo video" width="640" />
 </a></div>
 
 ## Table of Contents
@@ -44,7 +44,7 @@ CityEngine for Rhino technically consists of two plugins, (1) a command for Rhin
 
 #### Recommended Installation Method: Food4Rhino Marketplace
 
-Go to the [market place](https://www.food4rhino.com/app/puma) and click on Download, this will download and install CityEngine for Rhino.
+Go to the [market place](https://www.food4rhino.com/en/app/arcgis-cityengine-rhino-and-grasshopper) and click on Download, this will download and install CityEngine for Rhino.
 
 #### Install from local files
 
@@ -200,16 +200,16 @@ Please note, this command is only meant to provide a quick way for testing a RPK
 1. Checkout this Git repository.
 1. Open the Visual Studio solution.
 1. Ensure the configuration is set to `Release` and `x64` (the only supported configuration).
-1. Build the solution. The result is stored in the `build` directory, foremost `PumaRhino.rhp` and `PumaGrasshopper.gha`.
+1. Build the solution. The result is stored in the `build` directory, foremost `CityEngineRhino.rhp` and `CityEngineGrasshopper.gha`.
 
 ### Installing locally built plugins
 
 After having built the plugins, they have to be installed in Rhino and Grasshopper respectively.
 
 1. Start Rhino. In the menu bar, go to _Tools -> Options -> Rhino Options -> Plug-ins_.
-1. Click on `install` and select the `PumaRhino.rhp` file located in `path-to-solution/build`.
+1. Click on `install` and select the `CityEngineRhino.rhp` file located in `path-to-solution/build`.
 1. To install the Grasshopper plugin, run the command `GrasshopperDeveloperSettings` in Rhino.
-1. In the window that opens, add the folder `path-to-solution/build` containing `PumaGrasshopper.gha`. Make sure the `Memory load .gha assemblies...` box is unticked.
+1. In the window that opens, add the folder `path-to-solution/build` containing `CityEngineGrasshopper.gha`. Make sure the `Memory load .gha assemblies...` box is unticked.
 1. Confirm, then restart Rhino and Grasshopper.
 
 ### Create installation packages (rhi, yak)
@@ -230,15 +230,19 @@ Note: In case of troubles, try to enable the "Ask to load disabled plug-ins" box
 
 ### Debug the native code
 
-For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the PumaCodecs and PumaRhino C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
+For debugging, keep the `Release` configuration (we always generate PDBs) and turn off the C++ optimizations in the `RinoCodecs` and `CityEngineRhino` C++ project properties. Rebuild and attach the debugger to Rhino and set breakpoints.
 
 ## Release Notes
+
+### Version 1.2.0 (2024-10-28)
+* Rebranded from "Puma" to "ArcGIS CityEngine for Rhino and Grasshopper". We will continue to use the compact name "Puma" in the source code.
+* Small restructuring of the Grasshopper component toolbar to make it easier to find for new users.
+* Renamed the build output to `CityEngineRhino.rhp`, `CityEngineGrasshopper.gha` as well as `CityEngineRhino.rhi/yak`.
 
 ### Version 1.2.0 Beta 2 (2024-09-05)
 * Improved the new bulk component: added new icon, silently ignore empty input lines for attribute values, warn if lines do not match the key:value pattern.
 * Added support for Rhino 8, removed support for Rhino 6.
 * Added support for Rule Packages created with CityEngine 2024.0.
-* Rebranded from "Puma" to "ArcGIS CityEngine for Rhino and Grasshopper". We will continue to use the compact name "Puma" in the source code.
 
 ### Version 1.2.0 Beta 1 (2024-07-29)
 * Added a new component where CGA attributes can be input in bulk via a tree parameter.

@@ -37,7 +37,7 @@ namespace {
 
 constexpr prt::LogLevel PRT_MINIMAL_LOG_LEVEL = prt::LogLevel::LOG_WARNING;
 
-const std::wstring PUMA_TEMP_DIR_NAME(L"puma");
+const std::wstring PUMA_TEMP_DIR_NAME(L"cityengine_for_rhino");
 
 } // namespace
 
@@ -52,7 +52,7 @@ const std::filesystem::path& PRTContext::getGlobalTempDir() {
 }
 
 const std::filesystem::path& PRTContext::getLogFilePath() {
-	static const std::filesystem::path logFilePath = getGlobalTempDir() / "puma.log";
+	static const std::filesystem::path logFilePath = getGlobalTempDir() / "cityengine_for_rhino.log";
 	return logFilePath;
 }
 

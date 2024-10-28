@@ -88,9 +88,9 @@ BEGIN
             VALUE "CompanyName", "Esri Online LLC"
             VALUE "FileDescription", "ArcGIS CityEngine for Rhino"
             VALUE "FileVersion", VER_FILE_VERSION_STR
-            VALUE "InternalName", "PumaRhino.rhp"
+            VALUE "InternalName", "CityEngineRhino.rhp"
             VALUE "LegalCopyright", "Copyright (c) 2024"
-            VALUE "OriginalFilename", "PumaRhino.rhp"
+            VALUE "OriginalFilename", "CityEngineRhino.rhp"
             VALUE "ProductName", "ArcGIS CityEngine for Rhino"
             VALUE "ProductVersion", VER_PRODUCT_VERSION_STR
         END
