@@ -13,7 +13,7 @@ _CityEngine for Rhino is free for personal, educational, and non-commercial use.
 Download and open the ["Street Segment" example](https://esri.github.io/cityengine/rhino#examples) or create a scene from scratch:
 
 1. In CityEngine, download e.g. [Tutorial 9](https://doc.arcgis.com/en/cityengine/latest/tutorials/tutorial-9-advanced-shape-grammar.htm) and export the "Parthenon" CGA rules to a RPK (see [Creating a Rule Package](https://doc.arcgis.com/en/cityengine/latest/help/help-rule-package.htm)).
-1. Install CityEngine for Rhino from the [market place at food4rhino](https://www.food4rhino.com/app/puma).
+1. Install CityEngine for Rhino from the [market place at food4rhino](https://www.food4rhino.com/en/app/arcgis-cityengine-rhino-and-grasshopper).
 1. Start Rhino and open Grasshopper.
 1. In Grasshopper go to the "Esri" tab and find the "ArcGIS CityEngine" section, drag the "CityEngine" component into the document.
 1. Right-click on the RPK input parameter to select the "Parthenon" RPK created above. CityEngine for Rhino will ask you to save the document, so it can store the path to the RPK relative to the document. It is best practice to put RPKs next to the Grasshopper document or in a subdirectory.
@@ -44,7 +44,7 @@ CityEngine for Rhino technically consists of two plugins, (1) a command for Rhin
 
 #### Recommended Installation Method: Food4Rhino Marketplace
 
-Go to the [market place](https://www.food4rhino.com/app/puma) and click on Download, this will download and install CityEngine for Rhino.
+Go to the [market place](https://www.food4rhino.com/en/app/arcgis-cityengine-rhino-and-grasshopper) and click on Download, this will download and install CityEngine for Rhino.
 
 #### Install from local files
 
