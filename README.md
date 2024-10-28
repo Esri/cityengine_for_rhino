@@ -20,8 +20,8 @@ Download and open the ["Street Segment" example](https://esri.github.io/cityengi
 1. Create a "Surface" component and use the "Set one surface" context menu entry to draw a surface in Rhino with the "Surface from 3 or 4 corner points" tool.
 1. Connect the "Surface" to the "Shapes" input. Now CityEngine for Rhino will generate the model in the Rhino viewport.
 
-<div align="center"><a href="https://youtu.be/JHMathmLBY8" target="_blank">
-    <img src="https://img.youtube.com/vi/JHMathmLBY8/0.jpg" alt="CityEngine for Rhino demo video on Youtube" width="640" />
+<div align="center"><a href="https://mediaspace.esri.com/media/t/1_01id0tp9" target="_blank">
+<img src="doc/img/demo_video.png" alt="CityEngine for Rhino demo video" width="640" />
 </a></div>
 
 ## Table of Contents
