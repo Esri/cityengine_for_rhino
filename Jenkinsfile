@@ -79,6 +79,7 @@ Map taskGenPuma() {
 def taskPrepare(cfg) {
  	cepl.cleanCurrentDir()
 	papl.checkout(REPO, env.BRANCH_NAME)
+	updateVersionProperties("${SOURCE}/version.properties", BUILD_ID)
 	stash(name: SOURCE_STASH)
 }
 
@@ -97,7 +98,6 @@ def taskBuildPuma(cfg) {
 
 	final String rhinoMajorVersion = cfg.rh.tokenize('.')[0]
 	Map envMap = [ 'RHINO_VER_MAJOR' : rhinoMajorVersion, 'PUMA_VER_BUILD' : BUILD_ID ]
-
 	runDockerCmd(cfg, image, containerName, dirMap, envMap, workDir, buildCmd)
 
 	manifest = readYaml(file: "${SOURCE}/manifest.yml") // called within publish, different cwd
@@ -122,6 +122,12 @@ def taskBuildPuma(cfg) {
 @NonCPS
 Map composeConfig(rh, tc, dc) {
 	return rh + tc + dc + [ grp: "rh${rh['rh']}+rhsdk${rh['rhsdk']}" ]
+}
+
+def updateVersionProperties(String propFile, String buildId) {
+	def versionProps = readProperties(file: propFile)
+	versionProps.VERSION_BUILD = buildId
+	writeFile(file: propFile, text: versionProps)
 }
 
 def runDockerCmd(Map cfg, String image, String containerName, Map dirMap, Map envMap, String workDir, String cmd) {
