@@ -127,7 +127,8 @@ Map composeConfig(rh, tc, dc) {
 def updateVersionProperties(String propFile, String buildId) {
 	def versionProps = readProperties(file: propFile)
 	versionProps.VERSION_BUILD = buildId
-	writeFile(file: propFile, text: versionProps)
+	def propsText = versionProps.collect{ entry->entry.key+"="+entry.value }.join('\n')
+	writeFile(file: propFile, text: propsText)
 }
 
 def runDockerCmd(Map cfg, String image, String containerName, Map dirMap, Map envMap, String workDir, String cmd) {
