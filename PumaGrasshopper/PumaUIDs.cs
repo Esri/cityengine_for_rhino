@@ -1,9 +1,9 @@
 ﻿/**
- * Puma - CityEngine Plugin for Rhinoceros
+ * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
- * Copyright (c) 2021-2023 Esri R&D Center Zurich
+ * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ namespace PumaGrasshopper
     public static class PumaUIDs
     {
         public static Guid ComponentPumaGuid = new Guid("ad54a111-cdbc-4417-bddd-c2195c9482d8");
+        public static Guid ComponentPumaBulkInputGuid = new Guid("03FB28F9-FF2E-4175-B75B-571E4DC26FE9");
         public static Guid ComponentReportsDislayGuid = new Guid("316524f4-1c56-41e7-9315-10f60b35cd61");
         public static Guid ComponentReportsUnpackerGuid = new Guid("23602a6d-1137-4403-867a-082e001ca707");
 

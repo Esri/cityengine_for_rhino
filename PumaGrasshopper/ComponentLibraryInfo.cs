@@ -1,9 +1,9 @@
-﻿/**
- * Puma - CityEngine Plugin for Rhinoceros
+/**
+ * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
- * Copyright (c) 2021-2023 Esri R&D Center Zurich
+ * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ namespace PumaGrasshopper
         {
             get
             {
-                return "Puma Component Library " + PRTWrapper.GetVersion();
+                return "CityEngine Component Library " + PRTWrapper.GetVersion();
             }
         }
         public override Bitmap Icon
@@ -45,7 +45,7 @@ namespace PumaGrasshopper
             get
             {
                 //Return a short string describing the purpose of this GHA library.
-                return "Puma provides a collection of components to run CityEngine CGA rules within Grasshopper.";
+                return "ArcGIS CityEngine for Grasshopper provides a collection of components to run CityEngine CGA rules within Grasshopper.";
             }
         }
         public override Guid Id
@@ -73,7 +73,8 @@ namespace PumaGrasshopper
             }
         }
 
-        public const string MainCategory = "Esri";
-        public const string PumaSubCategory = "Puma";
+        public const string MainCategory = "CityEngine";
+        public const string SubCategoryMain = "Main";
+        public const string SubCategoryTools = "Tools";
     }
 }

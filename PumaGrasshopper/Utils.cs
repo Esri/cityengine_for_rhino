@@ -1,9 +1,9 @@
 ﻿/**
- * Puma - CityEngine Plugin for Rhinoceros
+ * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
- * Copyright (c) 2021-2023 Esri R&D Center Zurich
+ * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,6 +321,22 @@ namespace PumaGrasshopper
         public static string GetCastErrorMessage(string attribute, string castTarget)
         {
             return "Could not cast attribute " + attribute + " to " + castTarget;
+        }
+
+        public static bool ParseInputPair(IGH_Goo input, out KeyValuePair<string, string[]> pair)
+        {
+            if (!input.CastTo(out string value)) throw new Exception("Could not cast input to string");
+
+            string[] tokens = StringFromCeArray(value);
+
+            if(tokens.Length >= 2)
+            {
+                pair = new KeyValuePair<string, string[]>(tokens[0], tokens.Skip(1).ToArray());
+                return true;
+            }
+            
+            pair = new KeyValuePair<string, string[]>(value, null); 
+            return false;
         }
     }
 }

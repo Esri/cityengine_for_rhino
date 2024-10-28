@@ -1,9 +1,9 @@
 ﻿/**
- * Puma - CityEngine Plugin for Rhinoceros
+ * ArcGIS CityEngine for Rhino
  *
- * See https://esri.github.io/cityengine/puma for documentation.
+ * See https://esri.github.io/cityengine/rhino for documentation.
  *
- * Copyright (c) 2021-2023 Esri R&D Center Zurich
+ * Copyright (c) 2021-2024 Esri R&D Center Zurich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ RHINO_PLUG_IN_DECLARE
 
 // Rhino plug-in name
 // Provide a short, friendly name for this plug-in.
-RHINO_PLUG_IN_NAME(L"Puma");
+RHINO_PLUG_IN_NAME(L"ArcGIS CityEngine for Rhino");
 
 // Rhino plug-in id
 // Provide a unique uuid for this plug-in.
@@ -59,7 +59,7 @@ RHINO_PLUG_IN_VERSION(VER_PRODUCT_VERSION_STR);
 
 // Rhino plug-in description
 // Provide a description of this plug-in.
-RHINO_PLUG_IN_DESCRIPTION(L"Puma enables the use of CityEngine CGA rules for the generation of procedural buildings "
+RHINO_PLUG_IN_DESCRIPTION(L"ArcGIS CityEngine for Rhino enables the use of CityEngine CGA rules for the generation of procedural buildings "
                           L"within Rhino and Grasshopper.");
 
 // Rhino plug-in icon resource id
@@ -74,8 +74,8 @@ RHINO_PLUG_IN_DEVELOPER_COUNTRY(L"United States");
 RHINO_PLUG_IN_DEVELOPER_PHONE(L"+1 909 793 2853");
 RHINO_PLUG_IN_DEVELOPER_FAX(L"");
 RHINO_PLUG_IN_DEVELOPER_EMAIL(L"cityengine-info@esri.com");
-RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"https://esri.github.io/cityengine/puma");
-RHINO_PLUG_IN_UPDATE_URL(L"https://github.com/esri/puma/releases");
+RHINO_PLUG_IN_DEVELOPER_WEBSITE(L"https://esri.github.io/cityengine/rhino");
+RHINO_PLUG_IN_UPDATE_URL(L"https://github.com/esri/cityengine_for_rhino/releases");
 
 // The one and only CRhinoPRTPlugIn object
 static class CRhinoPRTPlugIn thePlugIn;
