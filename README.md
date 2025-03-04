@@ -234,7 +234,7 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
-### Version 1.3.0 (TBD)
+### Version 1.3.0 (2025-03-05)
 * Added support for Rule Packages created with CityEngine 2024.1
 
 ### Version 1.2.0 (2024-10-28)
