@@ -234,6 +234,9 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
+### Version 1.3.0 (2025-03-05)
+* Added support for Rule Packages created with CityEngine 2024.1
+
 ### Version 1.2.0 (2024-10-28)
 * Rebranded from "Puma" to "ArcGIS CityEngine for Rhino and Grasshopper". We will continue to use the compact name "Puma" in the source code.
 * Small restructuring of the Grasshopper component toolbar to make it easier to find for new users.
