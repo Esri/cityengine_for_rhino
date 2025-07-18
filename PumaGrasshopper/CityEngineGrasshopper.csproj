@@ -102,6 +102,7 @@
     </Compile>
     <Compile Include="ComponentPumaShared.cs" />
     <Compile Include="InteropWrapper.cs" />
+    <Compile Include="Materials.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <DependentUpon>Properties\AssemblyVersion.cs</DependentUpon>
