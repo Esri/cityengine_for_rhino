@@ -36,14 +36,19 @@ namespace Materials {
 struct MaterialAttribute {
 	size_t mMatId;
 
+	bool mIsPBRMaterial;
+
 	std::map<std::wstring, std::wstring> mTexturePaths;
 
 	ON_Color mDiffuseCol;
 	ON_Color mAmbientCol;
 	ON_Color mSpecularCol;
+	ON_Color mEmissiveCol;
 
 	double mShininess;
 	double mOpacity;
+	double mMetallic;
+	double mRoughness;
 };
 
 const std::set<std::wstring> TEXTURE_KEYS = {
@@ -52,8 +57,11 @@ const std::set<std::wstring> TEXTURE_KEYS = {
         L"diffuseMap",  // dirtmap
         L"specularMap", // specularmap
         L"opacityMap",  // opacitymap
-        L"normalMap"    // normalmap
-};
+        L"normalMap",   // normalmap
+        L"emissiveMap", // emissivemap
+        L"roughnessMap",// roughnessmap
+        L"occlusionMap",// occlusionmap
+        L"metallicMap"};// metallicmap
 
 using MaterialsMap = std::map<size_t, MaterialAttribute>;
 

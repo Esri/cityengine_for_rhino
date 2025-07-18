@@ -366,15 +366,13 @@ const std::vector<TextureUVMapping> TEXTURE_UV_MAPPINGS = []() -> std::vector<Te
 	        {L"specularMap", 0, 3}, // specularmap
 	        {L"opacityMap", 0, 4},  // opacitymap
 	        {L"normalMap", 0, 5}    // normalmap
-	        /*
 	    #if PRT_VERSION_MAJOR > 1
-	            ,
-	            { L"emissiveMap",  0,    6 },  // emissivemap
-	            { L"occlusionMap", 0,    7 },  // occlusionmap
-	            { L"roughnessMap", 0,    8 },  // roughnessmap
-	            { L"metallicMap",  0,    9 }   // metallicmap
-	    #endif*/
-
+	        ,
+	        { L"emissiveMap",  0,    6 },  // emissivemap
+	        { L"occlusionMap", 0,    7 },  // occlusionmap
+	        { L"roughnessMap", 0,    8 },  // roughnessmap
+	        { L"metallicMap",  0,    9 }   // metallicmap
+	    #endif
 	};
 	// clang-format on
 }();

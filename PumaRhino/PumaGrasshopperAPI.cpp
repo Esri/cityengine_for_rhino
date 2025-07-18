@@ -195,10 +195,15 @@ RHINOPRT_API bool Generate(const wchar_t* rpk_path,
 				pcu::appendColor(matAttributes.mDiffuseCol, pColorsArray);
 				pcu::appendColor(matAttributes.mAmbientCol, pColorsArray);
 				pcu::appendColor(matAttributes.mSpecularCol, pColorsArray);
+				pcu::appendColor(matAttributes.mEmissiveCol, pColorsArray);
 				pColorsArray->Append(matAttributes.mOpacity);
 				pColorsArray->Append(matAttributes.mShininess);
+				pColorsArray->Append(matAttributes.mMetallic);
+				pColorsArray->Append(matAttributes.mRoughness);
+				
 
 				pMatIndices->Append(static_cast<int>(matAttributes.mTexturePaths.size()));
+				pMatIndices->Append(static_cast<int>(matAttributes.mIsPBRMaterial));
 
 				for (auto& texture : matAttributes.mTexturePaths) {
 

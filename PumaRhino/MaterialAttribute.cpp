@@ -94,6 +94,13 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t instanceIn
 							ma.mTexturePaths.insert_or_assign(strKey, tex);
 					}
 				}
+				else if (strKey == L"shader") {
+					const wchar_t* shaderType = attrMap->getString(key);
+					if (shaderType != nullptr) {
+						std::wstring shader(shaderType);
+						ma.mIsPBRMaterial = shader == L"CityEnginePBRShader";
+					}
+				}
 				else {
 					LOG_DBG << "Ignoring unsupported key " << key << ": " << attrMap->getString(key);
 				}
@@ -104,6 +111,12 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t instanceIn
 				}
 				else if (strKey == L"opacity") {
 					ma.mOpacity = attrMap->getFloat(key);
+				}
+				else if (strKey == L"metallic") {
+					ma.mMetallic = attrMap->getFloat(key);
+				}
+				else if (strKey == L"roughness") {
+					ma.mRoughness = attrMap->getFloat(key);
 				}
 
 				break;
@@ -117,6 +130,9 @@ Materials::MaterialAttribute Materials::extractMaterials(const size_t instanceIn
 				}
 				else if (strKey == L"specularColor") {
 					ma.mSpecularCol = extractColor(key, attrMap);
+				}
+				else if (strKey == L"emissiveColor") {
+					ma.mEmissiveCol = extractColor(key, attrMap);
 				}
 
 				break;

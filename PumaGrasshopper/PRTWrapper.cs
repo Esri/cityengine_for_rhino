@@ -262,24 +262,23 @@ namespace PumaGrasshopper
                 for(int meshId = 0; meshId < meshCount; meshId++)
                 {
                     int texCount = materialIndices[id + meshId + 1];
+                    bool isPBRMaterial = Convert.ToBoolean(materialIndices[id + meshId + 2]);
 
                     var diffuse = colors.Skip(colorsOffset).Take(3).ToArray();
                     var ambient = colors.Skip(colorsOffset + 3).Take(3).ToArray();
                     var specular = colors.Skip(colorsOffset + 6).Take(3).ToArray();
-                    var opacity = colors[colorsOffset + 9];
-                    var shininess = colors[colorsOffset + 10];
+                    var emission = colors.Skip(colorsOffset + 9).Take(3).ToArray();
+                    var opacity = colors[colorsOffset + 12];
+                    var shininess = colors[colorsOffset + 13];
+                    var metallic = colors[colorsOffset + 14];
+                    var roughness = colors[colorsOffset + 15];
 
-                    colorsOffset += 11;
+                    colorsOffset += 16;
 
-                    Material mat = new Material()
-                    {
-                        DiffuseColor = Utils.ColorFromRGB(diffuse),
-                        AmbientColor = Utils.ColorFromRGB(ambient),
-                        SpecularColor = Utils.ColorFromRGB(specular),
-                        Transparency = 1.0 - opacity,
-                        Shine = shininess,
-                        FresnelReflections = true,
-                    };
+                    var mat = Materials.CreateMaterial(isPBRMaterial, Utils.ColorFromRGB(diffuse),
+                                                       Utils.ColorFromRGB(ambient), Utils.ColorFromRGB(specular),
+                                                       opacity, shininess, Utils.Color4fFromRGB(emission), metallic,
+                                                       roughness);
 
                     string coloMap = "";
 
@@ -292,7 +291,7 @@ namespace PumaGrasshopper
                         {
                             FileReference = Rhino.FileIO.FileReference.CreateFromFullPath(texPath),
                             TextureCombineMode = TextureCombineMode.Modulate,
-                            TextureType = TextureType.Bitmap
+                            TextureType = TextureType.Diffuse
                         };
 
                         switch (texKey)
@@ -307,7 +306,7 @@ namespace PumaGrasshopper
                                 if (coloMap != tex.FileReference.FullPath)
                                 {
                                     tex.TextureCombineMode = TextureCombineMode.Modulate;
-                                    tex.TextureType = TextureType.Transparency;
+                                    tex.TextureType = TextureType.Opacity;
                                     mat.SetTransparencyTexture(tex);
                                 }
 
@@ -319,6 +318,26 @@ namespace PumaGrasshopper
                                 tex.TextureType = TextureType.Bump;
                                 mat.SetBumpTexture(tex);
                                 break;
+                            case "emissiveMap":
+                                tex.TextureCombineMode = TextureCombineMode.None;
+                                tex.TextureType = TextureType.PBR_Emission;
+                                mat.PhysicallyBased.SetTexture(tex, TextureType.PBR_Emission);
+                                break;
+                            case "roughnessMap":
+                                tex.TextureCombineMode = TextureCombineMode.Modulate;
+                                tex.TextureType = TextureType.PBR_Roughness;
+                                mat.PhysicallyBased.SetTexture(tex, TextureType.PBR_Roughness);
+                                break;
+                            case "metallicMap":
+                                tex.TextureCombineMode = TextureCombineMode.Modulate;
+                                tex.TextureType = TextureType.PBR_Metallic;
+                                mat.PhysicallyBased.SetTexture(tex, TextureType.PBR_Metallic);
+                                break;
+                            case "occlusionMap":
+                                tex.TextureCombineMode = TextureCombineMode.Modulate;
+                                tex.TextureType = TextureType.PBR_AmbientOcclusion;
+                                mat.PhysicallyBased.SetTexture(tex, TextureType.PBR_AmbientOcclusion);
+                                break;
                             default:
                                 break;
                         }
@@ -326,11 +345,13 @@ namespace PumaGrasshopper
 
                     textureOffset += texCount;
 
-                    materials[meshId] = new GH_Material(Rhino.Render.RenderMaterial.CreateBasicMaterial(mat, Rhino.RhinoDoc.ActiveDoc));
-                    
+                    Rhino.Render.RenderMaterial renderMaterial = Rhino.Render.RenderMaterial.FromMaterial(mat, Rhino.RhinoDoc.ActiveDoc);
+                    Rhino.RhinoDoc.ActiveDoc.RenderMaterials.Add(renderMaterial);
+
+                    materials[meshId] = new GH_Material(renderMaterial);
                 }
 
-                id += meshCount + 1;
+                id += meshCount * 2 + 1;
 
                 generationResult.materials.Add(materials);
             }
