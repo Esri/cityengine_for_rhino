@@ -141,9 +141,7 @@ std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std:
 	return str;
 }
 
-std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim);
-
-std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray);
+std::vector<std::wstring> fromCeArray(const std::wstring& stringArray);
 const std::wstring toCeArray(const wchar_t* const* values, size_t count);
 const std::wstring toCeArray(const bool* values, size_t count);
 const std::wstring toCeArray(const double* values, size_t count);
@@ -160,7 +158,7 @@ void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBu
 }
 
 template<typename T>
-void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const wchar_t*>& /* values */,
+void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<std::wstring>& /* values */,
 	AttributeMapBuilderPtr& /* aBuilder */) {
 	static_assert(std::is_same<T, int32_t>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
 	              "Type T must be one of int32_t, double or bool");
@@ -182,33 +180,33 @@ inline void fillMapBuilder<double>(const std::wstring& key, double value, Attrib
 }
 
 template <>
-inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<std::wstring>& values,
                                AttributeMapBuilderPtr& aBuilder) {
 	bool* bArray = new bool[values.size()];
 	for (int i = 0; i < values.size(); ++i) {
-		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
+		bArray[i] = (bool)(values[i] == L"true");
 	}
 	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
 	delete[] bArray;
 }
 
 template <>
-inline void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+inline void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vector<std::wstring>& values,
                                      AttributeMapBuilderPtr& aBuilder) {
 	int32_t* iArray = new int32_t[values.size()];
 	for (int i = 0; i < values.size(); ++i) {
-		iArray[i] = (int32_t)std::stoi(std::wstring(values[i]));
+		iArray[i] = (int32_t)std::stoi(values[i]);
 	}
 	aBuilder->setIntArray(key.c_str(), iArray, values.size());
 	delete[] iArray;
 }
 
 template <>
-inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values,
+inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<std::wstring>& values,
                                  AttributeMapBuilderPtr& aBuilder) {
 	double* dArray = new double[values.size()];
 	for (int i = 0; i < values.size(); ++i) {
-		dArray[i] = (double)std::stod(std::wstring(values[i]));
+		dArray[i] = (double)std::stod(values[i]);
 	}
 	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
 	delete[] dArray;

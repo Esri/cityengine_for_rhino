@@ -312,24 +312,31 @@ void PathRemover::operator()(std::filesystem::path const* p) {
 	}
 }
 
-std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim) {
-	std::vector<const wchar_t*> result;
+namespace {
+
+std::vector<std::wstring> split(const std::wstring& i_str, const std::wstring& i_delim) {
+	std::vector<std::wstring> result;
 
 	size_t found = i_str.find(i_delim);
 	size_t startIndex = 0;
 
 	while (found != std::wstring::npos) {
-		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.begin() + found).c_str());
+		if (found - startIndex > 0) { // skip delim
+			result.emplace_back(i_str.begin() + startIndex, i_str.begin() + found);
+		}
 		startIndex = found + i_delim.size();
 		found = i_str.find(i_delim, startIndex);
 	}
 	if (startIndex != i_str.size())
-		result.push_back(std::wstring(i_str.begin() + startIndex, i_str.end()).c_str());
+		result.emplace_back(i_str.begin() + startIndex, i_str.end());
+
 	return result;
 }
 
-std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray) {
-	return pcu::split(stringArray, CE_ARRAY_DELIMITER);
+} // namespace
+
+std::vector<std::wstring> fromCeArray(const std::wstring& stringArray) {
+	return split(stringArray, CE_ARRAY_DELIMITER);
 }
 
 const std::wstring toCeArray(const wchar_t* const* values, size_t count) {
@@ -424,14 +431,23 @@ void unpackIntegerArrayAttributes(int start, int count, ON_ClassArray<ON_wString
 	}
 }
 
+template <typename C>
+std::vector<const C*> toPtrVec(const std::vector<std::basic_string<C>>& sv) {
+	std::vector<const C*> pv(sv.size());
+	std::transform(sv.begin(), sv.end(), pv.begin(), [](const std::basic_string<C>& s) { return s.c_str(); });
+	return pv;
+}
+
+
 void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
                             AttributeMapBuilderPtr& aBuilder, bool isArray) {
 	for (int i = start; i < start + count; ++i) {
 		const std::wstring key(keys->At(i)->Array());
 
 		if (isArray) {
-			auto strings = pcu::fromCeArray(values->At(i)->Array());
-			aBuilder->setStringArray(key.c_str(), strings.data(), strings.size());
+			const auto strings = pcu::fromCeArray(values->At(i)->Array());
+			const auto stringPtrs = toPtrVec(strings);
+			aBuilder->setStringArray(key.c_str(), stringPtrs.data(), stringPtrs.size());
 		}
 		else
 			aBuilder->setString(key.c_str(), values->At(i)->Array());
