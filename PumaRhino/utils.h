@@ -189,6 +189,7 @@ inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector
 		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
 	}
 	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
+	delete[] bArray;
 }
 
 template <>
@@ -199,6 +200,7 @@ inline void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vec
 		iArray[i] = (int32_t)std::stoi(std::wstring(values[i]));
 	}
 	aBuilder->setIntArray(key.c_str(), iArray, values.size());
+	delete[] iArray;
 }
 
 template <>
@@ -209,6 +211,7 @@ inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vect
 		dArray[i] = (double)std::stod(std::wstring(values[i]));
 	}
 	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
+	delete[] dArray;
 }
 
 
