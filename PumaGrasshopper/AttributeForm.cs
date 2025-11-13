@@ -162,6 +162,9 @@ namespace PumaGrasshopper
 
         private string GetDefaultValueString(string attributeName, Annotations.AnnotationArgumentType type)
         {
+            if (DefaultValues == null)
+                return "no default values available";
+            
             if (DefaultValues.Length > 1) return "Multiple";
 
             var defaultValueMap = DefaultValues.First();
