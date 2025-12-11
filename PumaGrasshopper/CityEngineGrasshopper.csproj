@@ -39,7 +39,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CityEngineGrasshopper</RootNamespace>
     <AssemblyName>CityEngineGrasshopper</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+	<TargetFrameworks>net48,net7.0</TargetFrameworks>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
