@@ -182,34 +182,31 @@ inline void fillMapBuilder<double>(const std::wstring& key, double value, Attrib
 template <>
 inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<std::wstring>& values,
                                AttributeMapBuilderPtr& aBuilder) {
-	bool* bArray = new bool[values.size()];
+	auto bArray = std::make_unique<bool[]>(values.size());
 	for (int i = 0; i < values.size(); ++i) {
-		bArray[i] = (bool)(values[i] == L"true");
+		bArray[i] = (values[i] == L"true");
 	}
-	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
-	delete[] bArray;
+	aBuilder->setBoolArray(key.c_str(), bArray.get(), values.size());
 }
 
 template <>
 inline void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vector<std::wstring>& values,
                                      AttributeMapBuilderPtr& aBuilder) {
-	int32_t* iArray = new int32_t[values.size()];
+	auto iArray = std::make_unique<int32_t[]>(values.size());
 	for (int i = 0; i < values.size(); ++i) {
-		iArray[i] = (int32_t)std::stoi(values[i]);
+		iArray[i] = std::stoi(values[i]);
 	}
-	aBuilder->setIntArray(key.c_str(), iArray, values.size());
-	delete[] iArray;
+	aBuilder->setIntArray(key.c_str(), iArray.get(), values.size());
 }
 
 template <>
 inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<std::wstring>& values,
                                  AttributeMapBuilderPtr& aBuilder) {
-	double* dArray = new double[values.size()];
+	auto dArray = std::make_unique<double[]>(values.size());
 	for (int i = 0; i < values.size(); ++i) {
-		dArray[i] = (double)std::stod(values[i]);
+		dArray[i] = std::stod(values[i]);
 	}
-	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
-	delete[] dArray;
+	aBuilder->setFloatArray(key.c_str(), dArray.get(), values.size());
 }
 
 
