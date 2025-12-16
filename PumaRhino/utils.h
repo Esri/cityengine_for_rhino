@@ -47,21 +47,23 @@ class RhinoCallbacks;
 
 namespace pcu {
 
+/**
+ * file system helpers
+ */
+
 std::filesystem::path getDllLocation();
 std::filesystem::path getTempDir(const std::wstring& tmp_prefix);
 std::wstring getUUID();
 std::filesystem::path getUniqueTempDir(const std::filesystem::path& tempDir, const std::wstring& basename);
 
-template <typename C>
-C getDirSeparator();
-template <>
-char getDirSeparator();
-template <>
-wchar_t getDirSeparator();
+template<typename C> C getDirSeparator();
+template<> char getDirSeparator();
+template<> wchar_t getDirSeparator();
 
 /**
  * helpers for prt object management
  */
+
 struct PRTDestroyer {
 	void operator()(const prt::Object* p) const {
 		if (p)
@@ -106,6 +108,7 @@ AttributeMapPtr createValidatedOptions(const wchar_t* encID, const prt::Attribut
 /**
  * String and URI helpers
  */
+
 std::string toOSNarrowFromUTF16(const std::wstring& osWString);
 std::wstring toUTF16FromOSNarrow(const std::string& osString);
 std::wstring toUTF16FromUTF8(const std::string& utf8String);
@@ -141,9 +144,7 @@ std::basic_string<C>& replace_not_in_range(std::basic_string<C>& str, const std:
 	return str;
 }
 
-std::vector<const wchar_t*> split(const std::wstring& i_str, const std::wstring& i_delim);
-
-std::vector<const wchar_t*> fromCeArray(const std::wstring& stringArray);
+std::vector<std::wstring> fromCeArray(const std::wstring& stringArray);
 const std::wstring toCeArray(const wchar_t* const* values, size_t count);
 const std::wstring toCeArray(const bool* values, size_t count);
 const std::wstring toCeArray(const double* values, size_t count);
@@ -159,97 +160,45 @@ void fillMapBuilder(const std::wstring& /* key */, T /* value */, AttributeMapBu
 	              "Type T must be one of int32_t, double or bool");
 }
 
-template<typename T>
-void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<const wchar_t*>& /* values */,
+template<> void fillMapBuilder<bool>(const std::wstring& key, bool value, AttributeMapBuilderPtr& aBuilder);
+template<> void fillMapBuilder<int32_t>(const std::wstring& key, int32_t value, AttributeMapBuilderPtr& aBuilder);
+template<> void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapBuilderPtr& aBuilder);
+
+template <typename T>
+void fillArrayMapBuilder(const std::wstring& /* key */, const std::vector<std::wstring>& /* values */,
 	AttributeMapBuilderPtr& /* aBuilder */) {
 	static_assert(std::is_same<T, int32_t>::value || std::is_same<T, double>::value || std::is_same<T, bool>::value,
 	              "Type T must be one of int32_t, double or bool");
 }
 
-template <>
-inline void fillMapBuilder<bool>(const std::wstring& key, bool value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setBool(key.c_str(), value);
-}
+template<> void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder);
+template<> void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder);
+template<> void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<std::wstring>& values, AttributeMapBuilderPtr& aBuilder);
 
-template <>
-inline void fillMapBuilder<int32_t>(const std::wstring& key, int32_t value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setInt(key.c_str(), value);
-}
+void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values, AttributeMapBuilderPtr& aBuilder);
+void unpackIntegerAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values, AttributeMapBuilderPtr& aBuilder);
+void unpackDoubleAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<double>* values, AttributeMapBuilderPtr& aBuilder);
+void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder, bool isArray);
 
-template <>
-inline void fillMapBuilder<double>(const std::wstring& key, double value, AttributeMapBuilderPtr& aBuilder) {
-	aBuilder->setFloat(key.c_str(), value);
-}
-
-template <>
-inline void fillArrayMapBuilder<bool>(const std::wstring& key, const std::vector<const wchar_t*>& values,
-                               AttributeMapBuilderPtr& aBuilder) {
-	bool* bArray = new bool[values.size()];
-	for (int i = 0; i < values.size(); ++i) {
-		bArray[i] = (bool)(std::wstring(values[i]) == L"true");
-	}
-	aBuilder->setBoolArray(key.c_str(), bArray, values.size());
-}
-
-template <>
-inline void fillArrayMapBuilder<int32_t>(const std::wstring& key, const std::vector<const wchar_t*>& values,
-                                     AttributeMapBuilderPtr& aBuilder) {
-	int32_t* iArray = new int32_t[values.size()];
-	for (int i = 0; i < values.size(); ++i) {
-		iArray[i] = (int32_t)std::stoi(std::wstring(values[i]));
-	}
-	aBuilder->setIntArray(key.c_str(), iArray, values.size());
-}
-
-template <>
-inline void fillArrayMapBuilder<double>(const std::wstring& key, const std::vector<const wchar_t*>& values,
-                                 AttributeMapBuilderPtr& aBuilder) {
-	double* dArray = new double[values.size()];
-	for (int i = 0; i < values.size(); ++i) {
-		dArray[i] = (double)std::stod(std::wstring(values[i]));
-	}
-	aBuilder->setFloatArray(key.c_str(), dArray, values.size());
-}
-
-
-void unpackBoolAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
-                      AttributeMapBuilderPtr& aBuilder);
-
-void unpackIntegerAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<int>* values,
-                             AttributeMapBuilderPtr& aBuilder);
-
-void unpackDoubleAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_SimpleArray<double>* values,
-                          AttributeMapBuilderPtr& aBuilder);
-
-void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
-                               AttributeMapBuilderPtr& aBuilder);
-
-void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
-                           AttributeMapBuilderPtr& aBuilder);
-
-void unpackIntegerArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys,
-                                  ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder);
-
-void unpackStringAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values,
-                            AttributeMapBuilderPtr& aBuilder, bool isArray);
+void unpackBoolArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder);
+void unpackIntegerArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder);
+void unpackDoubleArrayAttributes(int start, int count, ON_ClassArray<ON_wString>* keys, ON_ClassArray<ON_wString>* values, AttributeMapBuilderPtr& aBuilder);
 
 /**
  * Resolve map helpers
  */
+
 constexpr const wchar_t* ANNOT_START_RULE = L"@StartRule";
 std::wstring getRuleFileEntry(const ResolveMapSPtr& resolveMap);
 std::wstring detectStartRule(const RuleFileInfoPtr& ruleFileInfo);
-
 std::wstring toAssetKey(std::wstring key);
 
 struct PathRemover {
 	void operator()(std::filesystem::path const* p);
 };
-
 using ScopedPath = std::unique_ptr<std::filesystem::path, PathRemover>;
 
 void logAttributeTypeError(const std::wstring& key);
-
 void logAttributeError(const std::wstring& key, prt::Status& status);
 
 } // namespace pcu
