@@ -26,8 +26,8 @@ properties([ disableConcurrentBuilds() ])
 
 // -- CONFIGURATION
 
-@Field final String REPO = 'git@github.com:esri/puma.git'
-@Field final String SOURCE = 'puma.git'
+@Field final String SOURCE = 'cityengine_for_rhino.git'
+@Field final String REPO = "https://github.com/esri/${SOURCE}"
 @Field final String SOURCE_STASH = 'puma-sources'
 
 @Field final String DOCKER_AGENT_WINDOWS = 'win19-64-d'
