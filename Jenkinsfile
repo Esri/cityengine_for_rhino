@@ -3,7 +3,7 @@
 // This pipeline is designed to run on Esri-internal CI infrastructure.
 
 @Library('psl')
-import com.esri.zrh.jenkins.PipelineSupportLibrary 
+import com.esri.zrh.jenkins.PipelineSupportLibrary as PSL
 import com.esri.zrh.jenkins.PslFactory 
 import com.esri.zrh.jenkins.psl.UploadTrackingPsl
 import com.esri.zrh.jenkins.JenkinsTools
@@ -26,8 +26,8 @@ properties([ disableConcurrentBuilds() ])
 
 // -- CONFIGURATION
 
-@Field final String REPO = 'git@github.com:esri/puma.git'
-@Field final String SOURCE = 'puma.git'
+@Field final String SOURCE = 'cityengine_for_rhino.git'
+@Field final String REPO = "https://github.com/esri/${SOURCE}"
 @Field final String SOURCE_STASH = 'puma-sources'
 
 @Field final String DOCKER_AGENT_WINDOWS = 'win19-64-d'
@@ -88,7 +88,7 @@ def taskBuildPuma(cfg) {
 	unstash(name: SOURCE_STASH)
 
 	final String tag = "rh${cfg.rh}-rhsdk${cfg.rhsdk}-py${cfg.py}-v${DOCKER_IMAGE_REVISION}"
-	final String image = "zrh-dreg-sp-1.esri.com/puma/puma-toolchain:${tag}"
+	final String image = "${PSL.HARBOR_NAME}/puma/puma-toolchain:${tag}"
 
 	final String buildCmd = "ci_build.cmd"
 	final String containerName = "puma-build-rh${cfg.rh}-${env.BRANCH_NAME.replaceAll('/', '_')}-b${BUILD_ID}"
