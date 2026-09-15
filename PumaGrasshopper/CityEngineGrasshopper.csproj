@@ -60,6 +60,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <Optimize>true</Optimize>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+	<DebugSymbols>true</DebugSymbols>
+	<DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -155,8 +157,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if exist "$(IntermediateOutputPath)$(ProjectName).pdb" copy /Y "$(IntermediateOutputPath)$(ProjectName).pdb" "$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <FallbackCulture>en-US</FallbackCulture>
