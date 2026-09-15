@@ -30,8 +30,8 @@
     </WriteLinesToFile>
   </Target>
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2C95F9DD-5756-46F5-8C23-9E0A182B8C74}</ProjectGuid>
@@ -39,12 +39,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CityEngineGrasshopper</RootNamespace>
     <AssemblyName>CityEngineGrasshopper</AssemblyName>
-	<TargetFrameworks>net48,net7.0</TargetFrameworks>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <TargetExt>.gha</TargetExt>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -54,11 +54,14 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <TargetExt>.gha</TargetExt>
     <OutputPath>..\build\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
     <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+	<DebugSymbols>true</DebugSymbols>
+	<DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -103,9 +106,7 @@
     <Compile Include="ComponentPumaShared.cs" />
     <Compile Include="InteropWrapper.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <DependentUpon>Properties\AssemblyVersion.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -156,7 +157,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)\obj\$(ConfigurationName)\$(ProjectName).pdb $(OutDir)</PostBuildEvent>
+    <PostBuildEvent>if exist "$(IntermediateOutputPath)$(ProjectName).pdb" copy /Y "$(IntermediateOutputPath)$(ProjectName).pdb" "$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <FallbackCulture>en-US</FallbackCulture>
@@ -171,8 +172,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files\Rhino $(RhinoTargetVersion)\System\Rhino.exe</StartProgram>
-    <DefineConstants>
-    </DefineConstants>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
