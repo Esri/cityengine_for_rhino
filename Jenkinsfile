@@ -38,7 +38,7 @@ properties([ disableConcurrentBuilds() ])
 
 @Field final Map RHINO7_CONFIG = [ rh: '7.17.22102.5001',  rhsdk: '7.19.22165.13001', py: '3.9.13' ]
 @Field final Map RHINO8_CONFIG = [ rh: '8.8.24163.12481',  rhsdk: '8.8.24163.12481',  py: '3.9.13' ]
-@Field final int DOCKER_IMAGE_REVISION = 3 // see counter part in the containers repository
+@Field final int DOCKER_IMAGE_REVISION = 4 // see counter part in the containers repository
 
 @Field final List CONFIGS_PREPARE = [
     WINDOWS_NATIVE_CONFIG
