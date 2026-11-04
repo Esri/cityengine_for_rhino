@@ -234,6 +234,9 @@ For debugging, keep the `Release` configuration (we always generate PDBs) and tu
 
 ## Release Notes
 
+### Version 1.5.0 (2026-11-20)
+- Added support for Rule Packages created with CityEngine 2026.0
+
 ### Version 1.4.0 (2026-1-30)
 - Added support for Rule Packages created with CityEngine 2025.0 and 2025.1
 - Improved handling of empty array attributes.
